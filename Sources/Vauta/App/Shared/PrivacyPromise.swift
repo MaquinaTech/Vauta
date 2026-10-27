@@ -3,17 +3,12 @@
 
 import SwiftUI
 
-/// The privacy promises said the same way on Welcome and in Settings → Privacy & Security
-/// (the panel header carries a deliberate short form of the first one). All four icons are
+/// The privacy promises in Settings → Privacy & Security (Welcome sums them up in one card,
+/// and the panel header carries a deliberate short form of the first one). All four icons are
 /// outline glyphs of one weight, sized so that no promise looks heavier than the others.
 enum PrivacyPromise {
     static var audioNeverSaved: Label<Text, PromiseGlyph> {
         Label { Text("Audio is never saved to disk.") } icon: { PromiseGlyph("waveform.slash") }
-    }
-
-    /// The short form, on Welcome. Settings → Privacy & Security says the same with the details.
-    static var transcriptsEncrypted: Label<Text, PromiseGlyph> {
-        Label { Text("Meetings and context stay on this Mac, encrypted.") } icon: { PromiseGlyph("lock") }
     }
 
     static var transcriptsEncryptedDetailed: Label<Text, PromiseGlyph> {

@@ -112,7 +112,9 @@ struct LevelRow: View {
                 ZStack(alignment: .leading) {
                     Capsule().fill(.quaternary)
                     // No sound, no fill: a stub at zero would read as "a little sound".
-                    Capsule().fill(tint.gradient)
+                    // The level glows in the speaker's colour, like the meters on the website.
+                    Capsule().fill(LinearGradient(colors: [tint.opacity(0.75), tint], startPoint: .leading, endPoint: .trailing))
+                        .shadow(color: tint.opacity(0.55), radius: 4)
                         .frame(width: level <= 0.001 ? 0 : max(4, geo.size.width * level))
                         .animation(.easeOut(duration: 0.15), value: level)
                 }

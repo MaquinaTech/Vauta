@@ -65,7 +65,7 @@ extension View {
         modifier(PanelSurface(tint: style.tint, fill: AnyShapeStyle(style.tint.opacity(style == .warning ? 0.15 : 0.12)), strokeOpacity: 0.7))
     }
 
-    /// The title of a card: same size and weight everywhere, with a quiet icon.
+    /// The title of a card: same size and weight everywhere, with the icon in Vauta's colours.
     func panelCardTitle() -> some View {
         font(.callout.weight(.medium))
             .labelStyle(PanelCardTitleLabelStyle())
@@ -110,7 +110,8 @@ private struct PanelCardTitleLabelStyle: LabelStyle {
             // Every title's icon in the same square, scale and weight, so the symbols weigh the same.
             configuration.icon
                 .imageScale(.medium)
-                .foregroundStyle(.secondary)
+                // Vauta's colours, as on the record button: the cards are what Vauta does while it listens.
+                .foregroundStyle(Brand.symbolGradient)
                 .frame(width: PanelMetrics.titleIconWidth, height: PanelMetrics.titleIconWidth, alignment: .center)
             configuration.title
         }

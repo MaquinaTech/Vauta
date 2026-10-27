@@ -19,8 +19,8 @@ struct RecordButton: View {
             // Not `.disabled` while busy: the system would grey the whole button, spinner included.
             Button { pressed() } label: {
                 ZStack {
-                    RecordOrb(look: look, diameter: isMuted ? 56 : 64, level: model.isRecording ? loudest : 0,
-                              isMuted: isMuted || model.isBusy, outlined: blocked && contrast == .increased)
+                    VautaOrb(mode: orbMode, diameter: isMuted ? 56 : 64, level: model.isRecording ? loudest : 0,
+                             outlined: blocked && contrast == .increased)
                     if model.isBusy || restoringNow {
                         // Restoring or erasing is as long a wait as saving: the same working spinner.
                         BusyArc()
@@ -58,8 +58,8 @@ struct RecordButton: View {
             // The shortcut is only advertised while it works: another app may hold it.
             .accessibilityHint(Text(verbatim: accessibilityHint))
             .help(helpText)
-            // Room for the rings around the disc, so they never run into the rows above and below.
-            .padding(.vertical, 6)
+            // Room for the orbit and the rings around the sphere, so they never run into the rows above and below.
+            .padding(.vertical, 10)
 
             if model.isRecording {
                 Text(verbatim: model.elapsed)
@@ -131,11 +131,14 @@ struct RecordButton: View {
         (model.permissionProblem != nil || (!model.storeAvailable && model.phase != .opening) || model.isReplacingData) && !model.isRecording
     }
 
-    private var look: RecordOrb.Look {
+    private var orbMode: VautaOrb.Mode {
         // Opaque, so the white glyph reads (4.5:1); it still looks quieter than the coloured button.
         if blocked { return .blocked(Self.blockedGrey) }
-        // While the transcript is saved the button keeps its colours, with the white spinner on it (enough contrast to read as working, not disabled).
-        return model.isRecording || model.phase == .stopping ? .recording : .idle
+        // While Vauta starts or saves, the orbit spins and the white spinner sits on the sphere.
+        if model.isBusy || restoringNow { return .working }
+        // Stepping back is not being disabled: the button stays fully opaque (smaller, no glow, no orbit).
+        if isMuted { return .muted }
+        return model.isRecording ? .listening : .idle
     }
 
     /// The loudest channel, for the glow of the button while recording.

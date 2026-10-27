@@ -3305,9 +3305,6 @@
 /* VoiceOver announcement when the Meetings window closes, or Settings → Context empties, because Meetings were locked */
 "Meetings and context locked. Unlock them with Touch ID or your password." = "Meetings und Kontext gesperrt. Entsperre sie mit Touch ID oder deinem Passwort.";
 
-/* No comment provided by engineer. */
-"Meetings and context stay on this Mac, encrypted." = "Meetings und Kontext bleiben verschlüsselt auf diesem Mac.";
-
 /* Tooltip of the Ask search label */
 "Meetings are found by meaning; documents use keyword search until they are indexed. Click to open Settings." = "Meetings werden nach Bedeutung gefunden; Dokumente nutzen die Stichwortsuche, bis sie indiziert sind. Klicke, um die Einstellungen zu öffnen.";
 
@@ -7961,3 +7958,17 @@
 
 /* Label of the notes field of a reminder or an event in the editor; Apple’s Reminders and Calendar name this field (zh-Hans 备注), unlike the Notes tab of a meeting */
 "event.field.notes" = "Notizen";
+
+"Transcription on this Mac" = "Transkription auf diesem Mac";
+
+"Any call app. No bot joins the call." = "Jede Anruf-App. Kein Bot nimmt am Anruf teil.";
+
+"Minutes and tasks" = "Protokolle und Aufgaben";
+
+"Decisions, tasks with owner and date, and open questions." = "Entscheidungen, Aufgaben mit Verantwortlichen und Datum und offene Fragen.";
+
+"One question across your meetings, notes and files." = "Eine Frage über deine Meetings, Notizen und Dateien.";
+
+"Private" = "Privat";
+
+"Audio is never saved. No account, no analytics." = "Audio wird nie gespeichert. Kein Konto, keine Analysedaten.";

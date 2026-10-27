@@ -97,6 +97,8 @@ struct OnboardingView: View {
                     }
                 }
                 .scrollBounceBehavior(.basedOnSize)
+                // Vauta's colours glow softly behind the top of every page, as in the menu-bar panel.
+                .background(alignment: .top) { PanelGlow(isRecording: false).frame(height: isWelcome ? 520 : 300) }
                 .onScrollGeometryChange(for: Bool.self) { $0.contentSize.height > $0.containerSize.height + 1 } action: { _, overflows in
                     pageOverflows = overflows
                 }
@@ -137,7 +139,7 @@ struct OnboardingView: View {
                     animated { proxy.scrollTo(OnboardingAnchor.pageEnd, anchor: .bottom) }
                 }
             }
-            Divider()
+            SetupProgressLine(fraction: isWelcome ? 0 : Double(model.flow.position.index) / Double(max(1, model.flow.position.count)))
             footer
         }
         .frame(width: OnboardingMetrics.windowSize.width, height: windowHeight)
@@ -333,6 +335,8 @@ struct OnboardingView: View {
 /// Title, subtitle and an icon at the top of a page.
 struct OnboardingHeader: View {
     let symbol: String
+    /// Shows this glyph on Vauta's sphere instead of the symbol (the last page, when everything is set up).
+    var orbGlyph: String?
     /// The icon's colour; the accent colour unless the page has a state to show.
     var tint: Color = .accentColor
     let title: String
@@ -344,12 +348,19 @@ struct OnboardingHeader: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            Image(systemName: symbol)
-                .font(.system(size: 34, weight: .regular))
-                .foregroundStyle(tint)
-                // Symbols differ in height: a fixed frame keeps the title at the same place on every page.
-                .frame(height: OnboardingMetrics.headerIconHeight)
-                .accessibilityHidden(true)
+            if let orbGlyph {
+                BrandSymbol(symbol: orbGlyph, diameter: 56, showsOrbit: true)
+                    .padding(.vertical, 6)
+                    .accessibilityHidden(true)
+            } else {
+                Image(systemName: symbol)
+                    .font(.system(size: 34, weight: .regular))
+                    // The accent becomes Vauta's gradient; a state (a problem, a success) keeps its own colour.
+                    .foregroundStyle(tint == .accentColor ? AnyShapeStyle(Brand.symbolGradient) : AnyShapeStyle(tint))
+                    // Symbols differ in height: a fixed frame keeps the title at the same place on every page.
+                    .frame(height: OnboardingMetrics.headerIconHeight)
+                    .accessibilityHidden(true)
+            }
             Text(title)
                 .font(.title2.bold())
                 .multilineTextAlignment(.center)
@@ -502,4 +513,25 @@ private struct SetupWindowReader: NSViewRepresentable {
     }
 
     func updateNSView(_ view: Reader, context: Context) { view.box = box; box.window = view.window }
+}
+
+/// The line above the footer: a divider that fills with Vauta's colours as the steps go by.
+private struct SetupProgressLine: View {
+    let fraction: Double
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            Divider()
+            GeometryReader { geo in
+                Capsule()
+                    .fill(LinearGradient(colors: [Brand.indigo, Brand.blue, Brand.teal], startPoint: .leading, endPoint: .trailing))
+                    .frame(width: geo.size.width * fraction, height: 2)
+                    .shadow(color: Brand.blue.opacity(0.6), radius: 4)
+            }
+            .frame(height: 2)
+        }
+        .frame(height: 2)
+        .animation(.smooth(duration: 0.5), value: fraction)
+        .accessibilityHidden(true)
+    }
 }
