@@ -19,11 +19,8 @@ struct RecordButton: View {
             // Not `.disabled` while busy: the system would grey the whole button, spinner included.
             Button { pressed() } label: {
                 ZStack {
-                    Circle()
-                        .fill(fill)
-                        .overlay { if blocked && contrast == .increased { Circle().strokeBorder(Color.primary, lineWidth: 1) } }
-                        .frame(width: isMuted ? 56 : 64, height: isMuted ? 56 : 64)
-                        .shadow(color: blocked || isMuted || model.isBusy ? .clear : (model.isRecording ? Color.red : .accentColor).opacity(0.4), radius: 8)
+                    RecordOrb(look: look, diameter: isMuted ? 56 : 64, level: model.isRecording ? loudest : 0,
+                              isMuted: isMuted || model.isBusy, outlined: blocked && contrast == .increased)
                     if model.isBusy || restoringNow {
                         // Restoring or erasing is as long a wait as saving: the same working spinner.
                         BusyArc()
@@ -61,10 +58,13 @@ struct RecordButton: View {
             // The shortcut is only advertised while it works: another app may hold it.
             .accessibilityHint(Text(verbatim: accessibilityHint))
             .help(helpText)
+            // Room for the rings around the disc, so they never run into the rows above and below.
+            .padding(.vertical, 6)
 
             if model.isRecording {
                 Text(verbatim: model.elapsed)
-                    .font(.title2.monospacedDigit())
+                    .font(.system(.title2, design: .rounded).weight(.medium).monospacedDigit())
+                    .contentTransition(.numericText())
                     .accessibilityLabel(Text("Elapsed time"))
                     .accessibilityValue(Text(verbatim: ElapsedTime.spoken(model.elapsedSeconds)))
             } else {
@@ -131,15 +131,15 @@ struct RecordButton: View {
         (model.permissionProblem != nil || (!model.storeAvailable && model.phase != .opening) || model.isReplacingData) && !model.isRecording
     }
 
-    private var fill: AnyShapeStyle {
-        // Opaque, so the white glyph reads (4.5:1); it still looks quieter than the blue button.
-        if blocked { return AnyShapeStyle(Self.blockedGrey) }
-        // While the transcript is saved the button keeps its solid colour, with the white spinner on it (enough contrast to read as working, not disabled).
-        if model.isBusy { return AnyShapeStyle((model.phase == .stopping ? Color.red : Color.accentColor).gradient) }
-        // Stepping back is not being disabled: the button stays fully opaque (smaller, no glow).
-        if isMuted { return AnyShapeStyle(Color.accentColor.gradient) }
-        return model.isRecording ? AnyShapeStyle(Color.red.gradient) : AnyShapeStyle(Color.accentColor.gradient)
+    private var look: RecordOrb.Look {
+        // Opaque, so the white glyph reads (4.5:1); it still looks quieter than the coloured button.
+        if blocked { return .blocked(Self.blockedGrey) }
+        // While the transcript is saved the button keeps its colours, with the white spinner on it (enough contrast to read as working, not disabled).
+        return model.isRecording || model.phase == .stopping ? .recording : .idle
     }
+
+    /// The loudest channel, for the glow of the button while recording.
+    private var loudest: Double { min(1, max(model.levels[.me] ?? 0, model.levels[.others] ?? 0)) }
 
     /// An opaque grey for each appearance (the system's secondary label is translucent and resolves light in both):
     /// white on #6E6E73 is 5.1:1 and on #636366 is 5.9:1, so the glyph passes 4.5:1.

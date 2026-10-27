@@ -88,6 +88,10 @@ struct RecorderPanel: View {
         }
         .padding(Self.padding)
         .frame(width: Self.width)
+        // Vauta's colours glow softly behind the header and the record button, as on the website.
+        .background(alignment: .top) {
+            PanelGlow(isRecording: model.isRecording).frame(height: topHeight + Self.padding * 2)
+        }
         .environment(\.copyProtection, model.preferences.copyProtection)
         .background(WindowHardening())
         .writingToolsBehavior(.disabled)
@@ -325,10 +329,16 @@ private struct ScrollEdges: Equatable {
 /// App name, state and the privacy promise.
 struct PanelHeader: View {
     let model: RecorderModel
+    private static let icon = AppIconImage.image(points: 20)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            HStack {
+            HStack(spacing: 7) {
+                Image(nsImage: Self.icon)
+                    .resizable()
+                    .interpolation(.high)
+                    .frame(width: 20, height: 20)
+                    .accessibilityHidden(true)
                 Text(verbatim: "Vauta").font(.headline)
                 Spacer()
                 // The colour is on the glyph only: red or orange text on the light panel has too little contrast.
