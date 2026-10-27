@@ -4,7 +4,7 @@ All notable changes to Vauta are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Vauta follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.9.0] - Unreleased
+## [0.9.0] - 2026-10-27
 
 The first public release (public beta). Compared with 0.1.0, Vauta is open source, works with any meeting app and any language Apple supports, and can write minutes with Apple's on-device model or an optional integrated model. Evaluation figures and their limits are in [docs/BENCHMARKS.md](docs/BENCHMARKS.md) and [docs/CLAIMS.md](docs/CLAIMS.md).
 
@@ -100,4 +100,4 @@ The first public release (public beta). Compared with 0.1.0, Vauta is open sourc
 
 The first version, used privately before the project was published. Safari and Spanish (Spain) only, with minutes written by an OpenAI-compatible model server on this Mac or on the local network.
 
-[0.9.0]: https://github.com/MaquinaTech/Vauta/commits/main
+[0.9.0]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.0

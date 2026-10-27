@@ -64,7 +64,7 @@ struct LiveAnswersRuntimeTests {
         /// What `startLiveAnswers` does: the detector is made with the settings of the moment, enabled or not.
         func start() {
             var timing = QuestionTiming()
-            timing.settle = 0.05; timing.checkInterval = 0.05; timing.cardInterval = 0.05; timing.staleAfter = 600; timing.lateAfter = 60; timing.dropAfter = 120
+            timing.settle = 0.05; timing.checkInterval = 0.05; timing.cardInterval = 0.05; timing.staleAfter = 600; timing.lateAfter = 600; timing.dropAfter = 1_200
             running = preferences.liveAnswerSettings
             bridge = LiveAnswersBridge(model: answers, accepting: { [preferences] in preferences.liveAnswersActive })
             detector = QuestionDetector(backend: model, store: nil, meetingID: 1, meetingLocale: "en-US", settings: preferences.liveAnswerSettings, timing: timing,

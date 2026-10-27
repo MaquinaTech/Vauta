@@ -244,6 +244,7 @@ import Testing
     // MARK: OCR
 
     @Test func anImageIsReadWithOCR() async throws {
+        guard await TestHardware.requireVision() else { return }
         let image = try #require(PDFFixtures.textImage("Quarterly budget approved", size: CGSize(width: 1400, height: 300)))
         let folder = DocumentFolder()
         let url = folder.write("scan.png", PDFFixtures.png(image))
@@ -257,6 +258,7 @@ import Testing
     }
 
     @Test func aScannedPDFPageIsReadWithOCR() async throws {
+        guard await TestHardware.requireVision() else { return }
         let folder = DocumentFolder()
         let url = folder.write("scan.pdf", PDFFixtures.scanned(text: "Invoice total due on delivery", size: CGSize(width: 1800, height: 300)))
         let doc = try await extractor.extract(url, format: .pdf)

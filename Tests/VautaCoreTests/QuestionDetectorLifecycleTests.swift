@@ -78,7 +78,9 @@ struct QuestionDetectorLifecycleTests {
         var timing = QuestionDetectorTests.fast
         timing.checkMax = 1
         timing.checkWindow = 3_600
-        timing.staleAfter = 45
+        // The second check would wait about an hour, far past this; it is not 45 s (the shipped value) because the first question
+        // must not go stale while a saturated machine is slow to check it: the detector runs on the real uptime clock.
+        timing.staleAfter = 600
         let r = try await QuestionDetectorTests.rig(timing: timing)
         await QuestionDetectorTests.ask(r, "Who is responsible for the vendor contract?", at: 700)
         #expect(await settle { r.backend.checkTimes.count == 1 })

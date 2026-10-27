@@ -72,6 +72,7 @@ esac
 LOGS="$(mktemp -d "${TMPDIR:-/tmp}/vauta-render-logs.XXXXXX")"
 trap 'rm -rf "$LOGS" "$WORK/jobs"' EXIT
 export APP OUT SCALE ONLY LOGS BUNDLE_ID WORK VAUTA_RENDER_TIMEOUT
+# shellcheck disable=SC2016 # the script runs in the child shell, which expands it
 for lang in $LANGS; do
   for appearance in $APPEARANCES; do echo "$lang $appearance"; done
 done | xargs -n 2 -P "$JOBS" bash -c '

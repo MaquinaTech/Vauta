@@ -20,7 +20,15 @@ struct EvaluationToolingTests {
     @Test func theContextLineHasWhatEveryRunRecordsAndCountsNoModelWork() async throws {
         let line = await LLMEvaluation.contextLine()
         let object = try #require(JSONSerialization.jsonObject(with: Data(line.utf8)) as? [String: Any])
-        #expect(object["load1"] != nil && object["freeMemoryMB"] != nil && object["gpuUtilPct"] != nil)
+        #expect(object["load1"] != nil && object["freeMemoryMB"] != nil)
+        if TestHardware.hasGPUUtilisation {
+            #expect(object["gpuUtilPct"] != nil)
+        } else {
+            // A virtual machine has no GPU counters: the reading is left out of the line, not recorded as a number.
+            Issue.record("the GPU utilisation counter is not available on this Mac (no IOAccelerator statistics); checking the documented fallback",
+                         severity: .warning)
+            #expect(object["gpuUtilPct"] == nil)
+        }
     }
 
     @Test func aTraceKeepsTheGPUFiguresOfTheRunAndOldTracesStillRead() throws {

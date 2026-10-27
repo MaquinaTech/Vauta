@@ -245,6 +245,9 @@
 /* Network Activity: where a destination is; the person clicked Download for the search model */
 "A download you started" = "A download you started";
 
+/* Status detail; the argument is a file size */
+"A folder from an earlier version still holds a copy of your meetings (%@). Vauta doesn’t use it, so you can delete it." = "A folder from an earlier version still holds a copy of your meetings (%@). Vauta doesn’t use it, so you can delete it.";
+
 /* Settings → Privacy network audit explanation */
 "A live list of every connection Vauta makes: where it goes, when and how much. Never the content. Use it to see for yourself that nothing leaves your Mac except what you set up." = "A live list of every connection Vauta makes: where it goes, when and how much. Never the content. Use it to see for yourself that nothing leaves your Mac except what you set up.";
 
@@ -597,9 +600,6 @@
 
 /* No comment provided by engineer. */
 "Always" = "Always";
-
-/* Status detail; the argument is a file size */
-"A folder from an earlier version still holds a copy of your meetings (%@). Vauta doesn’t use it, so you can delete it." = "A folder from an earlier version still holds a copy of your meetings (%@). Vauta doesn’t use it, so you can delete it.";
 
 /* Settings → Recording; title of the row with the menu that adds a speech model */
 "Another language" = "Another language";

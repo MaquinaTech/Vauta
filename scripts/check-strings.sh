@@ -1,6 +1,7 @@
 #!/bin/bash
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+# shellcheck disable=SC1111 # the curly quotes in this file are the text being checked, not shell quoting
 #
 # Checks that every localization matches the English source (en.lproj):
 #   - the same Localizable.strings, Localizable.stringsdict and InfoPlist.strings files;
