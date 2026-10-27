@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: Apache-2.0
+   SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+   Info.plist strings: the permission prompts macOS shows on Vauta's behalf.
+   Keep them short and honest: say what Vauta does with the access and what it never does. */
+
+/* System audio permission prompt (Screen & System Audio Recording) */
+"NSAudioCaptureUsageDescription" = "Vauta transkribiert, was die anderen Teilnehmenden in deinen Meetings sagen. Audio wird nie gespeichert und verlässt diesen Mac nie.";
+
+/* Calendar permission prompt. Vauta reads only the chosen calendars: events around now, and the event about to start (and the next one within 12 hours) for the brief. */
+"NSCalendarsFullAccessUsageDescription" = "Nur wenn du es in den Einstellungen aktivierst: Vauta liest die von dir gewählten Kalender (Termine rund um die aktuelle Uhrzeit und in den nächsten 12 Stunden), um Aufnahmen vorzuschlagen, Briefings vorzubereiten und Titel und Teilnehmende zu übernehmen. Nur wenn du auf „Hinzufügen“ drückst, legt Vauta den bestätigten Folgetermin an und prüft dafür diesen Tag, damit er nicht doppelt entsteht. Vauta speichert keine Kopie deines Kalenders.";
+
+/* Local network permission prompt, shown when the model server runs on another computer */
+"NSLocalNetworkUsageDescription" = "Vauta verbindet sich nur mit dem von dir gewählten Modellserver in deinem lokalen Netzwerk, immer über HTTPS, um Protokolle zu schreiben und Fragen zu beantworten. Nichts gelangt ins Internet.";
+
+/* Microphone permission prompt */
+"NSMicrophoneUsageDescription" = "Vauta transkribiert, was du in deinen Meetings sagst. Audio wird nie gespeichert und verlässt diesen Mac nie.";
+
+/* Reminders permission prompt, shown the first time the person turns on related reminders in the brief or presses Add on a task. Vauta reads the chosen lists (incomplete reminders only) for the brief and, when adding, the titles in the one list it adds to; it adds only the reminder the person confirmed and never changes or deletes one it did not create. */
+"NSRemindersFullAccessUsageDescription" = "Vauta liest die von dir gewählten Erinnerungslisten kurz vor einem Meeting, um passende Erinnerungen im Briefing zu zeigen. Wenn du bei einer Aufgabe auf „Hinzufügen“ drückst, legt Vauta genau diese eine Erinnerung an und liest die Titel in der Liste, zu der du sie hinzufügst, damit sie nicht doppelt entsteht. Vauta ändert oder löscht nie eine Erinnerung, die du angelegt hast, und speichert keine Kopie deiner Erinnerungen.";

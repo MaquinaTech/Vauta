@@ -1,0 +1,122 @@
+{
+ "ES2011a_others": {
+  "headset_speaker": "FEE041",
+  "meeting": "ES2011a",
+  "split": "dev",
+  "me_speaker": "FEE041",
+  "me_talk_rank": 1,
+  "remote": [
+   "FEE043",
+   "FEE044",
+   "FEE042"
+  ],
+  "codec": "opus 24k internal-rate 48k",
+  "duration": 1113.845375,
+  "scored_seconds_nobleed": 752.035375
+ },
+ "ES2011c_others": {
+  "headset_speaker": "FEE044",
+  "meeting": "ES2011c",
+  "split": "dev",
+  "me_speaker": "FEE044",
+  "me_talk_rank": 2,
+  "remote": [
+   "FEE043",
+   "FEE041",
+   "FEE042"
+  ],
+  "codec": "opus 16k internal-rate 16k",
+  "duration": 1616.064,
+  "scored_seconds_nobleed": 1314.5540000000005
+ },
+ "IS1008a_others": {
+  "headset_speaker": "MIO086",
+  "meeting": "IS1008a",
+  "split": "dev",
+  "me_speaker": "MIE085",
+  "me_talk_rank": 3,
+  "remote": [
+   "MIO086",
+   "FIE073",
+   "FIE038"
+  ],
+  "codec": "opus 24k internal-rate 48k",
+  "duration": 943.786625,
+  "scored_seconds_nobleed": 824.3466250000001
+ },
+ "IS1008c_others": {
+  "headset_speaker": "FIE073",
+  "meeting": "IS1008c",
+  "split": "dev",
+  "me_speaker": "MIO086",
+  "me_talk_rank": 4,
+  "remote": [
+   "FIE073",
+   "FIE038",
+   "MIE085"
+  ],
+  "codec": "opus 16k internal-rate 16k",
+  "duration": 1546.24,
+  "scored_seconds_nobleed": 1348.3899999999999
+ },
+ "IS1008d_others": {
+  "headset_speaker": "FIE038",
+  "meeting": "IS1008d",
+  "split": "dev",
+  "me_speaker": "MIO086",
+  "me_talk_rank": 1,
+  "remote": [
+   "FIE038",
+   "MIE085",
+   "FIE073"
+  ],
+  "codec": "opus 24k internal-rate 48k",
+  "duration": 1480.704,
+  "scored_seconds_nobleed": 1161.4339999999995
+ },
+ "TS3004a_others": {
+  "headset_speaker": "MTD013PM",
+  "meeting": "TS3004a",
+  "split": "dev",
+  "me_speaker": "MTD016ME",
+  "me_talk_rank": 2,
+  "remote": [
+   "MTD013PM",
+   "MTD015UID",
+   "MTD014ID"
+  ],
+  "codec": "opus 16k internal-rate 16k",
+  "duration": 1345.322625,
+  "scored_seconds_nobleed": 1174.422625
+ },
+ "TS3004c_others": {
+  "headset_speaker": "MTD016ME",
+  "meeting": "TS3004c",
+  "split": "dev",
+  "me_speaker": "MTD013PM",
+  "me_talk_rank": 3,
+  "remote": [
+   "MTD015UID",
+   "MTD014ID",
+   "MTD016ME"
+  ],
+  "codec": "opus 24k internal-rate 48k",
+  "duration": 2970.0,
+  "scored_seconds_nobleed": 2611.3999999999996
+ },
+ "TS3004d_others": {
+  "headset_speaker": "MTD015UID",
+  "meeting": "TS3004d",
+  "split": "dev",
+  "me_speaker": "MTD014ID",
+  "me_talk_rank": 4,
+  "remote": [
+   "MTD016ME",
+   "MTD015UID",
+   "MTD013PM"
+  ],
+  "codec": "opus 16k internal-rate 16k",
+  "duration": 2750.8,
+  "scored_seconds_nobleed": 2458.1799999999976
+ }
+}

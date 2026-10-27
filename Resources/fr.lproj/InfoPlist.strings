@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: Apache-2.0
+   SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+   French (fr) Info.plist strings: the permission prompts macOS shows on Vauta's behalf.
+   Keep them short and honest: say what Vauta does with the access and what it never does. */
+
+/* System audio permission prompt (Screen & System Audio Recording) */
+"NSAudioCaptureUsageDescription" = "Vauta transcrit ce que disent les autres participants de vos réunions. L’audio n’est jamais enregistré et ne quitte jamais ce Mac.";
+
+/* Calendar permission prompt. Vauta reads only the chosen calendars: events around now, and the event about to start (and the next one within 12 hours) for the brief. */
+"NSCalendarsFullAccessUsageDescription" = "Uniquement si vous l’activez dans les Réglages : Vauta lit les calendriers que vous choisissez (les événements autour de l’heure actuelle et des 12 prochaines heures) pour suggérer d’enregistrer, préparer des fiches de réunion et utiliser les titres et les participants. Uniquement quand vous cliquez sur Ajouter, il crée l’événement de suivi que vous avez confirmé et vérifie ce jour pour ne pas l’ajouter deux fois. Vauta ne conserve aucune copie de votre calendrier.";
+
+/* Local network permission prompt, shown when the model server runs on another computer */
+"NSLocalNetworkUsageDescription" = "Vauta se connecte uniquement au serveur de modèles que vous choisissez sur votre réseau local, toujours via HTTPS, pour rédiger des comptes rendus et répondre à vos questions. Rien n’est envoyé sur Internet.";
+
+/* Microphone permission prompt */
+"NSMicrophoneUsageDescription" = "Vauta transcrit ce que vous dites dans vos réunions. L’audio n’est jamais enregistré et ne quitte jamais ce Mac.";
+
+/* Reminders permission prompt, shown the first time the person turns on related reminders in the brief or presses Add on a task. Vauta reads the chosen lists (incomplete reminders only) for the brief and, when adding, the titles in the one list it adds to; it adds only the reminder the person confirmed and never changes or deletes one it did not create. */
+"NSRemindersFullAccessUsageDescription" = "Vauta lit les listes de rappels que vous choisissez, juste avant une réunion, pour afficher les rappels associés dans sa fiche de réunion. Quand vous cliquez sur Ajouter pour une tâche, il ajoute ce seul rappel et lit les titres de la liste où vous l’ajoutez, pour ne pas l’ajouter deux fois. Vauta ne modifie ni ne supprime jamais un rappel que vous avez créé et n’en conserve aucune copie.";

@@ -1,0 +1,203 @@
+{
+ "locale": "es-ES",
+ "files": [
+  {
+   "file": "es_mls_wer1",
+   "source": "mls",
+   "seconds": 303.9,
+   "wall_s": 4.0,
+   "strict": {
+    "sub": 21,
+    "dele": 3,
+    "ins": 7,
+    "words": 693,
+    "wer": 4.473304473304474,
+    "hyp_words": 697
+   },
+   "folded": {
+    "sub": 19,
+    "dele": 3,
+    "ins": 7,
+    "words": 693,
+    "wer": 4.184704184704184,
+    "hyp_words": 697
+   }
+  },
+  {
+   "file": "es_mls_wer2",
+   "source": "mls",
+   "seconds": 300.5,
+   "wall_s": 3.8,
+   "strict": {
+    "sub": 29,
+    "dele": 3,
+    "ins": 8,
+    "words": 765,
+    "wer": 5.228758169934641,
+    "hyp_words": 770
+   },
+   "folded": {
+    "sub": 25,
+    "dele": 3,
+    "ins": 8,
+    "words": 765,
+    "wer": 4.705882352941177,
+    "hyp_words": 770
+   }
+  },
+  {
+   "file": "es_mls_wer3",
+   "source": "mls",
+   "seconds": 301.8,
+   "wall_s": 3.9,
+   "strict": {
+    "sub": 36,
+    "dele": 4,
+    "ins": 11,
+    "words": 796,
+    "wer": 6.407035175879397,
+    "hyp_words": 803
+   },
+   "folded": {
+    "sub": 32,
+    "dele": 4,
+    "ins": 11,
+    "words": 796,
+    "wer": 5.9045226130653266,
+    "hyp_words": 803
+   }
+  },
+  {
+   "file": "es_vp_wer1",
+   "source": "voxpopuli",
+   "seconds": 315.2,
+   "wall_s": 4.0,
+   "strict": {
+    "sub": 41,
+    "dele": 27,
+    "ins": 19,
+    "words": 856,
+    "wer": 10.163551401869158,
+    "hyp_words": 848
+   },
+   "folded": {
+    "sub": 39,
+    "dele": 27,
+    "ins": 19,
+    "words": 856,
+    "wer": 9.929906542056075,
+    "hyp_words": 848
+   }
+  },
+  {
+   "file": "es_vp_wer2",
+   "source": "voxpopuli",
+   "seconds": 301.7,
+   "wall_s": 3.8,
+   "strict": {
+    "sub": 30,
+    "dele": 28,
+    "ins": 25,
+    "words": 807,
+    "wer": 10.285006195786865,
+    "hyp_words": 804
+   },
+   "folded": {
+    "sub": 30,
+    "dele": 28,
+    "ins": 25,
+    "words": 807,
+    "wer": 10.285006195786865,
+    "hyp_words": 804
+   }
+  },
+  {
+   "file": "es_vp_wer3",
+   "source": "voxpopuli",
+   "seconds": 309.2,
+   "wall_s": 3.9,
+   "strict": {
+    "sub": 24,
+    "dele": 21,
+    "ins": 11,
+    "words": 785,
+    "wer": 7.13375796178344,
+    "hyp_words": 775
+   },
+   "folded": {
+    "sub": 24,
+    "dele": 21,
+    "ins": 11,
+    "words": 785,
+    "wer": 7.13375796178344,
+    "hyp_words": 775
+   }
+  },
+  {
+   "file": "es_vp_wer4",
+   "source": "voxpopuli",
+   "seconds": 305.6,
+   "wall_s": 3.8,
+   "strict": {
+    "sub": 31,
+    "dele": 28,
+    "ins": 11,
+    "words": 765,
+    "wer": 9.15032679738562,
+    "hyp_words": 748
+   },
+   "folded": {
+    "sub": 30,
+    "dele": 28,
+    "ins": 11,
+    "words": 765,
+    "wer": 9.019607843137255,
+    "hyp_words": 748
+   }
+  }
+ ],
+ "summary": {
+  "mls_strict": {
+   "sub": 86,
+   "dele": 10,
+   "ins": 26,
+   "words": 2254,
+   "wer": 5.412599822537711
+  },
+  "mls_folded": {
+   "sub": 76,
+   "dele": 10,
+   "ins": 26,
+   "words": 2254,
+   "wer": 4.968944099378882
+  },
+  "all_strict": {
+   "sub": 212,
+   "dele": 114,
+   "ins": 92,
+   "words": 5467,
+   "wer": 7.645875251509055
+  },
+  "all_folded": {
+   "sub": 199,
+   "dele": 114,
+   "ins": 92,
+   "words": 5467,
+   "wer": 7.408084872873605
+  },
+  "voxpopuli_strict": {
+   "sub": 126,
+   "dele": 104,
+   "ins": 66,
+   "words": 3213,
+   "wer": 9.212573918456272
+  },
+  "voxpopuli_folded": {
+   "sub": 123,
+   "dele": 104,
+   "ins": 66,
+   "words": 3213,
+   "wer": 9.119203236850296
+  }
+ }
+}

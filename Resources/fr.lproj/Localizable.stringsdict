@@ -1,0 +1,1566 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- SPDX-License-Identifier: Apache-2.0
+     SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+     French plural strings. Keys match the English source; French uses "one" (0 and 1),
+     "many" (large round numbers such as a million: "1 000 000 de réunions") and "other".
+     See docs/TRANSLATING.md. -->
+<plist version="1.0">
+<dict>
+	<key>%@ · %lld chat models, %lld for search by meaning</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$@ · %2$#@chat@, %3$#@embedding@</string>
+		<key>chat</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld modèle de chat</string>
+			<key>many</key>
+			<string>%2$lld de modèles de chat</string>
+			<key>other</key>
+			<string>%2$lld modèles de chat</string>
+		</dict>
+		<key>embedding</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%3$lld pour la recherche par le sens</string>
+			<key>many</key>
+			<string>%3$lld pour la recherche par le sens</string>
+			<key>other</key>
+			<string>%3$lld pour la recherche par le sens</string>
+		</dict>
+	</dict>
+	<key>%lld aliases</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld alias</string>
+			<key>many</key>
+			<string>%lld d’alias</string>
+			<key>other</key>
+			<string>%lld alias</string>
+		</dict>
+	</dict>
+	<key>%lld aliases: %@</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@aliases@ : %2$@</string>
+		<key>aliases</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld alias</string>
+			<key>many</key>
+			<string>%1$lld d’alias</string>
+			<key>other</key>
+			<string>%1$lld alias</string>
+		</dict>
+	</dict>
+	<key>%lld calendars selected.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld calendrier sélectionné.</string>
+			<key>many</key>
+			<string>%lld de calendriers sélectionnés.</string>
+			<key>other</key>
+			<string>%lld calendriers sélectionnés.</string>
+		</dict>
+	</dict>
+	<key>%lld entries merged into it earlier</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld entrée fusionnée auparavant</string>
+			<key>many</key>
+			<string>%lld d’entrées fusionnées auparavant</string>
+			<key>other</key>
+			<string>%lld entrées fusionnées auparavant</string>
+		</dict>
+	</dict>
+	<key>%lld glossary terms</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld terme du glossaire</string>
+			<key>many</key>
+			<string>%lld de termes du glossaire</string>
+			<key>other</key>
+			<string>%lld termes du glossaire</string>
+		</dict>
+	</dict>
+	<key>%lld jobs</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld traitement</string>
+			<key>many</key>
+			<string>%lld de traitements</string>
+			<key>other</key>
+			<string>%lld traitements</string>
+		</dict>
+	</dict>
+	<key>%lld jobs waiting for the model</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld traitement en attente du modèle</string>
+			<key>many</key>
+			<string>%lld de traitements en attente du modèle</string>
+			<key>other</key>
+			<string>%lld traitements en attente du modèle</string>
+		</dict>
+	</dict>
+	<key>%lld jobs waiting for the model server</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld traitement en attente du serveur de modèles</string>
+			<key>many</key>
+			<string>%lld de traitements en attente du serveur de modèles</string>
+			<key>other</key>
+			<string>%lld traitements en attente du serveur de modèles</string>
+		</dict>
+	</dict>
+	<key>%lld meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld réunion</string>
+			<key>many</key>
+			<string>%lld de réunions</string>
+			<key>other</key>
+			<string>%lld réunions</string>
+		</dict>
+	</dict>
+	<key>%lld meetings are older than the new limit. Their minutes, decisions, notes and tasks will be deleted now.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld réunion est plus ancienne que la nouvelle limite. Son compte rendu, ses décisions, notes et tâches vont être supprimés maintenant.</string>
+			<key>many</key>
+			<string>%lld de réunions sont plus anciennes que la nouvelle limite. Leurs comptes rendus, décisions, notes et tâches vont être supprimés maintenant.</string>
+			<key>other</key>
+			<string>%lld réunions sont plus anciennes que la nouvelle limite. Leurs comptes rendus, décisions, notes et tâches vont être supprimés maintenant.</string>
+		</dict>
+	</dict>
+	<key>%lld meetings stay, but are no longer grouped under this recurring meeting.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld réunion est conservée, mais n’est plus regroupée sous cette réunion récurrente.</string>
+			<key>many</key>
+			<string>%lld de réunions sont conservées, mais ne sont plus regroupées sous cette réunion récurrente.</string>
+			<key>other</key>
+			<string>%lld réunions sont conservées, mais ne sont plus regroupées sous cette réunion récurrente.</string>
+		</dict>
+	</dict>
+	<key>%lld meetings (%@) on this Mac.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@meetings@ sur ce Mac (%2$@).</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld réunion</string>
+			<key>many</key>
+			<string>%1$lld de réunions</string>
+			<key>other</key>
+			<string>%1$lld réunions</string>
+		</dict>
+	</dict>
+	<key>%lld mentions</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld mention</string>
+			<key>many</key>
+			<string>%lld de mentions</string>
+			<key>other</key>
+			<string>%lld mentions</string>
+		</dict>
+	</dict>
+	<key>%lld more</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld de plus</string>
+			<key>many</key>
+			<string>%lld de plus</string>
+			<key>other</key>
+			<string>%lld de plus</string>
+		</dict>
+	</dict>
+	<key>%lld more notes</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld note de plus</string>
+			<key>many</key>
+			<string>%lld de notes de plus</string>
+			<key>other</key>
+			<string>%lld notes de plus</string>
+		</dict>
+	</dict>
+	<key>%lld to review</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld à vérifier</string>
+			<key>many</key>
+			<string>%lld à vérifier</string>
+			<key>other</key>
+			<string>%lld à vérifier</string>
+		</dict>
+	</dict>
+	<key>%lld recurring meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld réunion récurrente</string>
+			<key>many</key>
+			<string>%lld de réunions récurrentes</string>
+			<key>other</key>
+			<string>%lld réunions récurrentes</string>
+		</dict>
+	</dict>
+	<key>%lld relations</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld relation</string>
+			<key>many</key>
+			<string>%lld de relations</string>
+			<key>other</key>
+			<string>%lld relations</string>
+		</dict>
+	</dict>
+	<key>%lld tasks</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld tâche</string>
+			<key>many</key>
+			<string>%lld de tâches</string>
+			<key>other</key>
+			<string>%lld tâches</string>
+		</dict>
+	</dict>
+	<key>%lld tasks lose their owner</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld tâche perd son responsable</string>
+			<key>many</key>
+			<string>%lld de tâches perdent leur responsable</string>
+			<key>other</key>
+			<string>%lld tâches perdent leur responsable</string>
+		</dict>
+	</dict>
+	<key>Found %@ in %lld earlier meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Voix de %1$@ trouvée dans %2$#@meetings@</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld réunion précédente</string>
+			<key>many</key>
+			<string>%2$lld de réunions précédentes</string>
+			<key>other</key>
+			<string>%2$lld réunions précédentes</string>
+		</dict>
+	</dict>
+	<key>Found your voice in %lld earlier meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Votre voix trouvée dans %#@meetings@</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld réunion précédente</string>
+			<key>many</key>
+			<string>%lld de réunions précédentes</string>
+			<key>other</key>
+			<string>%lld réunions précédentes</string>
+		</dict>
+	</dict>
+	<key>Heard %lld times</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Entendu une fois</string>
+			<key>many</key>
+			<string>Entendu %lld de fois</string>
+			<key>other</key>
+			<string>Entendu %lld fois</string>
+		</dict>
+	</dict>
+	<key>%lld tokens</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld token</string>
+			<key>many</key>
+			<string>%lld de tokens</string>
+			<key>other</key>
+			<string>%lld tokens</string>
+		</dict>
+	</dict>
+	<key>Connected to %@. It offers %lld models.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Connecté à %1$@. Il propose %2$#@models@.</string>
+		<key>models</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld modèle</string>
+			<key>many</key>
+			<string>%2$lld de modèles</string>
+			<key>other</key>
+			<string>%2$lld modèles</string>
+		</dict>
+	</dict>
+	<key>Delete with the transcript (after %lld days)</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Supprimer avec la transcription (après %lld jour)</string>
+			<key>many</key>
+			<string>Supprimer avec la transcription (après %lld de jours)</string>
+			<key>other</key>
+			<string>Supprimer avec la transcription (après %lld jours)</string>
+		</dict>
+	</dict>
+	<key>Last %lld days</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Dernier jour</string>
+			<key>other</key>
+			<string>%lld derniers jours</string>
+		</dict>
+	</dict>
+	<key>Links to %lld meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Lien vers %lld réunion</string>
+			<key>many</key>
+			<string>Liens vers %lld de réunions</string>
+			<key>other</key>
+			<string>Liens vers %lld réunions</string>
+		</dict>
+	</dict>
+	<key>Meetings older than %lld days couldn’t be deleted. %@</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Impossible de supprimer les réunions de plus de %1$#@days@. %2$@</string>
+		<key>days</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld jour</string>
+			<key>many</key>
+			<string>%1$lld de jours</string>
+			<key>other</key>
+			<string>%1$lld jours</string>
+		</dict>
+	</dict>
+	<key>Each language downloads once from Apple. After that, transcription runs on this Mac, and audio never leaves it. macOS lets Vauta keep up to %lld languages: downloading another one releases the language you used least recently.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Chaque langue se télécharge une seule fois depuis Apple. La transcription s’exécute ensuite sur ce Mac, et l’audio ne le quitte jamais. macOS permet à Vauta de garder jusqu’à %lld langue : en télécharger une autre libère celle que vous avez utilisée le moins récemment.</string>
+			<key>many</key>
+			<string>Les modèles proviennent d’Apple et s’exécutent sur ce Mac ; l’audio n’en sort jamais. macOS permet à Vauta de garder jusqu’à %lld de langues : en télécharger une autre libère celle que vous avez utilisée le moins récemment.</string>
+			<key>other</key>
+			<string>Chaque langue se télécharge une seule fois depuis Apple. La transcription s’exécute ensuite sur ce Mac, et l’audio ne le quitte jamais. macOS permet à Vauta de garder jusqu’à %lld langues : en télécharger une autre libère celle que vous avez utilisée le moins récemment.</string>
+		</dict>
+	</dict>
+	<key>Other possible items, %lld items</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Autres éléments possibles, %lld élément</string>
+			<key>many</key>
+			<string>Autres éléments possibles, %lld d’éléments</string>
+			<key>other</key>
+			<string>Autres éléments possibles, %lld éléments</string>
+		</dict>
+	</dict>
+	<key>Spoke in %lld meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>A parlé dans %lld réunion</string>
+			<key>many</key>
+			<string>A parlé dans %lld de réunions</string>
+			<key>other</key>
+			<string>A parlé dans %lld réunions</string>
+		</dict>
+	</dict>
+	<key>Stopped after %lld of %lld meetings.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Arrêté après %1$lld sur %2$#@meetings@.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld réunion</string>
+			<key>many</key>
+			<string>%2$lld de réunions</string>
+			<key>other</key>
+			<string>%2$lld réunions</string>
+		</dict>
+	</dict>
+	<key>The %lld lines (%@) of “%@” will be attributed to “%@”. You can undo this from the Edit menu.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@lines@</string>
+		<key>lines</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>La ligne (%2$@) de « %3$@ » sera attribuée à « %4$@ ». Vous pouvez annuler depuis le menu Édition.</string>
+			<key>many</key>
+			<string>Les %1$lld de lignes (%2$@) de « %3$@ » seront attribuées à « %4$@ ». Vous pouvez annuler depuis le menu Édition.</string>
+			<key>other</key>
+			<string>Les %1$lld lignes (%2$@) de « %3$@ » seront attribuées à « %4$@ ». Vous pouvez annuler depuis le menu Édition.</string>
+		</dict>
+	</dict>
+	<key>The %lld speakers in this meeting, and any names you gave them, are removed. Vauta can’t separate them again because it keeps no audio. You can undo this from the Edit menu until you open another meeting.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@speakers@</string>
+		<key>speakers</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>L’intervenant de cette réunion et le nom que vous lui avez donné sont retirés, et Vauta ne peut pas le séparer à nouveau car il ne conserve aucun audio. Vous pouvez annuler depuis le menu Édition jusqu’à ce que vous ouvriez une autre réunion.</string>
+			<key>many</key>
+			<string>Les %lld d’intervenants de cette réunion et les noms que vous leur avez donnés sont retirés, et Vauta ne peut pas les séparer à nouveau car il ne conserve aucun audio. Vous pouvez annuler depuis le menu Édition jusqu’à ce que vous ouvriez une autre réunion.</string>
+			<key>other</key>
+			<string>Les %lld intervenants de cette réunion et les noms que vous leur avez donnés sont retirés, et Vauta ne peut pas les séparer à nouveau car il ne conserve aucun audio. Vous pouvez annuler depuis le menu Édition jusqu’à ce que vous ouvriez une autre réunion.</string>
+		</dict>
+	</dict>
+	<key>The model for search by meaning returns %lld dimensions; Vauta needs at least %lld.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Le modèle pour la recherche par le sens renvoie %1$#@dimensions@ ; Vauta en nécessite au moins %2$lld.</string>
+		<key>dimensions</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld dimension</string>
+			<key>many</key>
+			<string>%1$lld de dimensions</string>
+			<key>other</key>
+			<string>%1$lld dimensions</string>
+		</dict>
+	</dict>
+	<key>The meeting hasn’t been heard for a while. Recording stops in %lld s unless you keep recording.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>La réunion n’est plus audible depuis un moment. L’enregistrement s’arrête dans %lld s, sauf si vous le poursuivez.</string>
+			<key>other</key>
+			<string>La réunion n’est plus audible depuis un moment. L’enregistrement s’arrête dans %lld s, sauf si vous le poursuivez.</string>
+		</dict>
+	</dict>
+	<key>The model server is busy. Retrying in %lld s.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Le serveur de modèles est occupé. Nouvelle tentative dans %lld s.</string>
+			<key>other</key>
+			<string>Le serveur de modèles est occupé. Nouvelle tentative dans %lld s.</string>
+		</dict>
+	</dict>
+	<key>The transcript (%lld passages), %lld decisions, %lld tasks and all notes and marks of this meeting are removed from the encrypted store. You can’t undo this.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>La transcription (%1$#@passages@), %2$#@decisions@, %3$#@tasks@ ainsi que toutes les notes et tous les repères de cette réunion sont supprimés de la base chiffrée. Cette action est irréversible.</string>
+		<key>decisions</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld décision</string>
+			<key>many</key>
+			<string>%2$lld de décisions</string>
+			<key>other</key>
+			<string>%2$lld décisions</string>
+		</dict>
+		<key>passages</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld passage</string>
+			<key>many</key>
+			<string>%1$lld de passages</string>
+			<key>other</key>
+			<string>%1$lld passages</string>
+		</dict>
+		<key>tasks</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%3$lld tâche</string>
+			<key>many</key>
+			<string>%3$lld de tâches</string>
+			<key>other</key>
+			<string>%3$lld tâches</string>
+		</dict>
+	</dict>
+	<key>Transcript deleted after %lld days</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Cette transcription a été supprimée après %lld jour</string>
+			<key>many</key>
+			<string>Cette transcription a été supprimée après %lld de jours</string>
+			<key>other</key>
+			<string>Cette transcription a été supprimée après %lld jours</string>
+		</dict>
+	</dict>
+	<key>This erases %lld meetings with their transcripts, minutes, notes and tasks, every person, project and glossary term, and the encryption key.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Cette action efface %lld réunion avec sa transcription, son compte rendu, ses notes et ses tâches, toutes les personnes, tous les projets et tous les termes du glossaire, ainsi que la clé de chiffrement.</string>
+			<key>many</key>
+			<string>Cette action efface %lld de réunions avec leurs transcriptions, comptes rendus, notes et tâches, toutes les personnes, tous les projets et tous les termes du glossaire, ainsi que la clé de chiffrement.</string>
+			<key>other</key>
+			<string>Cette action efface %lld réunions avec leurs transcriptions, comptes rendus, notes et tâches, toutes les personnes, tous les projets et tous les termes du glossaire, ainsi que la clé de chiffrement.</string>
+		</dict>
+	</dict>
+	<key>Transcripts are always deleted after %lld days. If you keep minutes, Vauta first writes the minutes of meetings that don’t have them.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Les transcriptions sont toujours supprimées après %lld jour. Si vous conservez les comptes rendus, Vauta rédige d’abord ceux des réunions qui n’en ont pas.</string>
+			<key>many</key>
+			<string>Les transcriptions sont toujours supprimées après %lld de jours. Si vous conservez les comptes rendus, Vauta rédige d’abord ceux des réunions qui n’en ont pas.</string>
+			<key>other</key>
+			<string>Les transcriptions sont toujours supprimées après %lld jours. Si vous conservez les comptes rendus, Vauta rédige d’abord ceux des réunions qui n’en ont pas.</string>
+		</dict>
+	</dict>
+	<key>Transcripts are deleted after %lld days.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Les transcriptions sont supprimées après %lld jour.</string>
+			<key>many</key>
+			<string>Les transcriptions sont supprimées après %lld de jours.</string>
+			<key>other</key>
+			<string>Les transcriptions sont supprimées après %lld jours.</string>
+		</dict>
+	</dict>
+	<key>This replaces %lld meetings with %lld from the backup.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Cela remplace %1$#@current@ par %2$#@backup@ de la sauvegarde.</string>
+		<key>current</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld réunion</string>
+			<key>many</key>
+			<string>%1$lld de réunions</string>
+			<key>other</key>
+			<string>%1$lld réunions</string>
+		</dict>
+		<key>backup</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld</string>
+			<key>many</key>
+			<string>%2$lld</string>
+			<key>other</key>
+			<string>%2$lld</string>
+		</dict>
+	</dict>
+	<key>This restores %lld meetings from the backup.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Cela restaure %#@count@ depuis la sauvegarde.</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld réunion</string>
+			<key>many</key>
+			<string>%lld de réunions</string>
+			<key>other</key>
+			<string>%lld réunions</string>
+		</dict>
+	</dict>
+	<key>%lld requests</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld requête</string>
+			<key>many</key>
+			<string>%lld de requêtes</string>
+			<key>other</key>
+			<string>%lld requêtes</string>
+		</dict>
+	</dict>
+	<key>%lld destinations, %lld outside your local network.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@destinations@, dont %2$lld hors de votre réseau local.</string>
+		<key>destinations</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld destination</string>
+			<key>many</key>
+			<string>%lld de destinations</string>
+			<key>other</key>
+			<string>%lld destinations</string>
+		</dict>
+	</dict>
+	<key>%lld of %lld requests</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$lld sur %2$#@total@</string>
+		<key>total</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld requête</string>
+			<key>many</key>
+			<string>%lld de requêtes</string>
+			<key>other</key>
+			<string>%lld requêtes</string>
+		</dict>
+	</dict>
+	<key>Only %lld destinations, all on your Mac or your local network.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Seulement %lld destination, sur votre Mac ou votre réseau local.</string>
+			<key>many</key>
+			<string>Seulement %lld de destinations, toutes sur votre Mac ou votre réseau local.</string>
+			<key>other</key>
+			<string>Seulement %lld destinations, toutes sur votre Mac ou votre réseau local.</string>
+		</dict>
+	</dict>
+	<key>%lld destinations on this Mac.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld destination sur ce Mac.</string>
+			<key>many</key>
+			<string>%lld de destinations sur ce Mac.</string>
+			<key>other</key>
+			<string>%lld destinations sur ce Mac.</string>
+		</dict>
+	</dict>
+	<key>%lld destinations on your Mac or your local network.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld destination sur votre Mac ou votre réseau local.</string>
+			<key>many</key>
+			<string>%lld de destinations sur votre Mac ou votre réseau local.</string>
+			<key>other</key>
+			<string>%lld destinations sur votre Mac ou votre réseau local.</string>
+		</dict>
+	</dict>
+	<key>Only %lld destinations, all on this Mac.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Seulement %lld destination, sur ce Mac.</string>
+			<key>many</key>
+			<string>Seulement %lld de destinations, toutes sur ce Mac.</string>
+			<key>other</key>
+			<string>Seulement %lld destinations, toutes sur ce Mac.</string>
+		</dict>
+	</dict>
+	<key>%lld failed</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld échec</string>
+			<key>many</key>
+			<string>%lld d’échecs</string>
+			<key>other</key>
+			<string>%lld échecs</string>
+		</dict>
+	</dict>
+	<key>Encrypting %lld meetings…</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Chiffrement de %lld réunion…</string>
+			<key>many</key>
+			<string>Chiffrement de %lld de réunions…</string>
+			<key>other</key>
+			<string>Chiffrement de %lld réunions…</string>
+		</dict>
+	</dict>
+	<key>Restoring %lld meetings…</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Restauration de %lld réunion…</string>
+			<key>many</key>
+			<string>Restauration de %lld de réunions…</string>
+			<key>other</key>
+			<string>Restauration de %lld réunions…</string>
+		</dict>
+	</dict>
+	<key>Restored %lld meetings and your context from the backup.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@ et votre contexte ont été restaurés.</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld réunion</string>
+			<key>many</key>
+			<string>%lld de réunions</string>
+			<key>other</key>
+			<string>%lld réunions</string>
+		</dict>
+	</dict>
+	<key>This restores %lld meetings and replaces your context (%lld entries) from the backup.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Cela restaure %1$#@meetings@ et remplace votre contexte (%2$#@entries@) depuis la sauvegarde.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld réunion</string>
+			<key>many</key>
+			<string>%1$lld de réunions</string>
+			<key>other</key>
+			<string>%1$lld réunions</string>
+		</dict>
+		<key>entries</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld entrée</string>
+			<key>many</key>
+			<string>%2$lld d’entrées</string>
+			<key>other</key>
+			<string>%2$lld entrées</string>
+		</dict>
+	</dict>
+	<key>Ready, %lld notices</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Prêt, %lld message</string>
+			<key>many</key>
+			<string>Prêt, %lld de messages</string>
+			<key>other</key>
+			<string>Prêt, %lld messages</string>
+		</dict>
+	</dict>
+	<key>%lld fingerprints</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld empreinte</string>
+			<key>many</key>
+			<string>%lld d’empreintes</string>
+			<key>other</key>
+			<string>%lld empreintes</string>
+		</dict>
+	</dict>
+	<key>%lld ambiguous names</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld nom ambigu</string>
+			<key>many</key>
+			<string>%lld de noms ambigus</string>
+			<key>other</key>
+			<string>%lld noms ambigus</string>
+		</dict>
+	</dict>
+	<key>%lld possible recognition errors</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld erreur de reconnaissance possible</string>
+			<key>many</key>
+			<string>%lld d’erreurs de reconnaissance possibles</string>
+			<key>other</key>
+			<string>%lld erreurs de reconnaissance possibles</string>
+		</dict>
+	</dict>
+	<key>Vauta couldn’t search %lld meetings; they were left as they were.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Impossible de rechercher des noms dans %lld réunion, laissée telle quelle.</string>
+			<key>many</key>
+			<string>Impossible de rechercher des noms dans %lld de réunions, laissées telles quelles.</string>
+			<key>other</key>
+			<string>Impossible de rechercher des noms dans %lld réunions, laissées telles quelles.</string>
+		</dict>
+	</dict>
+	<key>No new names were found in %lld meetings.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Aucun nouveau nom trouvé dans %lld réunion.</string>
+			<key>many</key>
+			<string>Aucun nouveau nom trouvé dans %lld de réunions.</string>
+			<key>other</key>
+			<string>Aucun nouveau nom trouvé dans %lld réunions.</string>
+		</dict>
+	</dict>
+	<key>Found %@ in %lld meetings.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Trouvé dans %2$#@meetings@ : %1$@.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld réunion</string>
+			<key>many</key>
+			<string>%2$lld de réunions</string>
+			<key>other</key>
+			<string>%2$lld réunions</string>
+		</dict>
+	</dict>
+	<key>%lld notes ·</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld note ·</string>
+			<key>other</key>
+			<string>%lld notes ·</string>
+		</dict>
+	</dict>
+	<key>%lld passages</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld passage</string>
+			<key>other</key>
+			<string>%lld passages</string>
+		</dict>
+	</dict>
+	<key>%lld unconfirmed</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld non confirmée</string>
+			<key>other</key>
+			<string>%lld non confirmées</string>
+		</dict>
+	</dict>
+	<key>%lld files</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld fichier</string>
+			<key>other</key>
+			<string>%lld fichiers</string>
+		</dict>
+	</dict>
+	<key>%lld indexed</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld indexé</string>
+			<key>other</key>
+			<string>%lld indexés</string>
+		</dict>
+	</dict>
+	<key>%lld skipped</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld ignoré</string>
+			<key>other</key>
+			<string>%lld ignorés</string>
+		</dict>
+	</dict>
+	<key>Index: %lld files · about %lld pages of text</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Index : %1$#@files@ · environ %2$#@pages@ de texte</string>
+		<key>files</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld fichier</string>
+			<key>other</key>
+			<string>%1$lld fichiers</string>
+		</dict>
+		<key>pages</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld page</string>
+			<key>other</key>
+			<string>%2$lld pages</string>
+		</dict>
+	</dict>
+	<key>The %lld document sources in the backup replace the ones here and are indexed again.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>La source de documents (%lld) de la sauvegarde remplace celle de ce Mac et sera de nouveau indexée.</string>
+			<key>other</key>
+			<string>Les %lld sources de documents de la sauvegarde remplacent celles de ce Mac et seront de nouveau indexées.</string>
+		</dict>
+	</dict>
+	<key>Couldn’t read %lld files in %@.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@files@</string>
+		<key>files</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Impossible de lire %1$lld fichier dans « %2$@ ».</string>
+			<key>other</key>
+			<string>Impossible de lire %1$lld fichiers dans « %2$@ ».</string>
+		</dict>
+	</dict>
+	<key>%lld reminders created from this meeting stay in Reminders.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld rappel créé à partir de cette réunion reste dans Rappels.</string>
+			<key>other</key>
+			<string>%lld rappels créés à partir de cette réunion restent dans Rappels.</string>
+		</dict>
+	</dict>
+	<key>%lld events created from this meeting stay in Calendar.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld événement créé à partir de cette réunion reste dans Calendrier.</string>
+			<key>other</key>
+			<string>%lld événements créés à partir de cette réunion restent dans Calendrier.</string>
+		</dict>
+	</dict>
+	<key>Minutes ready for %lld meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Compte rendu prêt pour %lld réunion</string>
+			<key>other</key>
+			<string>Comptes rendus prêts pour %lld réunions</string>
+		</dict>
+	</dict>
+	<key>Minutes ready · %lld tasks</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Compte rendu prêt · %#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld tâche</string>
+			<key>other</key>
+			<string>%lld tâches</string>
+		</dict>
+	</dict>
+	<key>Minutes ready · %lld follow-up meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Compte rendu prêt · %#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld réunion de suivi</string>
+			<key>other</key>
+			<string>%lld réunions de suivi</string>
+		</dict>
+	</dict>
+	<key>Minutes ready · %lld tasks · %lld follow-up meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Compte rendu prêt · %1$#@tasks@ · %2$#@followups@</string>
+		<key>tasks</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld tâche</string>
+			<key>other</key>
+			<string>%1$lld tâches</string>
+		</dict>
+		<key>followups</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld réunion de suivi</string>
+			<key>other</key>
+			<string>%2$lld réunions de suivi</string>
+		</dict>
+	</dict>
+	<key>Open in Mail · %lld recipients</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Ouvrir dans Mail · %#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld destinataire</string>
+			<key>other</key>
+			<string>%lld destinataires</string>
+		</dict>
+	</dict>
+	<key>%lld suggestions</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@v@</string>
+		<key>v</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld suggestion</string>
+			<key>other</key>
+			<string>%lld suggestions</string>
+		</dict>
+	</dict>
+	<key>Carried over · %lld meetings since %@</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Reportée · %1$#@v@ depuis le %2$@</string>
+		<key>v</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld réunion</string>
+			<key>other</key>
+			<string>%1$lld réunions</string>
+		</dict>
+	</dict>
+	<key>Also mark the %lld earlier mentions as done</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@v@</string>
+		<key>v</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Marquer aussi la mention précédente comme terminée</string>
+			<key>other</key>
+			<string>Marquer aussi les %lld mentions précédentes comme terminées</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

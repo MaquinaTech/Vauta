@@ -1,0 +1,1249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- SPDX-License-Identifier: Apache-2.0
+     SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+     Korean plural strings. Korean has a single plural category ("other") in CLDR,
+     so each variable has only that form. See docs/TRANSLATING.md. -->
+<plist version="1.0">
+<dict>
+	<key>%@ · %lld chat models, %lld for search by meaning</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$@ · %2$#@chat@, %3$#@embedding@</string>
+		<key>chat</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>채팅 모델 %2$lld개</string>
+		</dict>
+		<key>embedding</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>의미 검색용 %3$lld개</string>
+		</dict>
+	</dict>
+	<key>%lld aliases</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>별칭 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld aliases: %@</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@aliases@: %2$@</string>
+		<key>aliases</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>별칭 %1$lld개</string>
+		</dict>
+	</dict>
+	<key>%lld calendars selected.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>캘린더 %lld개가 선택되었습니다.</string>
+		</dict>
+	</dict>
+	<key>%lld entries merged into it earlier</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>이전에 이 항목으로 병합된 항목 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld glossary terms</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>용어집 용어 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld jobs</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>작업 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld jobs waiting for the model</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>모델을 기다리는 작업 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld jobs waiting for the model server</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>모델 서버를 기다리는 작업 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld meetings are older than the new limit. Their minutes, decisions, notes and tasks will be deleted now.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개가 새로운 기한보다 오래되었습니다. 해당 회의의 회의록, 결정 사항, 메모 및 할 일이 지금 삭제됩니다.</string>
+		</dict>
+	</dict>
+	<key>%lld meetings stay, but are no longer grouped under this recurring meeting.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개는 유지되지만 더 이상 이 반복 회의로 묶이지 않습니다.</string>
+		</dict>
+	</dict>
+	<key>%lld meetings (%@) on this Mac.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>이 Mac에 %1$#@meetings@(%2$@)가 있습니다.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %1$lld개</string>
+		</dict>
+	</dict>
+	<key>%lld mentions</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>언급 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld more</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld개 더 보기</string>
+		</dict>
+	</dict>
+	<key>%lld more notes</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>메모 %lld개 더 보기</string>
+		</dict>
+	</dict>
+	<key>%lld to review</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld개 검토 필요</string>
+		</dict>
+	</dict>
+	<key>%lld recurring meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>반복 회의 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld relations</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>관계 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld tasks</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>할 일 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld tasks lose their owner</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>할 일 %lld개의 담당자가 없어짐</string>
+		</dict>
+	</dict>
+	<key>Found %@ in %lld earlier meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>이전 회의 %2$#@meetings@에서 %1$@ 님을 찾았습니다</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%2$lld개</string>
+		</dict>
+	</dict>
+	<key>Found your voice in %lld earlier meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>이전 회의 %#@meetings@에서 내 목소리를 찾았습니다</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld개</string>
+		</dict>
+	</dict>
+	<key>Heard %lld times</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld회 인식됨</string>
+		</dict>
+	</dict>
+	<key>%lld tokens</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>토큰 %lld개</string>
+		</dict>
+	</dict>
+	<key>Connected to %@. It offers %lld models.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$@에 연결되었습니다. %2$#@models@를 제공합니다.</string>
+		<key>models</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>모델 %2$lld개</string>
+		</dict>
+	</dict>
+	<key>Delete with the transcript (after %lld days)</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>녹취록과 함께 삭제(%lld일 후)</string>
+		</dict>
+	</dict>
+	<key>Last %lld days</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>최근 %lld일</string>
+		</dict>
+	</dict>
+	<key>Links to %lld meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개에 연결됨</string>
+		</dict>
+	</dict>
+	<key>Meetings older than %lld days couldn’t be deleted. %@</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@days@보다 오래된 회의를 삭제할 수 없습니다. %2$@</string>
+		<key>days</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld일</string>
+		</dict>
+	</dict>
+	<key>Each language downloads once from Apple. After that, transcription runs on this Mac, and audio never leaves it. macOS lets Vauta keep up to %lld languages: downloading another one releases the language you used least recently.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>각 언어는 Apple에서 한 번만 다운로드됩니다. 이후 텍스트 변환은 이 Mac에서 실행되며 오디오는 Mac 밖으로 나가지 않습니다. macOS에서 Vauta는 최대 %lld개 언어를 보관할 수 있으며, 다른 언어를 다운로드하면 가장 오랫동안 사용하지 않은 언어가 해제됩니다.</string>
+		</dict>
+	</dict>
+	<key>Other possible items, %lld items</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>기타 가능한 항목, %lld개</string>
+		</dict>
+	</dict>
+	<key>Spoke in %lld meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld개 회의에서 발언</string>
+		</dict>
+	</dict>
+	<key>Stopped after %lld of %lld meetings.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%2$#@meetings@ 중 %1$lld개를 처리하고 멈췄습니다.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %2$lld개</string>
+		</dict>
+	</dict>
+	<key>The %lld lines (%@) of “%@” will be attributed to “%@”. You can undo this from the Edit menu.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@lines@</string>
+		<key>lines</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>“%3$@”의 %1$lld개 줄(%2$@)이 “%4$@”의 발언으로 귀속됩니다. “편집” 메뉴에서 실행 취소할 수 있습니다.</string>
+		</dict>
+	</dict>
+	<key>The %lld speakers in this meeting, and any names you gave them, are removed. Vauta can’t separate them again because it keeps no audio. You can undo this from the Edit menu until you open another meeting.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@speakers@</string>
+		<key>speakers</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>이 회의의 화자 %lld명과 지정한 이름이 제거되며, Vauta는 오디오를 보관하지 않으므로 다시 구분할 수 없습니다. 다른 회의를 열기 전까지는 “편집” 메뉴에서 실행 취소할 수 있습니다.</string>
+		</dict>
+	</dict>
+	<key>The model for search by meaning returns %lld dimensions; Vauta needs at least %lld.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>의미 검색용 모델이 %1$#@dimensions@차원을 반환하지만 Vauta에는 %2$lld차원 이상이 필요합니다.</string>
+		<key>dimensions</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld</string>
+		</dict>
+	</dict>
+	<key>The meeting hasn’t been heard for a while. Recording stops in %lld s unless you keep recording.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>한동안 회의 소리가 들리지 않습니다. 녹음을 계속하지 않으면 %lld초 후 녹음이 중지됩니다.</string>
+		</dict>
+	</dict>
+	<key>The model server is busy. Retrying in %lld s.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>모델 서버가 사용 중입니다. %lld초 후 다시 시도합니다.</string>
+		</dict>
+	</dict>
+	<key>The transcript (%lld passages), %lld decisions, %lld tasks and all notes and marks of this meeting are removed from the encrypted store. You can’t undo this.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>이 회의의 녹취록(%1$#@passages@), %2$#@decisions@, %3$#@tasks@ 및 모든 메모와 북마크가 암호화된 저장소에서 제거됩니다. 이 작업은 실행 취소할 수 없습니다.</string>
+		<key>decisions</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>결정 사항 %2$lld개</string>
+		</dict>
+		<key>passages</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>구간 %1$lld개</string>
+		</dict>
+		<key>tasks</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>할 일 %3$lld개</string>
+		</dict>
+	</dict>
+	<key>Transcript deleted after %lld days</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>이 녹취록은 %lld일 후 삭제되었습니다</string>
+		</dict>
+	</dict>
+	<key>This erases %lld meetings with their transcripts, minutes, notes and tasks, every person, project and glossary term, and the encryption key.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개와 해당 녹취록, 회의록, 메모 및 할 일, 모든 사람, 프로젝트 및 용어집 용어, 그리고 암호화 키가 지워집니다.</string>
+		</dict>
+	</dict>
+	<key>Transcripts are always deleted after %lld days. If you keep minutes, Vauta first writes the minutes of meetings that don’t have them.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>녹취록은 항상 %lld일 후 삭제됩니다. 회의록을 보관하는 경우 Vauta가 먼저 회의록이 없는 회의의 회의록을 작성합니다.</string>
+		</dict>
+	</dict>
+	<key>Transcripts are deleted after %lld days.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>녹취록은 %lld일 후 삭제됩니다.</string>
+		</dict>
+	</dict>
+	<key>This replaces %lld meetings with %lld from the backup.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@current@를 백업의 %2$#@backup@개로 바꿉니다.</string>
+		<key>current</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %1$lld개</string>
+		</dict>
+		<key>backup</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%2$lld</string>
+		</dict>
+	</dict>
+	<key>This restores %lld meetings from the backup.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>백업에서 %#@count@를 복원합니다.</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld requests</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>요청 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld destinations, %lld outside your local network.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@destinations@ 중 %2$lld개가 로컬 네트워크 밖에 있습니다.</string>
+		<key>destinations</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>연결 대상 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld of %lld requests</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>요청 %1$lld/%2$#@total@</string>
+		<key>total</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld건</string>
+		</dict>
+	</dict>
+	<key>Only %lld destinations, all on your Mac or your local network.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>연결 대상은 %lld개뿐이며, 모두 사용 중인 Mac 또는 로컬 네트워크에 있습니다.</string>
+		</dict>
+	</dict>
+	<key>%lld destinations on this Mac.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>연결 대상은 %lld개이며, 모두 이 Mac에 있습니다.</string>
+		</dict>
+	</dict>
+	<key>%lld destinations on your Mac or your local network.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>연결 대상은 %lld개이며, 모두 사용 중인 Mac 또는 로컬 네트워크에 있습니다.</string>
+		</dict>
+	</dict>
+	<key>Only %lld destinations, all on this Mac.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>연결 대상은 %lld개뿐이며, 모두 이 Mac에 있습니다.</string>
+		</dict>
+	</dict>
+	<key>%lld failed</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld개 실패</string>
+		</dict>
+	</dict>
+	<key>Encrypting %lld meetings…</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개 암호화 중…</string>
+		</dict>
+	</dict>
+	<key>Restoring %lld meetings…</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개 복원 중…</string>
+		</dict>
+	</dict>
+	<key>Restored %lld meetings and your context from the backup.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>백업에서 %#@count@와 컨텍스트를 복원했습니다.</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개</string>
+		</dict>
+	</dict>
+	<key>This restores %lld meetings and replaces your context (%lld entries) from the backup.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>백업에서 %1$#@meetings@를 복원하고 컨텍스트(%2$#@entries@)를 바꿉니다.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %1$lld개</string>
+		</dict>
+		<key>entries</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%2$lld개 항목</string>
+		</dict>
+	</dict>
+	<key>Ready, %lld notices</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>준비됨, 안내 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld fingerprints</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>목소리 지문 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld ambiguous names</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>모호한 이름 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld possible recognition errors</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>인식 오류 가능성 %lld개</string>
+		</dict>
+	</dict>
+	<key>Vauta couldn’t search %lld meetings; they were left as they were.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개에서 이름을 검색할 수 없어 그대로 두었습니다.</string>
+		</dict>
+	</dict>
+	<key>No new names were found in %lld meetings.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개에서 새로운 이름을 찾지 못했습니다.</string>
+		</dict>
+	</dict>
+	<key>Found %@ in %lld meetings.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%2$#@meetings@에서 %1$@를 찾았습니다.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %2$lld개</string>
+		</dict>
+	</dict>
+	<key>%lld notes ·</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>메모 %lld개 ·</string>
+		</dict>
+	</dict>
+	<key>%lld passages</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>구간 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld unconfirmed</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>미확인 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld files</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>파일 %lld개</string>
+		</dict>
+	</dict>
+	<key>%lld indexed</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld개 색인됨</string>
+		</dict>
+	</dict>
+	<key>%lld skipped</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld개 건너뜀</string>
+		</dict>
+	</dict>
+	<key>Index: %lld files · about %lld pages of text</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>색인: %1$#@files@ · 텍스트 약 %2$#@pages@</string>
+		<key>files</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>파일 %1$lld개</string>
+		</dict>
+		<key>pages</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%2$lld페이지</string>
+		</dict>
+	</dict>
+	<key>The %lld document sources in the backup replace the ones here and are indexed again.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>백업의 문서 소스 %lld개가 이 Mac의 소스를 대체하며 다시 색인됩니다.</string>
+		</dict>
+	</dict>
+	<key>Couldn’t read %lld files in %@.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@files@</string>
+		<key>files</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>“%2$@”의 파일 %1$lld개를 읽을 수 없습니다.</string>
+		</dict>
+	</dict>
+	<key>%lld reminders created from this meeting stay in Reminders.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>이 회의에서 만든 미리 알림 %lld개는 미리 알림에 남아 있습니다.</string>
+		</dict>
+	</dict>
+	<key>%lld events created from this meeting stay in Calendar.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>이 회의에서 만든 일정 %lld개는 캘린더에 남아 있습니다.</string>
+		</dict>
+	</dict>
+	<key>Minutes ready for %lld meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개의 회의록이 준비되었습니다</string>
+		</dict>
+	</dict>
+	<key>Minutes ready · %lld tasks</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>회의록 준비됨 · %#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>할 일 %lld개</string>
+		</dict>
+	</dict>
+	<key>Minutes ready · %lld follow-up meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>회의록 준비됨 · %#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>후속 회의 %lld개</string>
+		</dict>
+	</dict>
+	<key>Minutes ready · %lld tasks · %lld follow-up meetings</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>회의록 준비됨 · %1$#@tasks@ · %2$#@followups@</string>
+		<key>tasks</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>할 일 %1$lld개</string>
+		</dict>
+		<key>followups</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>후속 회의 %2$lld개</string>
+		</dict>
+	</dict>
+	<key>Open in Mail · %lld recipients</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Mail에서 열기 · %#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>받는 사람 %lld명</string>
+		</dict>
+	</dict>
+	<key>%lld suggestions</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@v@</string>
+		<key>v</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>제안 %lld개</string>
+		</dict>
+	</dict>
+	<key>Carried over · %lld meetings since %@</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>이어짐 · %2$@부터 %1$#@v@</string>
+		<key>v</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %1$lld회</string>
+		</dict>
+	</dict>
+	<key>Also mark the %lld earlier mentions as done</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@v@</string>
+		<key>v</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>이전 언급 %lld개도 함께 완료로 표시</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

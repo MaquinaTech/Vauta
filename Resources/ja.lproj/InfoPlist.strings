@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: Apache-2.0
+   SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+   Info.plist strings: the permission prompts macOS shows on Vauta's behalf.
+   Keep them short and honest: say what Vauta does with the access and what it never does. */
+
+/* System audio permission prompt (Screen & System Audio Recording) */
+"NSAudioCaptureUsageDescription" = "Vautaは、ミーティングでほかの参加者が話す内容を文字起こしします。音声が保存されたり、このMacの外に送信されたりすることはありません。";
+
+/* Calendar permission prompt. Vauta reads only the chosen calendars: events around now, and the event about to start (and the next one within 12 hours) for the brief. */
+"NSCalendarsFullAccessUsageDescription" = "設定でオンにした場合のみ、Vautaは選択したカレンダーの予定（現在時刻前後と今後12時間）を読み取り、録音の提案、ブリーフィングの準備、タイトルと出席者の使用を行います。「追加」を押したときだけ、確認したフォローアップのイベントを作成し、重複しないようにその日を確認します。カレンダーのコピーは保持しません。";
+
+/* Local network permission prompt, shown when the model server runs on another computer */
+"NSLocalNetworkUsageDescription" = "Vautaは、議事録の作成と質問への回答のために、ローカルネットワーク上で選択したモデルサーバにのみ、常にHTTPSで接続します。インターネットには何も送信されません。";
+
+/* Microphone permission prompt */
+"NSMicrophoneUsageDescription" = "Vautaは、ミーティングで話す内容を文字起こしします。音声が保存されたり、このMacの外に送信されたりすることはありません。";
+
+/* Reminders permission prompt, shown the first time the person turns on related reminders in the brief or presses Add on a task. Vauta reads the chosen lists (incomplete reminders only) for the brief and, when adding, the titles in the one list it adds to; it adds only the reminder the person confirmed and never changes or deletes one it did not create. */
+"NSRemindersFullAccessUsageDescription" = "Vautaは、ミーティング直前に、選択したリマインダーのリストを読み取り、関連するリマインダーをブリーフィングに表示します。タスクで「追加」を押すと、そのリマインダー1件だけを追加し、重複しないように、追加先のリストにあるタイトルを読み取ります。作成済みのリマインダーを変更・削除することはなく、リマインダーのコピーも保持しません。";

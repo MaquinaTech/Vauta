@@ -1,0 +1,8 @@
+dd3544504bdd5aad8b54f20c5f4735db08045d11a912cce78d9c42d4e22dc444  crorm.wav  29157454 bytes  crc32=57434bd8  https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip
+bb275869d9493a21139dc7d0a376c72301fd97ae1316e3f1f03587c2ab16ad9b  lpola.wav  26894414 bytes  crc32=b1ea8b71  https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip
+6fd9a861d748d3c5546f9611bcb8c74e40923afa45f844070664099bbac69636  sexgc.wav  26601550 bytes  crc32=a6cb7488  https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip
+64a4ffff4771fe3c2934194fa1096e14b4eff6d97b57f8216426ff6ae2a8b36b  yzvon.wav  28557390 bytes  crc32=3c1dc3b7  https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip
+a9eca647a69728e7f7b3c904eb49dcb1909bd13a467e647edca81e8df7ca839f  fijfi.wav  29501518 bytes  crc32=f5f6b4ed  https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip
+3e188fe03fc75b470b80cfa924b365498fef461c85622055352ab2ff4fcba347  poucc.wav  29573198 bytes  crc32=de99d0ae  https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip
+1ac3e1791500d63c416604d5e6215971ba12269d0285469873d054b4c60bbede  uhfrw.wav  28555342 bytes  crc32=0ff91e7e  https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip
+9a093917ca6d494df67d098b1cb3441e042d492c135f7a625047ad3e3acc95d3  ikhje.wav  27859022 bytes  crc32=818b1c42  https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip

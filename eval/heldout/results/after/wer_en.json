@@ -1,0 +1,381 @@
+{
+ "locale": "en-US",
+ "window_s": 600,
+ "pad_s": 0.25,
+ "files": [
+  {
+   "meeting": "ES2011a",
+   "condition": "headset",
+   "audio_s": 600.0,
+   "wall_s": 8.3,
+   "masked": {
+    "sub": 23,
+    "dele": 26,
+    "ins": 9,
+    "words": 375,
+    "wer": 15.466666666666667,
+    "hyp_words": 358
+   },
+   "unmasked": {
+    "sub": 53,
+    "dele": 20,
+    "ins": 215,
+    "words": 375,
+    "wer": 76.8,
+    "hyp_words": 570
+   }
+  },
+  {
+   "meeting": "ES2011a",
+   "condition": "others",
+   "audio_s": 600.0,
+   "wall_s": 9.3,
+   "masked": {
+    "sub": 49,
+    "dele": 51,
+    "ins": 10,
+    "words": 495,
+    "wer": 22.22222222222222,
+    "hyp_words": 454
+   },
+   "unmasked": {
+    "sub": 117,
+    "dele": 44,
+    "ins": 118,
+    "words": 495,
+    "wer": 56.36363636363637,
+    "hyp_words": 569
+   }
+  },
+  {
+   "meeting": "ES2011c",
+   "condition": "headset",
+   "audio_s": 600.0,
+   "wall_s": 10.2,
+   "masked": {
+    "sub": 11,
+    "dele": 21,
+    "ins": 4,
+    "words": 391,
+    "wer": 9.207161125319693,
+    "hyp_words": 374
+   },
+   "unmasked": {
+    "sub": 16,
+    "dele": 14,
+    "ins": 581,
+    "words": 391,
+    "wer": 156.26598465473145,
+    "hyp_words": 958
+   }
+  },
+  {
+   "meeting": "ES2011c",
+   "condition": "others",
+   "audio_s": 600.0,
+   "wall_s": 10.9,
+   "masked": {
+    "sub": 25,
+    "dele": 56,
+    "ins": 3,
+    "words": 736,
+    "wer": 11.41304347826087,
+    "hyp_words": 683
+   },
+   "unmasked": {
+    "sub": 37,
+    "dele": 40,
+    "ins": 267,
+    "words": 736,
+    "wer": 46.73913043478261,
+    "hyp_words": 963
+   }
+  },
+  {
+   "meeting": "IS1008a",
+   "condition": "headset",
+   "audio_s": 600.0,
+   "wall_s": 11.8,
+   "masked": {
+    "sub": 29,
+    "dele": 21,
+    "ins": 12,
+    "words": 679,
+    "wer": 9.131075110456553,
+    "hyp_words": 670
+   },
+   "unmasked": {
+    "sub": 36,
+    "dele": 14,
+    "ins": 666,
+    "words": 679,
+    "wer": 105.44918998527245,
+    "hyp_words": 1331
+   }
+  },
+  {
+   "meeting": "IS1008a",
+   "condition": "others",
+   "audio_s": 600.0,
+   "wall_s": 13.3,
+   "masked": {
+    "sub": 41,
+    "dele": 30,
+    "ins": 10,
+    "words": 1067,
+    "wer": 7.591377694470478,
+    "hyp_words": 1047
+   },
+   "unmasked": {
+    "sub": 52,
+    "dele": 21,
+    "ins": 292,
+    "words": 1067,
+    "wer": 34.20805998125586,
+    "hyp_words": 1338
+   }
+  },
+  {
+   "meeting": "IS1008c",
+   "condition": "headset",
+   "audio_s": 600.0,
+   "wall_s": 14.1,
+   "masked": {
+    "sub": 23,
+    "dele": 32,
+    "ins": 18,
+    "words": 865,
+    "wer": 8.439306358381502,
+    "hyp_words": 851
+   },
+   "unmasked": {
+    "sub": 33,
+    "dele": 20,
+    "ins": 366,
+    "words": 865,
+    "wer": 48.4393063583815,
+    "hyp_words": 1211
+   }
+  },
+  {
+   "meeting": "IS1008c",
+   "condition": "others",
+   "audio_s": 600.0,
+   "wall_s": 14.6,
+   "masked": {
+    "sub": 37,
+    "dele": 96,
+    "ins": 19,
+    "words": 1104,
+    "wer": 13.768115942028986,
+    "hyp_words": 1027
+   },
+   "unmasked": {
+    "sub": 38,
+    "dele": 103,
+    "ins": 194,
+    "words": 1104,
+    "wer": 30.344202898550726,
+    "hyp_words": 1195
+   }
+  },
+  {
+   "meeting": "IS1008d",
+   "condition": "headset",
+   "audio_s": 600.0,
+   "wall_s": 11.6,
+   "masked": {
+    "sub": 19,
+    "dele": 21,
+    "ins": 3,
+    "words": 639,
+    "wer": 6.729264475743349,
+    "hyp_words": 621
+   },
+   "unmasked": {
+    "sub": 19,
+    "dele": 20,
+    "ins": 661,
+    "words": 639,
+    "wer": 109.54616588419405,
+    "hyp_words": 1280
+   }
+  },
+  {
+   "meeting": "IS1008d",
+   "condition": "others",
+   "audio_s": 600.0,
+   "wall_s": 13.0,
+   "masked": {
+    "sub": 60,
+    "dele": 99,
+    "ins": 10,
+    "words": 1034,
+    "wer": 16.344294003868473,
+    "hyp_words": 945
+   },
+   "unmasked": {
+    "sub": 85,
+    "dele": 72,
+    "ins": 323,
+    "words": 1034,
+    "wer": 46.42166344294004,
+    "hyp_words": 1285
+   }
+  },
+  {
+   "meeting": "TS3004a",
+   "condition": "headset",
+   "audio_s": 600.0,
+   "wall_s": 8.6,
+   "masked": {
+    "sub": 59,
+    "dele": 35,
+    "ins": 22,
+    "words": 669,
+    "wer": 17.33931240657698,
+    "hyp_words": 656
+   },
+   "unmasked": {
+    "sub": 61,
+    "dele": 33,
+    "ins": 45,
+    "words": 669,
+    "wer": 20.777279521674142,
+    "hyp_words": 681
+   }
+  },
+  {
+   "meeting": "TS3004a",
+   "condition": "others",
+   "audio_s": 600.0,
+   "wall_s": 9.4,
+   "masked": {
+    "sub": 74,
+    "dele": 63,
+    "ins": 21,
+    "words": 782,
+    "wer": 20.20460358056266,
+    "hyp_words": 740
+   },
+   "unmasked": {
+    "sub": 80,
+    "dele": 67,
+    "ins": 33,
+    "words": 782,
+    "wer": 23.017902813299234,
+    "hyp_words": 748
+   }
+  },
+  {
+   "meeting": "TS3004c",
+   "condition": "headset",
+   "audio_s": 600.0,
+   "wall_s": 9.7,
+   "masked": {
+    "sub": 35,
+    "dele": 28,
+    "ins": 9,
+    "words": 558,
+    "wer": 12.903225806451612,
+    "hyp_words": 539
+   },
+   "unmasked": {
+    "sub": 38,
+    "dele": 22,
+    "ins": 299,
+    "words": 558,
+    "wer": 64.33691756272401,
+    "hyp_words": 835
+   }
+  },
+  {
+   "meeting": "TS3004c",
+   "condition": "others",
+   "audio_s": 600.0,
+   "wall_s": 10.6,
+   "masked": {
+    "sub": 63,
+    "dele": 85,
+    "ins": 11,
+    "words": 833,
+    "wer": 19.087635054021607,
+    "hyp_words": 759
+   },
+   "unmasked": {
+    "sub": 74,
+    "dele": 74,
+    "ins": 126,
+    "words": 833,
+    "wer": 32.89315726290516,
+    "hyp_words": 885
+   }
+  },
+  {
+   "meeting": "TS3004d",
+   "condition": "headset",
+   "audio_s": 600.0,
+   "wall_s": 10.3,
+   "masked": {
+    "sub": 63,
+    "dele": 27,
+    "ins": 9,
+    "words": 601,
+    "wer": 16.472545757071547,
+    "hyp_words": 583
+   },
+   "unmasked": {
+    "sub": 77,
+    "dele": 16,
+    "ins": 383,
+    "words": 601,
+    "wer": 79.20133111480865,
+    "hyp_words": 968
+   }
+  },
+  {
+   "meeting": "TS3004d",
+   "condition": "others",
+   "audio_s": 600.0,
+   "wall_s": 11.7,
+   "masked": {
+    "sub": 111,
+    "dele": 126,
+    "ins": 15,
+    "words": 1032,
+    "wer": 24.41860465116279,
+    "hyp_words": 921
+   },
+   "unmasked": {
+    "sub": 135,
+    "dele": 123,
+    "ins": 132,
+    "words": 1032,
+    "wer": 37.7906976744186,
+    "hyp_words": 1041
+   }
+  }
+ ],
+ "summary": {
+  "headset": {
+   "wer": 11.701904961272765,
+   "wer_unmasked": 77.62193845509734,
+   "sub": 262,
+   "dele": 211,
+   "ins": 86,
+   "words": 4777,
+   "audio_s": 4800.0,
+   "wall_s_per_pass": 42.3
+  },
+  "others": {
+   "wer": 16.447832839192433,
+   "wer_unmasked": 37.3711704080192,
+   "sub": 460,
+   "dele": 606,
+   "ins": 99,
+   "words": 7083,
+   "audio_s": 4800.0,
+   "wall_s_per_pass": 46.3
+  }
+ }
+}

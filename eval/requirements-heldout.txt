@@ -1,0 +1,12 @@
+# Supports macOS arm64 with Python 3.12 only: each package lists the hash of its one cp312 wheel, so --require-hashes fails on
+# another Python version or platform (eval/requirements.txt lists more numpy wheels).
+# Extra Python dependencies of the held-out sets that are built (Spanish conversations, call augmentation); the
+# evaluation of the main harness needs only numpy (requirements.txt). Hash-pinned wheels:
+#   pip install --only-binary=:all: --require-hashes -r eval/requirements-heldout.txt
+cffi==2.1.1 --hash=sha256:f81b3b8f3d4e343550fa4baa0e479bba9f2d29ce9c2e9b51d1ce1718d7442fcf
+numpy==2.5.3 --hash=sha256:a72f874bc9e10e4b8f80426fb49716d5141f64442a0c8418065093ec8017fbb0
+pyarrow==26.0.0 --hash=sha256:90ddaf7c625307ad52f31a9b25c34fe5e4897c7529ee3481135822b2b6842ff1
+pycparser==3.11 --hash=sha256:51d5a8ba2be0bbe440b99d2112604c95bbbc3c2748a64260186c541e1729cd80
+scipy==1.18.1 --hash=sha256:7bbf207c4453ce1ad2e00b17313852b33310b83090c2311bdaf97f93c0380d12
+soundfile==0.14.0 --hash=sha256:d828d35a059626da52f1415b5faee610aeab393319cb3fc4a9aef47b619fc14c
+typing-extensions==4.16.0 --hash=sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8

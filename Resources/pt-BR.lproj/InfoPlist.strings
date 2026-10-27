@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: Apache-2.0
+   SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+   Info.plist strings: the permission prompts macOS shows on Vauta's behalf.
+   Keep them short and honest: say what Vauta does with the access and what it never does. */
+
+/* System audio permission prompt (Screen & System Audio Recording) */
+"NSAudioCaptureUsageDescription" = "Vauta transcreve o que os outros participantes dizem nas suas reuniões. O áudio nunca é salvo e nunca sai deste Mac.";
+
+/* Calendar permission prompt. Vauta reads only the chosen calendars: events around now, and the event about to start (and the next one within 12 hours) for the brief. */
+"NSCalendarsFullAccessUsageDescription" = "Só se você ativar nos Ajustes: Vauta lê os calendários que você escolher (os eventos perto do horário atual e das próximas 12 horas) para sugerir gravações, preparar resumos prévios e usar títulos e participantes. Só quando você clica em Adicionar, ele cria o evento de acompanhamento que você confirmou e confere esse dia para não adicioná-lo duas vezes. Vauta não guarda nenhuma cópia do seu calendário.";
+
+/* Local network permission prompt, shown when the model server runs on another computer */
+"NSLocalNetworkUsageDescription" = "Vauta se conecta apenas ao servidor de modelos que você escolher na sua rede local, sempre por HTTPS, para escrever atas e responder a perguntas. Nada vai para a internet.";
+
+/* Microphone permission prompt */
+"NSMicrophoneUsageDescription" = "Vauta transcreve o que você diz nas suas reuniões. O áudio nunca é salvo e nunca sai deste Mac.";
+
+/* Reminders permission prompt, shown the first time the person turns on related reminders in the brief or presses Add on a task. Vauta reads the chosen lists (incomplete reminders only) for the brief and, when adding, the titles in the one list it adds to; it adds only the reminder the person confirmed and never changes or deletes one it did not create. */
+"NSRemindersFullAccessUsageDescription" = "Vauta lê as listas de lembretes que você escolher, logo antes de uma reunião, para mostrar os lembretes relacionados no resumo prévio. Quando você clica em Adicionar em uma tarefa, ele adiciona só esse lembrete e lê os títulos da lista em que você o adiciona, para não adicioná-lo duas vezes. Vauta nunca altera nem apaga um lembrete que você criou e não guarda nenhuma cópia dos seus lembretes.";

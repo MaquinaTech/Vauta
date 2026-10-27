@@ -1,0 +1,527 @@
+{
+ "ami_dev_others__uem": {
+  "files": 8,
+  "der_c025": 32.82,
+  "der_c0": 36.19,
+  "miss": 5.37,
+  "fa": 23.74,
+  "conf": 3.7,
+  "ref_s": 8616,
+  "exact_count": 0,
+  "within1": 8,
+  "mean_count_err": 0.75,
+  "one_speaker_baseline_der_c025": 54.9,
+  "per_file": {
+   "ES2011a_others": {
+    "der_c025": 45.2,
+    "ref_spk": 3,
+    "hyp_spk": 2
+   },
+   "ES2011c_others": {
+    "der_c025": 26.3,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "IS1008a_others": {
+    "der_c025": 24.9,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "IS1008c_others": {
+    "der_c025": 30.0,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "IS1008d_others": {
+    "der_c025": 50.0,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "TS3004a_others": {
+    "der_c025": 31.8,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "TS3004c_others": {
+    "der_c025": 31.3,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "TS3004d_others": {
+    "der_c025": 30.5,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   }
+  }
+ },
+ "ami_dev_others__uem_nobleed": {
+  "files": 8,
+  "der_c025": 12.49,
+  "der_c0": 18.83,
+  "miss": 5.37,
+  "fa": 3.42,
+  "conf": 3.7,
+  "ref_s": 8616,
+  "exact_count": 1,
+  "within1": 8,
+  "mean_count_err": 0.62,
+  "one_speaker_baseline_der_c025": 54.9,
+  "per_file": {
+   "ES2011a_others": {
+    "der_c025": 14.3,
+    "ref_spk": 3,
+    "hyp_spk": 2
+   },
+   "ES2011c_others": {
+    "der_c025": 12.5,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "IS1008a_others": {
+    "der_c025": 6.5,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "IS1008c_others": {
+    "der_c025": 11.8,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "IS1008d_others": {
+    "der_c025": 13.0,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "TS3004a_others": {
+    "der_c025": 11.5,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "TS3004c_others": {
+    "der_c025": 12.6,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "TS3004d_others": {
+    "der_c025": 15.3,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   }
+  }
+ },
+ "es_conv__uem": {
+  "files": 12,
+  "der_c025": 9.42,
+  "der_c0": 13.48,
+  "miss": 4.22,
+  "fa": 0.21,
+  "conf": 4.99,
+  "ref_s": 8104,
+  "exact_count": 9,
+  "within1": 12,
+  "mean_count_err": -0.08,
+  "one_speaker_baseline_der_c025": 58.5,
+  "per_file": {
+   "es_conv01_mls_2spk": {
+    "der_c025": 1.4,
+    "ref_spk": 2,
+    "hyp_spk": 2
+   },
+   "es_conv02_vp_2spk": {
+    "der_c025": 3.3,
+    "ref_spk": 2,
+    "hyp_spk": 2
+   },
+   "es_conv03_mls_3spk": {
+    "der_c025": 29.2,
+    "ref_spk": 3,
+    "hyp_spk": 2
+   },
+   "es_conv04_vp_3spk": {
+    "der_c025": 3.1,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv05_mls_4spk": {
+    "der_c025": 12.6,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   },
+   "es_conv06_vp_4spk": {
+    "der_c025": 11.5,
+    "ref_spk": 4,
+    "hyp_spk": 5
+   },
+   "es_conv07_mls_5spk": {
+    "der_c025": 4.8,
+    "ref_spk": 5,
+    "hyp_spk": 5
+   },
+   "es_conv08_vp_5spk": {
+    "der_c025": 22.4,
+    "ref_spk": 5,
+    "hyp_spk": 4
+   },
+   "es_conv09_mls_6spk": {
+    "der_c025": 8.0,
+    "ref_spk": 6,
+    "hyp_spk": 6
+   },
+   "es_conv10_vp_6spk": {
+    "der_c025": 3.6,
+    "ref_spk": 6,
+    "hyp_spk": 6
+   },
+   "es_conv11_mls_3spk": {
+    "der_c025": 3.9,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv12_vp_4spk": {
+    "der_c025": 7.1,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   }
+  }
+ },
+ "voxconverse_heldout__nouem": {
+  "files": 11,
+  "der_c025": 8.0,
+  "der_c0": 12.64,
+  "miss": 1.35,
+  "fa": 1.71,
+  "conf": 4.94,
+  "ref_s": 4493,
+  "exact_count": 8,
+  "within1": 10,
+  "mean_count_err": -0.45,
+  "one_speaker_baseline_der_c025": 52.9,
+  "per_file": {
+   "auzru": {
+    "der_c025": 2.6,
+    "ref_spk": 7,
+    "hyp_spk": 7
+   },
+   "bjruf": {
+    "der_c025": 11.9,
+    "ref_spk": 2,
+    "hyp_spk": 2
+   },
+   "bvqnu": {
+    "der_c025": 7.5,
+    "ref_spk": 6,
+    "hyp_spk": 5
+   },
+   "dxbbt": {
+    "der_c025": 2.9,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "eddje": {
+    "der_c025": 8.8,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   },
+   "ezxso": {
+    "der_c025": 24.5,
+    "ref_spk": 7,
+    "hyp_spk": 4
+   },
+   "gcfwp": {
+    "der_c025": 15.0,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "gmmwm": {
+    "der_c025": 2.9,
+    "ref_spk": 2,
+    "hyp_spk": 2
+   },
+   "rpkso": {
+    "der_c025": 2.3,
+    "ref_spk": 5,
+    "hyp_spk": 5
+   },
+   "vtzqw": {
+    "der_c025": 15.7,
+    "ref_spk": 6,
+    "hyp_spk": 5
+   },
+   "xvxwv": {
+    "der_c025": 3.4,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   }
+  }
+ },
+ "aug_calls__uem": {
+  "files": 24,
+  "der_c025": 17.15,
+  "der_c0": 23.18,
+  "miss": 5.32,
+  "fa": 4.82,
+  "conf": 7.01,
+  "ref_s": 15783,
+  "exact_count": 18,
+  "within1": 23,
+  "mean_count_err": -0.12,
+  "one_speaker_baseline_der_c025": 54.6,
+  "per_file": {
+   "ES2011a_others__A_wideband_voip": {
+    "der_c025": 20.7,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "ES2011a_others__B_pstn_narrowband": {
+    "der_c025": 22.7,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "ES2011a_others__C_mobile_poor": {
+    "der_c025": 61.0,
+    "ref_spk": 3,
+    "hyp_spk": 1
+   },
+   "IS1008c_others__A_wideband_voip": {
+    "der_c025": 28.9,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "IS1008c_others__B_pstn_narrowband": {
+    "der_c025": 19.5,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "IS1008c_others__C_mobile_poor": {
+    "der_c025": 11.2,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "TS3004a_others__A_wideband_voip": {
+    "der_c025": 37.5,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "TS3004a_others__B_pstn_narrowband": {
+    "der_c025": 34.5,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "TS3004a_others__C_mobile_poor": {
+    "der_c025": 29.5,
+    "ref_spk": 3,
+    "hyp_spk": 2
+   },
+   "dxbbt__A_wideband_voip": {
+    "der_c025": 2.0,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "dxbbt__B_pstn_narrowband": {
+    "der_c025": 4.1,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "dxbbt__C_mobile_poor": {
+    "der_c025": 3.7,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv04_vp_3spk__A_wideband_voip": {
+    "der_c025": 3.7,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv04_vp_3spk__B_pstn_narrowband": {
+    "der_c025": 4.0,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv04_vp_3spk__C_mobile_poor": {
+    "der_c025": 9.5,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv06_vp_4spk__A_wideband_voip": {
+    "der_c025": 11.6,
+    "ref_spk": 4,
+    "hyp_spk": 5
+   },
+   "es_conv06_vp_4spk__B_pstn_narrowband": {
+    "der_c025": 38.2,
+    "ref_spk": 4,
+    "hyp_spk": 3
+   },
+   "es_conv06_vp_4spk__C_mobile_poor": {
+    "der_c025": 17.3,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   },
+   "es_conv07_mls_5spk__A_wideband_voip": {
+    "der_c025": 6.0,
+    "ref_spk": 5,
+    "hyp_spk": 5
+   },
+   "es_conv07_mls_5spk__B_pstn_narrowband": {
+    "der_c025": 8.6,
+    "ref_spk": 5,
+    "hyp_spk": 5
+   },
+   "es_conv07_mls_5spk__C_mobile_poor": {
+    "der_c025": 11.9,
+    "ref_spk": 5,
+    "hyp_spk": 4
+   },
+   "xvxwv__A_wideband_voip": {
+    "der_c025": 3.5,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   },
+   "xvxwv__B_pstn_narrowband": {
+    "der_c025": 3.5,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   },
+   "xvxwv__C_mobile_poor": {
+    "der_c025": 4.4,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   }
+  }
+ },
+ "aug_calls__uem_nodrop": {
+  "files": 24,
+  "der_c025": 16.8,
+  "der_c0": 22.76,
+  "miss": 4.84,
+  "fa": 4.99,
+  "conf": 6.98,
+  "ref_s": 14716,
+  "exact_count": 18,
+  "within1": 23,
+  "mean_count_err": -0.12,
+  "one_speaker_baseline_der_c025": 54.59,
+  "per_file": {
+   "ES2011a_others__A_wideband_voip": {
+    "der_c025": 20.6,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "ES2011a_others__B_pstn_narrowband": {
+    "der_c025": 22.4,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "ES2011a_others__C_mobile_poor": {
+    "der_c025": 60.9,
+    "ref_spk": 3,
+    "hyp_spk": 1
+   },
+   "IS1008c_others__A_wideband_voip": {
+    "der_c025": 28.8,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "IS1008c_others__B_pstn_narrowband": {
+    "der_c025": 19.4,
+    "ref_spk": 3,
+    "hyp_spk": 4
+   },
+   "IS1008c_others__C_mobile_poor": {
+    "der_c025": 10.9,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "TS3004a_others__A_wideband_voip": {
+    "der_c025": 37.6,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "TS3004a_others__B_pstn_narrowband": {
+    "der_c025": 34.4,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "TS3004a_others__C_mobile_poor": {
+    "der_c025": 28.6,
+    "ref_spk": 3,
+    "hyp_spk": 2
+   },
+   "dxbbt__A_wideband_voip": {
+    "der_c025": 1.9,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "dxbbt__B_pstn_narrowband": {
+    "der_c025": 3.6,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "dxbbt__C_mobile_poor": {
+    "der_c025": 3.2,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv04_vp_3spk__A_wideband_voip": {
+    "der_c025": 3.6,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv04_vp_3spk__B_pstn_narrowband": {
+    "der_c025": 3.7,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv04_vp_3spk__C_mobile_poor": {
+    "der_c025": 8.2,
+    "ref_spk": 3,
+    "hyp_spk": 3
+   },
+   "es_conv06_vp_4spk__A_wideband_voip": {
+    "der_c025": 11.3,
+    "ref_spk": 4,
+    "hyp_spk": 5
+   },
+   "es_conv06_vp_4spk__B_pstn_narrowband": {
+    "der_c025": 38.4,
+    "ref_spk": 4,
+    "hyp_spk": 3
+   },
+   "es_conv06_vp_4spk__C_mobile_poor": {
+    "der_c025": 16.1,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   },
+   "es_conv07_mls_5spk__A_wideband_voip": {
+    "der_c025": 6.1,
+    "ref_spk": 5,
+    "hyp_spk": 5
+   },
+   "es_conv07_mls_5spk__B_pstn_narrowband": {
+    "der_c025": 8.2,
+    "ref_spk": 5,
+    "hyp_spk": 5
+   },
+   "es_conv07_mls_5spk__C_mobile_poor": {
+    "der_c025": 11.4,
+    "ref_spk": 5,
+    "hyp_spk": 4
+   },
+   "xvxwv__A_wideband_voip": {
+    "der_c025": 3.3,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   },
+   "xvxwv__B_pstn_narrowband": {
+    "der_c025": 3.6,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   },
+   "xvxwv__C_mobile_poor": {
+    "der_c025": 4.1,
+    "ref_spk": 4,
+    "hyp_spk": 4
+   }
+  }
+ }
+}

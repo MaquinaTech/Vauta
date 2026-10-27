@@ -1,0 +1,117 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build and test
+    # Xcode 27 / Swift 6.4 on macOS 27, Apple silicon (public preview image).
+    # If that label is unavailable, use `runs-on: macos-26` and select Xcode 27 first:
+    #   - run: sudo xcode-select -s /Applications/Xcode_27.0.app
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Toolchain
+        run: |
+          sw_vers
+          xcode-select -p
+          swift --version
+
+      - name: Build (release)
+        run: swift build -c release --arch arm64
+
+      - name: Test (with code coverage)
+        run: swift test --enable-code-coverage
+
+      # Coverage of the shipped sources, computed with the toolchain's own llvm-cov: no third-party service,
+      # nothing uploaded anywhere but the workflow run itself. The package has two test bundles (VautaCoreTests and
+      # VautaAppTests); the report reads every one of them so the app target is counted too.
+      - name: Coverage summary
+        run: |
+          set -euo pipefail
+          BIN_DIR="$(swift build --show-bin-path)"
+          PROFDATA="$(dirname "$(swift test --show-codecov-path)")/default.profdata"
+          BINS=()
+          while IFS= read -r bin; do BINS+=("$bin"); done < <(find "$BIN_DIR" -maxdepth 4 -path '*.xctest/Contents/MacOS/*' -type f | sort)
+          [[ -f "$PROFDATA" && ${#BINS[@]} -ge 2 ]] || { echo "::error::coverage data not found"; exit 1; }
+          OBJECTS=()
+          for bin in "${BINS[@]:1}"; do OBJECTS+=(-object "$bin"); done
+          mkdir -p coverage
+          IGNORE='(\.build|/Tests/|/tools/|/eval/)'
+          CORE_IGNORE='(\.build|/Tests/|/tools/|/eval/|/Sources/Vauta/)'
+          xcrun llvm-cov report "${BINS[0]}" "${OBJECTS[@]}" -instr-profile="$PROFDATA" -ignore-filename-regex="$IGNORE" -use-color=false \
+            | tee coverage/summary.txt
+          xcrun llvm-cov export "${BINS[0]}" "${OBJECTS[@]}" -instr-profile="$PROFDATA" -ignore-filename-regex="$IGNORE" -summary-only \
+            > coverage/summary.json
+          xcrun llvm-cov export "${BINS[0]}" "${OBJECTS[@]}" -instr-profile="$PROFDATA" -ignore-filename-regex="$CORE_IGNORE" -summary-only \
+            > coverage/summary-core.json
+          FMT="import json,sys;t=json.load(open(sys.argv[1]))['data'][0]['totals'];print('lines %.1f%% (%d of %d), functions %.1f%%, regions %.1f%%' % (t['lines']['percent'], t['lines']['covered'], t['lines']['count'], t['functions']['percent'], t['regions']['percent']))"
+          {
+            echo "### Test coverage"
+            echo
+            echo "Whole package (VautaCore and the app target): $(python3 -c "$FMT" coverage/summary.json)"
+            echo
+            echo "VautaCore library only: $(python3 -c "$FMT" coverage/summary-core.json)"
+            echo
+            echo "Shipped sources only (tests, tools and the evaluation harness are excluded), read from every test bundle. Produced by \`llvm-cov\` on this run; the per-file table is in the \`coverage\` artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the coverage report
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Lint property lists
+        run: |
+          find Resources Sources \( -name '*.plist' -o -name '*.entitlements' -o -name '*.strings' -o -name '*.stringsdict' \) -print0 \
+            | xargs -0 plutil -lint
+
+      - name: Check translations against English
+        run: scripts/check-strings.sh
+
+      - name: Check that the English strings are in sync with the code
+        run: |
+          scripts/extract-strings.sh
+          git diff --exit-code -- Resources/en.lproj/Localizable.strings \
+            || { echo "::error::Resources/en.lproj/Localizable.strings is out of sync: run scripts/extract-strings.sh and commit"; exit 1; }
+
+      - name: Check license headers
+        run: scripts/check-headers.sh
+
+      - name: Check the dependencies (only the pinned mlx-swift fork and swift-numerics)
+        run: scripts/check-dependencies.sh
+
+      - name: Check shell scripts
+        run: |
+          for f in scripts/*.sh; do bash -n "$f"; done
+          if command -v shellcheck >/dev/null; then shellcheck scripts/*.sh; else echo "shellcheck not installed; syntax check only"; fi
+
+      - name: Assemble the app bundle (ad-hoc signature)
+        env:
+          VAUTA_ALLOW_ADHOC: "1"
+        run: |
+          scripts/build-app.sh
+          test -f build/Vauta.app/Contents/Resources/AppIcon.icns
+          plutil -lint build/Vauta.app/Contents/Info.plist
+          codesign --verify --strict build/Vauta.app

@@ -1,0 +1,79 @@
+{
+  "ami_setup": {
+    "repo": "https://github.com/pyannote/AMI-diarization-setup",
+    "commit": "67c2d539286e89f68952d5dcf83912bd9f01dfae",
+    "use": "only_words RTTMs, UEMs and split lists (reference labels)"
+  },
+  "voxconverse_annotations": {
+    "repo": "https://github.com/joonson/voxconverse",
+    "commit": "24bf60be297701cd7e4ef18550c6d390c1b87365",
+    "use": "test RTTMs with the corrected labels"
+  },
+  "ami_manual_annotations": {
+    "url": "https://groups.inf.ed.ac.uk/ami/AMICorpusAnnotations/ami_public_manual_1.6.2.zip",
+    "sha256": "b56e5babb2496b8795deeeda7e71178d7fbc9963f94276cf2a3f4b56ebbc9f9d",
+    "use": "meetings.xml (speaker to headset channel) and the manual word transcripts (words/*.words.xml)"
+  },
+  "ami_audio_base": "https://groups.inf.ed.ac.uk/ami/AMICorpusMirror/amicorpus",
+  "voxconverse_audio_zip": "https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip",
+  "ami_meetings": [
+    "ES2004a",
+    "ES2004c",
+    "IS1009a",
+    "IS1009c",
+    "TS3003a",
+    "TS3003c",
+    "EN2002a",
+    "EN2002b",
+    "IS1009d",
+    "TS3003b"
+  ],
+  "voxconverse_files": [
+    "crorm",
+    "lpola",
+    "sexgc",
+    "yzvon",
+    "fijfi",
+    "poucc",
+    "uhfrw",
+    "ikhje"
+  ],
+  "wer_meetings": [
+    "ES2004a",
+    "ES2004c",
+    "IS1009a",
+    "IS1009c",
+    "TS3003a",
+    "TS3003c",
+    "EN2002a",
+    "EN2002b",
+    "IS1009d",
+    "TS3003b"
+  ],
+  "wer_seconds": 600,
+  "diarization_halves": {
+    "rule": "all 18 file ids sorted by plain name (ASCII order); even positions (0, 2, 4, ...) are half_a, odd positions are half_b",
+    "half_a": [
+      "EN2002a_others",
+      "ES2004a_others",
+      "IS1009a_others",
+      "IS1009d_others",
+      "TS3003b_others",
+      "crorm",
+      "ikhje",
+      "poucc",
+      "uhfrw"
+    ],
+    "half_b": [
+      "EN2002b_others",
+      "ES2004c_others",
+      "IS1009c_others",
+      "TS3003a_others",
+      "TS3003c_others",
+      "fijfi",
+      "lpola",
+      "sexgc",
+      "yzvon"
+    ]
+  }
+}

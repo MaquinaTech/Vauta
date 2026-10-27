@@ -1,0 +1,96 @@
+name: Bug report
+description: Something in Vauta does not work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a problem. Please **do not paste meeting transcripts, minutes or other private content**;
+        describe what happened instead. Security problems go through the private vulnerability report, not here.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Start a Google Meet call in Safari
+        2. Press ⌃⌥R
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: vauta-version
+    attributes:
+      label: Vauta version
+      description: Settings > About, or run `~/Applications/Vauta.app/Contents/MacOS/Vauta --version` in Terminal.
+      placeholder: "1.0.0 (123)"
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version
+      description: Apple menu > About This Mac.
+      placeholder: "macOS 27.0.1"
+    validations:
+      required: true
+  - type: input
+    id: mac-model
+    attributes:
+      label: Mac model
+      placeholder: "MacBook Air M3, 16 GB"
+    validations:
+      required: true
+  - type: input
+    id: meeting-app
+    attributes:
+      label: Meeting app or browser
+      description: The app or browser (with its version) that held the call, if relevant.
+      placeholder: "Zoom 6.4, Chrome 141 (Google Meet), Teams, FaceTime…"
+  - type: input
+    id: ui-language
+    attributes:
+      label: Vauta interface language
+      placeholder: "English"
+  - type: input
+    id: transcription-language
+    attributes:
+      label: Transcription language
+      placeholder: "Spanish (Spain)"
+  - type: dropdown
+    id: model-server
+    attributes:
+      label: Model provider
+      description: What writes the minutes and answers questions.
+      options:
+        - On this Mac (Apple)
+        - LM Studio
+        - Ollama
+        - llama.cpp
+        - MLX / mlx-lm
+        - vLLM
+        - Jan
+        - LocalAI
+        - Other OpenAI-compatible server
+        - None / not relevant
+  - type: input
+    id: model
+    attributes:
+      label: Model name
+      description: If you use a model server.
+      placeholder: "qwen3-30b-a3b"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Diagnostics
+      description: |
+        Settings > Status > Copy Diagnostics (no meeting content), or the output of
+        `~/Applications/Vauta.app/Contents/MacOS/Vauta doctor`. For capture problems, add the output of `Vauta status` taken during the call.
+        Relevant lines from Console.app (process "Vauta") also help. Remove anything private first.
+      render: text

@@ -1,0 +1,39 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+# Swift package dependencies (the pinned MLX fork) are bumped by hand, following docs/SEARCH_MODEL.md; Dependabot covers the pinned
+# GitHub Actions and the Python requirement files of the evaluation harness and the developer tools.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns: ["*"]
+  - package-ecosystem: pip
+    directory: /eval
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: eval
+  - package-ecosystem: pip
+    directory: /tools/search-model
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: tools
+  - package-ecosystem: pip
+    directory: /tools/language-model
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: tools
+  - package-ecosystem: pip
+    directory: /tools/convert-diarization-models
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: tools
