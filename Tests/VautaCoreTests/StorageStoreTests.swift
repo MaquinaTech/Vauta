@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
-import CryptoKit
 import Foundation
 import SQLite3
 import Testing
@@ -28,21 +27,6 @@ struct StorageStoreTests {
         let excluded = try fx.dir.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup
         #expect(excluded == true)
         #expect(try FileManager.default.contentsOfDirectory(atPath: fx.dir.path).allSatisfy { !$0.hasPrefix(MeetingStore.tempPrefix) })
-    }
-
-    @Test func aNewStoreNeverAdoptsAKeyThatWasAlreadyThere() async throws {
-        let fx = StoreFixture()
-        // Planted by another process before Vauta created its store.
-        let planted = SymmetricKey(size: .bits256)
-        try fx.keys.replace(with: planted)
-        var store: MeetingStore? = try fx.open()
-        let id = try await store!.startMeeting(at: .now)
-        try await store!.endMeeting(id, at: .now)
-        store = nil
-        let key = try #require(fx.keys.key)
-        #expect(key != planted)
-        #expect(throws: (any Error).self) { try SnapshotEnvelope.open(Data(contentsOf: fx.snapshotURL), key: planted) }
-        #expect((try? fx.open()) != nil, "the store opens with the key it created")
     }
 
     @Test func secondInstanceIsLockedOut() async throws {

@@ -111,6 +111,10 @@ setting is on, a voice summary per speaker with each meeting (`speaker_voices`).
 - **Malware or another process running as your user while Vauta is open.** The decrypted database is in Vauta's
   memory, and the login keychain is unlocked for your whole session, including while the screen is locked. The
   Meetings lock (Touch ID or password) protects the interface, not memory.
+- **A key item planted before Vauta creates its store.** When no store exists yet, Vauta uses a `database-key-v1` item
+  that is already in the login keychain (so a store restored next to it still opens). A process running as you that
+  created that item beforehand, with an access list open to it, could read the key. Such a process is already in the
+  threat above; "Erase Everything" replaces the item with one only Vauta can read.
 - **Other accounts on this Mac, with a server on this Mac.** In **This Mac** mode Vauta talks plain HTTP to
   `127.0.0.1`, which is shared by every account on the Mac. While your server is stopped, a process of another
   account can listen on its port and receive Vauta's requests (meeting text and the server key). On a Mac shared
@@ -140,9 +144,9 @@ setting is on, a voice summary per speaker with each meeting (`speaker_voices`).
 - Created only when no store exists. If the store exists and its key is missing, Vauta refuses to create a new key
   (that would make the store unreadable) and reports the problem. A locked keychain or a cancelled prompt never leads
   to a new key.
-- A new store never adopts an item that is already there (left over, or planted by another process of your user with
-  an access list that would let it read the key): Vauta deletes it and creates its own, bound to its signature. If the
-  item cannot be deleted, no store is created. "Erase Everything" creates its new key the same way.
+- A new store uses an item that is already there, so a store file put back next to it still opens (see the limit
+  below). "Erase Everything" never does: it deletes the item, checks it is gone and adds a new one, and an item that
+  appears in between makes the add fail instead of being adopted.
 - `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` is set, but the classic login keychain ignores it (it needs the Data
   Protection keychain, which requires a provisioning profile). In practice the item is readable while the login
   keychain is unlocked.
@@ -181,6 +185,15 @@ key    = HKDF-SHA256(database key, info: "acta-journal-v1", 32 bytes)
 - The sequence number in the AAD prevents reordering, repeating or removing records in the middle. A truncated last
   record (power cut mid-write) does not authenticate and replay stops there.
 
+### Documents index (`vauta.docs.enc`)
+
+The index of the files you add as document sources uses the snapshot's envelope with its own key,
+`HKDF-SHA256(database key, info: "vauta.documents.v1", 32 bytes)`. It is derived data: never in the journal or in backups,
+rebuilt from your files when it does not open, and deleted by Erase Everything and by a restore. While a file is being
+read, a small plaintext marker, `vauta.docs.extracting`, holds the source number, the file's size and date, and the first
+8 bytes of an HMAC-SHA256 of its relative path (key derived from the documents key with `vauta.documents.marker.v1`),
+never its name, so a file that crashes the reader is skipped on the next launch.
+
 ### Durability
 
 - Snapshots are written to a new `0600` temporary file, flushed with `F_FULLFSYNC`, renamed over the old file, and the
@@ -212,7 +225,7 @@ Format of a backup file (`.vautabackup`; backups from an earlier version are sti
 - The 28-byte header is the GCM additional authenticated data, so changing the version, the iteration count or the salt makes decryption fail.
 - Key: PBKDF2-HMAC-SHA256 (CommonCrypto `CCKeyDerivationPBKDF`) over the NFC-normalized UTF-8 password, 1,000,000 iterations
   (readers accept 600,000 to 2,000,000), 16 random bytes of salt, 32-byte output. Apple's frameworks have no
-  memory-hard KDF (scrypt, Argon2) and Vauta takes no third-party code, so a long password is the real protection;
+  memory-hard KDF (scrypt, Argon2) and Vauta takes no third-party cryptography code, so a long password is the real protection;
   the app requires at least 12 characters.
 - Plaintext inside the sealed box: manifest length (UInt32) | manifest (JSON: format, app version, schema version,
   creation time, meeting count, settings length) | the settings (format 2 only) | the database image in the same

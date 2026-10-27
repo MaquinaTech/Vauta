@@ -8,11 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Security
 
-- A new store never adopts a database key that is already in the Keychain: Vauta deletes that item and creates its own, so a key planted by another process of your user (with an access list that lets it read the key) is never used. "Erase Everything" creates its new key the same way.
+- "Erase Everything" deletes the database key, checks it is gone and adds a new one; a key item that appears in between is never adopted.
+- Restoring a backup compares its schema with Vauta's ignoring SQL comments: an apostrophe in a comment no longer hides a changed string literal in the statement after it (`item_links`).
 - The model server's key and configuration are saved as a new Keychain item each time instead of updating an existing one, so they never take on an access list another app set.
 - A document's stored path is opened only if it is one the folder scan lists (no `..`, nothing hidden), so it cannot lead outside the folder you chose.
 - The release workflow runs the tests and the build with read-only access; only a separate job that runs no repository code can create the draft release.
-- SECURITY.md describes the limit of a model server on this Mac when other accounts use the same Mac, and the signed `vauta-0.9.0` tags and rulesets that keep the MLX fork commits fetchable. The network entitlement comment names the model download hosts.
+- SECURITY.md describes the documents index, a key item planted before Vauta creates its store, the limit of a model server on this Mac when other accounts use the same Mac, and the signed `vauta-0.9.0` tags and rulesets that keep the MLX fork commits fetchable. The network entitlement comment names the model download hosts.
 
 ## [0.9.0] - 2026-10-27
 

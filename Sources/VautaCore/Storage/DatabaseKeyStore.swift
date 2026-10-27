@@ -30,10 +30,8 @@ extension DatabaseKeyStore {
         return try createKey()
     }
 
-    /// A new random key for a store that has no file yet, created after deleting whatever item is there. With no
-    /// store on disk an existing item encrypts nothing of Vauta's, and another process of this user may have planted
-    /// it with an access list that lets it read the key: the new item gets Vauta's own access list instead. If the
-    /// old item cannot be deleted, this throws and no store is created.
+    /// Deletes the key item and creates a new random one with Vauta's own access list, for Erase Everything. An item
+    /// that appears between the two steps is never adopted: the add fails on the duplicate and this throws.
     func newKey() throws -> SymmetricKey {
         try remove()
         return try createKey()
