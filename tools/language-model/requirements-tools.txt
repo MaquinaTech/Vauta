@@ -2,6 +2,6 @@
 # The mlx GPU quantiser is the byte reference for Vauta's CPU quantiser: bump mlx only with a new run of make-manifest.py.
 jinja2==3.1.6
 mlx==0.32.3
-mlx-lm==0.32.0
+mlx-lm==0.32.2
 numpy==2.5.4
 tokenizers==0.23.3
