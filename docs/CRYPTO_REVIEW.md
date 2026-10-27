@@ -5,15 +5,17 @@ nobody outside the project has reviewed it, and the author of the code wrote it.
 primitives are used, where, with what parameters, what was checked, and what is weak or unprotected. The formats are
 specified in [SECURITY.md](../SECURITY.md#encryption); this page judges them.
 
-Reviewed at commit `a670db8`, for every code file in the Code column of the inventory below (`Storage/`, `Backup/`,
-`LLM/ServerTrust.swift`, `LLM/LLMClient.swift`, `LLM/MeetingStore+Search.swift`, `Diarization/DiarizationModels.swift`).
+Reviewed at commit `919bb04`, for every code file in the Code column of the inventory below (`Storage/`, `Backup/`,
+`LLM/ServerTrust.swift`, `LLM/LLMClient.swift`, `LLM/MeetingStore+Search.swift`, `Diarization/DiarizationModels.swift`,
+`Documents/DocumentIndex.swift`, `Documents/DocumentIndexer.swift`, `Documents/DocumentIndexer+IO.swift`, `Documents/MeetingStore+Documents.swift`). The previous review was at `a670db8`, a commit of the history before the public repository; the changes
+from it to `919bb04` were reviewed as a whole.
 The release workflow `.github/workflows/release.yml` is outside this review: since the source-only decision it holds no
 secrets, signs nothing and publishes no binaries. The review is
 redone for each later change to any of those paths, and before each release the maintainer checks that none changed since.
 The command must print nothing (otherwise redo the review and change the commit above):
 
 ```
-git diff a670db8..vX.Y.Z -- Sources/VautaCore/Storage Sources/VautaCore/Backup Sources/VautaCore/LLM/ServerTrust.swift Sources/VautaCore/LLM/LLMClient.swift Sources/VautaCore/LLM/MeetingStore+Search.swift Sources/VautaCore/Diarization/DiarizationModels.swift
+git diff 919bb04..vX.Y.Z -- Sources/VautaCore/Storage Sources/VautaCore/Backup Sources/VautaCore/LLM/ServerTrust.swift Sources/VautaCore/LLM/LLMClient.swift Sources/VautaCore/LLM/MeetingStore+Search.swift Sources/VautaCore/Diarization/DiarizationModels.swift Sources/VautaCore/Documents/DocumentIndex.swift Sources/VautaCore/Documents/DocumentIndexer.swift Sources/VautaCore/Documents/DocumentIndexer+IO.swift Sources/VautaCore/Documents/MeetingStore+Documents.swift
 ```
 
 Findings are reported privately, as described in
@@ -21,13 +23,17 @@ Findings are reported privately, as described in
 
 ## Scope
 
-In scope: the encrypted store (snapshot and journal), the database key and the Keychain, encrypted backups, Erase
-Everything, the TLS rules for model servers, the integrity check of the bundled speaker models, and the release signing.
-Out of scope: macOS, CryptoKit and CommonCrypto themselves (Vauta trusts them), the model servers, and side channels.
+In scope: the encrypted store (snapshot and journal), the documents index and its crash marker, the database key and the
+Keychain items, encrypted backups, Erase Everything, the TLS rules for model servers and the integrity check of the bundled
+speaker models. Out of scope: macOS, CryptoKit and CommonCrypto themselves (Vauta trusts them), the model servers, and side
+channels. Also outside this review, although they use SHA-256: the download and import checks of the integrated language
+model and the search model (`LanguageModel/`, `SearchModel/`), and the text fingerprints kept inside the encrypted images
+(`Actions/ActionLedger.swift`, `Links/LinkText.swift`, `Brief/BriefModel.swift`, `Documents/PassageChunker.swift`,
+`Documents/DocumentScanner.swift`).
 
 ## Rules the code follows
 
-- Only Apple frameworks: CryptoKit (`AES.GCM`, `HKDF`, `SHA256`, `SymmetricKey`), CommonCrypto (`CCKeyDerivationPBKDF`),
+- Only Apple frameworks: CryptoKit (`AES.GCM`, `HKDF`, `HMAC`, `SHA256`, `SymmetricKey`), CommonCrypto (`CCKeyDerivationPBKDF`),
   Security (Keychain, `SecTrust`, `SecRandomCopyBytes`). No third-party cryptography and no home-made primitives.
 - Authenticated encryption everywhere data is encrypted (AES-256-GCM). There is no unauthenticated mode.
 - Random values come from `SymmetricKey(size:)` and `SecRandomCopyBytes` (system CSPRNG). GCM nonces are random 96-bit
@@ -37,12 +43,15 @@ Out of scope: macOS, CryptoKit and CommonCrypto themselves (Vauta trusts them), 
 
 | Use | Primitive and parameters | Code |
 |---|---|---|
-| Store key | Random 256-bit key (`SymmetricKey(size: .bits256)`); generic-password item in the login keychain, service = bundle ID, account `database-key-v1`, not synchronizable | `Storage/DatabaseKeyStore.swift`, `Storage/Keychain.swift` |
+| Store key | Random 256-bit key (`SymmetricKey(size: .bits256)`); generic-password item in the login keychain, service = bundle ID, account `database-key-v1`, not synchronizable. Created only when no store file exists; an item already under that account is used then (limit 8) | `Storage/DatabaseKeyStore.swift`, `Storage/Keychain.swift`, `Storage/MeetingStore.swift` |
 | Snapshot `vauta.db.enc` | AES-256-GCM, random nonce, AAD = `"ACTA"` and version byte | `Storage/SnapshotEnvelope.swift` |
 | Journal `vauta.journal.enc` | AES-256-GCM per record, key = HKDF-SHA256(store key, info `acta-journal-v1`, 32 bytes), AAD = file header and a sequence number | `Storage/Journal.swift` |
+| Documents index `vauta.docs.enc` | Same envelope as the snapshot (AES-256-GCM, random nonce, AAD = `"ACTA"` and version byte); key = HKDF-SHA256(store key, info `vauta.documents.v1`, 32 bytes). Derived data: an image that does not open is deleted and rebuilt | `Documents/DocumentIndex.swift`, `Documents/MeetingStore+Documents.swift` |
+| Documents crash marker `vauta.docs.extracting` | Plaintext JSON, present only while a file is read: source number, size, modification date and the first 8 bytes of HMAC-SHA256(relative path), key = HKDF-SHA256(documents key, info `vauta.documents.marker.v1`, 32 bytes) | `Documents/DocumentIndexer.swift`, `Documents/DocumentIndexer+IO.swift`, `Storage/StoreFiles.swift` |
+| Model server configuration and key | Generic-password items with the same attributes as the store key; every write deletes the item and adds a new one (`Keychain.recreate`) | `Storage/Keychain.swift` |
 | Backup `.vautabackup` | PBKDF2-HMAC-SHA256, 1,000,000 iterations (accepts 600,000 to 2,000,000), 16-byte random salt, 32-byte key; AES-256-GCM, AAD = the 28-byte header | `Backup/BackupFormat.swift`, `Backup/BackupPassword.swift` |
-| Backup restore | New random store key, store re-sealed, key replaced in place | `Backup/MeetingStore+Backup.swift` |
-| Erase Meetings and Context | Key deleted and verified gone, new key created (crypto-shred) | `Storage/MeetingStore+Erase.swift` |
+| Backup restore | New random store key, store re-sealed, key replaced in place; the documents index and its marker are deleted | `Backup/MeetingStore+Backup.swift` |
+| Erase Meetings and Context | Key deleted and verified gone, new key added (crypto-shred); the documents index and its marker are deleted | `Storage/MeetingStore+Erase.swift`, `Storage/DatabaseKeyStore.swift` |
 | Model server TLS | TLS 1.3 only, private CA as sole anchor when set, optional SHA-256 SPKI pins | `LLM/ServerTrust.swift`, `LLM/LLMClient.swift` |
 | Bundled speaker models | SHA-256 tree hash over every file, compared with a constant in the source before Core ML loads them | `Diarization/DiarizationModels.swift` |
 | Search-cache fingerprint | First 8 bytes of SHA-256 of a text, as a change detector inside the encrypted store (not a security control) | `LLM/MeetingStore+Search.swift` |
@@ -52,12 +61,18 @@ Out of scope: macOS, CryptoKit and CommonCrypto themselves (Vauta trusts them), 
 
 1. **Key handling.** The key is 32 bytes, read as such (a different length is an error). A missing key with an existing
    store is an error and never creates a new key, so a locked keychain cannot silently orphan the store. `add` fails on
-   a duplicate, `replace` updates in place (never delete then add), so a failed write keeps the old key.
+   a duplicate. Restore's `replace` updates the key in place (never delete then add), so a failed restore keeps the old
+   key. Erase deletes the item under both service names, reads back to confirm, and adds a new one (`newKey`); an item
+   that appears in between makes the add fail, so it is never adopted. The model server items are written the opposite
+   way: each write deletes the item and adds a new one, so a value is never written into an item another process
+   created; if the add fails, the previous value is added back when it could be read.
 2. **Header binding.** The snapshot, journal and backup headers are AAD, so a changed version, KDF id, iteration count or
    salt fails authentication. The legacy `ACTA`/`ACTJ`/`ACTABK` magics and the `acta-journal-v1` label are fixed forever
-   (they are format identifiers, not branding).
+   (they are format identifiers, not branding). The documents index uses the snapshot envelope and header unchanged.
 3. **Key separation.** The journal key is derived by HKDF with its own label; the snapshot and the journal never use the
-   same key. Backups use an unrelated password-derived key.
+   same key. Backups use an unrelated password-derived key. The documents index key is derived from the store key by HKDF
+   with its own label (`vauta.documents.v1`), and the crash-marker HMAC key from the documents key with another
+   (`vauta.documents.marker.v1`), so no key is used both to seal and to MAC.
 4. **Journal ordering.** The sequence number in the AAD stops reordering, repeating and removal of records in the middle;
    a torn last record fails authentication and replay stops there. The generation (16 random bytes) ties a journal to
    its snapshot.
@@ -71,9 +86,12 @@ Out of scope: macOS, CryptoKit and CommonCrypto themselves (Vauta trusts them), 
 7. **Plaintext lifetime.** Plaintext buffers that Vauta owns (`SecretBuffer`, wiped `Data`) are zeroed with `memset_s`
    when released. SQLite uses `secure_delete = ON` and `temp_store = MEMORY`; files are created `0600`; the snapshot is replaced
    atomically and flushed with `F_FULLFSYNC`; journal records are appended and flushed with `F_BARRIERFSYNC` (a torn last record
-   fails authentication).
+   fails authentication). The documents index is written with the same atomic, `0600`, `F_FULLFSYNC` path as the snapshot,
+   and its full-text index uses FTS5 `secure-delete`. The only plaintext file the store folder holds besides the lock and
+   erase markers is `vauta.docs.extracting`, which names a file only by a keyed hash of its path.
 8. **Erase.** The Keychain item is deleted, read back to confirm, and replaced; an interrupted erase is completed on the
-   next launch by a marker file.
+   next launch by a marker file. Erase and restore also delete `vauta.docs.enc` and `vauta.docs.extracting`; the
+   in-memory index is emptied and takes the new derived key.
 9. **Network.** TLS minimum is set to 1.3, trust is evaluated with the private CA as the only anchor and no network fetch,
    host names are checked, pins compare the leaf SPKI hash. Tests cover these rules; TLS 1.3 and the absence of proxies and
    redirects are verified by reading the code and by Network Activity, not by a unit test (see [CLAIMS.md](CLAIMS.md)).
@@ -91,7 +109,7 @@ These are stated plainly because the README and SECURITY.md promise only what th
    counter, and dropping records from the end of the journal is not detected. Erase and restore change the key, so only
    copies from after the last re-key can be replayed.
 3. **Backups depend on the password.** PBKDF2-HMAC-SHA256 at 1,000,000 iterations is not memory-hard. Apple's frameworks
-   offer no scrypt or Argon2, and Vauta takes no third-party code. A weak password falls to offline guessing on GPUs; the
+   offer no scrypt or Argon2, and Vauta takes no third-party cryptography code. A weak password falls to offline guessing on GPUs; the
    12-character minimum is a length check, not a strength estimate. Backups also carry no freshness, by design.
 4. **No forward secrecy for the store.** One long-lived key protects everything since the last re-key; a leaked key opens
    every copy sealed with it.
@@ -100,12 +118,20 @@ These are stated plainly because the README and SECURITY.md promise only what th
 6. **Keychain backups.** An old Time Machine copy of the login keychain can contain a key that Erase Meetings and Context has since
    replaced (see SECURITY.md).
 7. **Model server key and configuration.** The server address, trust settings and bearer token are stored as plain
-   Keychain items, protected by the Keychain only. They are not wrapped with the store key.
-8. **Model integrity is a pin, not a signature.** The speaker-model hash guards against damage or a swapped file. It does not
+   Keychain items, protected by the Keychain only. They are not wrapped with the store key. They are written by deleting
+   the item and adding a new one: if the process stops between the two, or the add is refused and the old value could not
+   be read first, the old value is lost and has to be entered again.
+8. **A key item that is already there is used.** When no store file exists, Vauta uses a `database-key-v1` item already in
+   the keychain, so a store file put back next to it still opens. A process running as the user that planted that item
+   beforehand, with an access list open to it, could read the key (limit 1 already covers such a process). Erase replaces
+   the item with one bound to Vauta's signature.
+9. **The documents index has no rollback protection** either: an older `vauta.docs.enc` sealed with the same derived key
+   opens. It holds only text derived from files the user chose and is rebuilt from them.
+10. **Model integrity is a pin, not a signature.** The speaker-model hash guards against damage or a swapped file. It does not
    defend against someone who can rewrite the signed app bundle. The compiled Core ML cache is not hashed.
-9. **Nonce safety is argued, not enforced** (item 5 above).
-10. **No constant-time or side-channel review.** Vauta relies on CryptoKit and CommonCrypto for these properties.
-11. **Not independently audited.** No cryptographer outside the project has reviewed the formats or the code. The test
+11. **Nonce safety is argued, not enforced** (item 5 above).
+12. **No constant-time or side-channel review.** Vauta relies on CryptoKit and CommonCrypto for these properties.
+13. **Not independently audited.** No cryptographer outside the project has reviewed the formats or the code. The test
     suite checks round trips, tamper detection, wrong keys and truncation; it does not replace a review.
 
 ## Possible improvements
@@ -120,7 +146,8 @@ external review before 1.0.
 A backup is authenticated, not trusted: whoever knows the password can author one. `MeetingStore.openBackup` therefore
 (1) opens the image with `trusted_schema = OFF` and `cell_size_check = ON` (set on every connection), (2) compares
 `sqlite_schema` with the DDL that Vauta's own migrations produce for the image's `user_version` and refuses any difference
-(`BackupSchemaGuard`), (3) runs a full `integrity_check`, and only then migrates and adopts it. Declared image sizes are
+other than whitespace, identifier quotes and SQL comments, which SQLite itself may rewrite across versions (`BackupSchemaGuard`;
+comments are skipped outside string literals, so an apostrophe in one cannot hide a changed literal after it), (3) runs a full `integrity_check`, and only then migrates and adopts it. Declared image sizes are
 capped (1 GiB for a backup, which `createBackup` also refuses to exceed so that no backup is unrestorable; LZ4 payloads cannot declare more than 256 times their length, a stored image must equal its payload). The user's own store image is authenticated with the store key and keeps a far larger limit, so a store that was saved always opens again. A tampered backup header can still make the app derive a key at the 2,000,000-iteration ceiling (twice the default, about half a second to a second on Apple silicon) before the GCM tag fails: a residual, bounded cost that is accepted. Done: every connection caps string and blob length (256 MiB) and statement length (64 MiB) with `sqlite3_limit`, and a restored image's three FTS5 indexes (`segments_fts`, `names_fts`, `knowledge_fts`) pass FTS5 `integrity-check` after migration, before the store adopts it. Not done: `SQLITE_DBCONFIG_DEFENSIVE`,
 because `sqlite3_db_config` is variadic and cannot be called from Swift without adding a C target; the schema allow-list
 means no attacker-defined object or shadow-table layout reaches a statement that could write the schema.
