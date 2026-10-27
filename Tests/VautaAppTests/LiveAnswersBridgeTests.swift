@@ -53,7 +53,7 @@ private func settle(_ condition: @MainActor () -> Bool) async -> Bool {
 struct LiveAnswersBridgeTests {
     @Test func stoppingAnAnsweringRowStopsTheDetectorAndTheCardDoesNotComeBack() async throws {
         var timing = QuestionTiming()
-        timing.settle = 0.05; timing.checkInterval = 0.05; timing.cardInterval = 0.05; timing.staleAfter = 600; timing.lateAfter = 60; timing.dropAfter = 120
+        timing.settle = 0.05; timing.checkInterval = 0.05; timing.cardInterval = 0.05; timing.staleAfter = 600; timing.lateAfter = 600; timing.dropAfter = 1_200
         let model = LiveAnswersModel()
         model.announce = { _ in }
         let bridge = LiveAnswersBridge(model: model)
