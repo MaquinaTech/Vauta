@@ -4,7 +4,7 @@ huggingface_hub==1.33.0
 numpy==2.5.4
 pillow==13.0.0
 safetensors==0.8.0
-sentence-transformers==6.1.0
+sentence-transformers==6.2.0
 sentencepiece==0.2.2
 tokenizers==0.23.3
 torch==2.14.1
