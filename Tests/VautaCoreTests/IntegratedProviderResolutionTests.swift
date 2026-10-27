@@ -57,7 +57,9 @@ struct IntegratedProviderResolutionTests {
         let apple = Self.providers(Self.defaults(live: "apple"), access: access)
         #expect(apple.chat(for: .main).isIntegrated, "minutes and answers after the meeting always use the integrated model")
         if case .success(let live) = apple.chat(for: .live) {
-            #expect(!live.integrated, "live notes and answers use Apple's model")
+            // Apple's model when this Mac has it; otherwise (a CI runner without Apple Intelligence) the integrated one.
+            let appleAvailable = AppleChatModel().availability == .available
+            #expect(live.integrated == !appleAvailable, "live notes and answers use Apple's model when it is available")
         } else {
             Issue.record("the live work has a model: Apple's, or the integrated one when Apple is not available")
         }

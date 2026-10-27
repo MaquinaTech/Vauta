@@ -4,8 +4,8 @@
 # CodeQL static analysis for the Swift sources. Results appear under Security > Code scanning once the
 # repository is public (or has GitHub Advanced Security). Needs a macOS runner: Swift is compiled for analysis.
 # Whether CodeQL's Swift extractor accepts the Xcode 27 toolchain is unverified until Actions are on: after the first run,
-# check Security > Code scanning > Tools that Swift files were analysed (the maintainer's release checks). Fallbacks, in order: first change the build step below to
-# `swift build --build-system native --arch arm64`, then (if Swift is still not analysed) run this job on macos-26 with
+# check Security > Code scanning > Tools that Swift files were analysed (the maintainer's release checks). The build step uses
+# the native build system without the manifest sandbox; if Swift is still not analysed, run this job on macos-26 with
 # Xcode 26 selected. Swift 6.4's `swift build` defaults to the swiftbuild backend, whose compiles run
 # in a separate build-service process that the extractor may not trace, and a run can then finish green with no Swift file
 # analysed (nothing here fails it: check Tools after the first run).
@@ -51,7 +51,10 @@ jobs:
           queries: security-and-quality
 
       - name: Build
-        run: swift build --arch arm64
+        # The native build system keeps every compile in this process tree, where the extractor traces it, and
+        # --disable-sandbox keeps SwiftPM from spawning sandbox-exec for the manifest, which the tracer cannot start
+        # ("Bad CPU type in executable" on the first run).
+        run: swift build --build-system native --disable-sandbox --arch arm64
 
       - name: Analyze
         uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
