@@ -196,16 +196,18 @@ struct ItemEvidenceTests {
             tasks.append(Self.task("Look into item number \(i) of the plan", seg: Int64(i + 1), quote: "look into the item number \(i)"))
             decisions.append(Self.decision("Agree on the budget for item \(i + 1)", seg: Int64(i + 2), quote: "we agreed on the budget"))
         }
-        let started = ContinuousClock.now
-        let out = Self.apply(Self.minutes(decisions: decisions, tasks: tasks), segs, .shipped)
-        let order = SegmentOrder(segs)
-        let directory = SpeakerDirectory(speakers: [MeetingSpeaker(id: 100, meetingID: 1, channel: .others, ordinal: 1), MeetingSpeaker(id: 101, meetingID: 1, channel: .others, ordinal: 2),
-                                                    MeetingSpeaker(id: 102, meetingID: 1, channel: .others, ordinal: 3)], selfEntity: 1)
-        for t in tasks {
-            let seg = try #require(order.segment(t.segment))
-            _ = OwnerInference.infer(text: t.text, quote: t.quote, segment: seg, order: order, directory: directory, selfEntity: 1, people: [], meetingPeople: [], hint: .init(), language: "en")
-        }
-        let elapsed = (ContinuousClock.now - started) / .milliseconds(1)
+        // CPU time of this thread: the work is synchronous, and a busy machine must not fail a budget on speed.
+        var out: ValidatedMinutes!
+        let elapsed = try cpuSeconds {
+            out = Self.apply(Self.minutes(decisions: decisions, tasks: tasks), segs, .shipped)
+            let order = SegmentOrder(segs)
+            let directory = SpeakerDirectory(speakers: [MeetingSpeaker(id: 100, meetingID: 1, channel: .others, ordinal: 1), MeetingSpeaker(id: 101, meetingID: 1, channel: .others, ordinal: 2),
+                                                        MeetingSpeaker(id: 102, meetingID: 1, channel: .others, ordinal: 3)], selfEntity: 1)
+            for t in tasks {
+                let seg = try #require(order.segment(t.segment))
+                _ = OwnerInference.infer(text: t.text, quote: t.quote, segment: seg, order: order, directory: directory, selfEntity: 1, people: [], meetingPeople: [], hint: .init(), language: "en")
+            }
+        } * 1000
         #expect(out.tasks.count + out.decisions.count > 0)
         #expect(elapsed < 250, "\(Int(elapsed)) ms for \(tasks.count + decisions.count) items in a debug build (the design budget is 50 ms in release)")
     }

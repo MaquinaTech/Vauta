@@ -99,8 +99,9 @@ struct NetworkActivityAuditTests {
     @Test func theGuidedSetupPollingCoalescesThroughTheRealProbe() async throws {
         let port = StubServer.register { _ in nil }
         defer { StubServer.unregister(port) }
-        let log = NetworkActivityLog()
-        // A generous timeout: a probe that timed out on a loaded machine would be a different result, so a separate row.
+        // A wide window and a generous timeout: on a loaded machine the five rounds can take longer than the default
+        // minute (that window has its own test above), and a probe that timed out would be a different result.
+        let log = NetworkActivityLog(coalesceWindow: 3600)
         let session = ServerDiscovery.loopbackSession(timeout: 30, protocolClasses: [StubServer.self], log: log)
         let root = URL(string: "http://127.0.0.1:\(port)/")!
         for _ in 0..<5 {
@@ -108,7 +109,7 @@ struct NetworkActivityAuditTests {
                                                fetch: ServerDiscovery.loopbackFetch(session: session, root: root, timeout: 30))
         }
         let entries = await log.snapshot()
-        #expect(entries.count == 1, "five rounds of the same failing probe")
+        #expect(entries.count == 1, "five rounds of the same failing probe: \(entries)")
         #expect(entries.first?.count == 5 && entries.first?.purpose == .discovery)
     }
 
