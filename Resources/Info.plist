@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Vauta</string>
+	<key>CFBundleExecutable</key>
+	<string>Vauta</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIdentifier</key>
+	<string>local.vauta.app</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>es</string>
+		<string>fr</string>
+		<string>de</string>
+		<string>it</string>
+		<string>pt-BR</string>
+		<string>ja</string>
+		<string>ko</string>
+		<string>zh-Hans</string>
+	</array>
+	<key>CFBundleName</key>
+	<string>Vauta</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.9.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>26.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSAudioCaptureUsageDescription</key>
+	<string>Vauta transcribes what the other participants say in your meetings. Audio is never saved and never leaves this Mac.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Only if you turn it on in Settings: Vauta reads the calendars you choose (events around now and in the next 12 hours) to suggest recordings, prepare briefs and use titles and attendees. Only when you press Add, it creates the follow-up event you confirmed and checks that day so it is not added twice. It keeps no copy of your calendar.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Vauta connects only to the model server you choose on your local network, always over HTTPS, to write minutes and answer questions. Nothing goes to the internet.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Vauta transcribes what you say in your meetings. Audio is never saved and never leaves this Mac.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Vauta reads the reminder lists you choose, just before a meeting, to show related reminders in its brief. When you press Add on a task, it adds that one reminder and reads the titles in the list you add it to, so it does not add it twice. It never changes or deletes a reminder you made and keeps no copy of your reminders.</string>
+</dict>
+</plist>

@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: Apache-2.0
+   SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+   Info.plist strings: the permission prompts macOS shows on Vauta's behalf (Spanish, Spain).
+   Keep them short and honest: say what Vauta does with the access and what it never does. */
+
+/* System audio permission prompt (Screen & System Audio Recording) */
+"NSAudioCaptureUsageDescription" = "Vauta transcribe lo que dicen los demás participantes de tus reuniones. El audio nunca se guarda ni sale de este Mac.";
+
+/* Calendar permission prompt. Vauta reads only the chosen calendars: events around now, and the event about to start (and the next one within 12 hours) for the brief. */
+"NSCalendarsFullAccessUsageDescription" = "Solo si lo activas en Ajustes: Vauta lee los calendarios que elijas (los eventos en torno a la hora actual y de las próximas 12 horas) para sugerirte grabar, preparar resúmenes previos y usar títulos y asistentes. Solo cuando pulsas Añadir, crea el evento de seguimiento que confirmaste y revisa ese día para no añadirlo dos veces. No guarda ninguna copia de tu calendario.";
+
+/* Local network permission prompt, shown when the model server runs on another computer */
+"NSLocalNetworkUsageDescription" = "Vauta se conecta solo al servidor de modelos que elijas en tu red local, siempre por HTTPS, para redactar actas y responder preguntas. Nada va a internet.";
+
+/* Microphone permission prompt */
+"NSMicrophoneUsageDescription" = "Vauta transcribe lo que dices en tus reuniones. El audio nunca se guarda ni sale de este Mac.";
+
+/* Reminders permission prompt, shown the first time the person turns on related reminders in the brief or presses Add on a task. Vauta reads the chosen lists (incomplete reminders only) for the brief and, when adding, the titles in the one list it adds to; it adds only the reminder the person confirmed and never changes or deletes one it did not create. */
+"NSRemindersFullAccessUsageDescription" = "Vauta lee las listas de recordatorios que elijas, justo antes de una reunión, para mostrar los recordatorios relacionados en su resumen previo. Cuando pulsas Añadir en una tarea, añade ese único recordatorio y lee los títulos de la lista a la que lo añades para no añadirlo dos veces. No modifica ni elimina nunca un recordatorio que hayas creado y no guarda ninguna copia de tus recordatorios.";

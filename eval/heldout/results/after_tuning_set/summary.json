@@ -1,0 +1,80 @@
+{
+ "ami_others_uem": {
+  "files": 10,
+  "der_c025": 38.12110018042924,
+  "der_c0": 39.90317613569441,
+  "miss_c025": 5.433388063894814,
+  "fa_c025": 30.759501378590553,
+  "conf_c025": 1.9282107379438758,
+  "ref_s": 11631.429999999998,
+  "exact": 3,
+  "within1": 10,
+  "one_speaker_baseline_der_c025": 47.08979052474039
+ },
+ "ami_others_uem_nobleed": {
+  "files": 10,
+  "der_c025": 10.548113932150482,
+  "der_c0": 16.5070846834826,
+  "miss_c025": 5.433388063894814,
+  "fa_c025": 3.186515130311793,
+  "conf_c025": 1.9282107379438758,
+  "ref_s": 11631.429999999998,
+  "exact": 4,
+  "within1": 10,
+  "one_speaker_baseline_der_c025": 47.08979052474039
+ },
+ "voxconverse": {
+  "files": 8,
+  "der_c025": 7.625295365447613,
+  "der_c0": 12.700866630741096,
+  "miss_c025": 2.5545754792975672,
+  "fa_c025": 2.5362829600988133,
+  "conf_c025": 2.534436926051232,
+  "ref_s": 6791.820000000001,
+  "exact": 5,
+  "within1": 8,
+  "one_speaker_baseline_der_c025": 31.56835696256914
+ },
+ "pooled_18_ami_others_uem": {
+  "der_c025": 26.25953590565891,
+  "der_c0": 29.87491349246197,
+  "one_speaker_baseline_der_c025": 41.05261646256168
+ },
+ "pooled_18_ami_others_uem_nobleed": {
+  "der_c025": 9.411262470030476,
+  "der_c0": 15.103904034304476,
+  "one_speaker_baseline_der_c025": 41.05261646256168
+ },
+ "half_a": {
+  "files": 9,
+  "uris": [
+   "EN2002a_others",
+   "ES2004a_others",
+   "IS1009a_others",
+   "IS1009d_others",
+   "TS3003b_others",
+   "crorm",
+   "ikhje",
+   "poucc",
+   "uhfrw"
+  ],
+  "der_c025": 10.687354529869408,
+  "der_c0": 16.842807305561255
+ },
+ "half_b": {
+  "files": 9,
+  "uris": [
+   "EN2002b_others",
+   "ES2004c_others",
+   "IS1009c_others",
+   "TS3003a_others",
+   "TS3003c_others",
+   "fijfi",
+   "lpola",
+   "sexgc",
+   "yzvon"
+  ],
+  "der_c025": 8.257621894380991,
+  "der_c0": 13.455212209459095
+ }
+}

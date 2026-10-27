@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and help (Discussions)
+    url: https://github.com/MaquinaTech/Vauta/discussions
+    about: Ask how to do something or get help with your setup in Q&A, or share an idea in Ideas. Issues are for bugs, feature requests and translations.
+  - name: Report a security vulnerability
+    url: https://github.com/MaquinaTech/Vauta/security/advisories/new
+    about: Please report vulnerabilities privately. Do not open a public issue. See the security policy.
+  - name: Security policy
+    url: https://github.com/MaquinaTech/Vauta/security/policy
+    about: Supported versions and how vulnerabilities are handled.

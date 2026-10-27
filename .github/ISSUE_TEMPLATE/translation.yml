@@ -1,0 +1,43 @@
+name: Translation
+description: Report a translation mistake, or offer to translate Vauta into a new language.
+labels: ["localization"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Type
+      options:
+        - Wrong or unclear translation
+        - Missing translation (English text shown)
+        - Text cut off or not fitting
+        - New language
+    validations:
+      required: true
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: "German (de)"
+    validations:
+      required: true
+  - type: textarea
+    id: where
+    attributes:
+      label: Where does it appear?
+      description: The window, menu or notification, and a screenshot if possible (without private content).
+  - type: textarea
+    id: current
+    attributes:
+      label: Current text
+      render: text
+  - type: textarea
+    id: suggested
+    attributes:
+      label: Suggested text
+      render: text
+  - type: input
+    id: vauta-version
+    attributes:
+      label: Vauta version
+      description: Settings > About.
+      placeholder: "1.0.0 (123)"

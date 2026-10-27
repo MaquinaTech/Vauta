@@ -1,0 +1,67 @@
+# Build output
+.build/
+.build-diagnostics/
+.build-*/
+.swiftpm/
+build/
+# Packages written by scripts/package.sh
+dist/
+.DS_Store
+
+# Audio: never commit voice (transcribe-file tests, diagnostic leftovers)
+*.wav
+*.caf
+*.aif
+*.aiff
+*.m4a
+*.mp3
+*.mp4
+*.flac
+*.ogg
+*.opus
+
+# Meeting data (debug copies)
+*.enc
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.sqlite-*
+
+# Keys, certificates and secrets
+*.p12
+*.pfx
+*.p8
+*.key
+*.pem
+*.cer
+*.keychain
+*.keychain-db
+.env
+.env.*
+*.token
+secrets/
+
+# Per-machine build settings (bundle ID, flags): never in the repository or a package
+scripts/local.env
+# Signing identity fingerprint written by scripts/setup-signing.sh (per machine)
+scripts/signing-identity.txt
+# Model server TLS material (scripts/make-server-cert.sh) and local server configs
+vauta-server-tls/
+vauta-server.json
+
+# Diarization model conversion: checkpoints are never committed (tools/convert-diarization-models)
+tools/convert-diarization-models/src_wespeaker/
+*.ckpt
+pytorch_model.bin
+
+# Python bytecode
+__pycache__/
+
+# Evaluation harness: downloaded datasets, built sets, runs and the virtual environment (never committed)
+eval/work/
+eval/.venv/
+
+# LLVM coverage data (swift test --enable-code-coverage, instrumented binaries)
+*.profraw
+*.profdata

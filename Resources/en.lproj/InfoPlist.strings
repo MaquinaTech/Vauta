@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: Apache-2.0
+   SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+   Info.plist strings: the permission prompts macOS shows on Vauta's behalf.
+   Keep them short and honest: say what Vauta does with the access and what it never does. */
+
+/* System audio permission prompt (Screen & System Audio Recording) */
+"NSAudioCaptureUsageDescription" = "Vauta transcribes what the other participants say in your meetings. Audio is never saved and never leaves this Mac.";
+
+/* Calendar permission prompt. Vauta reads only the chosen calendars: events around now, and the event about to start (and the next one within 12 hours) for the brief. */
+"NSCalendarsFullAccessUsageDescription" = "Only if you turn it on in Settings: Vauta reads the calendars you choose (events around now and in the next 12 hours) to suggest recordings, prepare briefs and use titles and attendees. Only when you press Add, it creates the follow-up event you confirmed and checks that day so it is not added twice. It keeps no copy of your calendar.";
+
+/* Local network permission prompt, shown when the model server runs on another computer */
+"NSLocalNetworkUsageDescription" = "Vauta connects only to the model server you choose on your local network, always over HTTPS, to write minutes and answer questions. Nothing goes to the internet.";
+
+/* Microphone permission prompt */
+"NSMicrophoneUsageDescription" = "Vauta transcribes what you say in your meetings. Audio is never saved and never leaves this Mac.";
+
+/* Reminders permission prompt, shown the first time the person turns on related reminders in the brief or presses Add on a task. Vauta reads the chosen lists (incomplete reminders only) for the brief and, when adding, the titles in the one list it adds to; it adds only the reminder the person confirmed and never changes or deletes one it did not create. */
+"NSRemindersFullAccessUsageDescription" = "Vauta reads the reminder lists you choose, just before a meeting, to show related reminders in its brief. When you press Add on a task, it adds that one reminder and reads the titles in the list you add it to, so it does not add it twice. It never changes or deletes a reminder you made and keeps no copy of your reminders.";

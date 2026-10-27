@@ -1,0 +1,463 @@
+{
+ "es_conv01_mls_2spk": {
+  "source": "mls",
+  "n_speakers": 2,
+  "duration": 542.5,
+  "codec": "opus 24k internal-rate 48k",
+  "overlap_frac_of_speech": 0.054,
+  "speech_frac": null,
+  "speakers": {
+   "mls_11168": {
+    "gender": "female",
+    "hp_hz": 150,
+    "lp_hz": 5685,
+    "room_rt60": 0.4,
+    "noise_dbfs": -40.8
+   },
+   "mls_3796": {
+    "gender": "male",
+    "hp_hz": 100,
+    "lp_hz": 6637,
+    "room_rt60": 0.44,
+    "noise_dbfs": -42.4
+   }
+  },
+  "licence": "CC-BY-4.0"
+ },
+ "es_conv02_vp_2spk": {
+  "source": "vp",
+  "n_speakers": 2,
+  "duration": 543.2,
+  "codec": "opus 16k internal-rate 16k",
+  "overlap_frac_of_speech": 0.084,
+  "speech_frac": null,
+  "speakers": {
+   "vp_111019": {
+    "gender": "female",
+    "hp_hz": 100,
+    "lp_hz": 7504,
+    "room_rt60": 0.44,
+    "noise_dbfs": -50.4
+   },
+   "vp_28400": {
+    "gender": "male",
+    "hp_hz": 180,
+    "lp_hz": 7348,
+    "room_rt60": 0.17,
+    "noise_dbfs": -49.7
+   }
+  },
+  "licence": "CC0-1.0"
+ },
+ "es_conv03_mls_3spk": {
+  "source": "mls",
+  "n_speakers": 3,
+  "duration": 602.3,
+  "codec": "opus 24k internal-rate 48k",
+  "overlap_frac_of_speech": 0.131,
+  "speech_frac": null,
+  "speakers": {
+   "mls_7331": {
+    "gender": "female",
+    "hp_hz": 79,
+    "lp_hz": 6535,
+    "room_rt60": 0.2,
+    "noise_dbfs": -48.1
+   },
+   "mls_5691": {
+    "gender": "male",
+    "hp_hz": 175,
+    "lp_hz": 6630,
+    "room_rt60": 0.39,
+    "noise_dbfs": -41.4
+   },
+   "mls_1448": {
+    "gender": "female",
+    "hp_hz": 163,
+    "lp_hz": 5775,
+    "room_rt60": 0.25,
+    "noise_dbfs": -40.5
+   }
+  },
+  "licence": "CC-BY-4.0"
+ },
+ "es_conv04_vp_3spk": {
+  "source": "vp",
+  "n_speakers": 3,
+  "duration": 602.6,
+  "codec": "opus 16k internal-rate 16k",
+  "overlap_frac_of_speech": 0.08,
+  "speech_frac": null,
+  "speakers": {
+   "vp_103035": {
+    "gender": "female",
+    "hp_hz": 132,
+    "lp_hz": 6024,
+    "room_rt60": null,
+    "noise_dbfs": -46.6
+   },
+   "vp_103046": {
+    "gender": "male",
+    "hp_hz": 132,
+    "lp_hz": 7078,
+    "room_rt60": null,
+    "noise_dbfs": -46.9
+   },
+   "vp_28361": {
+    "gender": "female",
+    "hp_hz": 77,
+    "lp_hz": 6345,
+    "room_rt60": 0.41,
+    "noise_dbfs": -48.1
+   }
+  },
+  "licence": "CC0-1.0"
+ },
+ "es_conv05_mls_4spk": {
+  "source": "mls",
+  "n_speakers": 4,
+  "duration": 665.6,
+  "codec": "opus 24k internal-rate 48k",
+  "overlap_frac_of_speech": 0.034,
+  "speech_frac": null,
+  "speakers": {
+   "mls_6223": {
+    "gender": "female",
+    "hp_hz": 129,
+    "lp_hz": 6990,
+    "room_rt60": 0.15,
+    "noise_dbfs": -40.2
+   },
+   "mls_5691": {
+    "gender": "male",
+    "hp_hz": 86,
+    "lp_hz": 6051,
+    "room_rt60": null,
+    "noise_dbfs": -47.6
+   },
+   "mls_12249": {
+    "gender": "female",
+    "hp_hz": 158,
+    "lp_hz": 7485,
+    "room_rt60": null,
+    "noise_dbfs": -50.1
+   },
+   "mls_4096": {
+    "gender": "male",
+    "hp_hz": 111,
+    "lp_hz": 6706,
+    "room_rt60": 0.24,
+    "noise_dbfs": -44.9
+   }
+  },
+  "licence": "CC-BY-4.0"
+ },
+ "es_conv06_vp_4spk": {
+  "source": "vp",
+  "n_speakers": 4,
+  "duration": 661.5,
+  "codec": "opus 16k internal-rate 16k",
+  "overlap_frac_of_speech": 0.064,
+  "speech_frac": null,
+  "speakers": {
+   "vp_97024": {
+    "gender": "female",
+    "hp_hz": 173,
+    "lp_hz": 7078,
+    "room_rt60": 0.25,
+    "noise_dbfs": -46.7
+   },
+   "vp_125033": {
+    "gender": "male",
+    "hp_hz": 100,
+    "lp_hz": 6483,
+    "room_rt60": 0.19,
+    "noise_dbfs": -46.3
+   },
+   "vp_101417": {
+    "gender": "female",
+    "hp_hz": 100,
+    "lp_hz": 6265,
+    "room_rt60": 0.43,
+    "noise_dbfs": -50.5
+   },
+   "vp_119435": {
+    "gender": "male",
+    "hp_hz": 145,
+    "lp_hz": 5813,
+    "room_rt60": null,
+    "noise_dbfs": -49.9
+   }
+  },
+  "licence": "CC0-1.0"
+ },
+ "es_conv07_mls_5spk": {
+  "source": "mls",
+  "n_speakers": 5,
+  "duration": 662.4,
+  "codec": "opus 24k internal-rate 48k",
+  "overlap_frac_of_speech": 0.068,
+  "speech_frac": null,
+  "speakers": {
+   "mls_6223": {
+    "gender": "female",
+    "hp_hz": 148,
+    "lp_hz": 6402,
+    "room_rt60": null,
+    "noise_dbfs": -44.5
+   },
+   "mls_8306": {
+    "gender": "male",
+    "hp_hz": 99,
+    "lp_hz": 5712,
+    "room_rt60": null,
+    "noise_dbfs": -51.3
+   },
+   "mls_7331": {
+    "gender": "female",
+    "hp_hz": 88,
+    "lp_hz": 6424,
+    "room_rt60": null,
+    "noise_dbfs": -49.4
+   },
+   "mls_3796": {
+    "gender": "male",
+    "hp_hz": 112,
+    "lp_hz": 6506,
+    "room_rt60": null,
+    "noise_dbfs": -49.0
+   },
+   "mls_2308": {
+    "gender": "female",
+    "hp_hz": 156,
+    "lp_hz": 7106,
+    "room_rt60": null,
+    "noise_dbfs": -50.4
+   }
+  },
+  "licence": "CC-BY-4.0"
+ },
+ "es_conv08_vp_5spk": {
+  "source": "vp",
+  "n_speakers": 5,
+  "duration": 665.1,
+  "codec": "opus 16k internal-rate 16k",
+  "overlap_frac_of_speech": 0.067,
+  "speech_frac": null,
+  "speakers": {
+   "vp_28361": {
+    "gender": "female",
+    "hp_hz": 93,
+    "lp_hz": 7300,
+    "room_rt60": 0.32,
+    "noise_dbfs": -42.8
+   },
+   "vp_125051": {
+    "gender": "male",
+    "hp_hz": 134,
+    "lp_hz": 6064,
+    "room_rt60": null,
+    "noise_dbfs": -43.1
+   },
+   "vp_125035": {
+    "gender": "female",
+    "hp_hz": 118,
+    "lp_hz": 7165,
+    "room_rt60": null,
+    "noise_dbfs": -49.6
+   },
+   "vp_125053": {
+    "gender": "male",
+    "hp_hz": 160,
+    "lp_hz": 7345,
+    "room_rt60": 0.26,
+    "noise_dbfs": -50.3
+   },
+   "vp_28390": {
+    "gender": "female",
+    "hp_hz": 94,
+    "lp_hz": 5756,
+    "room_rt60": 0.31,
+    "noise_dbfs": -40.5
+   }
+  },
+  "licence": "CC0-1.0"
+ },
+ "es_conv09_mls_6spk": {
+  "source": "mls",
+  "n_speakers": 6,
+  "duration": 719.7,
+  "codec": "opus 24k internal-rate 48k",
+  "overlap_frac_of_speech": 0.053,
+  "speech_frac": null,
+  "speakers": {
+   "mls_12249": {
+    "gender": "female",
+    "hp_hz": 145,
+    "lp_hz": 6570,
+    "room_rt60": 0.42,
+    "noise_dbfs": -51.5
+   },
+   "mls_3796": {
+    "gender": "male",
+    "hp_hz": 96,
+    "lp_hz": 7036,
+    "room_rt60": 0.38,
+    "noise_dbfs": -50.6
+   },
+   "mls_7331": {
+    "gender": "female",
+    "hp_hz": 83,
+    "lp_hz": 6145,
+    "room_rt60": null,
+    "noise_dbfs": -49.0
+   },
+   "mls_8306": {
+    "gender": "male",
+    "hp_hz": 131,
+    "lp_hz": 6778,
+    "room_rt60": null,
+    "noise_dbfs": -43.9
+   },
+   "mls_6223": {
+    "gender": "female",
+    "hp_hz": 175,
+    "lp_hz": 6219,
+    "room_rt60": 0.35,
+    "noise_dbfs": -41.0
+   },
+   "mls_5870": {
+    "gender": "male",
+    "hp_hz": 178,
+    "lp_hz": 6464,
+    "room_rt60": null,
+    "noise_dbfs": -48.7
+   }
+  },
+  "licence": "CC-BY-4.0"
+ },
+ "es_conv10_vp_6spk": {
+  "source": "vp",
+  "n_speakers": 6,
+  "duration": 725.0,
+  "codec": "opus 16k internal-rate 16k",
+  "overlap_frac_of_speech": 0.074,
+  "speech_frac": null,
+  "speakers": {
+   "vp_97024": {
+    "gender": "female",
+    "hp_hz": 158,
+    "lp_hz": 6816,
+    "room_rt60": null,
+    "noise_dbfs": -47.0
+   },
+   "vp_103488": {
+    "gender": "male",
+    "hp_hz": 71,
+    "lp_hz": 5895,
+    "room_rt60": null,
+    "noise_dbfs": -46.0
+   },
+   "vp_103035": {
+    "gender": "female",
+    "hp_hz": 165,
+    "lp_hz": 6310,
+    "room_rt60": null,
+    "noise_dbfs": -41.2
+   },
+   "vp_119435": {
+    "gender": "male",
+    "hp_hz": 158,
+    "lp_hz": 6655,
+    "room_rt60": null,
+    "noise_dbfs": -49.8
+   },
+   "vp_28390": {
+    "gender": "female",
+    "hp_hz": 89,
+    "lp_hz": 7122,
+    "room_rt60": null,
+    "noise_dbfs": -47.5
+   },
+   "vp_4377": {
+    "gender": "male",
+    "hp_hz": 156,
+    "lp_hz": 6281,
+    "room_rt60": 0.17,
+    "noise_dbfs": -44.6
+   }
+  },
+  "licence": "CC0-1.0"
+ },
+ "es_conv11_mls_3spk": {
+  "source": "mls",
+  "n_speakers": 3,
+  "duration": 902.6,
+  "codec": "opus 24k internal-rate 48k",
+  "overlap_frac_of_speech": 0.082,
+  "speech_frac": null,
+  "speakers": {
+   "mls_2308": {
+    "gender": "female",
+    "hp_hz": 179,
+    "lp_hz": 6537,
+    "room_rt60": null,
+    "noise_dbfs": -48.6
+   },
+   "mls_3468": {
+    "gender": "male",
+    "hp_hz": 89,
+    "lp_hz": 7335,
+    "room_rt60": null,
+    "noise_dbfs": -41.8
+   },
+   "mls_6223": {
+    "gender": "female",
+    "hp_hz": 89,
+    "lp_hz": 5590,
+    "room_rt60": null,
+    "noise_dbfs": -44.3
+   }
+  },
+  "licence": "CC-BY-4.0"
+ },
+ "es_conv12_vp_4spk": {
+  "source": "vp",
+  "n_speakers": 4,
+  "duration": 903.9,
+  "codec": "opus 16k internal-rate 16k",
+  "overlap_frac_of_speech": 0.043,
+  "speech_frac": null,
+  "speakers": {
+   "vp_125041": {
+    "gender": "female",
+    "hp_hz": 138,
+    "lp_hz": 6968,
+    "room_rt60": 0.17,
+    "noise_dbfs": -47.5
+   },
+   "vp_96763": {
+    "gender": "male",
+    "hp_hz": 157,
+    "lp_hz": 5866,
+    "room_rt60": null,
+    "noise_dbfs": -42.0
+   },
+   "vp_36692": {
+    "gender": "female",
+    "hp_hz": 92,
+    "lp_hz": 7119,
+    "room_rt60": null,
+    "noise_dbfs": -44.9
+   },
+   "vp_101599": {
+    "gender": "male",
+    "hp_hz": 129,
+    "lp_hz": 6311,
+    "room_rt60": null,
+    "noise_dbfs": -42.5
+   }
+  },
+  "licence": "CC0-1.0"
+ }
+}

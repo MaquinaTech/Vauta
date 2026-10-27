@@ -1,0 +1,19 @@
+/* SPDX-License-Identifier: Apache-2.0
+   SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+   Info.plist strings: the permission prompts macOS shows on Vauta's behalf (Italian).
+   Keep them short and honest: say what Vauta does with the access and what it never does. */
+
+/* System audio permission prompt (Screen & System Audio Recording) */
+"NSAudioCaptureUsageDescription" = "Vauta trascrive ciò che dicono gli altri partecipanti alle tue riunioni. L’audio non viene mai salvato e non esce mai da questo Mac.";
+
+/* Calendar permission prompt. Vauta reads only the chosen calendars: events around now, and the event about to start (and the next one within 12 hours) for the brief. */
+"NSCalendarsFullAccessUsageDescription" = "Solo se lo attivi in Impostazioni: Vauta legge i calendari che scegli (gli eventi intorno all’ora attuale e delle prossime 12 ore) per suggerirti di registrare, preparare schede delle riunioni e usare titoli e partecipanti. Solo quando premi Aggiungi, crea l’evento di follow-up che hai confermato e controlla quel giorno per non aggiungerlo due volte. Non conserva alcuna copia del tuo calendario.";
+
+/* Local network permission prompt, shown when the model server runs on another computer */
+"NSLocalNetworkUsageDescription" = "Vauta si connette solo al server di modelli che scegli sulla tua rete locale, sempre tramite HTTPS, per scrivere i verbali e rispondere alle domande. Non invia nulla su internet.";
+
+/* Microphone permission prompt */
+"NSMicrophoneUsageDescription" = "Vauta trascrive ciò che dici nelle tue riunioni. L’audio non viene mai salvato e non esce mai da questo Mac.";
+
+/* Reminders permission prompt, shown the first time the person turns on related reminders in the brief or presses Add on a task. Vauta reads the chosen lists (incomplete reminders only) for the brief and, when adding, the titles in the one list it adds to; it adds only the reminder the person confirmed and never changes or deletes one it did not create. */
+"NSRemindersFullAccessUsageDescription" = "Vauta legge le liste di promemoria che scegli, subito prima di una riunione, per mostrare i promemoria correlati nella scheda della riunione. Quando premi Aggiungi su un’attività, aggiunge solo quel promemoria e legge i titoli della lista in cui lo aggiungi, per non aggiungerlo due volte. Non modifica né elimina mai un promemoria che hai creato e non ne conserva alcuna copia.";

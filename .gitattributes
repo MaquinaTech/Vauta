@@ -1,0 +1,4 @@
+# The compiled speaker models are hashed byte for byte (DiarizationModels.treeHash): no line-ending or text
+# normalisation may touch them, whatever core.autocrlf or text=auto a contributor or CI has.
+Sources/VautaCore/Resources/Models/** binary
+Tests/VautaCoreTests/Fixtures/** binary

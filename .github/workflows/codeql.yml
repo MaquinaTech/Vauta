@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
+#
+# CodeQL static analysis for the Swift sources. Results appear under Security > Code scanning once the
+# repository is public (or has GitHub Advanced Security). Needs a macOS runner: Swift is compiled for analysis.
+# Whether CodeQL's Swift extractor accepts the Xcode 27 toolchain is unverified until Actions are on: after the first run,
+# check Security > Code scanning > Tools that Swift files were analysed (the maintainer's release checks). Fallbacks, in order: first change the build step below to
+# `swift build --build-system native --arch arm64`, then (if Swift is still not analysed) run this job on macos-26 with
+# Xcode 26 selected. Swift 6.4's `swift build` defaults to the swiftbuild backend, whose compiles run
+# in a separate build-service process that the extractor may not trace, and a run can then finish green with no Swift file
+# analysed (nothing here fails it: check Tools after the first run).
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "17 4 * * 1" # weekly, Monday 04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (Swift)
+    # Same image as CI; see ci.yml for the macos-26 alternative.
+    runs-on: xcode-27
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      actions: read          # CodeQL reads workflow run metadata
+      security-events: write # upload the results
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          languages: swift
+          build-mode: manual
+          queries: security-and-quality
+
+      - name: Build
+        run: swift build --arch arm64
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          category: "/language:swift"

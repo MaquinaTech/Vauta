@@ -1,0 +1,7 @@
+# The versions the Wave 11a tools ran with (Mac mini M2, python 3.12). Developer-side only; nothing here is shipped.
+# The mlx GPU quantiser is the byte reference for Vauta's CPU quantiser: bump mlx only with a new run of make-manifest.py.
+jinja2==3.1.6
+mlx==0.32.3
+mlx-lm==0.32.0
+numpy==2.5.4
+tokenizers==0.23.3

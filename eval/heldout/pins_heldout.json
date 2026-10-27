@@ -1,0 +1,39 @@
+{
+  "ami_set": "ami_dev_others",
+  "vox_set": "voxconverse_heldout",
+  "ami_meetings": [
+    "ES2011a",
+    "ES2011c",
+    "IS1008a",
+    "IS1008c",
+    "IS1008d",
+    "TS3004a",
+    "TS3004c",
+    "TS3004d"
+  ],
+  "wer_meetings": [
+    "ES2011a",
+    "ES2011c",
+    "IS1008a",
+    "IS1008c",
+    "IS1008d",
+    "TS3004a",
+    "TS3004c",
+    "TS3004d"
+  ],
+  "wer_seconds": 600,
+  "voxconverse_files": [
+    "bjruf",
+    "gmmwm",
+    "dxbbt",
+    "eddje",
+    "rpkso",
+    "xvxwv",
+    "gcfwp",
+    "auzru",
+    "bvqnu",
+    "ezxso",
+    "vtzqw"
+  ],
+  "references_manifest": "manifests/heldout/REFERENCES.sha256.txt"
+}

@@ -1,0 +1,15 @@
+{
+  "note": "Invented text to test the scorer; not a real meeting.",
+  "transcript": {"passages": [
+    {"id": 1, "text": "So the budget for the remote is 12,5 euros per unit."},
+    {"id": 2, "text": "Marketing will send the draft by Friday."},
+    {"id": 3, "text": "We agreed to ship 4000 units in the first batch."}
+  ]},
+  "minutes": {"model": "example", "items": [
+    {"text": "Budget of 12,5 euros per unit.", "citations": [1], "unconfirmed": false},
+    {"text": "Ship 5000 units first.", "citations": [3], "unconfirmed": true},
+    {"text": "Marketing sends the draft.", "citations": [2], "unconfirmed": false},
+    {"text": "Ship 4000 units first.", "citations": [9], "unconfirmed": false},
+    {"text": "Team is positive.", "citations": [], "unconfirmed": false}
+  ]}
+}

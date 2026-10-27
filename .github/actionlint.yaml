@@ -1,0 +1,5 @@
+# GitHub-hosted image labels newer than actionlint's built-in list.
+self-hosted-runner:
+  labels:
+    - xcode-27
+    - xcode-27-xlarge
