@@ -19,6 +19,7 @@
 # To renew, run it again with the same arguments. It reuses the CA and the server key,
 # so the pin does not change and Vauta needs no update.
 set -euo pipefail
+# shellcheck source=scripts/legacy-env.sh
 source "$(dirname "$0")/legacy-env.sh"
 usage() { sed -n '5,20p' "$0" | sed 's/^# \{0,1\}//'; }
 [[ $# -ge 1 ]] || { usage; exit 2; }

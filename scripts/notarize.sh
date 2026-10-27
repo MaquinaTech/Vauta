@@ -16,6 +16,7 @@
 #   xcrun notarytool store-credentials vauta-notary --key AuthKey_XXXX.p8 --key-id XXXX --issuer <uuid>
 # VAUTA_NOTARY_KEYCHAIN optionally names the keychain holding that profile (used by CI).
 set -euo pipefail
+# shellcheck source=scripts/legacy-env.sh
 source "$(dirname "$0")/legacy-env.sh"
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
