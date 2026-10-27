@@ -100,11 +100,12 @@ struct NetworkActivityAuditTests {
         let port = StubServer.register { _ in nil }
         defer { StubServer.unregister(port) }
         let log = NetworkActivityLog()
-        let session = ServerDiscovery.loopbackSession(timeout: 1, protocolClasses: [StubServer.self], log: log)
+        // A generous timeout: a probe that timed out on a loaded machine would be a different result, so a separate row.
+        let session = ServerDiscovery.loopbackSession(timeout: 30, protocolClasses: [StubServer.self], log: log)
         let root = URL(string: "http://127.0.0.1:\(port)/")!
         for _ in 0..<5 {
             _ = await ServerDiscovery.identify(baseURL: root.appending(path: "v1/"), hints: [],
-                                               fetch: ServerDiscovery.loopbackFetch(session: session, root: root, timeout: 1))
+                                               fetch: ServerDiscovery.loopbackFetch(session: session, root: root, timeout: 30))
         }
         let entries = await log.snapshot()
         #expect(entries.count == 1, "five rounds of the same failing probe")

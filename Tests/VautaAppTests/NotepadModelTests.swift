@@ -37,7 +37,7 @@ private final class Pad {
         model.addedAfter = true
         model.undoManager = undo
         model.offset = { 100 }
-        model.report = { [unowned self] title, _ in problems.append(title) }
+        model.report = { [weak self] title, _ in self?.problems.append(title) }
         model.bannerDuration = .milliseconds(40)
         await model.reload(markUpdates: false)
     }
