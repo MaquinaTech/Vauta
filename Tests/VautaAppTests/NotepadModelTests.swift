@@ -65,8 +65,9 @@ struct NotepadModelTests {
 
         await pad.model.delete(gone.id)
         #expect(try await pad.texts() == ["second"] && pad.model.deleted.count == 1)
-        // The banner is gone (as after six seconds); the Edit menu still offers the undo.
-        try await Task.sleep(for: .milliseconds(200))
+        // The banner is gone (as after six seconds); the Edit menu still offers the undo. Its 40 ms timer can fire late on a
+        // loaded machine, so wait for it (up to 10 s) instead of a fixed pause.
+        for _ in 0..<500 where !pad.model.deleted.isEmpty { try await Task.sleep(for: .milliseconds(20)) }
         #expect(pad.model.deleted.isEmpty)
         #expect(pad.undo.canUndo)
 
@@ -201,9 +202,9 @@ struct NotepadModelTests {
         pad.model.wordsDraft = "the note"
         pad.model.editingWordsID = row.id
         pad.model.draft = "added just before leaving"
-        pad.model.commitPendingBeforeLeaving()
+        let saving = pad.model.commitPendingBeforeLeaving()
         #expect(pad.model.draft.isEmpty && pad.model.editingWordsID == nil)
-        try await Task.sleep(for: .milliseconds(300))
+        await saving?.value
         let notes = try await pad.store.notes(pad.meeting)
         #expect(notes.map(\.text).sorted() == ["added just before leaving", "the note"])
         #expect(notes.first { $0.text == "added just before leaving" }?.addedAfter == true)
