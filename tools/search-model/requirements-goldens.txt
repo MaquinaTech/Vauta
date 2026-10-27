@@ -9,4 +9,4 @@ sentencepiece==0.2.2
 tokenizers==0.23.3
 torch==2.14.1
 torchvision==0.29.1
-transformers==5.19.0
+transformers==5.20.2
