@@ -265,8 +265,11 @@ struct BriefControllerTests {
         let before = counter.count
         #expect(before >= 1 && controller.next?.snapshot?.agenda == .paused)
         controller.resumePausedAgendas()
-        try await Task.sleep(for: .milliseconds(200))
-        await controller.settle()
+        // The rebuild is scheduled, not immediate: wait for it (up to 10 s on a loaded machine) instead of a fixed pause.
+        for _ in 0..<100 where counter.count <= before {
+            try await Task.sleep(for: .milliseconds(100))
+            await controller.settle()
+        }
         #expect(counter.count > before, "the paused agenda is built again once the recording ends")
 
         let quiet = BuildCount()
