@@ -14,7 +14,7 @@ protobuf==7.36.2
 pyaml==26.7.0
 PyYAML==6.0.3
 scipy==1.18.1
-setuptools==84.1.0
+setuptools==84.2.1
 soundfile==0.14.0
 sympy==1.14.0
 torch==2.14.1
