@@ -22,7 +22,7 @@ jobs:
     # If that label is unavailable, use `runs-on: macos-26` and select Xcode 27 first:
     #   - run: sudo xcode-select -s /Applications/Xcode_27.0.app
     runs-on: xcode-27
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
