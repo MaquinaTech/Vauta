@@ -2,11 +2,11 @@
 
 ## Supported versions
 
-Vauta has not been released yet. It is distributed as source code only (no signed or notarized downloads): you build it from a tagged commit, see [Verifying what you run](#verifying-what-you-run).
+Vauta is distributed as source code only (no signed or notarized downloads): you build it from a tagged commit, see [Verifying what you run](#verifying-what-you-run).
 
 | Version | Security fixes |
 |---|---|
-| Latest tagged release (0.9.x once published) | Yes |
+| Latest tagged release (0.9.x) | Yes |
 | Older tags | No. Please update |
 | Builds from `main` | Fixed on `main`; no backports |
 
