@@ -78,7 +78,7 @@ extension MeetingStore {
         do {
             try keyStore.remove()
             let newKey: SymmetricKey
-            do { newKey = try keyStore.key(createIfMissing: true) } catch { newKey = try keyStore.key(createIfMissing: true) }
+            do { newKey = try keyStore.newKey() } catch { newKey = try keyStore.newKey() }
             key = newKey
             journalKey = Journal.key(from: newKey)
         } catch {

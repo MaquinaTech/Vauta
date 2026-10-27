@@ -111,6 +111,11 @@ setting is on, a voice summary per speaker with each meeting (`speaker_voices`).
 - **Malware or another process running as your user while Vauta is open.** The decrypted database is in Vauta's
   memory, and the login keychain is unlocked for your whole session, including while the screen is locked. The
   Meetings lock (Touch ID or password) protects the interface, not memory.
+- **Other accounts on this Mac, with a server on this Mac.** In **This Mac** mode Vauta talks plain HTTP to
+  `127.0.0.1`, which is shared by every account on the Mac. While your server is stopped, a process of another
+  account can listen on its port and receive Vauta's requests (meeting text and the server key). On a Mac shared
+  with people you don't trust, keep the server running while Vauta uses it, or run it on another computer
+  (**Network** mode, HTTPS).
 - **Someone using your unlocked login session.** Vauta asks for Touch ID or your password before showing Meetings,
   but whatever is already on screen is visible, and your keychain is unlocked for any app they run.
 - **Rollback.** Replacing `vauta.db.enc` and `vauta.journal.enc` with an older pair encrypted with the same key, or
@@ -135,6 +140,9 @@ setting is on, a voice summary per speaker with each meeting (`speaker_voices`).
 - Created only when no store exists. If the store exists and its key is missing, Vauta refuses to create a new key
   (that would make the store unreadable) and reports the problem. A locked keychain or a cancelled prompt never leads
   to a new key.
+- A new store never adopts an item that is already there (left over, or planted by another process of your user with
+  an access list that would let it read the key): Vauta deletes it and creates its own, bound to its signature. If the
+  item cannot be deleted, no store is created. "Erase Everything" creates its new key the same way.
 - `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` is set, but the classic login keychain ignores it (it needs the Data
   Protection keychain, which requires a provisioning profile). In practice the item is readable while the login
   keychain is unlocked.
@@ -261,7 +269,7 @@ discovery, goes through one choke point, `AuditedSession` (see [Network audit](#
 | No proxies, no redirects | HTTP, HTTPS, SOCKS, PAC and proxy auto-discovery are disabled; redirects are refused |
 | Fixed destinations | URLs are built only from the configured base URL (plus a few read-only identification paths of the chosen server type on the same origin) and checked again on every response |
 | No state | Ephemeral session: no cache, cookies or credential storage. Response sizes are capped |
-| The key | Read from the Keychain for each request, printable ASCII only, never logged. "Test Connection" sends the saved key only to the exact saved destination and trust settings |
+| The key | Read from the Keychain for each request, printable ASCII only, never logged. "Test Connection" sends the saved key only to the exact saved destination and trust settings. The key and the configuration are saved as a new Keychain item each time (any item already there is deleted first), so they never take on an access list another app set |
 
 **Discovery** ("Find Servers") uses a separate session that only reaches `http://127.0.0.1` on ports 1234, 11434, 8080,
 8000 and 1337, with short timeouts, no proxies and no redirects. It runs when you click the button, and, while the
@@ -296,7 +304,8 @@ add JIT, unsigned-memory or library-validation entitlements. The procedure is in
 docs/SEARCH_MODEL.md (re-apply the patches, regenerate the kernel source, run the self-test on signed builds). Its licences
 are in [NOTICE](NOTICE) and `THIRD_PARTY_LICENSES.txt`. The pin is transitive: the fork's own submodule `Source/Cmlx/mlx` points to a second
 repository, `MaquinaTech/mlx` at commit `d1dfda2` (branch `vauta-clt`), which carries the C++ part of the runtime-compilation patch; both
-repositories are ours and both commits are tagged (`vauta-0.9.0`) so a force-push or a deleted branch cannot make the pin unfetchable.
+repositories are ours and both commits are tagged (`vauta-0.9.0`, signed with the release key) and rulesets on both repositories block deleting or
+moving those tags and deleting or force-pushing `vauta-clt`, so the pin cannot become unfetchable.
 
 ### Network audit
 

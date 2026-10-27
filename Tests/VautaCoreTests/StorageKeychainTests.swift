@@ -13,7 +13,7 @@ import Testing
 struct StorageKeychainTests {
     let service = "local.vauta.tests.\(UUID().uuidString)"
 
-    @Test func writeUpdatesInPlaceAndKeepsASingleItem() throws {
+    @Test func writeReplacesTheItemAndKeepsASingleItem() throws {
         let account = "secret-\(UUID().uuidString)"
         defer { KeychainSecret.delete(account, service: service) }
         #expect(try KeychainSecret.read(account, service: service) == nil)
@@ -32,7 +32,7 @@ struct StorageKeychainTests {
         var result: CFTypeRef?
         #expect(SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess)
         let items = try #require(result as? [[String: Any]])
-        #expect(items.count == 1, "update never duplicates the item")
+        #expect(items.count == 1, "a write never duplicates the item")
         #expect(items.first?[kSecAttrLabel as String] as? String == "Vauta test (renamed)")
 
         KeychainSecret.delete(account, service: service)

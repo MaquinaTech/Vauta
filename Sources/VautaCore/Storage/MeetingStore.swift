@@ -208,7 +208,7 @@ public actor MeetingStore {
         migrationReport = migration.report
         defer { if !opened { migration.rollback() } }
         if exists { try? fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file.path) }
-        key = try keyStore.key(createIfMissing: !exists)
+        key = try exists ? keyStore.key(createIfMissing: false) : keyStore.newKey()
         journalKey = Journal.key(from: key)
         var replayed = 0
         var gen = Data()

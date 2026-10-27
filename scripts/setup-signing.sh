@@ -36,7 +36,11 @@ echo "1/5 Signing keychain. Choose a NEW password (not your Mac's) and save it i
 security create-keychain "$KC"
 security set-keychain-settings -l -u -t 600 "$KC"
 
-echo "2/5 Generating the identity (the private key only ever exists inside the keychain)…"
+echo "2/5 Generating the identity and importing it into the signing keychain…"
+# The private key exists outside the keychain only for the few seconds of this step: unencrypted in a temporary folder
+# that only you can read, and erased on exit. The .p12 that carries it into the keychain uses a random one-time
+# password, which `security import` takes as an argument (it has no other non-interactive way): a process running as
+# you could see it in that moment, but such a process could read the key file in the folder as well.
 D="$(mktemp -d)"; trap 'rm -rfP "$D"' EXIT; umask 077
 "$OPENSSL" req -x509 -newkey rsa:3072 -nodes -keyout "$D/key.pem" -out "$D/cert.pem" -days 3650 -sha256 \
   -subj "/CN=$CN" -addext "basicConstraints=critical,CA:FALSE" \

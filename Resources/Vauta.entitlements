@@ -23,12 +23,15 @@
        deletes anything it did not create and never creates a list or a calendar. No entitlement was added;
        whether Reminders needs its own key under the sandbox is to be checked with a signed build.
 
-     network.client: the ONLY destination is the model server the user chose
-       in Settings, enforced in code (LLMServerConfig and LLMClient): loopback
-       on this Mac, or HTTPS (TLS 1.3) to a private address on the local
-       network, with the private CA as the only trust anchor and optional SPKI
-       pins, no proxy and no redirects. Speech models are downloaded by the
-       system, not by Vauta. There is no network.server: Vauta never listens.
+     network.client: two kinds of destination, both enforced in code. The
+       model server the user chose in Settings (LLMServerConfig and LLMClient):
+       loopback on this Mac, or HTTPS (TLS 1.3) to a private address on the
+       local network, with the private CA as the only trust anchor and optional
+       SPKI pins, no proxy and no redirects. And the optional models, only when
+       the user presses Download: HTTPS to huggingface.co and its CDN host
+       us.aws.cdn.hf.co (SearchModelDestinations), each file checked against a
+       pinned SHA-256. Speech models are downloaded by the system, not by
+       Vauta. There is no network.server: Vauta never listens.
 
      files.user-selected.read-write: only files the user picks in an open or
        save panel: a recording to import (read), the CA certificate of a
