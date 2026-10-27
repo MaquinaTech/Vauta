@@ -8,7 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
-- The menu-bar panel takes Vauta's own colours, as on the website: the record button is a lit sphere in indigo, blue and teal, red into magenta while recording, with a ring around it; while recording, rings breathe out from it (still with Reduce Motion) and its glow follows the loudest channel. A soft glow in the same colours sits behind the header (none with Increase Contrast), the header shows the app icon, and the elapsed time uses rounded figures.
+- A new app icon in the website's colours: a lit sphere in indigo, blue and teal carrying a white waveform, with an orbit around it, on a dark sky (`tools/make-icon.swift`).
+- The menu-bar panel takes Vauta's own colours, as on the website: the record button is a lit sphere in indigo, blue and teal, red into magenta while recording, with a ring around it; while recording, rings breathe out from it (still with Reduce Motion) and its glow follows the loudest channel. A soft glow in the same colours sits behind the header and fades out below the meters (none with Increase Contrast), the header shows the app icon, and the elapsed time uses rounded figures.
 
 ### Security
 

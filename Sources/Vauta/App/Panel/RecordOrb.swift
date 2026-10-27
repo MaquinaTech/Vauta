@@ -101,6 +101,9 @@ struct PanelGlow: View {
                                startRadius: 0, endRadius: geo.size.width * 0.55)
             }
         }
+        // Fades out towards the bottom, so the light never ends on a straight edge under the meters.
+        .mask { LinearGradient(stops: [.init(color: .black, location: 0), .init(color: .black, location: 0.45), .init(color: .clear, location: 1)],
+                               startPoint: .top, endPoint: .bottom) }
         .opacity(contrast == .increased ? 0 : 1)
         .animation(.easeInOut(duration: 0.6), value: isRecording)
         .allowsHitTesting(false)

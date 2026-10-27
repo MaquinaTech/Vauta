@@ -13,10 +13,11 @@
 //   cp build/icon/AppIcon.icns Resources/AppIcon.icns
 //   cp build/icon/icon-1024.png docs/assets/icon-1024.png
 //
-// Design: the macOS squircle on the standard 1024 grid (824 pt body, 100 pt margin),
-// a deep indigo → teal gradient and a white page carrying a waveform, which reads as
-// "notes taken from a conversation". Everything is drawn in 1024-unit space and scaled,
-// with less detail at the smallest sizes so they stay legible.
+// Design: the macOS squircle on the standard 1024 grid (824 pt body, 100 pt margin), the
+// website's night sky (deep indigo into near black, with indigo and teal glows) and a lit
+// sphere in Vauta's indigo → blue → teal gradient carrying a white waveform, with a tilted
+// orbit around it, like the record button and the site's rings. Everything is drawn in
+// 1024-unit space and scaled, with less detail at the smallest sizes so they stay legible.
 
 import CoreGraphics
 import Foundation
@@ -59,20 +60,37 @@ func squircle(in rect: CGRect, exponent n: CGFloat = 5) -> CGPath {
     return path
 }
 
-/// A sheet of paper with a folded top-right corner.
-func pagePath(_ r: CGRect, fold: CGFloat, radius: CGFloat) -> CGPath {
-    let p = CGMutablePath()
-    p.move(to: CGPoint(x: r.minX + radius, y: r.minY))
-    p.addLine(to: CGPoint(x: r.maxX - radius, y: r.minY))
-    p.addQuadCurve(to: CGPoint(x: r.maxX, y: r.minY + radius), control: CGPoint(x: r.maxX, y: r.minY))
-    p.addLine(to: CGPoint(x: r.maxX, y: r.maxY - fold))
-    p.addLine(to: CGPoint(x: r.maxX - fold, y: r.maxY))
-    p.addLine(to: CGPoint(x: r.minX + radius, y: r.maxY))
-    p.addQuadCurve(to: CGPoint(x: r.minX, y: r.maxY - radius), control: CGPoint(x: r.minX, y: r.maxY))
-    p.addLine(to: CGPoint(x: r.minX, y: r.minY + radius))
-    p.addQuadCurve(to: CGPoint(x: r.minX + radius, y: r.minY), control: CGPoint(x: r.minX, y: r.minY))
-    p.closeSubpath()
-    return p
+/// A rounded vertical bar centred on `cy`.
+func bar(x: CGFloat, cy: CGFloat, width: CGFloat, height: CGFloat) -> CGPath {
+    CGPath(
+        roundedRect: CGRect(x: x, y: cy - height / 2, width: width, height: height),
+        cornerWidth: width / 2, cornerHeight: width / 2, transform: nil)
+}
+
+/// Fills `path` with Vauta's gradient: indigo → blue → teal, from `start` to `end`.
+func fillBrand(_ ctx: CGContext, _ path: CGPath, from start: CGPoint, to end: CGPoint) {
+    ctx.saveGState()
+    ctx.addPath(path)
+    ctx.clip()
+    ctx.drawLinearGradient(
+        gradient([(0, rgb(0x8B7DFF)), (0.5, rgb(0x3D8BFF)), (1, rgb(0x2EE6CF))]), start: start, end: end, options: [])
+    ctx.restoreGState()
+}
+
+/// A tilted orbit around the sphere: a thin ellipse, lavender on the left fading to teal on the right.
+func drawOrbit(_ ctx: CGContext, center: CGPoint) {
+    let (rx, ry, angle): (CGFloat, CGFloat, CGFloat) = (340, 120, 0.38)
+    ctx.saveGState()
+    ctx.translateBy(x: center.x, y: center.y)
+    ctx.rotate(by: angle)
+    ctx.addEllipse(in: CGRect(x: -rx, y: -ry, width: rx * 2, height: ry * 2))
+    ctx.setLineWidth(7)
+    ctx.replacePathWithStrokedPath()
+    ctx.clip()
+    ctx.drawLinearGradient(
+        gradient([(0, rgb(0xC9CBFF, 0.85)), (0.5, rgb(0x7A72FF, 0.42)), (1, rgb(0x63F0DD, 0.85))]),
+        start: CGPoint(x: -rx, y: 0), end: CGPoint(x: rx, y: 0), options: [])
+    ctx.restoreGState()
 }
 
 func drawIcon(in ctx: CGContext, pixels: Int) {
@@ -83,6 +101,7 @@ func drawIcon(in ctx: CGContext, pixels: Int) {
     ctx.interpolationQuality = .high
     ctx.setShouldAntialias(true)
     let small = pixels <= 32
+    let tiny = pixels <= 16
 
     // Body with a soft drop shadow.
     let body = CGRect(x: 100, y: 100, width: 824, height: 824)
@@ -90,25 +109,24 @@ func drawIcon(in ctx: CGContext, pixels: Int) {
     ctx.saveGState()
     ctx.setShadow(offset: CGSize(width: 0, height: -12 * scale), blur: 28 * scale, color: rgb(0x000000, 0.35))
     ctx.addPath(shape)
-    ctx.setFillColor(rgb(0x2A2470))
+    ctx.setFillColor(rgb(0x070818))
     ctx.fillPath()
     ctx.restoreGState()
 
-    // Background gradient: deep indigo (top left) → teal (bottom right).
+    // The night sky of the website: deep indigo into near black, with an indigo glow at the top left and a teal one
+    // at the bottom right.
     ctx.saveGState()
     ctx.addPath(shape)
     ctx.clip()
     ctx.drawLinearGradient(
-        gradient([(0, rgb(0x2A1A7C)), (0.52, rgb(0x2D58B0)), (1, rgb(0x12B8A6))]),
-        start: CGPoint(x: body.minX, y: body.maxY), end: CGPoint(x: body.maxX, y: body.minY), options: [])
-    // Top sheen and bottom shade for a little depth.
+        gradient([(0, rgb(0x15123F)), (0.55, rgb(0x0A0B22)), (1, rgb(0x050611))]),
+        start: CGPoint(x: 200, y: body.maxY), end: CGPoint(x: body.maxX - 100, y: body.minY), options: [])
     ctx.drawRadialGradient(
-        gradient([(0, rgb(0xFFFFFF, 0.22)), (1, rgb(0xFFFFFF, 0))]),
-        startCenter: CGPoint(x: 400, y: 930), startRadius: 0,
-        endCenter: CGPoint(x: 400, y: 930), endRadius: 620, options: [])
-    ctx.drawLinearGradient(
-        gradient([(0, rgb(0x000000, 0.18)), (1, rgb(0x000000, 0))]),
-        start: CGPoint(x: 512, y: body.minY), end: CGPoint(x: 512, y: body.minY + 260), options: [])
+        gradient([(0, rgb(0x6C63FF, 0.55)), (1, rgb(0x6C63FF, 0))]),
+        startCenter: CGPoint(x: 330, y: 700), startRadius: 0, endCenter: CGPoint(x: 330, y: 700), endRadius: 470, options: [])
+    ctx.drawRadialGradient(
+        gradient([(0, rgb(0x1FD6C1, 0.38)), (1, rgb(0x1FD6C1, 0))]),
+        startCenter: CGPoint(x: 740, y: 300), startRadius: 0, endCenter: CGPoint(x: 740, y: 300), endRadius: 430, options: [])
     ctx.restoreGState()
 
     // Hairline inner edge.
@@ -117,99 +135,73 @@ func drawIcon(in ctx: CGContext, pixels: Int) {
         ctx.addPath(shape)
         ctx.clip()
         ctx.addPath(shape)
-        ctx.setStrokeColor(rgb(0xFFFFFF, 0.16))
+        ctx.setStrokeColor(rgb(0xFFFFFF, 0.14))
         ctx.setLineWidth(6)
         ctx.strokePath()
         ctx.restoreGState()
     }
 
-    // The page.
-    let page =
-        small
-        ? CGRect(x: 262, y: 232, width: 500, height: 590)
-        : CGRect(x: 287, y: 222, width: 450, height: 580)
-    let fold: CGFloat = small ? 120 : 112
-    let sheet = pagePath(page, fold: fold, radius: 34)
+    // The sphere: a glow around it, Vauta's gradient, light from the top left and shade towards the edge. Larger at
+    // the small sizes, where the orbit is left out.
+    let center = CGPoint(x: 512, y: 512)
+    let radius: CGFloat = tiny ? 300 : small ? 270 : 230
+    let disc = CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
+    let sphere = CGPath(ellipseIn: disc, transform: nil)
+    // The back half of the orbit, behind the sphere.
+    if !small { drawOrbit(ctx, center: center) }
     ctx.saveGState()
-    ctx.setShadow(offset: CGSize(width: 0, height: -18 * scale), blur: 40 * scale, color: rgb(0x0B0830, 0.40))
-    ctx.addPath(sheet)
+    ctx.setShadow(offset: .zero, blur: 90 * scale, color: rgb(0x5A6BFF, 0.75))
+    ctx.addPath(sphere)
+    ctx.setFillColor(rgb(0x3D6BF0))
+    ctx.fillPath()
+    ctx.restoreGState()
+    fillBrand(ctx, sphere, from: CGPoint(x: disc.minX, y: disc.maxY), to: CGPoint(x: disc.maxX, y: disc.minY))
+    ctx.saveGState()
+    ctx.addPath(sphere)
+    ctx.clip()
+    let light = CGPoint(x: center.x - radius * 0.35, y: center.y + radius * 0.45)
+    ctx.drawRadialGradient(
+        gradient([(0, rgb(0xFFFFFF, 0.55)), (1, rgb(0xFFFFFF, 0))]),
+        startCenter: light, startRadius: 0, endCenter: light, endRadius: radius * 0.9, options: [])
+    let shade = CGPoint(x: center.x, y: center.y + radius * 0.2)
+    ctx.drawRadialGradient(
+        gradient([(0, rgb(0x000000, 0)), (1, rgb(0x050611, 0.45))]),
+        startCenter: shade, startRadius: radius * 0.55, endCenter: shade, endRadius: radius * 1.25, options: [])
+    ctx.restoreGState()
+    // The front half of the orbit passes in front of the sphere.
+    if !small {
+        ctx.saveGState()
+        ctx.clip(to: CGRect(x: 0, y: 0, width: canvas, height: center.y - 10))
+        drawOrbit(ctx, center: center)
+        ctx.restoreGState()
+    }
+
+    // The waveform in white, with a soft glow. Fewer, wider bars at the smallest sizes so the motif survives
+    // downsampling.
+    let heights: [CGFloat] =
+        tiny
+        ? [0.5, 1.0, 0.7]
+        : small
+            ? [0.45, 1.0, 0.7, 0.4]
+            : [0.3, 0.62, 1.0, 0.72, 0.9, 0.5, 0.28]
+    let barWidth: CGFloat = tiny ? 80 : small ? 52 : 30
+    let gap: CGFloat = tiny ? 56 : small ? 32 : 20
+    let maxHeight: CGFloat = tiny ? 300 : small ? 270 : 230
+    let total = CGFloat(heights.count) * barWidth + CGFloat(heights.count - 1) * gap
+    // Snap the start to the pixel grid so the bars stay crisp at 16 px.
+    let waveStartX = ((center.x - total / 2) * scale).rounded() / scale
+    let bars = CGMutablePath()
+    for (i, h) in heights.enumerated() {
+        bars.addPath(
+            bar(x: waveStartX + CGFloat(i) * (barWidth + gap), cy: center.y, width: barWidth,
+                height: max(barWidth, h * maxHeight)))
+    }
+    ctx.saveGState()
+    if !small { ctx.setShadow(offset: .zero, blur: 18 * scale, color: rgb(0xFFFFFF, 0.6)) }
+    ctx.addPath(bars)
     ctx.setFillColor(rgb(0xFFFFFF))
     ctx.fillPath()
     ctx.restoreGState()
-    // Faint vertical shading on the paper.
-    ctx.saveGState()
-    ctx.addPath(sheet)
-    ctx.clip()
-    ctx.drawLinearGradient(
-        gradient([(0, rgb(0xE8ECF8)), (1, rgb(0xFFFFFF))]),
-        start: CGPoint(x: 512, y: page.minY), end: CGPoint(x: 512, y: page.maxY), options: [])
-    ctx.restoreGState()
-
-    // Folded corner.
-    let corner = CGMutablePath()
-    corner.move(to: CGPoint(x: page.maxX - fold, y: page.maxY))
-    corner.addLine(to: CGPoint(x: page.maxX - fold, y: page.maxY - fold + 18))
-    corner.addQuadCurve(
-        to: CGPoint(x: page.maxX - fold + 18, y: page.maxY - fold),
-        control: CGPoint(x: page.maxX - fold, y: page.maxY - fold))
-    corner.addLine(to: CGPoint(x: page.maxX, y: page.maxY - fold))
-    corner.closeSubpath()
-    ctx.saveGState()
-    ctx.setShadow(offset: CGSize(width: -4 * scale, height: -6 * scale), blur: 14 * scale, color: rgb(0x0B0830, 0.25))
-    ctx.addPath(corner)
-    ctx.setFillColor(rgb(0xC9D0EE))
-    ctx.fillPath()
-    ctx.restoreGState()
-
-    // Waveform: rounded bars filled with the background gradient.
-    // Fewer, wider bars at the smallest sizes so the motif survives downsampling.
-    let tiny = pixels <= 16
-    let heights: [CGFloat] =
-        tiny
-        ? [0.5, 1.0, 0.7, 0.35]
-        : small
-            ? [0.38, 0.78, 1.0, 0.62, 0.34]
-            : [0.22, 0.46, 0.80, 0.56, 1.0, 0.70, 0.88, 0.44, 0.24]
-    let barWidth: CGFloat = tiny ? 64 : small ? 56 : 26
-    let gap: CGFloat = tiny ? 64 : small ? 30 : 15
-    let maxHeight: CGFloat = small ? 300 : 210
-    let total = CGFloat(heights.count) * barWidth + CGFloat(heights.count - 1) * gap
-    let waveCenterY = small ? page.midY - 10 : page.minY + 372
-    // Snap the start to the pixel grid so one-pixel bars stay crisp at 16 px.
-    let waveStartX = ((page.midX - total / 2) * scale).rounded() / scale
-    let bars = CGMutablePath()
-    for (i, h) in heights.enumerated() {
-        let height = max(barWidth, h * maxHeight)
-        let x = waveStartX + CGFloat(i) * (barWidth + gap)
-        bars.addRoundedRect(
-            in: CGRect(x: x, y: waveCenterY - height / 2, width: barWidth, height: height),
-            cornerWidth: barWidth / 2, cornerHeight: barWidth / 2)
-    }
-    ctx.saveGState()
-    ctx.addPath(bars)
-    ctx.clip()
-    ctx.drawLinearGradient(
-        gradient([(0, rgb(0x3B2E9E)), (1, rgb(0x0E9C98))]),
-        start: CGPoint(x: waveStartX, y: waveCenterY),
-        end: CGPoint(x: waveStartX + total, y: waveCenterY), options: [])
-    ctx.restoreGState()
-
-    // Text lines under the waveform.
-    if !small {
-        let inset: CGFloat = 70
-        let lineHeight: CGFloat = 24
-        let widths: [CGFloat] = [1.0, 0.86, 0.58]
-        let usable = page.width - 2 * inset
-        for (i, w) in widths.enumerated() {
-            let y = page.minY + 170 - CGFloat(i) * 52
-            ctx.addPath(
-                CGPath(
-                    roundedRect: CGRect(x: page.minX + inset, y: y, width: usable * w, height: lineHeight),
-                    cornerWidth: lineHeight / 2, cornerHeight: lineHeight / 2, transform: nil))
-        }
-        ctx.setFillColor(rgb(0xB9C1E2))
-        ctx.fillPath()
-    }
 }
 
 func renderPNG(pixels: Int, to url: URL) throws {
