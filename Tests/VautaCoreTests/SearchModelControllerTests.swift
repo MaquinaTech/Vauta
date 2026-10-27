@@ -69,6 +69,8 @@ struct SearchModelControllerTests {
         await env.controller.download()
         #expect(await env.wait { $0 == .ready })
         #expect(env.access.availability == .installed && env.access.model != nil)
+        // `ready` is set just before the choice is adopted and the hook runs: wait for the last step of the install.
+        #expect(await eventually { env.installedHook.value == 1 })
         #expect(ModelProviderSettings.load(defaults: env.defaults, hasServerConfig: false).embeddings == .onDeviceModel, "starting the download said they want it")
         #expect(env.installedHook.value == 1)
         let seen = env.states.value

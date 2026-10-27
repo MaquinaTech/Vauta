@@ -250,7 +250,7 @@ struct LanguageModelSchedulingTests {
         _ = await Self.eventually { await controller.status.state == .ready }
         #expect(await controller.status.state == .ready)
         #expect(!behaviour.rangeRequests.isEmpty)
-        #expect(access.availability == .installed)
+        TestHardware.expectIntegratedModelAvailability(of: access)
         let seen = states.withLock { $0 }
         #expect(seen.contains { if case .pausedForRecording = $0 { true } else { false } } && seen.contains { if case .downloading = $0 { true } else { false } })
         // Delete: back to nothing, and the access offers nothing.

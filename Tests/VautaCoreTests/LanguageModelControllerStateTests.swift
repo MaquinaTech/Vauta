@@ -94,7 +94,7 @@ struct LanguageModelControllerStateTests {
         await rig.controller.download()
         #expect(await rig.eventually(Self.isReady))
         #expect(rig.behaviour.rangeRequests.count - firstRun < firstRun + rig.model.spec.blocks.count, "blocks already verified were not fetched again")
-        #expect(rig.access.availability == .installed)
+        TestHardware.expectIntegratedModelAvailability(of: rig.access)
     }
 
     @Test(.timeLimit(.minutes(2))) func cancellingDiscardsWhatWasKept() async throws {
@@ -191,7 +191,7 @@ struct LanguageModelControllerStateTests {
         #expect(await rig.state() == .needsFile(.weights))
         await rig.controller.importFiles([weights])
         #expect(await rig.state() == .ready)
-        #expect(rig.access.availability == .installed)
+        TestHardware.expectIntegratedModelAvailability(of: rig.access)
         // A file that is not the model is refused with its own reason.
         let wrong = rig.fixture.root.appendingPathComponent("other.bin")
         try Data(repeating: 1, count: 1_234).write(to: wrong)
@@ -226,7 +226,7 @@ struct LanguageModelControllerStateTests {
         let fetched = rig.behaviour.rangeRequests.count - before
         #expect(fetched > 0 && fetched < allBlocks, "only the part from the damaged tensor was fetched again: \(fetched) of \(allBlocks)")
         try LanguageModelVerifier.fullVerify(file: rig.store.weightsURL, spec: spec)
-        #expect(rig.access.availability == .installed)
+        TestHardware.expectIntegratedModelAvailability(of: rig.access)
     }
 
     @Test(.timeLimit(.minutes(3))) func aPausedRepairIsStillARepairAfterARelaunchAndDiscardingItDeletesTheModel() async throws {
