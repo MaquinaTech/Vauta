@@ -69,6 +69,19 @@ struct StorageBackupHardeningTests {
         #expect(BackupSchemaGuard.normalized(plain) != BackupSchemaGuard.normalized(plain.replacingOccurrences(of: "b TEXT", with: "b BLOB")))
     }
 
+    /// A comment with an apostrophe (`-- the person's …` in `item_links`) must not swap literals and code for the rest of
+    /// the statement: quote characters added inside a later literal are still a difference.
+    @Test func aCommentWithAnApostropheDoesNotHideAChangedLiteral() throws {
+        let db = try image()
+        let sql = try #require(try db.query("SELECT sql FROM sqlite_schema WHERE name = 'item_links'").first?.string(0))
+        #expect(sql.contains("person's"))
+        let changed = sql.replacingOccurrences(of: "rel = 'same'", with: "rel = 'sa\"me'")
+        #expect(changed != sql)
+        #expect(BackupSchemaGuard.normalized(sql) != BackupSchemaGuard.normalized(changed))
+        #expect(BackupSchemaGuard.normalized("CREATE TABLE t(a) -- it's\n") == BackupSchemaGuard.normalized("CREATE TABLE t(a)"))
+        #expect(BackupSchemaGuard.normalized("CREATE TABLE t(/* it's */ a)") == BackupSchemaGuard.normalized("CREATE TABLE t(a)"))
+    }
+
     @Test func connectionsDoNotTrustTheSchema() throws {
         let db = try SQLiteDatabase(image: nil, size: 0)
         #expect(try db.query("PRAGMA trusted_schema")[0].int(0) == 0)

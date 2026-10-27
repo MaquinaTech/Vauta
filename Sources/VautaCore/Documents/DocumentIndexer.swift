@@ -413,11 +413,18 @@ public actor DocumentIndexer {
 
     /// Runs `body` with the URL of a file of a source, inside the source's scope. nil when the source can't be reached.
     public func withFile<T>(source id: Int64, relPath: String, _ body: (URL) async throws -> T) async rethrows -> T? {
-        guard let root = resolveRoot(id) else { return nil }
-        let url = sources[id]?.kind == .file ? root : root.appendingPathComponent(relPath)
+        guard let root = resolveRoot(id), let url = fileURL(source: id, root: root, relPath: relPath) else { return nil }
         let started = access.begin(root)
         defer { if started { access.end(root) } }
         return try await body(url)
+    }
+
+    /// The file at `relPath` in a source. A folder's path comes from the store and must be one the scan lists (no `..`,
+    /// nothing hidden), so it never leads outside the folder the person chose.
+    private func fileURL(source id: Int64, root: URL, relPath: String) -> URL? {
+        if sources[id]?.kind == .file { return root }
+        guard DocumentScanner.listsRelativePath(relPath) else { return nil }
+        return root.appendingPathComponent(relPath)
     }
 
     /// A file open in the passage viewer: its access stays open until `closeViewing`.
@@ -431,9 +438,8 @@ public actor DocumentIndexer {
     /// The URL of a source's file with its sandbox access held open (a PDF reads from its file while it is shown). nil when
     /// the source can't be reached (a drive that is not connected, a moved folder).
     public func openForViewing(source id: Int64, relPath: String) -> ViewedFile? {
-        guard let root = resolveRoot(id) else { return nil }
+        guard let root = resolveRoot(id), let url = fileURL(source: id, root: root, relPath: relPath) else { return nil }
         let began = access.begin(root)
-        let url = sources[id]?.kind == .file ? root : root.appendingPathComponent(relPath)
         guard FileManager.default.fileExists(atPath: url.path) else {
             if began { access.end(root) }
             return nil
@@ -449,8 +455,8 @@ public actor DocumentIndexer {
     /// Whether the file is still the one that was indexed (same size and date). A citation of a file that changed shows the stored
     /// passage with a note instead of the file.
     public func fileIsCurrent(source id: Int64, relPath: String) async -> Bool {
-        guard let record = try? await index.file(source: id, relPath: relPath), let root = resolveRoot(id) else { return false }
-        let url = sources[id]?.kind == .file ? root : root.appendingPathComponent(relPath)
+        guard let record = try? await index.file(source: id, relPath: relPath), let root = resolveRoot(id),
+              let url = fileURL(source: id, root: root, relPath: relPath) else { return false }
         let started = access.begin(root)
         defer { if started { access.end(root) } }
         guard case .found(let size, let mtime) = await statFile(url) else { return false }

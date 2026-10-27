@@ -29,6 +29,13 @@ extension DatabaseKeyStore {
         guard createIfMissing else { throw StoreError(.missingKey, detail: String(describing: self)) }
         return try createKey()
     }
+
+    /// Deletes the key item and creates a new random one with Vauta's own access list, for Erase Everything. An item
+    /// that appears between the two steps is never adopted: the add fails on the duplicate and this throws.
+    func newKey() throws -> SymmetricKey {
+        try remove()
+        return try createKey()
+    }
 }
 
 /// The database key in the login keychain (classic keychain, see `Keychain`).

@@ -94,6 +94,14 @@ func residentMemory() -> Int {
         }
     }
 
+    @Test func aStoredPathThatLeavesTheFolderIsNeverOpened() {
+        // A document's path comes from the store; only paths the scan lists lead to a file.
+        for path in ["../secret.pdf", "notes/../../secret.pdf", "./notes.pdf", ".hidden/notes.pdf", "a/.ssh/id"] {
+            #expect(!DocumentScanner.listsRelativePath(path), "\(path)")
+        }
+        #expect(DocumentScanner.listsRelativePath("Clients/Acme/proposal.pdf"))
+    }
+
     @Test func duplicateNamesAreRejectedForTheEntryThatIsRead() async {
         let data = docx { zip in
             zip.add("word/document.xml", "<w:document xmlns:w=\"w\"><w:body>\(OfficeFixtures.para("first"))</w:body></w:document>")

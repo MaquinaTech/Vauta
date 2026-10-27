@@ -100,6 +100,24 @@ enum Keychain {
         }
     }
 
+    /// Writes the item as a new one: deletes whatever is there, then adds it. An item someone else created (another
+    /// process of this user can plant one before Vauta writes, with an access list that lets it read the item) is
+    /// never updated in place, so a secret never lands under that access list. If the add fails, the previous value
+    /// is put back when it can be.
+    static func recreate(_ data: Data, service: String, account: String, label: String) throws {
+        let previous = try? readItem(service: service, account: account)
+        let status = SecItemDelete(baseQuery(service: service, account: account) as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw error(status, operation: "delete", account: account)
+        }
+        do {
+            try add(data, service: service, account: account, label: label)
+        } catch {
+            if let previous { try? add(previous, service: service, account: account, label: label) }
+            throw error
+        }
+    }
+
     /// Deletes the item, also under the service before the rename (an erase
     /// must shred both); a missing item is not an error.
     @discardableResult
@@ -129,8 +147,8 @@ public enum KeychainSecret {
         try read(account, service: VautaIdentity.keychainService)
     }
 
-    /// Updates the existing item in place (or adds it): a failed write never
-    /// loses the previous value.
+    /// Replaces the item with a new one (see `Keychain.recreate`): a failed write
+    /// puts the previous value back when it can.
     public static func write(_ value: String, account: String, label: String) throws {
         try write(value, account: account, label: label, service: VautaIdentity.keychainService)
     }
@@ -144,7 +162,7 @@ public enum KeychainSecret {
     }
 
     static func write(_ value: String, account: String, label: String, service: String) throws {
-        try Keychain.upsert(Data(value.utf8), service: service, account: account, label: label)
+        try Keychain.recreate(Data(value.utf8), service: service, account: account, label: label)
     }
 
     static func delete(_ account: String, service: String) {

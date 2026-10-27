@@ -32,17 +32,36 @@ enum BackupSchemaGuard {
     /// The stored SQL without the differences SQLite itself introduces: `ALTER TABLE ... RENAME` rewrites a statement
     /// (adding identifier quotes, and the text has varied across SQLite versions), so an image written by an older build on
     /// an older macOS must still match. Whitespace is collapsed (and dropped beside brackets and commas) and identifier quotes dropped; string literals stay
-    /// exactly as they are, so a changed default, check or trigger body is still a difference.
+    /// exactly as they are, so a changed default, check or trigger body is still a difference. Comments outside literals
+    /// count as whitespace: an apostrophe in one (`-- the person's …`) must not be taken for the start of a literal.
     static func normalized(_ sql: String) -> String {
+        let chars = Array(sql)
         var out = ""
         var inLiteral = false
         var pendingSpace = false
-        for ch in sql {
+        var i = 0
+        while i < chars.count {
+            let ch = chars[i]
+            let next: Character? = i + 1 < chars.count ? chars[i + 1] : nil
             if inLiteral {
                 out.append(ch)
                 if ch == "'" { inLiteral = false }
+                i += 1
                 continue
             }
+            if ch == "-", next == "-" {
+                while i < chars.count, chars[i] != "\n" { i += 1 }
+                pendingSpace = !out.isEmpty
+                continue
+            }
+            if ch == "/", next == "*" {
+                i += 2
+                while i < chars.count, !(chars[i] == "*" && i + 1 < chars.count && chars[i + 1] == "/") { i += 1 }
+                i = min(i + 2, chars.count)
+                pendingSpace = !out.isEmpty
+                continue
+            }
+            i += 1
             if ch.isWhitespace { pendingSpace = !out.isEmpty; continue }
             if ch == "\"" || ch == "`" || ch == "[" || ch == "]" { continue }
             if pendingSpace, ch != ")", ch != ",", out.last != "(" { out.append(" ") }
