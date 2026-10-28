@@ -13,6 +13,7 @@ enum CardStyle {
 private struct CardBackground: ViewModifier {
     let selected: Bool
     let tint: Color
+    var isVautaWork = false
     @Environment(\.colorSchemeContrast) private var systemContrast
     private var contrast: ColorSchemeContrast { systemContrast.snapshotResolved }
 
@@ -25,6 +26,9 @@ private struct CardBackground: ViewModifier {
                     shape.strokeBorder(tint.opacity(0.8), lineWidth: 1.5)
                 } else if contrast == .increased {
                     shape.strokeBorder(Color.primary.opacity(0.5), lineWidth: 1)
+                } else if isVautaWork {
+                    shape.strokeBorder(AngularGradient(colors: [Brand.indigo, Brand.cyan, Brand.teal, Brand.pink, Brand.indigo], center: .center)
+                        .opacity(0.5), lineWidth: 1)
                 }
             }
     }
@@ -51,6 +55,11 @@ extension View {
     /// The card background. `selected` adds a 1.5 pt outline in `tint` (a chosen option).
     func cardBackground(selected: Bool = false, tint: Color = .accentColor) -> some View {
         modifier(CardBackground(selected: selected, tint: tint))
+    }
+
+    /// The card of what Vauta wrote on its own (an answer): a hairline edge in Vauta's colours, as in the panel.
+    func vautaCardBackground() -> some View {
+        modifier(CardBackground(selected: false, tint: .accentColor, isVautaWork: true))
     }
 
     /// A tinted card for a call to action or a notice.

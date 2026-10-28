@@ -337,6 +337,8 @@ struct OnboardingHeader: View {
     let symbol: String
     /// Shows this glyph on Vauta's sphere instead of the symbol (the last page, when everything is set up).
     var orbGlyph: String?
+    /// The sphere is lit, with its orbit (everything is set up); otherwise the quiet one.
+    var orbLit = false
     /// The icon's colour; the accent colour unless the page has a state to show.
     var tint: Color = .accentColor
     let title: String
@@ -349,7 +351,7 @@ struct OnboardingHeader: View {
     var body: some View {
         VStack(spacing: 8) {
             if let orbGlyph {
-                BrandSymbol(symbol: orbGlyph, diameter: 56, showsOrbit: true)
+                BrandSymbol(symbol: orbGlyph, diameter: 56, showsOrbit: orbLit)
                     .padding(.vertical, 6)
                     .accessibilityHidden(true)
             } else {

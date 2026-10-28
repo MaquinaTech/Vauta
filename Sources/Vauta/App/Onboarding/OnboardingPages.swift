@@ -172,7 +172,9 @@ struct DonePage: View {
             // the instruction to fix them.
             let blocked = model.hasBlockingProblem(preferences)
             OnboardingHeader(symbol: allSet ? StatusSymbol.ok.name : (blocked ? StatusSymbol.warning.name : "checkmark.circle"),
-                             orbGlyph: allSet ? "checkmark" : nil,
+                             // Vauta's sphere on every variant, so the title never moves: lit with a check when all is set,
+                             // quiet with a check or an exclamation mark otherwise (the title and the cards say what is missing).
+                             orbGlyph: blocked ? "exclamationmark" : "checkmark", orbLit: allSet,
                              tint: allSet ? StatusSymbol.ok.color : (blocked ? StatusSymbol.warning.color : .accentColor),
                              title: model.finishedTitle(recorder, preferences),
                              subtitle: blocked

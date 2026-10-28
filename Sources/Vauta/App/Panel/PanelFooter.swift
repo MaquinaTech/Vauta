@@ -394,8 +394,8 @@ struct ServerStatusRow: View {
             // A small determinate ring that fills as the model reads (the text says the percentage): active work, not a static glyph.
             ProgressView(value: fraction).progressViewStyle(.circular).controlSize(.small)
         } else if s.activity != nil {
-            // Working: a spinner reads as busy, where an empty circle read as off.
-            ProgressView().controlSize(.small)
+            // Working: Vauta's small sphere turning reads as busy, where an empty circle read as off.
+            ThinkingOrb()
         } else {
             StatusSymbol.ok.image
         }

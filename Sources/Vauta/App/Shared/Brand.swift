@@ -32,8 +32,19 @@ enum Brand {
             : NSColor(srgbRed: 0x55 / 255, green: 0x4A / 255, blue: 0xE0 / 255, alpha: 1)
     })
 
-    /// The fill of a header symbol: indigo into blue into teal, like the record button.
-    static let symbolGradient = LinearGradient(colors: [indigo, blue, teal], startPoint: .topLeading, endPoint: .bottomTrailing)
+    /// The fill of a symbol: indigo into blue into teal, like the record button; deeper on a light background, where
+    /// the website's teal would look pale.
+    static let symbolGradient = LinearGradient(colors: [adaptive(light: 0x5A4FE0, dark: 0x7B6DFF),
+                                                        adaptive(light: 0x2F66E0, dark: 0x3A6FF0),
+                                                        adaptive(light: 0x0F8F84, dark: 0x17B3A3)],
+                                               startPoint: .topLeading, endPoint: .bottomTrailing)
+
+    private static func adaptive(light: UInt32, dark: UInt32) -> Color {
+        func ns(_ hex: UInt32) -> NSColor {
+            NSColor(srgbRed: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255, blue: CGFloat(hex & 0xFF) / 255, alpha: 1)
+        }
+        return Color(nsColor: NSColor(name: nil) { $0.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? ns(dark) : ns(light) })
+    }
 
     /// Renders keep one still frame: an animation would make two renders of the same scene differ.
     static var freezesMotion: Bool {

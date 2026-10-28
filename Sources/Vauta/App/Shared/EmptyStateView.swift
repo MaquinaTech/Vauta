@@ -92,7 +92,7 @@ struct SearchEmptyStateView: View {
         ContentUnavailableView {
             Label {
                 if trimmed.isEmpty { Text("No Results") } else { Text("No Results for “\(trimmed)”") }
-            } icon: { Image(systemName: "magnifyingglass") }
+            } icon: { BrandSymbol(symbol: "magnifyingglass") }
         } description: {
             // Same line-break rule as the other empty states: the last words (and short articles) stay together.
             if let message { Text(wrapping: message.keepingLastWordsTogether) }

@@ -27,6 +27,8 @@ struct VautaOrb: View {
     var carriesGlyph = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.colorSchemeContrast) private var systemContrast
+    private var contrast: ColorSchemeContrast { systemContrast.snapshotResolved }
     @ViewLocalState private var appeared = false
 
     private var still: Bool {
@@ -108,10 +110,13 @@ struct VautaOrb: View {
     private func draw(in canvas: inout GraphicsContext, size: CGSize, time: Double) {
         let center = CGPoint(x: size.width / 2, y: size.height / 2)
         let radius = diameter / 2
-        let isQuiet = mode == .muted || { if case .blocked = mode { true } else { false } }()
-        let orbit = showsOrbit && !isQuiet
+        let isBlocked = { if case .blocked = mode { true } else { false } }()
+        let isQuiet = mode == .muted || isBlocked
+        // A quieter sphere keeps a faint orbit, so the button looks the same kind of thing whatever sits above it.
+        let orbit = showsOrbit && !isBlocked
 
-        if !isQuiet { drawGlow(in: &canvas, center: center, radius: radius) }
+        // No halo with Increase Contrast, like the panel's glow.
+        if !isQuiet && contrast != .increased { drawGlow(in: &canvas, center: center, radius: radius) }
         if orbit { drawOrbit(in: &canvas, center: center, radius: radius, time: time, front: false) }
         if mode == .listening { drawCorona(in: &canvas, center: center, radius: radius, time: time) }
         drawSphere(in: &canvas, center: center, radius: radius, time: time)
@@ -119,7 +124,7 @@ struct VautaOrb: View {
     }
 
     private func drawGlow(in canvas: inout GraphicsContext, center: CGPoint, radius: CGFloat) {
-        let strength = (colorScheme == .dark ? 0.45 : 0.22) + 0.3 * level
+        let strength = (colorScheme == .dark ? 0.45 : 0.22) + (colorScheme == .dark ? 0.3 : 0.15) * level
         let reach = radius * (1.75 + 0.35 * level)
         let rect = CGRect(x: center.x - reach, y: center.y - reach, width: reach * 2, height: reach * 2)
         canvas.fill(Path(ellipseIn: rect), with: .radialGradient(
@@ -207,7 +212,7 @@ struct VautaOrb: View {
             let twinkle = 0.6 + 0.4 * sin(time * (1.3 + jitter * 1.4) + seed)
             let near = (depth + 1) / 2
             let size = CGFloat(0.5 + 1.2 * pow(Self.noise(seed * 5.31), 2)) * CGFloat(0.8 + 0.4 * near) * scale
-            let opacity = (front ? 0.5 + 0.5 * near : 0.15 + 0.25 * near) * twinkle
+            let opacity = (front ? 0.5 + 0.5 * near : 0.15 + 0.25 * near) * twinkle * (mode == .muted ? 0.5 : 1)
             let mix = (cos(angle) + 1) / 2
             canvas.fill(Path(ellipseIn: CGRect(x: point.x - size / 2, y: point.y - size / 2, width: size, height: size)),
                         with: .color((mix > 0.5 ? right : left).opacity(opacity)))
@@ -230,8 +235,10 @@ struct VautaOrb: View {
             path.closeSubpath()
             var glow = canvas
             glow.addFilter(.blur(radius: max(2, diameter / 28)))
-            glow.stroke(path, with: .color(ring.color.opacity(0.3 + 0.35 * level)), lineWidth: max(1.5, diameter / 36))
-            canvas.stroke(path, with: .color(ring.color.opacity(0.45 + 0.3 * level)), lineWidth: max(0.7, diameter / 110))
+            // Calmer on a light background, where the same pink reads as neon.
+            let calm = colorScheme == .dark ? 1.0 : 0.6
+            glow.stroke(path, with: .color(ring.color.opacity((0.3 + 0.35 * level) * calm)), lineWidth: max(1.5, diameter / 36))
+            canvas.stroke(path, with: .color(ring.color.opacity((0.45 + 0.3 * level) * calm)), lineWidth: max(0.7, diameter / 110))
         }
     }
 

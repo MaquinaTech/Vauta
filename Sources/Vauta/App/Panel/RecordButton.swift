@@ -132,10 +132,10 @@ struct RecordButton: View {
     }
 
     private var orbMode: VautaOrb.Mode {
+        // While Vauta starts, saves, restores or erases, the orbit spins and the white spinner sits on the sphere.
+        if model.isBusy || restoringNow { return .working }
         // Opaque, so the white glyph reads (4.5:1); it still looks quieter than the coloured button.
         if blocked { return .blocked(Self.blockedGrey) }
-        // While Vauta starts or saves, the orbit spins and the white spinner sits on the sphere.
-        if model.isBusy || restoringNow { return .working }
         // Stepping back is not being disabled: the button stays fully opaque (smaller, no glow, no orbit).
         if isMuted { return .muted }
         return model.isRecording ? .listening : .idle

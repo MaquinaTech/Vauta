@@ -510,7 +510,7 @@ struct AskView: View {
             }
         }
         .padding(12)
-        .cardBackground()
+        .vautaCardBackground()
     }
 
     /// The moments a "not yet" answer relates to: one link each, in the order they were said, without the model's sentences.
