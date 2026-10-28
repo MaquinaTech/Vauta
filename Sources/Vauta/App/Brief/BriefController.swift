@@ -15,51 +15,16 @@ import Observation
 @MainActor
 @Observable
 final class BriefController {
-    /// One event and its brief.
-    struct Entry: Equatable, Identifiable {
-        var event: BriefEvent
-        var snapshot: BriefSnapshot?
-        /// The Mac is too hot: nothing was built.
-        var hot = false
-        var reminders = BriefRemindersState.off
-        var id: BriefOccurrence { event.occurrence }
-    }
-
-    /// What the Upcoming view shows.
-    enum UpcomingState: Equatable {
-        /// Calendar or the brief is off: the view is not offered.
-        case off
-        case calendarDenied
-        case loading
-        /// No qualifying meeting in the next 12 hours.
-        case none
-        case entries([Entry])
-    }
-
-    /// What a test replaces so the controller runs without Calendar, a recorder or a store.
-    struct Seams {
-        var isLocked: () -> Bool = { false }
-        var calendarOn: () -> Bool = { true }
-        var hasAccess: () -> Bool = { true }
-        var calendars: () -> Set<String> = { ["work"] }
-        var source: any BriefEventSource
-        var build: (BriefEvent, Bool) async -> Entry
-        /// Whether a recording is running; nil asks the recorder.
-        var isRecording: (() -> Bool)?
-        /// Keeps the brief with the meeting; nil writes it to the recorder's store.
-        var saveBrief: ((BriefStoredReferences, Int64, Date) async -> Void)?
-    }
-
     /// How far from now an event may start for the one-time offer (the window Settings → Calendar names).
     static let offerWindow: TimeInterval = 10 * 60
 
     let prefs: BriefPreferencesModel
 
     /// The event the panel card is about (from `lead` minutes before it starts until 15 minutes after).
-    private(set) var next: Entry?
+    var next: Entry?
     private(set) var upcoming = UpcomingState.off
     /// The brief the current recording was started with (hidden while Meetings are locked).
-    private(set) var recordingBrief: BriefSnapshot?
+    var recordingBrief: BriefSnapshot?
     /// Which of the Upcoming entries is shown.
     var upcomingIndex = 0
 
@@ -82,26 +47,16 @@ final class BriefController {
     @ObservationIgnored private var expiry: Task<Void, Never>?
     @ObservationIgnored private var pruneTask: Task<Void, Never>?
     /// Builds the references of a recording that started while Meetings were locked.
-    @ObservationIgnored private var attachmentTask: Task<Void, Never>?
-    @ObservationIgnored private var recordingRun = 0
+    @ObservationIgnored var attachmentTask: Task<Void, Never>?
+    @ObservationIgnored var recordingRun = 0
     @ObservationIgnored private var announced = Set<BriefOccurrence>()
     /// Set at recording start, kept until the meeting is saved: only references (no reminder or invitation text) and when the recording began.
-    @ObservationIgnored private(set) var attachment: Attachment?
+    @ObservationIgnored var attachment: Attachment?
     @ObservationIgnored var lastNotified: BriefEvent?
     /// The occurrence "Record at Start" was pressed for: the card says so until the meeting starts or the person cancels.
     var armed: BriefOccurrence?
     @ObservationIgnored var armedTask: Task<Void, Never>?
     @ObservationIgnored var removalTask: Task<Void, Never>?
-    struct Attachment {
-        var references: BriefStoredReferences
-        var occurrence: BriefOccurrence
-        var title: String
-        var start: Date
-        var end: Date
-        var service: ConferencingService?
-        /// When the recording began: the brief is the one the person had then.
-        var recordedAt: Date
-    }
 
     /// Renderings invent the state and never touch EventKit.
     @ObservationIgnored private(set) var isSnapshot = false
@@ -198,7 +153,7 @@ final class BriefController {
 
     private var cardLead: Int { prefs.leadMinutes > 0 ? prefs.leadMinutes : BriefEventSelector.defaultLeadMinutes }
 
-    private func isWithinCard(_ event: BriefEvent, now: Date) -> Bool {
+    func isWithinCard(_ event: BriefEvent, now: Date) -> Bool {
         now >= event.start.addingTimeInterval(-Double(cardLead) * 60) && now <= event.start.addingTimeInterval(BriefEventSelector.lateGrace)
     }
 
@@ -581,129 +536,6 @@ final class BriefController {
         armed = nil
     }
 
-    // MARK: Recording
-
-    private var isRecordingNow: Bool { seams?.isRecording?() ?? (recorder?.phase == .recording || recorder?.phase == .starting) }
-
-    /// A recording that takes no linked calendar event can still be the in-person event the card is about: the card's
-    /// event, when it has no meeting link and the card is inside the window `BriefRecordingMatch` uses. The recording takes that event as
-    /// its calendar event (title, attendees and series, never the invitation's notes), so its attendees and series are saved like those of
-    /// a meeting with a link and the next occurrence finds this one.
-    func inPersonEventOnCard(at now: Date = .now) -> CalendarEventMatch? {
-        guard prefs.enabled, let event = next?.event, event.service == nil, isWithinCard(event, now: now) else { return nil }
-        return CalendarEventMatch(meeting: event.calendarMeeting, service: nil, occurrence: event.occurrence)
-    }
-
-    func inPersonOccurrenceOnCard(at now: Date = .now) -> BriefOccurrence? { inPersonEventOnCard(at: now)?.occurrence }
-
-    /// A recording starts. When the event on screen is the one it takes (the same occurrence of the same event), the meeting keeps that
-    /// brief when it ends, whether Meetings were unlocked then or not. A recording that takes no calendar event never carries one.
-    func recordingStarted(recordingOccurrence: BriefOccurrence?) {
-        removalTask?.cancel()
-        recorder?.withdrawBriefNotification()
-        armedTask?.cancel()
-        armed = nil
-        attachmentTask?.cancel()
-        attachment = nil
-        recordingBrief = nil
-        recordingRun += 1
-        guard prefs.enabled, let entry = next,
-              BriefRecordingMatch.matches(entry.event.occurrence, at: .now, leadMinutes: prefs.leadMinutes, recordingOccurrence: recordingOccurrence)
-        else { return }
-        if !isLocked, let snapshot = entry.snapshot {
-            keep(snapshot, showing: true)
-            return
-        }
-        // Locked (the usual state): the deterministic brief is built anyway, with no model, no cache and nothing shown. Only its
-        // references are kept, and the row appears when Meetings are unlocked.
-        let occurrence = entry.event.occurrence
-        let run = recordingRun
-        attachmentTask = Task { [weak self] in
-            guard let self, let snapshot = await self.snapshotForRecording(occurrence), !Task.isCancelled, self.recordingRun == run,
-                  self.isRecordingNow else { return }
-            self.keep(snapshot, showing: !self.isLocked)
-        }
-    }
-
-    private func keep(_ snapshot: BriefSnapshot, showing: Bool) {
-        if showing { recordingBrief = snapshot }
-        guard snapshot.hasContent else { return }
-        attachment = Attachment(references: BriefStoredReferences(snapshot: snapshot), occurrence: snapshot.occurrence, title: snapshot.title,
-                                start: snapshot.start, end: snapshot.end, service: snapshot.service, recordedAt: .now)
-    }
-
-    /// The event of the occurrence is read again in full (the locked card holds only its title and time) and its brief built from the
-    /// store alone.
-    private func snapshotForRecording(_ occurrence: BriefOccurrence) async -> BriefSnapshot? {
-        guard canRead, let source = activeSource else { return nil }
-        let start = Date(timeIntervalSince1970: TimeInterval(occurrence.startSeconds))
-        let events = await source.events(from: start.addingTimeInterval(-1), to: start.addingTimeInterval(1), calendarIDs: selectedCalendars, matching: [occurrence])
-        guard let event = events.first(where: { $0.occurrence == occurrence }) else { return nil }
-        let entry: Entry
-        if let build = seams?.build { entry = await build(event, false) } else { entry = await build(event, force: false, deterministic: true) }
-        return entry.snapshot
-    }
-
-    /// The recording ended and the meeting was saved: its brief is stored with it (references and the verified agenda only).
-    func recordingEnded(meetingID: Int64?) async {
-        await attachmentTask?.value
-        let held = attachment
-        defer {
-            resumePausedAgendas()
-            recordingBrief = nil
-            attachment = nil
-            attachmentTask = nil
-        }
-        guard let meetingID, let held else { return }
-        if let save = seams?.saveBrief {
-            await save(held.references, meetingID, held.recordedAt)
-        } else if let store = recorder?.store {
-            try? await store.saveBrief(held.references, for: meetingID, at: held.recordedAt)
-        } else {
-            return
-        }
-        await cache.invalidate(.occurrence(held.occurrence))
-        next = nil
-        refreshNext()
-    }
-
-    /// The recording was discarded (nothing recorded): the brief is not kept.
-    func recordingDiscarded() {
-        resumePausedAgendas()
-        attachmentTask?.cancel()
-        recordingRun += 1
-        recordingBrief = nil
-        attachment = nil
-    }
-
-    // MARK: Opening other apps (read-only)
-
-    /// Shows the event in Calendar when it has an identifier, else launches Calendar. Nothing is created or changed.
-    func openCalendar(_ event: BriefEvent? = nil) { openCalendar(eventIdentifier: event?.eventIdentifier) }
-
-    func openCalendar(eventIdentifier: String?) {
-        if let url = BriefOpenURL.event(eventIdentifier: eventIdentifier), BriefController.openShowing(url, in: "com.apple.iCal") { return }
-        BriefController.openApp("com.apple.iCal")
-    }
-
-    /// Shows the reminder in Reminders when its identifier is known, else launches Reminders.
-    func openReminders(id: String? = nil) {
-        if let url = BriefOpenURL.reminder(id: id), BriefController.openShowing(url, in: "com.apple.reminders") { return }
-        BriefController.openApp("com.apple.reminders")
-    }
-
-    /// Opens `url` with the Apple app that owns it; false when that app is not there.
-    private static func openShowing(_ url: URL, in bundleID: String) -> Bool {
-        guard let app = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { return false }
-        NSWorkspace.shared.open([url], withApplicationAt: app, configuration: NSWorkspace.OpenConfiguration())
-        return true
-    }
-
-    static func openApp(_ bundleID: String) {
-        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { return }
-        NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
-    }
-
     // MARK: Renderings
 
     #if VAUTA_DIAGNOSTICS
@@ -719,15 +551,4 @@ final class BriefController {
         self.recordingBrief = recordingBrief
     }
     #endif
-}
-
-/// The rules shared with the EventKit reader, which qualifies events off the main actor.
-final class BriefRulesBox: @unchecked Sendable {
-    private let lock = NSLock()
-    private var stored = BriefEventRules(calendarIDs: [])
-
-    var value: BriefEventRules {
-        get { lock.withLock { stored } }
-        set { lock.withLock { stored = newValue } }
-    }
 }
