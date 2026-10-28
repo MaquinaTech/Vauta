@@ -96,4 +96,16 @@ struct ModelsPeerCheckTests {
         let watch = PeerWatch(addresses: { _ in ["10.0.0.7"] })
         #expect(await watch.addresses(within: .milliseconds(50)) == nil)
     }
+
+    /// The probe's task delegate gets the events it implements before the session's delegate: if it ever answered a TLS
+    /// challenge or a redirect, the probe would skip the pins, the private CA and the no-redirect rule of `LLMClient`.
+    @Test func theProbeDelegateLeavesTrustAndRedirectsToTheClient() {
+        let watch = PeerWatch(addresses: { _ in [] })
+        for selector in [#selector(URLSessionDelegate.urlSession(_:didReceive:completionHandler:)),
+                         #selector(URLSessionTaskDelegate.urlSession(_:task:didReceive:completionHandler:)),
+                         #selector(URLSessionTaskDelegate.urlSession(_:task:willPerformHTTPRedirection:newRequest:completionHandler:))] {
+            #expect(!watch.responds(to: selector), Comment(rawValue: NSStringFromSelector(selector)))
+        }
+        #expect(watch.responds(to: #selector(URLSessionTaskDelegate.urlSession(_:task:didFinishCollecting:))))
+    }
 }
