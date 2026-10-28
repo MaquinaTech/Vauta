@@ -9,6 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Fixed
 
 - `scripts/update.sh` stopped with `unbound variable` before verifying the release, in shells that read the `…` after a variable name as part of the name. If it stopped for you, run `git checkout main && git pull` once and run it again.
+- `scripts/update.sh` ended with `dir: unbound variable` and exit status 1 after a successful install, and left a temporary folder behind.
 
 ## [0.9.3] - 2026-10-28
 
