@@ -4,7 +4,9 @@ All notable changes to Vauta are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Vauta follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.9.1] - 2026-10-28
+
+The look of the website comes to the app (a new icon, Vauta's animated sphere, Welcome and the menu-bar panel in Vauta's colours) and the security fixes of the audit after 0.9.0. No change to recording, transcription, the minutes or the stored data.
 
 ### Changed
 
@@ -122,4 +124,5 @@ The first public release (public beta). Compared with 0.1.0, Vauta is open sourc
 
 The first version, used privately before the project was published. Safari and Spanish (Spain) only, with minutes written by an OpenAI-compatible model server on this Mac or on the local network.
 
+[0.9.1]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.1
 [0.9.0]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.0
