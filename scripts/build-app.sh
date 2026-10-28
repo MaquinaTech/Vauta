@@ -79,6 +79,8 @@ elif [[ "${VAUTA_ALLOW_ADHOC:-0}" == "1" ]]; then
   MODE="adhoc"
   SIGN="-"
   echo "WARNING: ad-hoc signature (VAUTA_ALLOW_ADHOC=1); macOS will ask for permissions again" >&2
+elif [[ -f "$KC" ]]; then
+  fail "Vauta's signing keychain is left over from a setup that did not finish. Delete it (security delete-keychain \"$KC\") and run ./scripts/setup-signing.sh again (or set VAUTA_ALLOW_ADHOC=1)"
 else
   fail "Vauta's signing keychain is missing. Run ./scripts/setup-signing.sh first (or set VAUTA_SIGN_IDENTITY / VAUTA_ALLOW_ADHOC=1)"
 fi
@@ -151,7 +153,12 @@ xattr -cr "$APP"
 # --- Sign ----------------------------------------------------------------------------------
 if [[ "$MODE" == "local" ]]; then
   if [[ -t 0 ]]; then
-    security unlock-keychain "$KC"   # asks for the signing keychain's password
+    echo "Password of Vauta's signing keychain (the one you chose in setup-signing.sh, not your Mac's):"
+    for try in 1 2 3; do
+      security unlock-keychain "$KC" && break
+      [[ $try -lt 3 ]] || fail "wrong signing keychain password. If it is lost, delete the keychain (security delete-keychain \"$KC\") and run ./scripts/setup-signing.sh again"
+      echo "That is not the signing keychain's password, try again ($((try + 1))/3):"
+    done
   fi
   trap 'security lock-keychain "$KC" 2>/dev/null || true' EXIT
 fi

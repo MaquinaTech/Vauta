@@ -27,7 +27,14 @@ if [[ -e "$KC" ]]; then
   # A previous, interrupted attempt leaves an empty keychain: rebuild it. A keychain with
   # content is never touched.
   if [[ -n "$(security find-certificate -a "$KC" 2>/dev/null)" ]]; then
-    echo "$KC already exists and is not empty: leaving it alone."; exit 1
+    if [[ -s scripts/signing-identity.txt ]]; then
+      echo "Vauta's signing identity is already set up ($KC). Nothing to do: run ./scripts/install.sh."; exit 0
+    fi
+    # An attempt that stopped after the import (for example at the trust step) leaves the identity without
+    # scripts/signing-identity.txt, so install.sh cannot use it: say how to start over instead of looping.
+    echo "$KC is left over from an attempt that did not finish. Delete it and run this script again:"
+    echo "  security delete-keychain \"$KC\""
+    exit 1
   fi
   security delete-keychain "$KC"
 fi
@@ -44,18 +51,22 @@ echo "2/5 Generating the identity and importing it into the signing keychain…"
 D="$(mktemp -d)"; trap 'rm -rfP "$D"' EXIT; umask 077
 "$OPENSSL" req -x509 -newkey rsa:3072 -nodes -keyout "$D/key.pem" -out "$D/cert.pem" -days 3650 -sha256 \
   -subj "/CN=$CN" -addext "basicConstraints=critical,CA:FALSE" \
-  -addext "keyUsage=critical,digitalSignature" -addext "extendedKeyUsage=critical,codeSigning" 2>/dev/null
+  -addext "keyUsage=critical,digitalSignature" -addext "extendedKeyUsage=critical,codeSigning" 2>/dev/null \
+  || { echo "ERROR: $("$OPENSSL" version) could not create the certificate. Please report it."; exit 1; }
 P12PASS="$("$OPENSSL" rand -hex 24)"
-# OpenSSL 3 needs -legacy so `security import` can read the .p12; LibreSSL (macOS's) does not know it.
-LEGACY=(); "$OPENSSL" version | grep -q '^OpenSSL 3' && LEGACY=(-legacy)
-"$OPENSSL" pkcs12 -export ${LEGACY[@]+"${LEGACY[@]}"} -inkey "$D/key.pem" -in "$D/cert.pem" -name "$CN" -out "$D/vauta.p12" -passout "pass:$P12PASS"
+# OpenSSL 3 and later (Homebrew's) write the .p12 with AES and PBKDF2, which `security import` cannot read: it fails with
+# "MAC verification failed during PKCS12 import (wrong password?)". Name the algorithms macOS reads (3DES, SHA-1 MAC), whatever
+# the version; LibreSSL (macOS's) already uses them.
+P12ALGS=(); "$OPENSSL" version | grep -q '^OpenSSL' && P12ALGS=(-keypbe PBE-SHA1-3DES -certpbe PBE-SHA1-3DES -macalg sha1)
+"$OPENSSL" pkcs12 -export ${P12ALGS[@]+"${P12ALGS[@]}"} -inkey "$D/key.pem" -in "$D/cert.pem" -name "$CN" -out "$D/vauta.p12" -passout "pass:$P12PASS"
 echo "   Type the signing keychain's password again to unlock it:"
 for try in 1 2 3; do
   security unlock-keychain "$KC" && break
   [[ $try -lt 3 ]] || { echo "Too many attempts. Run the script again."; exit 1; }
   echo "   That does not match, try again ($((try + 1))/3):"
 done
-security import "$D/vauta.p12" -k "$KC" -P "$P12PASS" -T /usr/bin/codesign >/dev/null
+security import "$D/vauta.p12" -k "$KC" -P "$P12PASS" -T /usr/bin/codesign >/dev/null \
+  || { echo "ERROR: could not import the signing identity (not your password: the .p12 made by $("$OPENSSL" version)). Please report it."; exit 1; }
 echo "   The signing keychain's password once more (authorizes codesign only):"
 for try in 1 2 3; do
   security set-key-partition-list -S apple-tool:,apple: -s "$KC" >/dev/null && break
@@ -63,8 +74,12 @@ for try in 1 2 3; do
   echo "   That does not match, try again ($((try + 1))/3):"
 done
 
-echo "3/5 Trusting it for code signing only (macOS asks for your Mac's password)…"
-security add-trusted-cert -p codeSign -k "$KC" "$D/cert.pem"
+echo "3/5 Trusting it for code signing only (macOS asks for your Mac's login password this time, not the new one)…"
+for try in 1 2 3; do
+  security add-trusted-cert -p codeSign -k "$KC" "$D/cert.pem" && break
+  [[ $try -lt 3 ]] || { echo "Not trusted. Delete the keychain (security delete-keychain \"$KC\") and start over."; exit 1; }
+  echo "   Not trusted (wrong password or cancelled). Your Mac's login password, try again ($((try + 1))/3):"
+done
 
 NEW_SHA1="$(security find-identity -v -p codesigning "$KC" | awk -v cn="\"$CN\"" '$0 ~ cn {print $2; exit}')"
 [[ -n "$NEW_SHA1" ]] || { echo "ERROR: the new identity is not valid for code signing"; exit 1; }
