@@ -5,17 +5,21 @@ nobody outside the project has reviewed it, and the author of the code wrote it.
 primitives are used, where, with what parameters, what was checked, and what is weak or unprotected. The formats are
 specified in [SECURITY.md](../SECURITY.md#encryption); this page judges them.
 
-Reviewed at commit `919bb04`, for every code file in the Code column of the inventory below (`Storage/`, `Backup/`,
-`LLM/ServerTrust.swift`, `LLM/LLMClient.swift`, `LLM/MeetingStore+Search.swift`, `Diarization/DiarizationModels.swift`,
-`Documents/DocumentIndex.swift`, `Documents/DocumentIndexer.swift`, `Documents/DocumentIndexer+IO.swift`, `Documents/MeetingStore+Documents.swift`). The previous review was at `a670db8`, a commit of the history before the public repository; the changes
-from it to `919bb04` were reviewed as a whole.
+Reviewed at commit `ca9b697`, for every code file in the Code column of the inventory below (`Storage/`, `Backup/`,
+`LLM/ServerTrust.swift`, `LLM/LLMClient.swift`, `LLM/LLMClient+Trust.swift`, `LLM/LLMClient+PeerCheck.swift`,
+`LLM/MeetingStore+Search.swift`, `Diarization/DiarizationModels.swift`,
+`Documents/DocumentIndex.swift`, `Documents/DocumentIndexer.swift`, `Documents/DocumentIndexer+IO.swift`, `Documents/MeetingStore+Documents.swift`). The previous review was at `919bb04` (between 0.9.0 and 0.9.1); the changes from it to `ca9b697` (0.9.3: the
+staged restore key, the key item recreated on restore, the backup schema guard reading quoted names whole, the backup
+password rule, no network fetch during TLS evaluation, the peer check before a name-based server gets a request, and
+files split without changing code) were reviewed as a whole. Before that, `a670db8`, a commit of the history before the
+public repository.
 The release workflow `.github/workflows/release.yml` is outside this review: since the source-only decision it holds no
 secrets, signs nothing and publishes no binaries. The review is
 redone for each later change to any of those paths, and before each release the maintainer checks that none changed since.
 The command must print nothing (otherwise redo the review and change the commit above):
 
 ```
-git diff 919bb04..vX.Y.Z -- Sources/VautaCore/Storage Sources/VautaCore/Backup Sources/VautaCore/LLM/ServerTrust.swift Sources/VautaCore/LLM/LLMClient.swift Sources/VautaCore/LLM/MeetingStore+Search.swift Sources/VautaCore/Diarization/DiarizationModels.swift Sources/VautaCore/Documents/DocumentIndex.swift Sources/VautaCore/Documents/DocumentIndexer.swift Sources/VautaCore/Documents/DocumentIndexer+IO.swift Sources/VautaCore/Documents/MeetingStore+Documents.swift
+git diff ca9b697..vX.Y.Z -- Sources/VautaCore/Storage Sources/VautaCore/Backup Sources/VautaCore/LLM/ServerTrust.swift Sources/VautaCore/LLM/LLMClient.swift Sources/VautaCore/LLM/LLMClient+Trust.swift Sources/VautaCore/LLM/LLMClient+PeerCheck.swift Sources/VautaCore/LLM/MeetingStore+Search.swift Sources/VautaCore/Diarization/DiarizationModels.swift Sources/VautaCore/Documents/DocumentIndex.swift Sources/VautaCore/Documents/DocumentIndexer.swift Sources/VautaCore/Documents/DocumentIndexer+IO.swift Sources/VautaCore/Documents/MeetingStore+Documents.swift
 ```
 
 Findings are reported privately, as described in
@@ -52,7 +56,7 @@ model and the search model (`LanguageModel/`, `SearchModel/`), and the text fing
 | Backup `.vautabackup` | PBKDF2-HMAC-SHA256, 1,000,000 iterations (accepts 600,000 to 2,000,000), 16-byte random salt, 32-byte key; AES-256-GCM, AAD = the 28-byte header | `Backup/BackupFormat.swift`, `Backup/BackupPassword.swift` |
 | Backup restore | New random store key, staged first under account `database-key-v1.staged`; store re-sealed; then the key item is deleted and added again with Vauta's own access list and the staged item deleted; the documents index and its marker are deleted | `Backup/MeetingStore+Backup.swift` |
 | Erase Meetings and Context | Key deleted and verified gone, new key added (crypto-shred); the documents index and its marker are deleted | `Storage/MeetingStore+Erase.swift`, `Storage/DatabaseKeyStore.swift` |
-| Model server TLS | TLS 1.3 only, private CA as sole anchor when set (system anchors otherwise), no network fetch during evaluation, optional SHA-256 SPKI pins | `LLM/ServerTrust.swift`, `LLM/LLMClient.swift` |
+| Model server TLS | TLS 1.3 only, private CA as sole anchor when set (system anchors otherwise), no network fetch during evaluation, optional SHA-256 SPKI pins; a host given by name gets a probe without body or key, and nothing else until the connected address is allowed | `LLM/ServerTrust.swift`, `LLM/LLMClient.swift`, `LLM/LLMClient+Trust.swift`, `LLM/LLMClient+PeerCheck.swift` |
 | Bundled speaker models | SHA-256 tree hash over every file, compared with a constant in the source before Core ML loads them | `Diarization/DiarizationModels.swift` |
 | Search-cache fingerprint | First 8 bytes of SHA-256 of a text, as a change detector inside the encrypted store (not a security control) | `LLM/MeetingStore+Search.swift` |
 | Release | Source-only: a tag and a draft GitHub release with CHANGELOG notes; no binaries, no signing material, no secrets in the workflow | `.github/workflows/release.yml`, [RELEASING.md](RELEASING.md) |
@@ -98,7 +102,10 @@ model and the search model (`LanguageModel/`, `SearchModel/`), and the text fing
    next launch by a marker file. Erase and restore also delete `vauta.docs.enc` and `vauta.docs.extracting`; the
    in-memory index is emptied and takes the new derived key.
 9. **Network.** TLS minimum is set to 1.3, trust is evaluated with the private CA as the only anchor when one is set (the system anchors otherwise) and no network fetch in either case,
-   host names are checked, pins compare the leaf SPKI hash. Tests cover these rules; TLS 1.3 and the absence of proxies and
+   host names are checked, pins compare the leaf SPKI hash. For a host given by name, the first request of a session is
+   a probe without body or key whose metrics must name only allowed addresses before anything else is sent; its task
+   delegate implements only the metrics callback, so trust and redirects stay with the client's own delegate (a test
+   checks it). A later new connection is checked when its request completes (see SECURITY.md). Tests cover these rules; TLS 1.3 and the absence of proxies and
    redirects are verified by reading the code and by Network Activity, not by a unit test (see [CLAIMS.md](CLAIMS.md)).
 
 ## Known limits and weaknesses
