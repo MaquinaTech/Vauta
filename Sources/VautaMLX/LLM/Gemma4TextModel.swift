@@ -162,9 +162,25 @@ public final class Gemma4TextModel {
         return rows.reshaped([1, ids.count, config.layers, config.pleDim])
     }
 
-    /// Runs `ids` through the network, appending to `caches`, and returns the final-normalised hidden state of the last
-    /// position [1, 1, 2560] (logits are only ever needed for the last position of a chunk).
-    func forward(_ ids: [Int32], caches: LayerCaches) throws -> MLXArray {
+    /// What `forward` computes once the last layer that owns keys and values has written them. The layers from
+    /// `firstSharedLayer` on read those keys and values and write no cache, so a position whose hidden state nobody reads needs
+    /// nothing after that write (in the pinned model, layers 24-41 and most of layer 23: about 45% of a prefill chunk's matrix
+    /// products).
+    enum ForwardOutput {
+        /// The caches only: stops at the last cache write (a prefill chunk whose hidden states are thrown away).
+        case cachesOnly
+        /// The final-normalised hidden state of the last position [1, 1, 2560]: after the last cache write only that position is
+        /// computed (logits are only ever needed for the last position of a chunk).
+        case lastHidden
+        /// The final-normalised hidden states of every position [1, n, 2560], every position through every layer, as before the
+        /// cut: the reference the parity tests compare with, and what verifying several drafted tokens at once (speculative
+        /// decoding) would need.
+        case allHidden
+    }
+
+    /// Runs `ids` through the network, appending to `caches`, and returns the hidden states `output` asks for (nil for
+    /// `.cachesOnly`).
+    func forward(_ ids: [Int32], caches: LayerCaches, output: ForwardOutput) throws -> MLXArray? {
         guard !ids.isEmpty else { throw Gemma4Error.emptyPrompt }
         let n = ids.count
         let idArray = MLXArray(ids)
@@ -185,13 +201,21 @@ public final class Gemma4TextModel {
             let cols = MLXArray(0..<Int32(slidingHeld + n)).reshaped([1, slidingHeld + n])
             return .array(logicalAnd(rows .>= cols, (rows - cols) .< Int32(w)))
         }()
+        // The last position alone sees every key of a full layer, and the keys of its window in a sliding one: the last row of the
+        // windowed mask (with no mask it would also see the keys before its window).
+        let lastSlidingMask: MLXFast.ScaledDotProductAttentionMaskMode = {
+            if case .array(let m) = slidingMask { return .array(m[(n - 1)..., 0...]) }
+            return .none
+        }()
 
+        // After the keys and values of this layer, only the last position is computed (or nothing, for `.cachesOnly`).
+        let cutLayer = output == .allHidden ? nil : config.firstSharedLayer - 1
+        // The positions of the chunk that `h` holds: `rows` of them from position `first` (all of them, or the last one after the cut).
+        var rows = n, first = 0
         var shared: [Int: (MLXArray, MLXArray, Int)] = [:]
         for L in layers {
             let i = L.index
             var x = rms(h, L.inNorm)
-            var queries = L.q(x).reshaped([1, n, config.heads, L.headDim])
-            queries = rms(queries, L.qNorm).transposed(0, 2, 1, 3)
             let keys: MLXArray, values: MLXArray, offset: Int
             if L.ownsKV, let kp = L.k, let vp = L.v, let kn = L.kNorm {
                 var k = kp(x).reshaped([1, n, config.kvHeads, L.headDim])
@@ -206,9 +230,22 @@ public final class Gemma4TextModel {
                 let src = config.kvSource(i)
                 (keys, values, offset) = shared[src]!
             }
-            queries = rope(queries, L, offset: offset)
-            var a = MLXFast.scaledDotProductAttention(queries: queries, keys: keys, values: values, scale: 1.0, mask: L.full ? fullMask : slidingMask)
-            a = a.transposed(0, 2, 1, 3).reshaped([1, n, config.heads * L.headDim])
+            if i == cutLayer {
+                if output == .cachesOnly { return nil }
+                if n > 1 {
+                    h = h[0..., (n - 1)..., 0...]
+                    x = x[0..., (n - 1)..., 0...]
+                    ple = ple[0..., (n - 1)..., 0..., 0...]
+                    (rows, first) = (1, n - 1)
+                }
+            }
+            var queries = L.q(x).reshaped([1, rows, config.heads, L.headDim])
+            queries = rms(queries, L.qNorm).transposed(0, 2, 1, 3)
+            // A query's position is the cache offset plus its place in the chunk.
+            queries = rope(queries, L, offset: offset + first)
+            let mask: MLXFast.ScaledDotProductAttentionMaskMode = rows == n ? (L.full ? fullMask : slidingMask) : (L.full ? .none : lastSlidingMask)
+            var a = MLXFast.scaledDotProductAttention(queries: queries, keys: keys, values: values, scale: 1.0, mask: mask)
+            a = a.transposed(0, 2, 1, 3).reshaped([1, rows, config.heads * L.headDim])
             h = h + rms(L.o(a), L.postAttnNorm)
             x = rms(h, L.preFfNorm)
             let m = L.down(geluApproximate(L.gate(x)) * L.up(x))
@@ -217,7 +254,11 @@ public final class Gemma4TextModel {
             g = rms(L.pleProj(g), L.pleNorm)
             h = (h + g) * L.layerScalar
         }
-        return rms(h[0..., (n - 1)..., 0...], finalNorm)
+        switch output {
+        case .cachesOnly: return nil
+        case .allHidden: return rms(h, finalNorm)
+        case .lastHidden: return rms(rows == 1 ? h : h[0..., (n - 1)..., 0...], finalNorm)
+        }
     }
 
     private func rope(_ x: MLXArray, _ L: Gemma4Layer, offset: Int) -> MLXArray {

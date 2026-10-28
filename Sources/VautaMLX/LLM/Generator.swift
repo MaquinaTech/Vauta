@@ -104,6 +104,9 @@ public final class Gemma4Engine {
     public var fixedChunk: Int?
     /// The first prefill chunk, before a speed is known (tests set it to run a short prompt in one go).
     public var firstChunk = 64
+    /// Test hook: false runs every position of every chunk through every layer (`ForwardOutput.allHidden`), as before the layers
+    /// that share keys and values were cut to what is read: the reference the parity tests compare with.
+    var cutsSharedLayers = true
     /// Measured prefill speed (tokens per second, smoothed); nil until the first chunk has run.
     private(set) var prefillRate: Double?
     public var measuredPrefillRate: Double? { prefillRate }
@@ -174,6 +177,15 @@ public final class Gemma4Engine {
         return max(16, min(memoryCap, byTime))
     }
 
+    /// Runs `ids` into `caches` and returns the last position's hidden state [1, 1, hidden], or nil when `hidden` is false and only
+    /// the caches are wanted.
+    private func run(_ ids: [Int32], caches: LayerCaches, hidden: Bool) throws -> MLXArray? {
+        guard cutsSharedLayers else {
+            return try model.forward(ids, caches: caches, output: .allHidden).map { $0[0..., (ids.count - 1)..., 0...] }
+        }
+        return try model.forward(ids, caches: caches, output: hidden ? .lastHidden : .cachesOnly)
+    }
+
     private func prefill(_ ids: ArraySlice<Int32>, caches: LayerCaches, contextEnd: Int, wantHidden: Bool,
                          checkpoint: GenerationCheckpoint?, afterChunk: ((Int) -> Void)? = nil, isolation: isolated (any Actor)? = #isolation) async throws -> MLXArray? {
         var last: MLXArray?
@@ -186,8 +198,9 @@ public final class Gemma4Engine {
             let size = min(chunkLimit ?? Int.max, wanted)
             let j = min(ids.endIndex, i + size)
             let started = Date()
-            let h = try model.forward(Array(ids[i..<j]), caches: caches)
-            eval([h] + caches.arrays)
+            // Only the last chunk of a prompt that is decoded from needs a hidden state; the others only fill the caches.
+            let h = try run(Array(ids[i..<j]), caches: caches, hidden: wantHidden && j == ids.endIndex)
+            eval([h].compactMap { $0 } + caches.arrays)
             let elapsed = Date().timeIntervalSince(started)
             // Short tails say little about the speed; the rest feed a moving average.
             if j - i >= 16, elapsed > 0 {
@@ -197,7 +210,7 @@ public final class Gemma4Engine {
             chunksRun += 1
             memoryProbe?(MLXRuntime.physFootprintMB())
             afterChunk?(caches.offset)
-            last = h
+            if j == ids.endIndex { last = h }
             i = j
         }
         return wantHidden ? last : nil
@@ -325,7 +338,7 @@ public final class Gemma4Engine {
                 if closing == nil, out.count == request.maxTokens { done = true; break }
             }
             if done { break }
-            let h = try model.forward(feed, caches: caches)
+            guard let h = try run(feed, caches: caches, hidden: true) else { throw Gemma4Error.emptyPrompt }
             logits = model.logits(h)
             eval(logits)
             if out.count % 16 < feed.count { peak = max(peak, MLXRuntime.physFootprintMB()) }
