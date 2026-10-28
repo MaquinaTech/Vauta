@@ -19,7 +19,9 @@ legacy_same_id() {
 }
 cdhash() { codesign -dvvv "$1" 2>&1 | sed -n 's/^CDHash=//p'; }
 if [[ -d ~/Applications/Vauta.app && "$(cdhash build/Vauta.app)" == "$(cdhash ~/Applications/Vauta.app)" ]]; then
-  echo "Vauta is already installed with this exact build: nothing to do."
+  # Opening a running app only brings it forward; a quit one starts again, as the user expects from install.sh.
+  echo "Vauta is already installed with this exact build: nothing to install. Opening it."
+  open ~/Applications/Vauta.app
   exit 0
 fi
 
@@ -73,9 +75,15 @@ mkdir -p ~/Applications
 rm -rf ~/Applications/Vauta.app
 cp -R build/Vauta.app ~/Applications/Vauta.app
 if legacy_same_id; then
+  # The Trash folder may be protected (Full Disk Access): then Finder moves it there (macOS may ask to let Terminal
+  # control Finder). A failure is only a warning: Vauta is already installed.
   TRASHED="$HOME/.Trash/Acta $(date +%Y%m%d-%H%M%S).app"
-  mv "$LEGACY_APP" "$TRASHED"
-  echo "Moved the earlier version's Acta.app, which shares this bundle ID and data, to the Trash: $TRASHED"
+  if mv "$LEGACY_APP" "$TRASHED" 2>/dev/null \
+    || osascript -e "tell application \"Finder\" to delete POSIX file \"$LEGACY_APP\"" >/dev/null 2>&1; then
+    echo "Moved the earlier version's Acta.app, which shares this bundle ID and data, to the Trash."
+  else
+    echo "WARNING: could not move $LEGACY_APP to the Trash. It shares Vauta's data: move it to the Trash yourself." >&2
+  fi
 fi
 echo 'When this version opens, macOS may ask for the Keychain password for "Vauta": choose "Always Allow". It asks again after every update of an ad-hoc build and after a new signing identity. If it appears when you have not just installed or updated Vauta, click Deny.'
 open ~/Applications/Vauta.app

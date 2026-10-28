@@ -55,7 +55,7 @@ It handles **confidential conversations**. The rules below protect the user's da
 | Test (Xcode selected) | `swift test` |
 | Translations check | `scripts/check-strings.sh` |
 | License headers check | `scripts/check-headers.sh` |
-| App bundle without a signing identity | `VAUTA_ALLOW_ADHOC=1 scripts/build-app.sh` (builds `build/Vauta.app`; don't open it unless the user asks) |
+| App bundle without a signing identity | `VAUTA_BUNDLE_ID=local.vauta.dev VAUTA_ALLOW_ADHOC=1 scripts/build-app.sh` (builds `build/Vauta.app` with its own bundle ID, so it never touches the installed app's data; don't open it unless the user asks) |
 | Dependencies check | `scripts/check-dependencies.sh` (only the pinned mlx-swift fork and swift-numerics) |
 | GPU kernels and the search model in the shipped binary | `build/Vauta.app/Contents/MacOS/Vauta mlx-selftest [--model]` (hidden command; exit 0 pass, 1 fail, 2 unsupported, 3 model missing) |
 

@@ -9,10 +9,14 @@
 # The bundle ID is Vauta's identity for macOS: permissions, Keychain items, the sandbox
 # container and the speech model reservation. Do not change it after installing, or Vauta
 # starts from scratch (the old data stays in the old container).
+# A bundle ID set in the environment wins over local.env, so a throwaway build can use its own
+# (VAUTA_BUNDLE_ID=local.vauta.dev) without touching the installed app's container.
+ENV_BUNDLE_ID="${VAUTA_BUNDLE_ID:-}"
 if [[ -f scripts/local.env ]]; then
   # shellcheck disable=SC1091
   source scripts/local.env
 fi
+[[ -z "$ENV_BUNDLE_ID" ]] || VAUTA_BUNDLE_ID="$ENV_BUNDLE_ID"
 # shellcheck disable=SC1091
 source scripts/legacy-env.sh
 VAUTA_BUNDLE_ID="${VAUTA_BUNDLE_ID:-local.vauta.app}"

@@ -93,7 +93,9 @@ figures in each run's job summary once GitHub Actions are enabled; this paragrap
 
 ```sh
 scripts/check-strings.sh        # every translation matches the English keys and format specifiers
+scripts/extract-strings.sh && git diff --exit-code -- Resources/en.lproj/Localizable.strings   # English strings in sync with the code
 scripts/check-headers.sh        # every source file has the SPDX license header
+scripts/check-dependencies.sh   # only the pinned mlx-swift fork and swift-numerics
 find Resources Sources \( -name '*.plist' -o -name '*.entitlements' -o -name '*.strings' -o -name '*.stringsdict' \) \
   -print0 | xargs -0 plutil -lint
 for f in scripts/*.sh; do bash -n "$f"; done   # and shellcheck, if installed
@@ -112,8 +114,16 @@ installed app.
 ./scripts/install.sh            # builds, signs and installs ~/Applications/Vauta.app, then opens it
 ```
 
-For a quick throwaway build without a signing identity, use `VAUTA_ALLOW_ADHOC=1 ./scripts/build-app.sh` and open
-`build/Vauta.app`. macOS then asks for permissions again after every rebuild.
+For a quick throwaway build without a signing identity, give it its own bundle ID so it never opens your installed
+Vauta's container, Keychain items or meetings:
+
+```sh
+VAUTA_BUNDLE_ID=local.vauta.dev VAUTA_ALLOW_ADHOC=1 ./scripts/build-app.sh   # then open build/Vauta.app
+```
+
+macOS then asks for permissions again after every rebuild. Without `VAUTA_BUNDLE_ID` the build uses the same bundle ID as
+your install (the default or `scripts/local.env`), so it shares its data: quit the installed Vauta first, and never run
+both at once.
 
 Set your own bundle ID in `scripts/local.env` (never committed), for example `VAUTA_BUNDLE_ID=com.yourname.vauta`. The
 default is `local.vauta.app`. The bundle ID decides the sandbox container, the Keychain items and the permissions, so
