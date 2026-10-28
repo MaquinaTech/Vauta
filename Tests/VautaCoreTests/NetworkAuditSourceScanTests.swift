@@ -17,23 +17,39 @@ struct NetworkAuditSourceScanTests {
         ("URLSession.shared", #"\bURLSession\s*\.\s*shared\b"#),
         ("URL task", #"\.(dataTask|uploadTask|downloadTask|streamTask|webSocketTask)\s*\("#),
         ("async URL loading", #"\.(bytes|data|upload|download)\s*\(\s*(for|from)\s*:(?![^\n]*purpose:)"#),   // AuditedSession's own calls name a purpose
-        ("Network framework", #"\bNW(Connection|Browser|Listener|PathMonitor)\b|^\s*(@\w+\s+)?import\s+Network\b"#),
+        // The import on any line, with an attribute, an access level or a single declaration (`import struct Network.NWEndpoint`).
+        ("Network framework", #"\bNW(Connection|Browser|Listener|PathMonitor)\b"#
+            + #"|(?m:^\s*(@\w+\s+)*((public|package|internal|fileprivate|private)\s+)?"#
+            + #"import\s+((typealias|struct|class|enum|protocol|let|var|func)\s+)?Network\b)"#),
         ("legacy URL loading", #"\b(NSURLConnection|NSURLSession|CFHTTPMessage|CFSocket|CFReadStream|CFWriteStream|CFStreamCreatePairWithSocket)\b"#),
         ("web view", #"\bWKWebView\b"#),
         ("raw sockets", #"\b(getaddrinfo|gethostbyname)\s*\(|\bsocket\s*\(\s*(AF_|PF_)|getStreamsToHost"#),
         ("remote contents", #"contentsOf:\s*(try\??\s*)?URL\s*\(\s*string"#),
-        ("child process", #"\bProcess\s*(\.\s*init\s*)?\(|\bNSTask\b|\bposix_spawnp?\s*\(|\bpopen\s*\(|\bv?fork\s*\(\s*\)|(?<![.\w])(?<!func )system\s*\("#),
+        ("child process", #"\bProcess\s*(\.\s*init\s*)?\(|\bProcess\s*\.\s*(run|launchedProcess)\s*\(|\bNSTask\b"#
+            + #"|\bposix_spawnp?\s*\(|\bpopen\s*\(|\bv?fork\s*\(\s*\)|(?<![.\w])(?<!func )system\s*\("#),
         ("exec", #"\bf?exec(l|le|lp|v|ve|vp|vP|vpe)\s*\("#),
         ("XPC service", #"\bNSXPCConnection\s*\(\s*machServiceName\s*:"#),
-        // Initializers that load the URL they are given, a remote one too.
-        ("Data(contentsOf:)", #"\b(NS)?Data\s*\(\s*contentsOf\s*:"#),
-        ("String(contentsOf:)", #"\b(NS)?String\s*\(\s*contentsOf\s*:"#),
-        ("NSImage(contentsOf:)", #"\bNSImage\s*\(\s*contentsOf\s*:"#),
-        ("PDFDocument(url:)", #"\bPDFDocument\s*\(\s*url\s*:"#),
-        ("AVURLAsset(url:)", #"\bAV(URL)?Asset\s*\(\s*url\s*:"#),
-        ("NSAttributedString(contentsOf:)", #"\bNSAttributedString\s*\(\s*(contentsOf|url)\s*:"#),
-        ("XMLParser(contentsOf:)", #"\bXMLParser\s*\(\s*contentsOf\s*:"#),
+        // Initializers and functions that load the URL they are given, a remote one too (also written `Type.init(...)`). Only these:
+        // another API that loads a URL is not caught.
+        ("Data(contentsOf:)", #"\b(NS)?Data\s*(\.\s*init\s*)?\(\s*contentsOf\s*:"#),
+        ("String(contentsOf:)", #"\b(NS)?String\s*(\.\s*init\s*)?\(\s*contentsOf\s*:"#),
+        ("NSImage(contentsOf:)", #"\bNSImage\s*(\.\s*init\s*)?\(\s*contentsOf\s*:"#),
+        ("PDFDocument(url:)", #"\bPDFDocument\s*(\.\s*init\s*)?\(\s*url\s*:"#),
+        ("AVURLAsset(url:)", #"\bAV(URL)?Asset\s*(\.\s*init\s*)?\(\s*url\s*:"#),
+        ("AVPlayer(url:)", #"\bAV(Queue)?Player(Item)?\s*(\.\s*init\s*)?\(\s*url\s*:"#),
+        ("NSAttributedString(contentsOf:)", #"\bNSAttributedString\s*(\.\s*init\s*)?\(\s*(contentsOf|url)\s*:"#),
+        ("XMLParser(contentsOf:)", #"\bXMLParser\s*(\.\s*init\s*)?\(\s*contentsOf\s*:"#),
+        ("NSDictionary(contentsOf:)", #"\bNS(Mutable)?(Dictionary|Array)\s*(\.\s*init\s*)?\(\s*contentsOf\s*:"#),
+        ("CGImageSourceCreateWithURL", #"\bCG(ImageSource|DataProvider|PDFDocument)CreateWithURL\s*\("#
+            + #"|\bCGDataProvider\s*(\.\s*init\s*)?\(\s*url\s*:|\bCGPDFDocument\s*(\.\s*init\s*)?\("#),
+        // `.init(contentsOf:)` or `.init(url:)` with the type left to inference: any of the above.
+        ("implicit .init(contentsOf:)", #"(?<![\w)\].?!>])\.\s*init\s*\(\s*(contentsOf|url)\s*:"#),
     ]
+
+    /// `forbidden`, compiled once. A pattern that does not compile is left out, and `everyPatternCompiles` fails.
+    static let compiled: [(name: String, regex: NSRegularExpression)] = forbidden.compactMap { name, pattern in
+        (try? NSRegularExpression(pattern: pattern)).map { (name, $0) }
+    }
 
     /// Flagged calls that never leave this Mac, with how many each file has: a new call in one of these files is flagged again, and
     /// an entry the code no longer matches fails too. Each says why its URL is a local file.
@@ -58,6 +74,8 @@ struct NetworkAuditSourceScanTests {
         ("Sources/VautaCore/Documents/TextExtractors.swift", "NSAttributedString(contentsOf:)", 1),
         // The PDF of a passage, from a document source.
         ("Sources/Vauta/App/Documents/PassageViewer.swift", "PDFDocument(url:)", 1),
+        // An image the person added as a document source: its size and its pixels, for its text and for a passage's view.
+        ("Sources/VautaCore/Documents/VisionOCR.swift", "CGImageSourceCreateWithURL", 2),
         // The audio file the person chose to import.
         ("Sources/VautaCore/Import/RecordingTranscriber.swift", "AVURLAsset(url:)", 1),
         ("Sources/VautaCore/Import/AudioFileDecoder.swift", "AVURLAsset(url:)", 1),
@@ -106,8 +124,8 @@ struct NetworkAuditSourceScanTests {
         let text = code(source)
         let range = NSRange(text.startIndex..., in: text)
         var counts: [String: Int] = [:]
-        for (name, pattern) in forbidden {
-            let matches = (try? NSRegularExpression(pattern: pattern))?.numberOfMatches(in: text, range: range) ?? 0
+        for (name, regex) in compiled {
+            let matches = regex.numberOfMatches(in: text, range: range)
             if matches > 0 { counts[name] = matches }
         }
         return counts
@@ -120,11 +138,28 @@ struct NetworkAuditSourceScanTests {
     }
 
     /// The forbidden constructs in the file at `path` that its local uses do not account for.
-    static func violations(in source: String, at path: String) -> [String] {
-        let counts = occurrences(in: source)
-        return forbidden.map(\.name).filter { name in
+    static func violations(in source: String, at path: String) -> [String] { violations(counts: occurrences(in: source), at: path) }
+
+    /// The same, from the file's `occurrences`.
+    static func violations(counts: [String: Int], at path: String) -> [String] {
+        forbidden.map(\.name).filter { name in
             (counts[name] ?? 0) > (localUses.first { $0.path == path && $0.name == name }?.count ?? 0)
         }
+    }
+
+    /// The entries of `uses` that `files` (each with its `occurrences`) no longer match: a file with fewer calls than its entry
+    /// allows, or no such file.
+    static func stale(_ files: [(path: String, counts: [String: Int])],
+                      uses: [(path: String, name: String, count: Int)] = localUses) -> [String] {
+        var stale: [String] = []
+        for (path, counts) in files {
+            for use in uses where use.path == path && (counts[use.name] ?? 0) < use.count {
+                stale.append("\(path): \(use.name) is allowed \(use.count) times, found \(counts[use.name] ?? 0)")
+            }
+        }
+        let paths = Set(files.map(\.path))
+        for use in uses where !paths.contains(use.path) { stale.append("\(use.path): no such file") }
+        return stale
     }
 
     static func sourceFiles() throws -> [(path: String, text: String)] {
@@ -141,19 +176,9 @@ struct NetworkAuditSourceScanTests {
 
     @Test func onlyTheChokePointReachesTheNetwork() async throws {
         let (count, problems, stale) = try await offPool { () -> (Int, [String], [String]) in
-            let files = try Self.sourceFiles()
-            var problems: [String] = []
-            var stale: [String] = []
-            for (path, text) in files where path != Self.chokePoint {
-                for name in Self.violations(in: text, at: path) { problems.append("\(path): \(name)") }
-                let counts = Self.occurrences(in: text)
-                for use in Self.localUses where use.path == path && (counts[use.name] ?? 0) < use.count {
-                    stale.append("\(path): \(use.name) is allowed \(use.count) times, found \(counts[use.name] ?? 0)")
-                }
-            }
-            let paths = Set(files.map(\.path))
-            for use in Self.localUses where !paths.contains(use.path) { stale.append("\(use.path): no such file") }
-            return (files.count, problems, stale)
+            let files = try Self.sourceFiles().filter { $0.path != Self.chokePoint }.map { ($0.path, Self.occurrences(in: $0.text)) }
+            let problems = files.flatMap { path, counts in Self.violations(counts: counts, at: path).map { "\(path): \($0)" } }
+            return (files.count, problems, Self.stale(files))
         }
         #expect(count > 50, "the scan must actually see the sources")
         #expect(problems.isEmpty, """
@@ -182,6 +207,20 @@ struct NetworkAuditSourceScanTests {
         #expect(Self.violations(in: sources.journal + "\nlet d = PDFDocument(url: remote)", at: "Sources/VautaCore/Storage/Journal.swift")
                 == ["PDFDocument(url:)"])
         #expect(Self.violations(in: sources.journal, at: "Sources/VautaCore/Storage/Other.swift") == ["Data(contentsOf:)"])
+        // An entry the code no longer matches is stale: the call is gone, or the file moved.
+        let journal = "Sources/VautaCore/Storage/Journal.swift"
+        let uses = Self.localUses.filter { $0.path == journal }
+        let withoutTheCall = sources.journal.replacingOccurrences(of: "Data(contentsOf: url)", with: "Data()")
+        #expect(withoutTheCall != sources.journal)
+        #expect(Self.stale([(journal, Self.occurrences(in: sources.journal))], uses: uses).isEmpty)
+        #expect(Self.stale([(journal, Self.occurrences(in: withoutTheCall))], uses: uses)
+                == ["\(journal): Data(contentsOf:) is allowed 1 times, found 0"])
+        #expect(Self.stale([("Sources/VautaCore/Storage/Moved.swift", Self.occurrences(in: sources.journal))], uses: uses)
+                == ["\(journal): no such file"])
+    }
+
+    @Test func everyPatternCompiles() {
+        #expect(Self.compiled.map(\.name) == Self.forbidden.map(\.name))
     }
 
     @Test func detectorFlagsEveryKindOfBypass() {
@@ -205,14 +244,23 @@ struct NetworkAuditSourceScanTests {
             "AVURLAsset(url:)": "let a = AVURLAsset(url: url)",
             "NSAttributedString(contentsOf:)": "let s = try NSAttributedString(url: url, options: [:], documentAttributes: nil)",
             "XMLParser(contentsOf:)": "let p = XMLParser(contentsOf: url)",
+            "AVPlayer(url:)": "let p = AVPlayer(url: url)",
+            "NSDictionary(contentsOf:)": "let d = NSDictionary(contentsOf: url)",
+            "CGImageSourceCreateWithURL": "let s = CGImageSourceCreateWithURL(url as CFURL, nil)",
+            "implicit .init(contentsOf:)": "let d: Data = try .init(contentsOf: url)",
         ]
         for (name, source) in samples { #expect(Self.violations(in: source).contains(name), "\(name) not detected") }
         #expect(Self.violations(in: "let p = Process()").contains("child process"))
-        #expect(Self.violations(in: "import Network").contains("Network framework"))
+        for source in ["import Network", "import Foundation\nimport Network", "internal import Network", "@preconcurrency import Network",
+                       "@_implementationOnly import Network", "import struct Network.NWEndpoint"] {
+            #expect(Self.violations(in: source).contains("Network framework"), "\(source)")
+        }
         let variants: [(String, String)] = [
             ("URLSession(...)", "let s = URLSession.init(configuration: .default)"),
             ("child process", "let p = Process.init()"),
             ("child process", "let p = Process(); p.executableURL = tool"),
+            ("child process", "try Process.run(tool, arguments: [\"-c\"])"),
+            ("child process", "let p = Process.launchedProcess(launchPath: path, arguments: [])"),
             ("child process", "let f = popen(\"ls\", \"r\")"),
             ("child process", "posix_spawn(&pid, path, nil, nil, argv, environ)"),
             ("child process", "posix_spawnp(&pid, \"curl\", nil, nil, argv, environ)"),
@@ -226,6 +274,17 @@ struct NetworkAuditSourceScanTests {
             ("String(contentsOf:)", "let s = try NSString(contentsOf: url, encoding: 4)"),
             ("AVURLAsset(url:)", "let a = AVAsset(url: url)"),
             ("NSAttributedString(contentsOf:)", "let s = try NSAttributedString(contentsOf: url, documentAttributes: nil)"),
+            ("Data(contentsOf:)", "let d = try Data.init(contentsOf: url)"),
+            ("String(contentsOf:)", "let s = try String.init(contentsOf: url, encoding: .utf8)"),
+            ("PDFDocument(url:)", "let p = PDFDocument.init(url: url)"),
+            ("AVPlayer(url:)", "let i = AVPlayerItem(url: url)"),
+            ("AVPlayer(url:)", "let q = AVQueuePlayer(url: url)"),
+            ("NSDictionary(contentsOf:)", "let a = NSArray(contentsOf: url)"),
+            ("NSDictionary(contentsOf:)", "let d = try NSDictionary(contentsOf: url, error: ())"),
+            ("CGImageSourceCreateWithURL", "let p = CGDataProviderCreateWithURL(url as CFURL)"),
+            ("CGImageSourceCreateWithURL", "let p = CGDataProvider(url: url as CFURL)"),
+            ("CGImageSourceCreateWithURL", "let d = CGPDFDocument(url as CFURL)"),
+            ("implicit .init(contentsOf:)", "load(try .init(url: url))"),
         ]
         for (name, source) in variants { #expect(Self.violations(in: source).contains(name), "\(source)") }
         // Ordinary code and comments are not flagged.
@@ -239,6 +298,9 @@ struct NetworkAuditSourceScanTests {
             let data = try Data(contentsOfFile: path)
             let c = NSXPCConnection(serviceName: "local.vauta.helper")
             let p = RecordingProcess(url: url)
+            let r = RecordingProcess.init(url: url)
+            let i = CGImageSourceCreateWithData(data as CFData, nil)
+            let n = ProcessInfo.processInfo.processName
             // the MLX build is a fork (it compiles its kernels)
             """).isEmpty)
     }
