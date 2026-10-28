@@ -19,7 +19,9 @@ timestamp is deterministic, set `SOURCE_DATE_EPOCH` to fix that too).
 
 ## One-time setup
 
-1. Make the repository public, then enable GitHub Actions. They are disabled on purpose until then.
+1. Done: the repository is public and GitHub Actions are on. `ci.yml` runs on every pull request and every push to `main`,
+   `codeql.yml` on pull requests to `main`, pushes to it and weekly, and `scorecard.yml` on pushes to `main`, on changes to branch protection and weekly;
+   `release.yml` runs only when you start it on a tag (below).
 2. Add a tag ruleset (Settings, Rules) so that only you can create or delete tags matching `v*`: a tag is the one thing that
    can start a release.
 3. Turn on branch protection and two-factor authentication ([GOVERNANCE.md](../GOVERNANCE.md#repository-controls)).

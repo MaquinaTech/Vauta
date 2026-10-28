@@ -300,7 +300,7 @@
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "곧 시작하는 회의에 대한 짧은 페이지입니다. 참석자, 지난 회의에서 남은 일, 관련 회의, 문서, 메모가 들어 있습니다. 이 Mac에서 만들어집니다. 브리핑은 캘린더, 미리 알림, 메모를 변경하지 않습니다.";
 
 /* Settings → General, under the switch that opens the notepad when a recording starts */
-"A small floating window for short notes. It stays out of screen sharing and never takes the keyboard from your meeting app until you click it or use the shortcut." = "짧은 메모를 위한 작은 플로팅 윈도우입니다. 화면 공유에는 나타나지 않으며, 클릭하거나 단축키를 사용하기 전까지 회의 앱의 키보드 입력을 가져가지 않습니다.";
+"A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "짧은 메모를 위한 작은 플로팅 윈도우입니다. 클릭하거나 단축키를 사용하기 전까지 회의 앱의 키보드 입력을 가져가지 않습니다. Vauta는 macOS에 이 윈도우를 화면 공유에서 제외하도록 요청하지만 보장되지는 않습니다.";
 
 /* Meeting page, Questions: a past meeting or document that one of the answer's citations pointed to was deleted since */
 "A source was removed" = "출처가 삭제되었습니다";

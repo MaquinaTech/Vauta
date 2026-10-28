@@ -53,7 +53,7 @@ let package = Package(
             dependencies: ["VautaCore", "VautaMLX"],
             exclude: ["Fixtures"]
         ),
-        // The few pieces of the app target that have logic worth a test (the PDF export).
+        // The pieces of the app target that have logic worth a test (view models, the notepad and Answers panels, the PDF export).
         .testTarget(
             name: "VautaAppTests",
             dependencies: ["Vauta", "VautaCore"]

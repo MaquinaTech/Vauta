@@ -300,7 +300,7 @@
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "关于即将开始的会议的简短页面：谁会参加、上次会议遗留了什么，以及相关的会议、文稿和笔记。它在这台 Mac 上生成。会前简报绝不会更改你的日历、提醒事项或备忘录。";
 
 /* Settings → General, under the switch that opens the notepad when a recording starts */
-"A small floating window for short notes. It stays out of screen sharing and never takes the keyboard from your meeting app until you click it or use the shortcut." = "用于输入简短笔记的小型浮动窗口。它不会出现在屏幕共享中，在你点按它或使用快捷键之前，也不会抢走会议 App 的键盘输入。";
+"A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "用于输入简短笔记的小型浮动窗口。在你点按它或使用快捷键之前，它不会抢走会议 App 的键盘输入。Vauta 会请求 macOS 不让它出现在屏幕共享中，但这并不能保证。";
 
 /* Meeting page, Questions: a past meeting or document that one of the answer's citations pointed to was deleted since */
 "A source was removed" = "有来源已被删除";

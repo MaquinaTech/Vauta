@@ -179,7 +179,7 @@ These are all the connections Vauta makes. Nothing else is contacted.
 | **The model server you configure** | Live notes while recording, expanding your notes (see below), improved live translations (when a server is set up and the setting is on), minutes after a meeting, Ask (including the few passages of your documents it needs), search vectors, status checks, "Test Connection" and the translation "Test" | Transcript text, your notes, names and glossary terms from your context, the meeting title and date, and instructions. With documents: the few passages of your files that Ask picked for a question, and, only if you turn on "Also use the model server to find passages by meaning" for a server on your network, every indexed passage once (purpose "Indexing your documents"). For improved translations: each finished sentence of the **Others** channel and the three before it (with their translations), nothing else. Allowed destinations: this Mac (`127.0.0.1`, `::1`, `localhost`), or another computer on your local network over HTTPS with TLS 1.3. Only the OpenAI-compatible endpoints (`/v1/models`, `/v1/chat/completions`, `/v1/embeddings`) and a few read-only identification endpoints of the server type you chose |
 | **Loopback discovery** | Only when you click **Find Servers** (in Settings or setup) | Read-only requests to `http://127.0.0.1` on ports 1234, 11434, 8080, 8000 and 1337 (`GET`, plus Ollama's `POST /api/show` to read a model's details), to list the models of servers running on this Mac. Never any other address |
 | **Guided model setup** | Only while the **Set Up a Model Server** guide is open | The same read-only requests as loopback discovery, only to `http://127.0.0.1` ports 1234 (LM Studio) and 11434 (Ollama), about every 3 seconds; they stop when the guide closes, its window is hidden or Meetings relocks. The guide's **Get** button opens the app's official website (`lmstudio.ai` or `ollama.com`) in your default browser; Vauta itself downloads nothing and sends nothing to those sites |
-| **Hugging Face** (`huggingface.co`, and the one download server it names, currently `us.aws.cdn.hf.co`) | Only when you click **Download** in Settings → Models → Search by meaning or → Integrated model (or **Try Again** / **Resume** / **Repair**), never at launch and never in the background | Plain `GET` requests with the default User-Agent (which names the app and its build, the version of macOS’s network stack and the version of macOS (Darwin), and nothing else about you) for two fixed files of one pinned revision of `google/embeddinggemma-2` (the tokenizer, and the text part of the weights in 32 MiB ranges), or of `google/gemma-4-E4B-it` (the tokenizer, and the language tower of the weights in 64 MiB ranges). No token, no cookie, no account, no identifier, nothing about you, your meetings or your documents. The purpose is "Search model download" or "Language model download"; the signed download address Hugging Face returns is kept in memory only and its query string is never logged. A redirect to any other host is refused (a Blocked row) and nothing is sent to it |
+| **Hugging Face** (`huggingface.co`, and the one download server it names, currently `us.aws.cdn.hf.co`) | Only when you click **Download** in Settings → Models → Search by meaning or → Integrated model (or **Try Again** / **Resume** / **Repair**), never at launch and never in the background | Plain `GET` requests with the default User-Agent (which names the app and its build, the version of macOS’s network stack and the version of macOS (Darwin), and nothing else about you) for two fixed files of one pinned revision of `google/embeddinggemma-2` (the tokenizer, and the text part of the weights in 32 MiB ranges), or of `google/gemma-4-E4B-it` (the tokenizer, and the language tower of the weights in 64 MiB ranges). No token, no cookie, no account, no identifier, nothing about you, your meetings or your documents. The purpose is "Search model download" or "Integrated model download"; the signed download address Hugging Face returns is kept in memory only and its query string is never logged. A redirect to any other host is refused (a Blocked row) and nothing is sent to it |
 | **Apple** (by macOS, not by Vauta) | When a speech model, a translation language or an on-device language asset is installed | Standard system asset downloads |
 
 ### Seeing every connection
@@ -187,7 +187,7 @@ These are all the connections Vauta makes. Nothing else is contacted.
 Every request Vauta makes goes through one audited code path (`AuditedSession`) that records it in the Network
 Activity list. Each entry holds only:
 
-- the time, and the **purpose**: minutes, live notes, expanding notes, Ask, search by meaning, indexing your documents, search model download, language model download, translation, server discovery, connection
+- the time, and the **purpose**: minutes, live notes, expanding notes, Ask, search by meaning, indexing your documents, search model download, integrated model download, translation, server discovery, connection
   test, status check, or other;
 - the destination: scheme, host and port;
 - the HTTP method and the URL **path** (for example `POST /v1/chat/completions`), without any query string;
@@ -263,7 +263,7 @@ Intelligence or your model server, as before.
   at one pinned revision, in 64 MiB ranges. Every block, each tensor of the converted file and the whole file are checked
   against checksums built into Vauta; if anything differs, nothing is installed. The 15 GB original is never stored: the
   blocks are converted in memory to a 4-bit model of 4.2 GB, which is what stays. The download is listed in Network Activity
-  as "Language model download". Details: [docs/LANGUAGE_MODEL.md](docs/LANGUAGE_MODEL.md).
+  as "Integrated model download". Details: [docs/LANGUAGE_MODEL.md](docs/LANGUAGE_MODEL.md).
 - **What is sent.** Nothing but the request for those files (see the table above). No meeting, document, name or question
   ever reaches Hugging Face, and the model makes no connection of its own.
 - **Where the work happens.** On this Mac's GPU. The model is loaded when it is needed and unloaded after five idle minutes,
@@ -418,7 +418,7 @@ Settings → **Documents** lets you add folders and files that Ask can answer fr
 
 ## Your notes
 
-The short notes you type (in the panel, in the floating Notepad or in a meeting's Notes tab) and what the model writes from them are stored only in the encrypted database, with the meeting; they go with the meeting when you delete it, with Erase, and into encrypted backups. They are not in preferences or logs, and an unsent draft lives in memory only. Your notes are sent with the transcript excerpt around them to the model you chose, to expand them: nothing leaves this Mac with Apple Intelligence on this Mac, and with a model server the request goes through the same audited connection as live notes and minutes and is listed in Network Activity as "Expanding notes" (never its content). The Notepad window is hidden from screen sharing and screenshots. After the transcript is deleted by retention, your notes and their expansions stay (like decisions and tasks); the expansions keep the times they cite and no link to the deleted text.
+The short notes you type (in the panel, in the floating Notepad or in a meeting's Notes tab) and what the model writes from them are stored only in the encrypted database, with the meeting; they go with the meeting when you delete it, with Erase, and into encrypted backups. They are not in preferences or logs, and an unsent draft lives in memory only. Your notes are sent with the transcript excerpt around them to the model you chose, to expand them: nothing leaves this Mac with Apple Intelligence on this Mac, and with a model server the request goes through the same audited connection as live notes and minutes and is listed in Network Activity as "Expanding notes" (never its content). Vauta asks macOS to keep the Notepad window out of screen sharing and screenshots, which the system does not guarantee for every sharing app. After the transcript is deleted by retention, your notes and their expansions stay (like decisions and tasks); the expansions keep the times they cite and no link to the deleted text.
 
 ## Live answers
 
@@ -453,7 +453,7 @@ replaces Apple's caption and is the translation stored. If it answers later (up 
 in **Settings → Translation**, or set no model server, and no such request is ever made. The **Test** button there sends
 one invented sample sentence, not meeting text.
 
-- The captions panel is hidden from screen sharing and screenshots (like Vauta's other windows) and never takes focus.
+- Vauta asks macOS to keep the captions panel out of screen sharing and screenshots (like its other windows), which the system does not guarantee for every sharing app; the panel never takes focus.
 - The translation of each finished sentence is stored in the encrypted store, in its own table that depends on the
   transcript segment. It is deleted with the segment: when the meeting is deleted, when the transcript expires
   (90 days), by Erase Meetings and Context, and it is part of an encrypted backup. It is never put in notifications, logs or
@@ -511,7 +511,7 @@ chose. It is built on this Mac from what Vauta already holds plus three local so
   Center like the rest of the notification. When Meetings is locked, the panel shows only the event's
   title and time.
 
-- **Where it appears.** A **Next meeting** card in the menu-bar panel, **Upcoming** in Meetings and a **Brief** tab on a recorded meeting; all are excluded from screen sharing like the rest of Vauta's windows, and **Copy Agenda** follows "Protect meeting text from copying". **Record at Start** in the notification only asks, when the meeting starts, whether to record (nothing records by itself). "Open in Calendar" and "Open in Reminders" only open those apps.
+- **Where it appears.** A **Next meeting** card in the menu-bar panel, **Upcoming** in Meetings and a **Brief** tab on a recorded meeting; Vauta asks macOS to keep them out of screen sharing like the rest of its windows (not guaranteed for every sharing app), and **Copy Agenda** follows "Protect meeting text from copying". **Record at Start** in the notification only asks, when the meeting starts, whether to record (nothing records by itself). "Open in Calendar" and "Open in Reminders" only open those apps.
 
 ## After a meeting: reminders, events and email
 

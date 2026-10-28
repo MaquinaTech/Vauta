@@ -6,30 +6,31 @@ This document explains how Vauta is put together, for contributors. For what Vau
 ## Principles
 
 - **Local first.** Audio is processed in memory and never written to disk. Transcription is on device. The only
-  network peer is the model server the user configured; the one other connection is the optional search-model download,
-  which the user starts with a click.
+  network peer is the model server the user configured; the other connections are the two optional model downloads (the
+  search model and the integrated model), which the user starts with a click.
 - **One third-party package.** Apple frameworks, the system `libsqlite3` and a pinned fork of MLX (MIT), which runs the
-  optional search model and is imported only by the `VautaMLX` target. (The two bundled speaker-separation models are
-  weights, not code; see `NOTICE`.)
+  optional search model and the optional integrated model and is imported only by the `VautaMLX` target. (The two
+  bundled speaker-separation models are weights, not code; see `NOTICE`.)
 - **Deterministic where possible.** Names, search and validation are plain Swift. Models only propose text, and Swift
   checks every claim against the transcript before it is stored.
 - **Testable core.** Logic lives in the `VautaCore` library; the app target is a thin SwiftUI and AppKit layer.
 
 ## Package layout
 
-`Package.swift` defines four targets (Swift 6, strict concurrency, macOS 26, Apple silicon) and one remote dependency,
+`Package.swift` defines five targets (Swift 6, strict concurrency, macOS 26, Apple silicon) and one remote dependency,
 the MaquinaTech fork of mlx-swift pinned by revision (`scripts/check-dependencies.sh` and a test fail on any other
 package or revision; swift-numerics comes with it):
 
 | Target | Kind | Contents |
 |---|---|---|
-| `VautaMLX` | Library | The only place that may `import MLX` (a source-scan test enforces it): `MLXRuntime`, the bounds-checked `SafetensorsFile` and `ByteJSON`, `GemmaTextEncoder` (EmbeddingGemma 2 in MLX Swift, fp16, GPU) and `KernelSelfTest`. No content, no network |
+| `VautaMLX` | Library | The only place that may `import MLX` (a source-scan test enforces it): `MLXRuntime`, the bounds-checked `SafetensorsFile` and `ByteJSON`, `GemmaTextEncoder` (EmbeddingGemma 2 in MLX Swift, fp16, GPU), `KernelSelfTest` and, in `LLM/`, the integrated model's Gemma 4 text tower (`Gemma4TextModel`, `Gemma4Engine`, the caches and the constrained sampler). No content, no network |
 | `VautaCore` | Library | Capture, transcription, storage, knowledge, model clients and services, export and import, and the pure logic behind the UI |
 | `Vauta` | Executable | The menu-bar app (SwiftUI and AppKit) and the command-line tool. `main.swift` decides which one runs |
 | `VautaCoreTests` | Tests | Swift Testing suites for `VautaCore` |
+| `VautaAppTests` | Tests | Swift Testing suites for the parts of the app target with logic worth a test (view models, the notepad and Answers panels, the PDF export) |
 
 `Vauta` runs as a command-line tool when its first argument is a known command (`doctor`, `status`, `languages`,
-`install-speech-assets`, `install-dictation-assets`, `transcribe-file`, `minutes-file` (evaluation only: writes the minutes of a public transcript with Apple's on-device model in a throwaway store), `store-stats`, `cert-pin`, `server-check`, `help`, the hidden `mlx-selftest [--model]` (kernel checks, and the search model's files, in the shipped binary; not in the help),
+`install-speech-assets`, `install-dictation-assets`, `transcribe-file`, `speaker-models`, `diarize`, `minutes-file` (evaluation only: writes the minutes of a public transcript with Apple's on-device model in a throwaway store), `store-stats`, `cert-pin`, `server-check`, `help`, the hidden `mlx-selftest [--model]` (kernel checks, and the search model's files, in the shipped binary; not in the help),
 `version`, `--help`, `--version`) or any other word, which prints the usage instead of launching the app. With no
 arguments, or only flags such as `-AppleLanguages (fr)`, it launches the menu-bar app. See `LaunchMode.parse` in
 `VautaCore/App/CommandLineParsing.swift`.
@@ -51,9 +52,9 @@ flowchart LR
     store --> graph["Knowledge analysis"]
     store --> llm["LLMService (actor)"]
     llm --> providers["ModelProviding"]
-    providers --> server["Model server or Apple on-device model"]
+    providers --> server["Model server, Apple on-device model or integrated model"]
     llm --> store
-    store --> ui["Meetings, Ask, Context windows"]
+    store --> ui["Meetings window (Ask), Settings (Context)"]
 ```
 
 1. **Capture.** `MeetingCapture` runs two channels. The microphone is always **Me**. **Others** is the audio of the
@@ -95,7 +96,7 @@ flowchart LR
    below your own question and above the live notes. `llm-eval --tasks live-questions` replays a transcript through the same
    code on a simulated clock (`QuestionReplay`).
 8. **UI.** The Meetings window shows the transcript, minutes, tasks and suggestions; Ask answers questions with
-   citations; Context edits people, projects and the glossary.
+   citations; Settings → Context edits people, projects and the glossary.
 
 Imported recordings follow the same path from step 2, as a single channel (`RecordingTranscriber`, `RecordingImport`),
 and their speakers are separated offline by the same engine (`OfflineDiarization`).
@@ -196,7 +197,7 @@ At Stop:
 | Path | Responsibility | Key types |
 |---|---|---|
 | `main.swift`, `CLI*.swift` | Entry point and command-line tool | `runCLI` |
-| `App/VautaApp.swift` | Scenes: menu-bar panel, Meetings, Context, Settings, onboarding | `VautaApp` |
+| `App/VautaApp.swift` | Scenes: menu-bar panel (`MenuBarExtra`), and the Meetings, first-run setup, Network Activity and Settings windows (plain `Window` scenes; Context is a pane of Settings) | `VautaApp` |
 | `App/RecorderModel*.swift` | Recording lifecycle, services, presence, relock, retention timers | `RecorderModel` |
 | `App/Preferences.swift` | App-wide preferences in UserDefaults | `Preferences` |
 | `App/Panel/` (Answers card: `AnswersCard`, `LiveAnswersModel`) | The menu-bar panel: fixed header, record button and footer around a scrolling middle capped to the screen height | `RecorderPanel`, `MenuBarLabel`, `LiveTools`, `LiveTranslationRow`, `PanelStyle` |

@@ -494,7 +494,7 @@ scheduled. **Verdict: the email draft stays off on both backends.**
 | `FBL` / integrated | 2 | 0.50 | 1 of 103 = 0.01 | 0.03 | 1 of 1 | 1 of 1 |
 
 Both detector arms read the stored minutes of the **new extraction** (its cited segments and tasks, with a due day stored only when the words say it). The app
-runs the new extraction on the integrated model only; Apple's minutes and the servers' use the old extraction, whose minutes were not run through the detector, so these figures are not shown for them. Since then the detector's task path ignores a task
+runs the new extraction on the integrated model; Apple's minutes use the ranked extraction (since the harness phase) and the servers' the old one, and neither was run through the detector, so these figures are not shown for them. Since then the detector's task path ignores a task
 marked "to be confirmed" and a day outside a year after the meeting (the old extraction could keep a day the model worked out); the sentences inserted in the test transcripts sat in the
 last tenth, which the detector always reads (`FD` equals `FDX`), so the gap is expected to be small, but it is not measured.
 
@@ -510,7 +510,7 @@ Citation-verification rate on the 15 test meetings, from the stored traces (item
 (+0.041, 95% clustered bootstrap CI -0.035 to +0.115); integrated 0.921 to 0.912 (-0.008, CI -0.073 to +0.058). No drop is detectable; non-inferiority within 0.05 is not shown at this sample size.
 Blind pairwise comparison of the summary and open questions (one LLM judge, 15 meetings per backend): integrated, summary errors 6 old and 7 new, coverage 49 and 52 of 75, clarity 60 and 57,
 preferred new in 9 meetings and old in 6 (sign test on per-meeting summary errors, p 0.73); Apple, summary errors 18 old and 23 new (new worse in 7 meetings, better in 3, p 0.34), coverage 35 and 35, preferred new in 8 and old in 7.
-Apple's trend is unfavourable and its invented or wrong item count rose (10 to 16), hence the app runs the new extraction on the integrated model only. The servers were not measured and keep the old one.
+Apple's trend is unfavourable and its invented or wrong item count rose (10 to 16), hence the app then ran the new extraction on the integrated model only; the harness phase's blind test later moved Apple's model to the ranked extraction ([LANGUAGE_MODEL.md](LANGUAGE_MODEL.md), "Harness phase: what ships"). The servers were not measured and keep the old one.
 
 **What changed after the first judge.** Fixes for the causes it named, each with a unit test and the deterministic checks re-run (the second judged run is above): a due day before the meeting or more than a year after it is dropped when the
 minutes are read, and again before a reminder or an email uses it (the re-run wrote none of the 8 and the replay checks that); a date after a look-back
