@@ -11,12 +11,25 @@ protocol DatabaseKeyStore: Sendable {
     func existingKey() throws -> SymmetricKey?
     /// Creates and stores a new random key. Never overwrites an existing one.
     func createKey() throws -> SymmetricKey
-    /// Deletes the key and verifies it is gone (crypto-shred of the store).
+    /// Deletes the key, and the staged one, and verifies they are gone (crypto-shred of the store).
     func remove() throws
-    /// Replaces the key in place (or adds it if there is none). Never
-    /// delete-then-add: on failure the previous key is still there. Used when
-    /// restoring a backup, which re-keys the store.
+    /// Makes `key` the store key, written as a new item with Vauta's own access list. A restore calls it only once
+    /// the staged item holds the same key and the snapshot sealed with it is on disk, so a failure (or a crash)
+    /// between deleting the old item and adding the new one loses nothing: the next open finds the staged key.
     func replace(with key: SymmetricKey) throws
+    /// The key a restore staged before writing the snapshot sealed with it (see `MeetingStore.restore`), or nil.
+    func stagedKey() throws -> SymmetricKey?
+    /// Stores `key` as the staged key, as a new item: whatever was staged before is deleted first.
+    func stage(_ key: SymmetricKey) throws
+    /// Deletes the staged key, if there is one.
+    func discardStaged()
+}
+
+/// Stores without a crash to survive (the in-memory ones of evaluations and tests) need no staged key.
+extension DatabaseKeyStore {
+    func stagedKey() throws -> SymmetricKey? { nil }
+    func stage(_ key: SymmetricKey) throws {}
+    func discardStaged() {}
 }
 
 extension DatabaseKeyStore {
@@ -40,9 +53,14 @@ extension DatabaseKeyStore {
 
 /// The database key in the login keychain (classic keychain, see `Keychain`).
 /// Its ACL binds it to Vauta's code signature: another app triggers a macOS
-/// prompt. Account `database-key-v1` is part of the persisted format.
+/// prompt. Account `database-key-v1` is part of the persisted format, and so is
+/// the staged key's account, the same name followed by `.staged` (it exists only
+/// while a restore is being completed).
 struct KeychainDatabaseKeyStore: DatabaseKeyStore, CustomStringConvertible {
     static let defaultAccount = "database-key-v1"
+    static let stagedSuffix = ".staged"
+    // A fixed English label: it is stored in the Keychain, so it must not depend on the language at creation time.
+    private static let label = "Vauta database key"
 
     let service: String
     let account: String
@@ -53,29 +71,43 @@ struct KeychainDatabaseKeyStore: DatabaseKeyStore, CustomStringConvertible {
     }
 
     var description: String { "\(service) / \(account)" }
+    private var stagedAccount: String { account + Self.stagedSuffix }
 
-    func existingKey() throws -> SymmetricKey? {
+    func existingKey() throws -> SymmetricKey? { try key(account: account) }
+
+    func stagedKey() throws -> SymmetricKey? { try key(account: stagedAccount) }
+
+    private func key(account: String) throws -> SymmetricKey? {
         guard let data = try Keychain.read(service: service, account: account) else { return nil }
-        guard data.count == 32 else { throw StoreError(.keychainFailure, detail: "\(self): key has \(data.count) bytes") }
+        guard data.count == 32 else { throw StoreError(.keychainFailure, detail: "\(service) / \(account): key has \(data.count) bytes") }
         return SymmetricKey(data: data)
     }
 
     func createKey() throws -> SymmetricKey {
         let key = SymmetricKey(size: .bits256)
-        // A fixed English label: it is stored in the Keychain, so it must not depend on the language at creation time.
-        let label = "Vauta database key"
-        try Keychain.add(key.withUnsafeBytes { Data($0) }, service: service, account: account, label: label)
+        try Keychain.add(key.withUnsafeBytes { Data($0) }, service: service, account: account, label: Self.label)
         return key
     }
 
+    /// Delete, then add (`Keychain.recreate`): an item someone else planted under the account is never written into,
+    /// so the key never lands under that item's access list.
     func replace(with key: SymmetricKey) throws {
-        let label = "Vauta database key"
-        try Keychain.upsert(key.withUnsafeBytes { Data($0) }, service: service, account: account, label: label)
+        try Keychain.recreate(key.withUnsafeBytes { Data($0) }, service: service, account: account, label: Self.label)
     }
+
+    /// Delete, then add; an item that appears in between makes the add fail, so it is never adopted.
+    func stage(_ key: SymmetricKey) throws {
+        discardStaged()
+        try Keychain.add(key.withUnsafeBytes { Data($0) }, service: service, account: stagedAccount, label: Self.label)
+    }
+
+    func discardStaged() { Keychain.delete(service: service, account: stagedAccount) }
 
     func remove() throws {
         Keychain.delete(service: service, account: account)
-        guard try Keychain.read(service: service, account: account) == nil else {
+        discardStaged()
+        guard try Keychain.read(service: service, account: account) == nil,
+              try Keychain.read(service: service, account: stagedAccount) == nil else {
             throw StoreError(.keychainFailure, detail: "\(self): key still present after delete")
         }
     }

@@ -166,11 +166,12 @@ struct StorageBackupTests {
         let fileBefore = try Data(contentsOf: target.snapshotURL)
         let backup = try await MeetingStore.openBackup(file, password: Self.password)
 
-        target.keys.setReplaceFails(true)
+        target.keys.setStageFails(true)
         await expectStoreError(.restoreFailed) { try await store.restore(backup) }
-        target.keys.setReplaceFails(false)
+        target.keys.setStageFails(false)
 
         #expect(try #require(target.keys.key).withUnsafeBytes { Data($0) } == keyBefore)
+        #expect(target.keys.stagedValue == nil)
         #expect(try Data(contentsOf: target.snapshotURL) == fileBefore)
         #expect(try await store.imageContains("original"))
     }
@@ -200,7 +201,7 @@ struct StorageBackupTests {
         #expect(try await reopened.meetings().count == 1)
     }
 
-    @Test func failedRollbackKeepsTheCurrentStoreReadable() async throws {
+    @Test func failedWriteDiscardsTheStagedKeyAndKeepsTheStoreReadable() async throws {
         let file = try await backupOf(["del respaldo"])
         let target = StoreFixture()
         var store: MeetingStore! = try target.open()
@@ -208,11 +209,13 @@ struct StorageBackupTests {
         try await store.flush()
         let backup = try await MeetingStore.openBackup(file, password: Self.password)
 
-        // The new key is stored, the snapshot write fails, and putting the old key back fails too.
-        target.keys.setReplaceFails(after: 1)
+        // The Keychain refuses every replace too: a failed write never needs one.
+        target.keys.setReplaceFails(true)
         try FileManager.default.setAttributes([.posixPermissions: 0o500], ofItemAtPath: target.dir.path)
         await expectStoreError(.restoreFailed) { try await store.restore(backup) }
         try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: target.dir.path)
+        target.keys.setReplaceFails(false)
+        #expect(target.keys.stagedValue == nil)
 
         #expect(try await store.imageContains("original"))
         try await store.flush()

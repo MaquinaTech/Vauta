@@ -56,4 +56,20 @@ struct PromptTextTests {
     func answersCutInsideTheJSONAreDetected(input: String, cut: Bool) {
         #expect(ModelOutput.endsInsideJSON(input) == cut)
     }
+
+    /// A number in a text field reads the same on every Mac: in German `formatted()` wrote "2.026" for a year and "1,5".
+    @Test func numbersInTextFieldsDoNotDependOnTheRegion() throws {
+        struct Item: Decodable {
+            let values: [String?]
+            init(from decoder: any Decoder) throws {
+                let c = try decoder.container(keyedBy: AnyKey.self)
+                values = ["year", "half", "big", "negative", "word"].map { c.text($0) }
+            }
+        }
+        let json = #"{"year": 2026, "half": 1.5, "big": 1234567.25, "negative": -3, "word": "Q3"}"#
+        let item = try ModelOutput.decodeObject(Item.self, from: json)
+        #expect(item.values == ["2026", "1.5", "1234567.25", "-3", "Q3"])
+        #expect(2026.0.formatted(.number.locale(Locale(identifier: "de_DE"))) == "2.026", "what the old rendering gave in German")
+        #expect(1e20.plainText == "1e+20")
+    }
 }

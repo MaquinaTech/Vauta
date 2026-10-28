@@ -39,6 +39,30 @@ final class MemoryKeyStore: DatabaseKeyStore, @unchecked Sendable {
 
     func existingKey() throws -> SymmetricKey? { lock.withLock { stored } }
 
+    // MARK: Staged key (a second Keychain item, as in `KeychainDatabaseKeyStore`)
+
+    private var staged: SymmetricKey?
+    private var failStage = false
+
+    var stagedValue: SymmetricKey? { lock.withLock { staged } }
+
+    /// Simulates a Keychain that refuses to stage a key.
+    func setStageFails(_ fails: Bool) { lock.withLock { failStage = fails } }
+
+    /// Sets both items as a crash would have left them (nil deletes one).
+    func setItems(current: SymmetricKey?, staged: SymmetricKey?) { lock.withLock { stored = current; self.staged = staged } }
+
+    func stagedKey() throws -> SymmetricKey? { lock.withLock { staged } }
+
+    func stage(_ key: SymmetricKey) throws {
+        try lock.withLock {
+            if failStage { throw StoreError(.keychainFailure, detail: "simulated failure") }
+            staged = key
+        }
+    }
+
+    func discardStaged() { lock.withLock { staged = nil } }
+
     func createKey() throws -> SymmetricKey {
         try lock.withLock {
             if failCreation { throw StoreError(.keychainFailure, detail: "simulated failure") }
@@ -49,7 +73,7 @@ final class MemoryKeyStore: DatabaseKeyStore, @unchecked Sendable {
         }
     }
 
-    func remove() throws { lock.withLock { stored = nil } }
+    func remove() throws { lock.withLock { stored = nil; staged = nil } }
 }
 
 /// A temporary store directory with its own key store, removed on deinit.

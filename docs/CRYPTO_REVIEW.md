@@ -50,7 +50,7 @@ model and the search model (`LanguageModel/`, `SearchModel/`), and the text fing
 | Documents crash marker `vauta.docs.extracting` | Plaintext JSON, present only while a file is read: source number, size, modification date and the first 8 bytes of HMAC-SHA256(relative path), key = HKDF-SHA256(documents key, info `vauta.documents.marker.v1`, 32 bytes) | `Documents/DocumentIndexer.swift`, `Documents/DocumentIndexer+IO.swift`, `Storage/StoreFiles.swift` |
 | Model server configuration and key | Generic-password items with the same attributes as the store key; every write deletes the item and adds a new one (`Keychain.recreate`) | `Storage/Keychain.swift` |
 | Backup `.vautabackup` | PBKDF2-HMAC-SHA256, 1,000,000 iterations (accepts 600,000 to 2,000,000), 16-byte random salt, 32-byte key; AES-256-GCM, AAD = the 28-byte header | `Backup/BackupFormat.swift`, `Backup/BackupPassword.swift` |
-| Backup restore | New random store key, store re-sealed, key replaced in place; the documents index and its marker are deleted | `Backup/MeetingStore+Backup.swift` |
+| Backup restore | New random store key, staged first under account `database-key-v1.staged`; store re-sealed; then the key item is deleted and added again with Vauta's own access list and the staged item deleted; the documents index and its marker are deleted | `Backup/MeetingStore+Backup.swift` |
 | Erase Meetings and Context | Key deleted and verified gone, new key added (crypto-shred); the documents index and its marker are deleted | `Storage/MeetingStore+Erase.swift`, `Storage/DatabaseKeyStore.swift` |
 | Model server TLS | TLS 1.3 only, private CA as sole anchor when set, optional SHA-256 SPKI pins | `LLM/ServerTrust.swift`, `LLM/LLMClient.swift` |
 | Bundled speaker models | SHA-256 tree hash over every file, compared with a constant in the source before Core ML loads them | `Diarization/DiarizationModels.swift` |
@@ -61,8 +61,13 @@ model and the search model (`LanguageModel/`, `SearchModel/`), and the text fing
 
 1. **Key handling.** The key is 32 bytes, read as such (a different length is an error). A missing key with an existing
    store is an error and never creates a new key, so a locked keychain cannot silently orphan the store. `add` fails on
-   a duplicate. Restore's `replace` updates the key in place (never delete then add), so a failed restore keeps the old
-   key. Erase deletes the item under both service names, reads back to confirm, and adds a new one (`newKey`); an item
+   a duplicate. Restore stages the new key in a second item (`database-key-v1.staged`, deleted then added) before it
+   writes the snapshot sealed with it, and only then deletes the key item and adds the new key as a new item, so the key
+   never lands under the access list of an item it did not create; the staged item is deleted last. A failed restore
+   before the snapshot is written deletes the staged key and keeps the old one; after it, the staged key still opens the
+   store. On open, a staged key is used and made the store key only when the snapshot authenticates with it and not with
+   the key item; otherwise it is deleted (a read-only open changes nothing). So a crash at any step leaves a store that
+   opens, with the old data or the restored data. Erase deletes the item under both service names, reads back to confirm, and adds a new one (`newKey`); an item
    that appears in between makes the add fail, so it is never adopted. The model server items are written the opposite
    way: each write deletes the item and adds a new one, so a value is never written into an item another process
    created; if the add fails, the previous value is added back when it could be read.
@@ -89,7 +94,7 @@ model and the search model (`LanguageModel/`, `SearchModel/`), and the text fing
    fails authentication). The documents index is written with the same atomic, `0600`, `F_FULLFSYNC` path as the snapshot,
    and its full-text index uses FTS5 `secure-delete`. The only plaintext file the store folder holds besides the lock and
    erase markers is `vauta.docs.extracting`, which names a file only by a keyed hash of its path.
-8. **Erase.** The Keychain item is deleted, read back to confirm, and replaced; an interrupted erase is completed on the
+8. **Erase.** The Keychain item and any staged key are deleted, read back to confirm, and replaced; an interrupted erase is completed on the
    next launch by a marker file. Erase and restore also delete `vauta.docs.enc` and `vauta.docs.extracting`; the
    in-memory index is emptied and takes the new derived key.
 9. **Network.** TLS minimum is set to 1.3, trust is evaluated with the private CA as the only anchor and no network fetch,
@@ -123,8 +128,9 @@ These are stated plainly because the README and SECURITY.md promise only what th
    be read first, the old value is lost and has to be entered again.
 8. **A key item that is already there is used.** When no store file exists, Vauta uses a `database-key-v1` item already in
    the keychain, so a store file put back next to it still opens. A process running as the user that planted that item
-   beforehand, with an access list open to it, could read the key (limit 1 already covers such a process). Erase replaces
-   the item with one bound to Vauta's signature.
+   beforehand, with an access list open to it, could read the key (limit 1 already covers such a process). Erase and
+   restore replace the item with one bound to Vauta's signature. A planted `database-key-v1.staged` item is only used if
+   the snapshot authenticates with its key, which needs that key to have sealed the snapshot.
 9. **The documents index has no rollback protection** either: an older `vauta.docs.enc` sealed with the same derived key
    opens. It holds only text derived from files the user chose and is rebuilt from them.
 10. **Model integrity is a pin, not a signature.** The speaker-model hash guards against damage or a swapped file. It does not

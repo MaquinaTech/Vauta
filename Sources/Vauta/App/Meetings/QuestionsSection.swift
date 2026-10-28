@@ -155,7 +155,7 @@ private struct QuestionRow: View {
             if let citation = cite.documentCitation {
                 Button { model.openDocument(citation) } label: { Image(systemName: "arrow.up.forward.square") }
                     .buttonStyle(.link)
-                    .accessibilityLabel(Text(verbatim: cite.fileName ?? ""))
+                    .accessibilityLabel(cite.fileName.flatMap { $0.isEmpty ? nil : Text(verbatim: $0) } ?? Text("Document", comment: "VoiceOver, brief: what a line is; a file or a passage of one"))
                     .accessibilityHint(Text("Opens the document at this passage", comment: "Hint of a citation chip that opens a document"))
             }
         }

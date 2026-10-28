@@ -114,7 +114,7 @@ setting is on, a voice summary per speaker with each meeting (`speaker_voices`).
 - **A key item planted before Vauta creates its store.** When no store exists yet, Vauta uses a `database-key-v1` item
   that is already in the login keychain (so a store restored next to it still opens). A process running as you that
   created that item beforehand, with an access list open to it, could read the key. Such a process is already in the
-  threat above; "Erase Everything" replaces the item with one only Vauta can read.
+  threat above; "Erase Everything" and a restore replace the item with one only Vauta can read.
 - **Other accounts on this Mac, with a server on this Mac.** In **This Mac** mode Vauta talks plain HTTP to
   `127.0.0.1`, which is shared by every account on the Mac. While your server is stopped, a process of another
   account can listen on its port and receive Vauta's requests (meeting text and the server key). On a Mac shared
@@ -245,14 +245,14 @@ Format of a backup file (`.vautabackup`; backups from an earlier version are sti
 - Restore decrypts and validates in memory (authentication, manifest, schema no newer than the app's, the image's
   schema compared object by object with Vauta's own DDL for that version, so a backup carrying any extra or changed
   table, index, trigger, view or virtual table is refused before anything runs; SQLite `integrity_check`;
-  migrations for older schemas) before touching the store. Then, with no suspension point: the
-  Keychain database key is replaced in place with a new random key; the backup is written as the new snapshot,
-  sealed with the new key, atomically over the old one (`F_FULLFSYNC`, rename, directory sync); the journal is removed.
-  The new snapshot is encrypted before the key changes, so only the file write lies between the two. If writing
-  fails, the previous key is put back and the old store is untouched; if the Keychain also refuses that, the current
-  store is re-saved with the new key instead, so it stays readable. After success the old key no longer
-  exists, which is the same crypto-shred as Erase Everything. A crash in the instant between the key replacement and
-  the rename would leave the old file without its key; the backup file is the recovery in that case.
+  migrations for older schemas) before touching the store. Then, with no suspension point: a new random key is
+  stored in a second Keychain item (`database-key-v1.staged`); the backup is written as the new snapshot, sealed with
+  the new key, atomically over the old one (`F_FULLFSYNC`, rename, directory sync); the database key item is deleted
+  and added again with the new key and Vauta's own access list; the staged item is deleted; the journal is removed.
+  If writing fails, the staged key is deleted and the old store is untouched. If the process stops at any step, the
+  next launch opens the store with whichever of the two keys authenticates the snapshot and finishes the change, so
+  the store opens with either the old data or the restored data. After success the old key no longer exists, which
+  is the same crypto-shred as Erase Everything.
 - A wrong password, a changed header or payload, and a truncated file are indistinguishable by design (GCM
   authentication fails); a file without the header, or cut inside it, is reported as not being a backup.
 - Not protected: a backup is only as strong as its password; an attacker with the file can guess offline. A backup also

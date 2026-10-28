@@ -45,12 +45,22 @@ public enum PromptText {
 
     /// A model date ("YYYY-MM-DD") as the start of that day in `timeZone`;
     /// nil when it is not a date or is implausibly far (> 3 years) from `reference`.
+    /// A day whose midnight does not exist in `timeZone` (a daylight-saving change at 00:00, as in Santiago, Havana or
+    /// Beirut) starts at its first moment: `DateFormatter` returns nil for it, so a strict "YYYY-MM-DD" is read as a
+    /// `DueDay`, and the formatter only reads the looser forms it accepts ("2026-1-5").
     static func parseDay(_ s: String, reference: Date, timeZone: TimeZone = .current) -> Date? {
-        let f = DateFormatter()
-        f.locale = Locale(identifier: "en_US_POSIX")
-        f.timeZone = timeZone
-        f.dateFormat = "yyyy-MM-dd"
-        guard let d = f.date(from: s.trimmingCharacters(in: .whitespaces)) else { return nil }
+        let text = s.trimmingCharacters(in: .whitespaces)
+        let d: Date
+        if let day = DueDay(text) {
+            d = day.startOfDay(in: timeZone)
+        } else {
+            let f = DateFormatter()
+            f.locale = Locale(identifier: "en_US_POSIX")
+            f.timeZone = timeZone
+            f.dateFormat = "yyyy-MM-dd"
+            guard let parsed = f.date(from: text) else { return nil }
+            d = parsed
+        }
         return abs(d.timeIntervalSince(reference)) < 3 * 365 * 86_400 ? d : nil
     }
 
