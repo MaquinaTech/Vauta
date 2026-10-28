@@ -326,7 +326,7 @@ struct SummaryTab: View {
     /// glyphs follow the text instead of floating at the end of the first line.
     private func decisionText(_ d: Decision) -> Text {
         var t = Text(d.text)
-        if d.source == "llm" { t = t + Text(verbatim: " ") + Text(Image(systemName: "sparkles")).font(.caption).foregroundColor(.blue) }
+        if d.source == "llm" { t = t + Text(verbatim: " ") + Text(Image(systemName: "sparkles")).font(.caption).foregroundColor(Brand.sparkle) }
         if d.unconfirmed {
             t = t + Text(verbatim: " ") + Text(Image(systemName: "questionmark.circle")).foregroundColor(.orange)
                 + Text(verbatim: " ") + Text("Unconfirmed", comment: "Small badge after a decision the transcript doesn’t back").font(.footnote).foregroundColor(.secondary)
@@ -420,14 +420,14 @@ struct SourceBadge: View {
     /// The width of the badge's column, which other lists reserve to line their text up with it.
     nonisolated static let columnWidth: CGFloat = 20
     let source: String
-    /// A selected row has a coloured fill: a blue or green glyph would vanish into it.
+    /// A selected row has a coloured fill: an indigo or green glyph would vanish into it.
     @Environment(\.backgroundProminence) private var prominence
 
     var body: some View {
         let byModel = source == "llm"
         Image(systemName: byModel ? "sparkles" : "person.crop.circle.badge.checkmark")
             .frame(width: Self.columnWidth)
-            .foregroundStyle(prominence == .increased ? AnyShapeStyle(.primary) : AnyShapeStyle(byModel ? Color.blue : Color.green))
+            .foregroundStyle(prominence == .increased ? AnyShapeStyle(.primary) : AnyShapeStyle(byModel ? Brand.sparkle : Color.green))
             .help(byModel ? "Proposed by the model: review it" : "Added or edited by you")
             .accessibilityLabel(byModel ? Text("Proposed by the model") : Text("Added by you"))
     }

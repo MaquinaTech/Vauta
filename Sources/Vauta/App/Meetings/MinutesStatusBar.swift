@@ -45,7 +45,7 @@ struct MinutesStatusBar: View {
                 if running {
                     // One kind of indicator: the spinner while the stage is unknown, the bar once the model reports how far it has read.
                     // The bar is the indicator once the model reports how far it has read: no empty slot before the text then.
-                    if MinutesActivity.fraction(status) == nil { glyph { ProgressView().controlSize(.small) } }
+                    if MinutesActivity.fraction(status) == nil { glyph { ThinkingOrb() } }
                     TimelineView(.periodic(from: .now, by: 1)) { _ in
                         Text(runningText(status, now: AppClock.now)).monospacedDigit().foregroundStyle(.secondary)
                     }
@@ -115,7 +115,7 @@ struct MinutesStatusBar: View {
         // the wording around the name differs between languages.
         let text = Text(onDevice ? "Minutes proposed by Apple Intelligence: review them and correct anything that’s wrong."
                                  : "Minutes proposed by the model: review them and correct anything that’s wrong.").foregroundStyle(.secondary)
-        let glyphView = glyph { Image(systemName: "sparkles").foregroundStyle(.blue) }
+        let glyphView = glyph { Image(systemName: "sparkles").foregroundStyle(Brand.sparkle) }
         let writer: AnyView = canWrite ? AnyView(writeButton(retry: false)) : AnyView(EmptyView())
         // One layout at every width and in every language: the badge sits on a line of its own and the sentence
         // under it takes the room up to the button.

@@ -24,6 +24,14 @@ enum Brand {
     /// The record button while recording. White on the red in the middle is 4.4:1.
     static let recording = [rose, red, magenta]
 
+    /// The mark of what the model wrote (the sparkles next to a decision or a task): Vauta's indigo, darker on a light
+    /// background so it keeps 4.5:1 there, lighter on a dark one.
+    static let sparkle = Color(nsColor: NSColor(name: nil) { appearance in
+        appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 0x9D / 255, green: 0x95 / 255, blue: 0xFF / 255, alpha: 1)
+            : NSColor(srgbRed: 0x55 / 255, green: 0x4A / 255, blue: 0xE0 / 255, alpha: 1)
+    })
+
     /// The fill of a header symbol: indigo into blue into teal, like the record button.
     static let symbolGradient = LinearGradient(colors: [indigo, blue, teal], startPoint: .topLeading, endPoint: .bottomTrailing)
 

@@ -191,10 +191,10 @@ struct TaskTextCell: View {
     }
 
     private var badge: Text {
-        // A selected row has a coloured fill: a blue glyph would vanish into it.
+        // A selected row has a coloured fill: an indigo glyph would vanish into it.
         var out = Text(verbatim: "")
         if task.source == "llm" {
-            let color: Color = prominence == .increased ? .primary : .blue
+            let color: Color = prominence == .increased ? .primary : Brand.sparkle
             out = out + Text(verbatim: "\u{00A0}") + Text(Image(systemName: "sparkles")).foregroundStyle(color)
         }
         if task.unconfirmed || ownerMarked {

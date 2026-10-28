@@ -25,7 +25,7 @@ struct AnswersCard: View {
                     Spacer(minLength: 4)
                     // Finding an answer: a spinner of the size of the title, no row; pressing it stops the work.
                     if model.isWorking {
-                        Button { model.stopWorking() } label: { ProgressView().controlSize(.small) }
+                        Button { model.stopWorking() } label: { ThinkingOrb() }
                             .buttonStyle(.plain)
                             .frame(width: 16, height: 16)
                             .help(String(localized: "Stop", comment: "Button that stops finding an answer"))
@@ -41,7 +41,7 @@ struct AnswersCard: View {
                 }
                 if let pause = model.visiblePause { pauseLine(pause).panelRowStop() }
             }
-            .panelCard()
+            .panelVautaCard()
             .onGeometryChange(for: CGFloat.self, of: { $0.frame(in: .named(PanelRowStop.space)).minY }) { onTop($0) }
             .animation(reduceMotion ? nil : .snappy(duration: 0.2), value: model.rows)
             .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top)))

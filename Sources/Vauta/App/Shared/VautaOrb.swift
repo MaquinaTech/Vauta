@@ -209,3 +209,13 @@ struct VautaOrb: View {
         return x - x.rounded(.down)
     }
 }
+
+/// Vauta at work, in the size of a small spinner: the sphere with its colours turning faster, no orbit.
+struct ThinkingOrb: View {
+    var diameter: CGFloat = 16
+
+    var body: some View {
+        VautaOrb(mode: .working, diameter: diameter, showsOrbit: false, carriesGlyph: false)
+            .frame(width: diameter, height: diameter)
+    }
+}

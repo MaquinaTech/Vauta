@@ -71,7 +71,7 @@ struct BriefCardContent: View {
                 .controlSize(.small)
             }
         }
-        .panelCard()
+        .panelVautaCard()
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(verbatim: "\(String(localized: "Next meeting", comment: "Menu-bar panel: heading of the card about the meeting that is about to start")), \(card.summary.title), \(BriefLabels.whenLine(start: card.summary.start))"))
     }
@@ -118,7 +118,7 @@ struct BriefCardContent: View {
                 .font(.callout).foregroundStyle(.secondary)
         case .building:
             HStack(spacing: 8) {
-                ProgressView().controlSize(.small)
+                ThinkingOrb()
                 Text("Preparing brief…", comment: "Menu-bar panel, brief card: the brief is being built").font(.callout).foregroundStyle(.secondary)
             }
             .accessibilityElement(children: .combine)

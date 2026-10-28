@@ -234,7 +234,7 @@ struct LiveNotesView: View {
                 }
                 scrollingNotes
             }
-            .panelCard()
+            .panelVautaCard()
             .onAppear { if startsExpanded { expanded = true } }
             .onGeometryChange(for: CGFloat.self, of: { $0.frame(in: .named(PanelRowStop.space)).minY }) { onTop($0) }
             // Each note that is whole inside the card is a place where the panel's visible area may end, so a card taller
