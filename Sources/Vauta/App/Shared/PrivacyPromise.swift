@@ -50,13 +50,13 @@ struct PromiseGlyph: View {
     }
 }
 
-/// One icon rendering for the promises: monochrome, in the accent tint and the same 22 pt column and
-/// 10 pt gap as `SetupBulletStyle`, so Welcome and the last setup page style their lists alike.
+/// One icon rendering for the promises: monochrome, in Vauta's gradient and the same 22 pt column and
+/// 10 pt gap as `SetupBulletStyle`, so Settings and the setup pages style their lists alike.
 struct PromiseLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             configuration.icon
-                .foregroundStyle(.tint)
+                .foregroundStyle(Brand.symbolGradient)
                 // A fixed square box, so the four glyphs line up in one column whatever their own width.
                 .frame(width: 22, height: 20, alignment: .center)
                 .accessibilityHidden(true)
