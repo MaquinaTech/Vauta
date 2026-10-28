@@ -13,6 +13,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/licencia-Apache--2.0-blue" alt="Licencia: Apache-2.0"></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-black?logo=apple" alt="Plataforma: macOS 26 o posterior">
   <img src="https://img.shields.io/badge/Apple%20silicon-solo-black" alt="Solo Apple silicon">
+  <a href="https://www.bestpractices.dev/projects/16025"><img src="https://www.bestpractices.dev/projects/16025/badge" alt="OpenSSF Best Practices"></a>
 </p>
 
 <p align="center">
@@ -228,7 +229,7 @@ Puedes cambiar los dos atajos en **Ajustes → General**.
 
 Aquí no citamos puntuaciones de calidad de actas ni de búsqueda: las comparaciones tempranas que hicimos usaron datos que no están en este repositorio, así que nadie más puede reproducirlas. Lo que sí podemos decir es la lógica del diseño: el modelo en el dispositivo de Apple tiene una ventana de contexto pequeña, por lo que las reuniones largas se resumen por partes, y un modelo mayor en un servidor suele escribir mejores actas. Prueba ambos con tus propias reuniones; cambiar es un solo ajuste. La búsqueda por palabras clave de Preguntar no necesita ningún modelo. Las cifras de precisión que sí podemos reproducir están en [docs/BENCHMARKS.md](docs/BENCHMARKS.md) (en inglés).
 
-Para obtener mejores actas, usa un servidor de modelos con un modelo de 9B o más. La guía **Configurar un servidor de modelos** (en la configuración inicial, en **Ajustes → Modelos** y desde la recomendación que aparece junto a las actas escritas en el dispositivo) recomienda LM Studio u Ollama y un modelo según la memoria de tu Mac: Qwen3.5-9B desde 16 GB, Qwen3.8-27B desde 32 GB y ninguno por debajo de 16 GB. Vauta no ejecuta ningún motor de modelos de chat ni descarga ninguno por sí misma: abre la web de la app, muestra los comandos para copiar y detecta el servidor en este Mac. Lo único que Vauta puede descargar es el modelo de búsqueda opcional de arriba, y solo cuando pulsas Descargar.
+Para obtener mejores actas, usa un servidor de modelos con un modelo de 9B o más. La guía **Configurar un servidor de modelos** (en la configuración inicial, en **Ajustes → Modelos** y desde la recomendación que aparece junto a las actas escritas en el dispositivo) recomienda LM Studio u Ollama y un modelo según la memoria de tu Mac: Qwen3.5-9B desde 16 GB, Qwen3.8-27B desde 32 GB y ninguno por debajo de 16 GB. Para un servidor, Vauta no instala nada ni descarga ningún modelo de chat: abre la web de la app, muestra los comandos para copiar y detecta el servidor en este Mac. Los únicos modelos que Vauta puede descargar por sí misma son el modelo de búsqueda opcional y el modelo integrado opcional que se describen más abajo, y solo cuando pulsas Descargar.
 
 Preguntar usa la búsqueda por palabras clave hasta que actives la búsqueda por significado. El ajuste **Preguntar encuentra fragmentos con** puede ser **Búsqueda por significado en este Mac**, **Búsqueda por significado (servidor de modelos)** o **Búsqueda por palabras clave**.
 

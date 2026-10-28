@@ -13,6 +13,7 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License: Apache-2.0"></a>
   <img src="https://img.shields.io/badge/macOS-26%2B-black?logo=apple" alt="Platform: macOS 26 or later">
   <img src="https://img.shields.io/badge/Apple%20silicon-only-black" alt="Apple silicon only">
+  <a href="https://www.bestpractices.dev/projects/16025"><img src="https://www.bestpractices.dev/projects/16025/badge" alt="OpenSSF Best Practices"></a>
 </p>
 
 <p align="center">
@@ -229,7 +230,7 @@ Both shortcuts can be changed in **Settings → General**.
 
 We do not quote minute-quality or search scores here: the early comparisons we ran used data that is not in this repository, so nobody else can reproduce them. What we can say is the direction of the design: Apple's on-device model has a small context window, so long meetings are summarized in parts, and a larger model on a server usually writes better minutes. Try both on your own meetings; switching is one setting. Keyword search for Ask needs no model at all. The accuracy figures we *can* reproduce are in [docs/BENCHMARKS.md](docs/BENCHMARKS.md).
 
-For better minutes, use a model server with a 9B or larger model. The **Set Up a Model Server** guide (in setup, in **Settings → Models** and from the recommendation shown next to minutes written on-device) recommends LM Studio or Ollama and a model for your Mac's memory: Qwen3.5-9B from 16 GB, Qwen3.8-27B from 32 GB, nothing below 16 GB. Vauta runs no chat model engine and downloads no chat model itself; it opens the app's website, shows the commands to copy, and detects the server on this Mac. The one thing Vauta can download is the optional search model below, and only when you click Download.
+For better minutes, use a model server with a 9B or larger model. The **Set Up a Model Server** guide (in setup, in **Settings → Models** and from the recommendation shown next to minutes written on-device) recommends LM Studio or Ollama and a model for your Mac's memory: Qwen3.5-9B from 16 GB, Qwen3.8-27B from 32 GB, nothing below 16 GB. For a server, Vauta installs nothing and downloads no chat model: it opens the app's website, shows the commands to copy, and detects the server on this Mac. The only models Vauta itself can download are the optional search model and the optional integrated model below, and only when you click Download.
 
 Ask uses keyword search until you turn on search by meaning. The **Ask finds passages with** setting (Settings → Models) can be **Search by meaning on this Mac**, **Search by meaning (model server)** or **Keyword search**.
 
