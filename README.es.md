@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  <a href="https://maquinatech.github.io/Vauta-landing/es/"><strong>Web</strong></a> · <a href="README.md">English</a> · Español
+  <a href="https://vauta.vercel.app/es/"><strong>Web</strong></a> · <a href="README.md">English</a> · Español
 </p>
 
 ---
