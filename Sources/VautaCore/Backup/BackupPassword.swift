@@ -20,7 +20,7 @@ public enum BackupPassword {
         let chars = Array(password)
         guard chars.count >= minimumLength else { return .tooShort }
         let distinct = Set(chars).count
-        guard distinct >= 6 else { return .weak }
+        guard distinct >= minimumDistinctCharacters else { return .weak }
         let classes = [chars.contains { $0.isLowercase }, chars.contains { $0.isUppercase },
                        chars.contains { $0.isNumber }, chars.contains { !$0.isLetter && !$0.isNumber }].filter { $0 }.count
         let words = password.split(whereSeparator: { $0.isWhitespace || $0 == "-" }).count
@@ -29,6 +29,11 @@ public enum BackupPassword {
         return .weak
     }
 
+    /// Fewer distinct characters than this is trivially repetitive (`111111111111`), however long.
+    public static let minimumDistinctCharacters = 6
+
     /// A password is accepted when it reaches the minimum length and is not trivially repetitive.
-    public static func isAcceptable(_ password: String) -> Bool { strength(of: password) >= .weak }
+    public static func isAcceptable(_ password: String) -> Bool {
+        strength(of: password) >= .weak && Set(password).count >= minimumDistinctCharacters
+    }
 }

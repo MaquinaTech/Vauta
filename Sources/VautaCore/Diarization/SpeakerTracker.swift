@@ -56,7 +56,7 @@ enum Hungarian {
 /// Live speaker labels that stay stable while they get better.
 ///
 /// Each analysed window is labelled at once by the cheap online clusterer. That drifts (it over-segments: 6 to 11
-/// live speakers against about 4 real ones in the first evaluation), so every `liveReclusterSeconds` all the
+/// live speakers against about 4 real ones in the first evaluation), so every `liveReclusterSeconds` (less often in long meetings, see `liveReclusterInterval`) all the
 /// embeddings so far are clustered again exactly as at the end of the meeting, and the new clusters are mapped back
 /// onto the labels already shown with the Hungarian method (most shared embeddings wins). A speaker therefore
 /// keeps its label unless it really was merged into another; labels of merged speakers are retired and never
@@ -81,7 +81,7 @@ public final class SpeakerTracker {
     public var speakerCount: Int { online.activeCount }
 
     /// True when `recluster()` is due.
-    public var isReclusterDue: Bool { windowsSinceRecluster >= config.liveReclusterWindows }
+    public var isReclusterDue: Bool { windowsSinceRecluster >= config.liveReclusterInterval(windows: records.count) }
 
     /// Adds a window and returns its provisional labels (one per local speaker, -1 = none).
     @discardableResult

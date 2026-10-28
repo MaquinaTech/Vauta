@@ -248,6 +248,22 @@ struct FollowUpDetectorTests {
         #expect(Self.detect(["Let's meet again on the 20th."], cited: [1]).first?.day?.string == "2026-10-20", "a plan still counts")
     }
 
+    /// The one-year rule of due days (docs/ACTIONS.md) holds for days read from the transcript too.
+    @Test func aDayMoreThanAYearAwayIsNotAMeeting() {
+        #expect(Self.one("Let's meet again on 2028-03-01.") == nil)
+        #expect(Self.one("Let's meet again on 1 March 2028.", locale: "en-GB") == nil)
+        #expect(Self.one("We'll talk again on 01/03/2029.", locale: "en-GB") == nil)
+        #expect(Self.one("Let's meet again in 400 days.") == nil)
+        #expect(Self.one("Let's meet again on 2027-10-12.")?.day?.string == "2027-10-12", "a year to the day still counts")
+    }
+
+    @Test func aRejectedDateDoesNotHideALaterOneInTheSameSentence() {
+        expect("After the 2026-03-01 launch, let's meet again on 2026-11-02.", day: "2026-11-02", inferred: false, minute: nil)
+        expect("We met on 03/01/2026, let's meet again on 21/10/2026.", day: "2026-10-21", inferred: false, minute: nil, locale: "en-GB")
+        expect("Let's meet again on 2031-01-01, no, on 2026-11-02.", day: "2026-11-02", inferred: false, minute: nil)
+        expect("Since 1 March 2025 we meet, let's meet again on 21 October 2026.", day: "2026-10-21", inferred: false, minute: nil, locale: "en-GB")
+    }
+
     @Test func aTimeBelongsToTheDayItIsNextTo() {
         let found = Self.detect(["Let's meet again next Wednesday, 8:45.", "Or the 18th around one o'clock."], cited: [1, 2])
         #expect(found.first { $0.day?.string == "2026-10-14" }?.minuteOfDay == 8 * 60 + 45)

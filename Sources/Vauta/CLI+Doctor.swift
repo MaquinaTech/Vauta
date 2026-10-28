@@ -130,6 +130,13 @@ func serverCheck(configPath: String, askKey: Bool) async throws -> Int32 {
     let client = LLMClient(config: config, bearer: { key })
     let models = try await client.allModels(purpose: .connectionTest)
     print("Server: \(config.baseURL) · \(models.count) models: \(models.joined(separator: ", "))")
+    // The server keeps its own window: a prompt longer than it is cut (Ollama drops the start without an error).
+    if let server = try? await client.inspect() {
+        for short in server.models([config.fastModel, config.deepModel].filter { !$0.isEmpty }, loadedWithLessThan: config.contextTokens) {
+            printError("Warning: \(short.id) is loaded with a context of \(short.context) tokens, less than contextTokens "
+                       + "(\(config.contextTokens)). Load it with a longer context, or lower contextTokens.")
+        }
+    }
     let missing = [config.fastModel, config.deepModel, config.embeddingModel].filter { !$0.isEmpty && !models.contains($0) }
     guard missing.isEmpty else {
         printError("Not listed by the server: \(missing.joined(separator: ", "))")

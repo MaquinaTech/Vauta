@@ -19,7 +19,8 @@ extension MeetingStore {
         guard activeMeetingID == nil else { throw StoreError.meetingInProgress }
         // No await from here on: nothing interleaves. If the Keychain does not
         // answer, abort before touching anything.
-        if !needsNewKey { _ = try keyStore.key(createIfMissing: false) }
+        // (After a restore whose key is still only staged, the key item may be missing: the erase shreds both.)
+        if !needsNewKey && !keyPromotionPending { _ = try keyStore.key(createIfMissing: false) }
         let fresh = try SQLiteDatabase(image: nil, size: 0)
         try Schema.migrate(fresh)
         // Marker and file first; if the file cannot be deleted, nothing changes.
@@ -71,7 +72,7 @@ extension MeetingStore {
         }
     }
 
-    /// Completes the crypto-shred: removes the old key from the Keychain and
+    /// Completes the crypto-shred: removes the old key (and any staged one) from the Keychain and
     /// creates another (with one retry). Only once the new one exists does the
     /// store stop requiring it.
     func rotateKey() throws {
@@ -85,6 +86,8 @@ extension MeetingStore {
             throw StoreError(.newKeyPending, underlying: error)
         }
         needsNewKey = false
+        // `remove` shredded a key a restore had left staged too.
+        keyPromotionPending = false
         for marker in eraseMarkers { try? FileManager.default.removeItem(at: marker) }
     }
 }

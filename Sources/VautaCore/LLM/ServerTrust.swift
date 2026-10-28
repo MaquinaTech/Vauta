@@ -7,7 +7,11 @@ import Security
 
 /// TLS trust for the model server: host name (IP or DNS in the SAN), the
 /// private CA bundle as the only anchors (system anchors when there is none),
-/// and the SPKI pins when configured.
+/// and the SPKI pins when configured. Evaluation never fetches anything from
+/// the network: no missing intermediates (AIA) and no OCSP or CRL requests to a
+/// certificate authority, with or without a private CA. A publicly trusted
+/// server must therefore send its full chain (leaf and intermediates), which
+/// `tailscale cert`, Caddy and Let's Encrypt's `fullchain.pem` do.
 enum ServerTrust {
     /// Evaluates a server-trust challenge against the configured endpoints.
     static func evaluate(_ challenge: URLAuthenticationChallenge, _ targets: [LLMServerConfig.Endpoint])
@@ -26,12 +30,13 @@ enum ServerTrust {
     static func evaluate(_ trust: SecTrust, _ target: LLMServerConfig.Endpoint, at date: Date? = nil) -> Bool {
         SecTrustSetPolicies(trust, SecPolicyCreateSSL(true, target.host as CFString))
         if let date { SecTrustSetVerifyDate(trust, date as CFDate) }
+        // Revocation stays best-effort (the SSL policy does not require it), so this only stops the fetches.
+        SecTrustSetNetworkFetchAllowed(trust, false)
         if !target.caDERs.isEmpty {
             let anchors = target.caDERs.compactMap { SecCertificateCreateWithData(nil, $0 as CFData) }
             guard anchors.count == target.caDERs.count else { return false }
             SecTrustSetAnchorCertificates(trust, anchors as CFArray)
             SecTrustSetAnchorCertificatesOnly(trust, true)
-            SecTrustSetNetworkFetchAllowed(trust, false)
         }
         var error: CFError?
         guard SecTrustEvaluateWithError(trust, &error),

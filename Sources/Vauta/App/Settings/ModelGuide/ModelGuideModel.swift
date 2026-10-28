@@ -260,12 +260,18 @@ final class ModelGuideModel {
     }
 
     static func contextTitle(_ shortfall: ContextShortfall, name: String) -> String {
-        String(localized: "\(name)’s context is too short (\(tokens(shortfall.current)))",
+        contextTitle(current: shortfall.current, name: name)
+    }
+
+    static func contextTitle(current: Int, name: String) -> String {
+        String(localized: "\(name)’s context is too short (\(tokens(current)))",
                comment: "Model guide status title when a model has too little context; arguments are a model name and a token count like “4K”")
     }
 
-    static func contextDetail(_ shortfall: ContextShortfall) -> String {
-        String(localized: "Vauta needs at least \(tokens(shortfall.required)).", comment: "Model guide status detail; the argument is a token count")
+    static func contextDetail(_ shortfall: ContextShortfall) -> String { contextDetail(required: shortfall.required) }
+
+    static func contextDetail(required: Int) -> String {
+        String(localized: "Vauta needs at least \(tokens(required)).", comment: "Model guide status detail; the argument is a token count")
     }
 
     /// A context length the way the rest of the guide writes it: 32,768 is "32K".

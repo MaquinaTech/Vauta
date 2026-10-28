@@ -175,17 +175,19 @@ VAUTA_ALLOW_ADHOC=1 ./scripts/install.sh
 
 The trade-off: every rebuild looks like a new app to macOS, so it asks for the permissions again after every update.
 
-The first time the app opens, macOS asks for your Keychain password for "Vauta". Choose **Always Allow**. If that prompt ever appears at another time, choose **Deny**.
+The first time the app opens, macOS asks for your Keychain password for "Vauta". Choose **Always Allow**. It asks again after every update of an ad-hoc build, and after you create a new signing identity: choose **Always Allow** then too. If the prompt appears when you have not just installed or updated Vauta, choose **Deny**.
 
 **Permissions.** During setup macOS asks for the **microphone** (your voice), **system audio** (the other participants in the call) and, if you turn those features on, **Calendar** (meeting titles and attendees), **Reminders** (to send tasks there) and notifications. Vauta also asks for access to your **local network** if you point it at a model server on another computer. Each one can be changed later in System Settings → Privacy & Security.
 
-**Update.** Pull and install again; Vauta quits cleanly, replaces itself and reopens:
+**Update.** Run the update script; it installs the newest release only if its tag is signed by the maintainer's key, shows the release notes and asks first. Vauta quits cleanly, replaces itself and reopens:
 
 ```sh
 cd Vauta
-git pull
-./scripts/install.sh
+./scripts/update.sh                         # with the local signing identity, in your own Terminal
+VAUTA_ALLOW_ADHOC=1 ./scripts/update.sh     # with the ad-hoc signature
 ```
+
+It checks the key against the `.github/allowed_signers` you already have (and the fingerprint in [SECURITY.md](SECURITY.md#verifying-what-you-run)), refuses an older version than the one installed, runs the tests and leaves this folder at the release tag (`git switch main` goes back to the branch). Versions before 0.9.3 don't have the script yet: run `git pull` once, then `./scripts/update.sh`.
 
 **Uninstall.** Quit Vauta and delete `~/Applications/Vauta.app`. Your meetings live in the app's container, `~/Library/Containers/<bundle-id>/` (default bundle ID `local.vauta.app`); deleting that folder deletes all meetings, so back them up first if you want them (**Settings → Privacy & Security → Back Up…**). Then delete the Keychain items whose service is the bundle ID in Keychain Access. If you used `setup-signing.sh`, you can also delete the keychain `~/Library/Keychains/vauta-signing.keychain-db`.
 

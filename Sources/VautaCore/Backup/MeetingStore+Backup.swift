@@ -114,12 +114,15 @@ extension MeetingStore {
     }
 
     /// Replaces the store with a backup. The old data is only dropped once the
-    /// new store is on disk:
+    /// new store is on disk, and the store opens after a crash at any step:
     ///
-    /// 1. the database key is replaced in the Keychain (in place; if that fails nothing changed);
+    /// 1. the new key is staged in the Keychain, next to the current one (if that fails nothing changed);
     /// 2. the backup is written as the new snapshot, sealed with the new key, atomically over the old one;
-    ///    if this fails the previous key is put back and the old store is untouched;
-    /// 3. the old key is gone, so every old copy of the store (backups, disk remnants) can no longer be read.
+    ///    if this fails the staged key is deleted and the old store is untouched;
+    /// 3. the new key becomes the store key, as a new item with Vauta's own access list, and the staged one is
+    ///    deleted. If this fails, or the process dies before or during it, the staged key still opens the snapshot:
+    ///    the next open (or the next restore) completes it (`settleStagedKey`);
+    /// 4. the old key is gone, so every old copy of the store (backups, disk remnants) can no longer be read.
     ///
     /// Refused while a meeting is being recorded.
     public func restore(_ backup: OpenedBackup) async throws -> RestoreSummary {
@@ -141,31 +144,34 @@ extension MeetingStore {
         let fresh = Journal.newGeneration()
         try Self.setGeneration(fresh, in: restored)
         let newKey = SymmetricKey(size: .bits256)
-        // Sealed before the key changes, so the window between the Keychain
-        // update and the rename is only the file write.
         let sealed = try SnapshotEnvelope.seal(restored.withSerializedBytes(SnapshotEnvelope.pack), key: newKey)
-        // After "Erase everything" whose key rotation is still pending, the
-        // Keychain holds the key being shredded: it is never put back.
-        let oldKey = needsNewKey ? nil : key
         do {
-            try keyStore.replace(with: newKey)
+            // The staged key of an earlier restore whose last step failed is the one the snapshot on disk needs: it
+            // becomes the store key before another is staged. After "Erase everything" whose key rotation is still
+            // pending there is no snapshot, and the key being shredded is never put back.
+            if keyPromotionPending && !needsNewKey {
+                try keyStore.replace(with: key)
+                keyStore.discardStaged()
+            }
+            keyPromotionPending = false
+            try keyStore.stage(newKey)
         } catch {
             throw StoreError(.restoreFailed, underlying: error)
         }
         do {
             try AtomicFile.write(sealed, to: file, tempPrefix: Self.tempPrefix)
         } catch {
-            if let oldKey {
-                // Put the previous key back so the old snapshot stays readable.
-                do { try keyStore.replace(with: oldKey) } catch {
-                    do { try keyStore.replace(with: oldKey) } catch {
-                        // The Keychain keeps only the new key: re-save the current
-                        // store with it right away, so it stays readable.
-                        adoptKeyAfterFailedRollback(newKey)
-                    }
-                }
+            // The rename may be done when the error comes (the directory flush failed): then the new snapshot is the store.
+            guard let onDisk = try? Data(contentsOf: file), SnapshotEnvelope.isSealed(onDisk, with: newKey) else {
+                keyStore.discardStaged()
+                throw StoreError(.restoreFailed, underlying: error)
             }
-            throw StoreError(.restoreFailed, underlying: error)
+        }
+        do {
+            try keyStore.replace(with: newKey)
+            keyStore.discardStaged()
+        } catch {
+            keyPromotionPending = true
         }
         removeJournalsAndLeftovers(includingSetAside: false)
         // The documents image belonged to the data that was just replaced (and is sealed with the old key): the restored sources are
@@ -186,22 +192,32 @@ extension MeetingStore {
         return RestoreSummary(replacedMeetings: replaced, restoredMeetings: Int(try db.query("SELECT COUNT(*) FROM meetings")[0].int(0)))
     }
 
-    /// Last resort when a restore could not write its snapshot nor put the old
-    /// key back: the store switches to the key the Keychain has and rewrites
-    /// the current data with it (new generation, no journal).
-    private func adoptKeyAfterFailedRollback(_ newKey: SymmetricKey) {
-        key = newKey
-        journalKey = Journal.key(from: newKey)
-        needsSnapshot = true
-        let fresh = Journal.newGeneration()
-        guard (try? Self.setGeneration(fresh, in: db)) != nil,
-              let packed = try? db.withSerializedBytes(SnapshotEnvelope.pack),
-              (try? Self.writeSnapshot(packed, key: newKey, to: file)) != nil else { return }
-        removeJournalsAndLeftovers(includingSetAside: false)
-        generation = fresh
-        pendingOps = []
-        nextSeq = 0
-        journalBytes = 0
-        needsSnapshot = false
+    /// Completes a restore that stopped after writing its snapshot (see `restore`), on open. Returns the staged key
+    /// when it is the one that opens `snapshot` and the store key does not; `promoted` is false when it could not become
+    /// the store key (it is still staged, and the next open or restore tries again). A staged key that opens nothing
+    /// needed (no snapshot, or the store key opens it: the restore never wrote its snapshot, or it finished) is
+    /// deleted. A read-only open (`writable` false) changes nothing in the Keychain.
+    static func settleStagedKey(_ keyStore: any DatabaseKeyStore, snapshot: URL,
+                                writable: Bool) throws -> (key: SymmetricKey, promoted: Bool)? {
+        guard let staged = try keyStore.stagedKey() else { return nil }
+        let current = try keyStore.existingKey()
+        guard let sealed = try? Data(contentsOf: snapshot) else {
+            if writable { keyStore.discardStaged() }
+            return nil
+        }
+        if let current, SnapshotEnvelope.isSealed(sealed, with: current) {
+            if writable { keyStore.discardStaged() }
+            return nil
+        }
+        // Neither key opens it: the file is damaged, and the open fails on it with the store key, as without a restore.
+        guard SnapshotEnvelope.isSealed(sealed, with: staged) else { return nil }
+        guard writable else { return (staged, false) }
+        do {
+            try keyStore.replace(with: staged)
+        } catch {
+            return (staged, false)
+        }
+        keyStore.discardStaged()
+        return (staged, true)
     }
 }

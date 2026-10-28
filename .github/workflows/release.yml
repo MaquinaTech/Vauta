@@ -58,6 +58,13 @@ jobs:
           git merge-base --is-ancestor HEAD origin/main \
             || { echo "::error::$TAG is not an ancestor of main: release only commits that went through review and CI"; exit 1; }
 
+      - name: Check the version in Info.plist matches the tag
+        run: |
+          # Source archives and clones build with the version in Resources/Info.plist, not with the tag.
+          PLIST_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' Resources/Info.plist)"
+          [[ "$PLIST_VERSION" == "$VAUTA_VERSION" ]] \
+            || { echo "::error::Resources/Info.plist says $PLIST_VERSION but the tag is $TAG: bump CFBundleShortVersionString before tagging"; exit 1; }
+
       - name: Toolchain
         run: |
           sw_vers

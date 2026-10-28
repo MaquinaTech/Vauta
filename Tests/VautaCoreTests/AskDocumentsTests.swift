@@ -300,12 +300,21 @@ private func passage(_ id: Int64, _ name: String = "Plan.pdf", _ text: String, l
         #expect(claim.verified && claim.isFromDocumentsOnly && claim.documents.first?.fileName == "Memo.txt")
     }
 
+    /// Every view of the meetings window and of the panel, where answers and their claims are shown: a renamed or split
+    /// file stays covered.
     @Test func askNeverRendersMarkdownOrLinks() throws {
-        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Sources/Vauta/App/Meetings")
-        for file in ["AskView.swift", "AskModel.swift", "AskDocumentViews.swift"] {
-            guard let text = try? String(contentsOf: root.appendingPathComponent(file), encoding: .utf8) else { continue }
-            #expect(!text.contains("AttributedString(markdown"), "\(file) renders Markdown")
-            #expect(!text.contains("LocalizedStringKey(claim") && !text.contains("Text(.init("), "\(file) interprets answer text")
+        let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+            .appendingPathComponent("Sources/Vauta/App")
+        var scanned: [String] = []
+        for folder in ["Meetings", "Panel"] {
+            let dir = app.appendingPathComponent(folder)
+            for file in try FileManager.default.contentsOfDirectory(atPath: dir.path) where file.hasSuffix(".swift") {
+                let text = try String(contentsOf: dir.appendingPathComponent(file), encoding: .utf8)
+                #expect(!text.contains("AttributedString(markdown"), "\(folder)/\(file) renders Markdown")
+                #expect(!text.contains("LocalizedStringKey(claim") && !text.contains("Text(.init("), "\(folder)/\(file) interprets answer text")
+                scanned.append(file)
+            }
         }
+        #expect(scanned.contains("AskView.swift") && scanned.contains("AskView+Answer.swift") && scanned.contains("AnswersCard.swift"))
     }
 }

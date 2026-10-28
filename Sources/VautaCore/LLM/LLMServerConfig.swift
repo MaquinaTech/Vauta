@@ -161,17 +161,22 @@ public struct LLMServerConfig: Codable, Sendable, Equatable {
     /// `embeddingsOnServer`: whether search by meaning runs on this server
     /// (`ModelProviderSettings.embeddings == .server`). Only then is the
     /// embedding model name required.
-    public func validated(embeddingsOnServer: Bool = true) throws -> Endpoint {
+    ///
+    /// `keepingLegacyNames`: a 0.1.x configuration (no `profile`) already saved
+    /// may keep a host name without a private CA or pin (it gets a warning
+    /// instead). Only the client applying the saved configuration passes it: a
+    /// new, pasted or edited configuration always needs that trust.
+    public func validated(embeddingsOnServer: Bool = true, keepingLegacyNames: Bool = false) throws -> Endpoint {
         try validateCommon(embeddingsOnServer: embeddingsOnServer)
-        return try endpoint(baseURL)
+        return try endpoint(baseURL, keepingLegacyNames: keepingLegacyNames)
     }
 
     /// One endpoint per role (the main one unless the role has its own URL).
-    public func validatedEndpoints(embeddingsOnServer: Bool = true) throws -> [LLMRole: Endpoint] {
-        let main = try validated(embeddingsOnServer: embeddingsOnServer)
+    public func validatedEndpoints(embeddingsOnServer: Bool = true, keepingLegacyNames: Bool = false) throws -> [LLMRole: Endpoint] {
+        let main = try validated(embeddingsOnServer: embeddingsOnServer, keepingLegacyNames: keepingLegacyNames)
         var out: [LLMRole: Endpoint] = [:]
         for role in LLMRole.allCases {
-            out[role] = try roleBaseURLs?[role].map(endpoint) ?? main
+            out[role] = try roleBaseURLs?[role].map { try endpoint($0, keepingLegacyNames: keepingLegacyNames) } ?? main
         }
         return out
     }
@@ -206,7 +211,7 @@ public struct LLMServerConfig: Codable, Sendable, Equatable {
             .trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
     }
 
-    private func endpoint(_ url: String) throws -> Endpoint {
+    private func endpoint(_ url: String, keepingLegacyNames: Bool) throws -> Endpoint {
         var raw = url.trimmingCharacters(in: .whitespacesAndNewlines)
         while raw.hasSuffix("/") { raw.removeLast() }
         guard let c = URLComponents(string: raw), let scheme = c.scheme?.lowercased(), let host = c.host, !host.isEmpty else {
@@ -222,8 +227,10 @@ public struct LLMServerConfig: Codable, Sendable, Equatable {
             guard scheme == "https" else { throw Invalid.remoteRequiresHTTPS }
             guard !ServerAddress.isLoopback(h) else { throw Invalid.remoteIsLoopback }
             guard ServerAddress.isPrivateNetworkHost(h) else { throw Invalid.notPrivateHost(h) }
-            // New-format configs only; 0.1.x configs get a warning instead.
-            if profile != nil, !ServerAddress.isIPLiteral(h), !hasPinnedTrust { throw Invalid.hostNameRequiresTrust(h) }
+            // A saved 0.1.x config (no profile) gets a warning instead; anything new needs the trust.
+            if !(keepingLegacyNames && profile == nil), !ServerAddress.isIPLiteral(h), !hasPinnedTrust {
+                throw Invalid.hostNameRequiresTrust(h)
+            }
         }
         let port = c.port ?? (scheme == "https" ? 443 : 80)
         var caDERs: [Data] = []

@@ -37,23 +37,31 @@ struct ChatStreamParser {
     private(set) var done = false
 
     private var event: String?
+    /// The `data:` lines of the event being read, and their size. Every line is
+    /// parsed once at most, and the pending lines once, when the event ends, so
+    /// the work stays linear in the size of the stream.
     private var data: [String] = []
+    private var pendingBytes = 0
     /// Not SSE: the whole body is collected and parsed at the end.
     private var plainBody: String?
+    private var plainBytes = 0
     private var sawLine = false
 
     let maxContentBytes: Int
+    let maxPendingBytes: Int
 
-    init(maxContentBytes: Int = LLMClient.maxChatBytes) {
+    init(maxContentBytes: Int = LLMClient.maxChatBytes, maxPendingBytes: Int = 4 << 20) {
         self.maxContentBytes = maxContentBytes
+        self.maxPendingBytes = maxPendingBytes
     }
 
     /// Feeds one line without its terminator. Returns false once the stream is complete.
     mutating func consume(_ line: String) throws -> Bool {
-        if var body = plainBody {
-            body += line + "\n"
-            guard body.utf8.count <= LLMClient.maxBodyBytes else { throw LLMError.tooLarge }
-            plainBody = body
+        if plainBody != nil {
+            plainBytes += line.utf8.count + 1
+            guard plainBytes <= LLMClient.maxBodyBytes else { throw LLMError.tooLarge }
+            plainBody?.append(line)   // in place: the body is never copied
+            plainBody?.append("\n")
             return true
         }
         if !sawLine {
@@ -62,6 +70,7 @@ struct ChatStreamParser {
             sawLine = true
             if trimmed.hasPrefix("{") || trimmed.hasPrefix("[") {
                 plainBody = line + "\n"
+                plainBytes = line.utf8.count + 1
                 return true
             }
         }
@@ -83,12 +92,18 @@ struct ChatStreamParser {
                 return false
             }
             // Most servers send one JSON object per line: handle it right away
-            // even when the blank separator line never comes.
-            if !data.isEmpty, Self.object(value) != nil {
-                try dispatch()   // a stale partial payload never swallows the next one
+            // even when the blank separator line never comes. A stale partial
+            // payload before it is dispatched first and never swallows it.
+            if let obj = Self.object(value) {
+                try dispatch()
+                try handle(obj)
+                return !done
             }
+            // Part of a multi-line payload: parsed when the event ends (blank
+            // line, next event, `[DONE]` or the end of the stream).
+            pendingBytes += value.utf8.count + 1
+            guard pendingBytes <= maxPendingBytes else { throw LLMError.tooLarge }
             data.append(value)
-            if Self.object(data.joined(separator: "\n")) != nil { try dispatch() }
         default:
             break   // id:, retry:, unknown fields
         }
@@ -109,10 +124,15 @@ struct ChatStreamParser {
         guard !data.isEmpty else { return }
         let payload = data.joined(separator: "\n")
         data.removeAll()
+        pendingBytes = 0
         guard let obj = Self.object(payload) else {
-            if event == "error" { throw LLMError.server(message: String(payload.prefix(300))) }
+            if event == "error" { throw LLMError.server(message: ServerErrorBody.sanitized(payload)) }
             return
         }
+        try handle(obj)
+    }
+
+    private mutating func handle(_ obj: [String: Any]) throws {
         if event == "error" || obj["error"] != nil { throw ServerErrorBody.streamError(obj) }
         try handleChunk(obj)
     }

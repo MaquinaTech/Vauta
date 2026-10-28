@@ -15,8 +15,11 @@ final class MicrophoneCapture: @unchecked Sendable {
     private let queue = DispatchQueue(label: "vauta.mic.reconfig", qos: .userInitiated)
     private var observer: NSObjectProtocol?
     private var running = false
-    private var onBuffer: (@Sendable (AVAudioPCMBuffer) -> Void)?
+    private var onBuffer: (@Sendable (AVAudioPCMBuffer, _ hostTime: UInt64?) -> Void)?
     private var attempts = 0
+    private var retryItem: DispatchWorkItem?
+    /// Once the microphone is lost, how often it is tried again while recording.
+    static let lostRetrySeconds = 8.0
 
     /// Diagnostic messages (reconfigurations).
     var onDiagnostic: (@Sendable (String) -> Void)?
@@ -25,7 +28,7 @@ final class MicrophoneCapture: @unchecked Sendable {
 
     var format: AVAudioFormat { queue.sync { engine.inputNode.outputFormat(forBus: 0) } }
 
-    func start(onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) throws {
+    func start(onBuffer: @escaping @Sendable (AVAudioPCMBuffer, _ hostTime: UInt64?) -> Void) throws {
         try queue.sync {
             let input = engine.inputNode
             let fmt = input.outputFormat(forBus: 0)
@@ -48,6 +51,8 @@ final class MicrophoneCapture: @unchecked Sendable {
                 // No work inside the notification: reconfigure on the queue.
                 guard let self else { return }
                 self.queue.async {
+                    self.retryItem?.cancel()
+                    self.retryItem = nil
                     self.attempts = 0
                     self.reconfigure()
                 }
@@ -58,6 +63,8 @@ final class MicrophoneCapture: @unchecked Sendable {
     func stop() {
         queue.sync {
             running = false
+            retryItem?.cancel()
+            retryItem = nil
             if let observer { NotificationCenter.default.removeObserver(observer) }
             observer = nil
             onBuffer = nil
@@ -70,9 +77,11 @@ final class MicrophoneCapture: @unchecked Sendable {
     /// On macOS 27 it uses the variant that returns an error instead of raising
     /// an Objective-C exception (which can't be caught and would crash the app).
     private static func installTap(on input: AVAudioInputNode, format: AVAudioFormat,
-                                   _ onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) throws {
+                                   _ onBuffer: @escaping @Sendable (AVAudioPCMBuffer, _ hostTime: UInt64?) -> Void) throws {
         let downmixer = Downmixer()
-        let block: AVAudioNodeTapBlock = { buffer, _ in onBuffer(downmixer.mono(buffer)) }
+        let block: AVAudioNodeTapBlock = { buffer, when in
+            onBuffer(downmixer.mono(buffer), when.isHostTimeValid ? when.hostTime : nil)
+        }
         if #available(macOS 27.0, *) {
             // The Swift importer exposes it as `throws` with a leftover `error: ()`.
             do {
@@ -115,16 +124,28 @@ final class MicrophoneCapture: @unchecked Sendable {
     }
 
     /// Retries with growing delays; after ~10 attempts reports the channel as
-    /// lost (a later configuration change starts over).
+    /// lost and goes on trying every `lostRetrySeconds` while recording (a
+    /// configuration change starts over at once).
     private func retry(_ error: Error) {
         attempts += 1
         if attempts == 1 { onHealth?(.reconnecting) }
-        guard attempts <= 10 else {
-            onDiagnostic?("microphone lost: \(error)")
-            onHealth?(.lost(CaptureError(.microphoneLost, detail: error.localizedDescription)))
-            return
+        let delay: Double
+        if attempts <= 10 {
+            onDiagnostic?("microphone: \(error); retry \(attempts)")
+            delay = min(0.5 * Double(attempts), 2)
+        } else {
+            if attempts == 11 {
+                onDiagnostic?("microphone lost: \(error)")
+                onHealth?(.lost(CaptureError(.microphoneLost, detail: error.localizedDescription)))
+            }
+            delay = Self.lostRetrySeconds
         }
-        onDiagnostic?("microphone: \(error); retry \(attempts)")
-        queue.asyncAfter(deadline: .now() + min(0.5 * Double(attempts), 2)) { [weak self] in self?.reconfigure() }
+        retryItem?.cancel()
+        let item = DispatchWorkItem { [weak self] in
+            self?.retryItem = nil
+            self?.reconfigure()
+        }
+        retryItem = item
+        queue.asyncAfter(deadline: .now() + delay, execute: item)
     }
 }

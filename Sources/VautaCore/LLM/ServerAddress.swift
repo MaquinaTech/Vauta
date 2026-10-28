@@ -81,12 +81,20 @@ enum ServerAddress {
         return isLoopback(address) || isPrivateNetworkHost(address)
     }
 
-    /// Whether `address` is on a subnet directly attached to one of this Mac's
-    /// up, non-loopback, non-tunnel interfaces. A `.local` name usually
+    /// Whether the IPv6 `address` is on a subnet directly attached to one of this
+    /// Mac's up, non-loopback, non-tunnel interfaces. A `.local` name usually
     /// resolves to the server's global IPv6 address, which is still on the LAN.
-    static func isOnLink(_ address: String) -> Bool {
-        guard let peer = ip(address).map(unmapped) else { return false }
-        return localSubnets().contains { inSubnet(peer, $0.address, mask: $0.mask) }
+    /// IPv4 never counts (an IPv4 peer must be private): a Mac on a public IPv4
+    /// subnet would otherwise accept any address on it, down to a /8.
+    static func isOnLink(_ address: String, subnets: [(address: IP, mask: IP)]? = nil) -> Bool {
+        guard let peer = ip(address).map(unmapped), case .v6 = peer else { return false }
+        return (subnets ?? localSubnets()).contains { inSubnet(peer, $0.address, mask: $0.mask) }
+    }
+
+    /// An IPv6 literal that is not an IPv4-mapped address.
+    static func isIPv6(_ address: String) -> Bool {
+        if case .v6 = ip(address).map(unmapped) { return true }
+        return false
     }
 
     /// Same family, same network bits, and a mask of at least /8 (IPv4) or

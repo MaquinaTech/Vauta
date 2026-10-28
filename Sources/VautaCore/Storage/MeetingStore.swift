@@ -4,7 +4,7 @@
 import CryptoKit
 import Foundation
 
-/// The meeting store. Only two encrypted files ever exist on disk:
+/// The meeting store. Its data is in two encrypted files:
 ///
 /// - `vauta.db.enc`, the full snapshot (see `SnapshotEnvelope`). It is written
 ///   atomically when a meeting ends, after deletes, when opening after a crash
@@ -12,6 +12,11 @@ import Foundation
 /// - `vauta.journal.enc` (see `Journal`), with only what was written since the
 ///   last snapshot: while recording, a few KB are appended every 10 s instead
 ///   of rewriting the whole database. It is replayed and removed on open.
+///
+/// The folder also holds `vauta.docs.enc`, the documents index (encrypted, derived data, see `DocumentIndex`), and
+/// plaintext files with no meeting content: the lock, the erase marker, and `vauta.docs.extracting` while a document
+/// is read (it names the file only by a keyed hash of its path). Atomic writes leave a temporary while they run, and a
+/// migration may set encrypted files aside (`StoreFiles`).
 ///
 /// Stores written under the old name (`acta.*`, the earlier version) are renamed in
 /// place on open, see `StoreMigration`.
@@ -85,6 +90,8 @@ public actor MeetingStore {
     /// nothing is written (with the old key the file would outlive its key)
     /// until the key is rotated.
     var needsNewKey = false
+    /// A restore wrote its snapshot but its key is still only the staged one in the Keychain (see `restore`).
+    var keyPromotionPending = false
     /// Counts the edits committed since the store was opened (the brief's cache key: any edit may change what a brief shows).
     public internal(set) var editRevision: UInt64 = 0
     /// The meeting being recorded: it cannot be deleted.
@@ -201,6 +208,9 @@ public actor MeetingStore {
             }
             for marker in eraseMarkers { try? fm.removeItem(at: marker) }
         }
+        // A restore interrupted after writing its snapshot: its key is still the staged one.
+        let staged = try Self.settleStagedKey(keyStore, snapshot: at(StoreFiles.snapshot), writable: createIfMissing)
+        keyPromotionPending = staged.map { !$0.promoted && createIfMissing } ?? false
         // Old names to the new ones, verified with the key first. If anything
         // below fails, the renames are undone so the old files stay as they were.
         var migration = StoreMigration.Outcome()
@@ -208,7 +218,7 @@ public actor MeetingStore {
         migrationReport = migration.report
         defer { if !opened { migration.rollback() } }
         if exists { try? fm.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file.path) }
-        key = try keyStore.key(createIfMissing: !exists)
+        key = try staged?.key ?? keyStore.key(createIfMissing: !exists)
         journalKey = Journal.key(from: key)
         var replayed = 0
         var gen = Data()

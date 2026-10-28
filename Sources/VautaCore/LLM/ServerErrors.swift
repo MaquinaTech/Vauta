@@ -206,7 +206,7 @@ enum ServerErrorBody {
 
     static func message(in obj: [String: Any]) -> String? {
         if let e = obj["error"] as? [String: Any] {
-            return (e["message"] as? String).map(clip) ?? (e["code"] as? String) ?? (e["type"] as? String)
+            return (e["message"] as? String).map(clip) ?? ((e["code"] as? String) ?? (e["type"] as? String)).map(clip)
         }
         if let e = obj["error"] as? String { return clip(e) }
         if let d = obj["detail"] as? String { return clip(d) }
@@ -277,8 +277,53 @@ enum ServerErrorBody {
         return nil
     }
 
+    /// A server message as Vauta keeps it (shown in the app, in Status and in copied diagnostics): credentials
+    /// redacted first, then clipped, so a cut never leaves part of a key behind.
+    static func sanitized(_ s: String) -> String { clip(s) }
+
     private static func clip(_ s: String) -> String {
-        let t = s.trimmingCharacters(in: .whitespacesAndNewlines)
+        let t = redacted(s).trimmingCharacters(in: .whitespacesAndNewlines)
         return t.count > 300 ? String(t.prefix(300)) + "…" : t
+    }
+
+    /// What replaces a credential in a server message.
+    static let redaction = "•••"
+
+    /// Replaces what looks like a credential in a server message: the value of an `Authorization` header, a
+    /// `Bearer` token and an API key field (a proxy or a server may echo the request it refused). `secret`, the
+    /// stored key, is replaced wherever it appears, in any form.
+    static func redacted(_ s: String, secret: String? = nil) -> String {
+        var t = s
+        if let secret = secret?.trimmingCharacters(in: .whitespacesAndNewlines), secret.count >= 4 {
+            t = t.replacingOccurrences(of: secret, with: redaction, options: .caseInsensitive)
+            // A message clipped in the middle of the key ends with its first characters.
+            if t.hasSuffix("…") {
+                let body = t.dropLast()
+                if let k = stride(from: min(secret.count, body.count), through: 4, by: -1).first(where: {
+                    secret.lowercased().hasPrefix(body.suffix($0).lowercased())
+                }) {
+                    t = String(body.dropLast(k)) + redaction + "…"
+                }
+            }
+        }
+        t = t.replacing(/(?i)(authorization["']?\s*[:=]\s*["']?)(?:[A-Za-z-]+\s+)?[^\s"',;}]+/) { String($0.output.1) + redaction }
+        t = t.replacing(/(?i)(bearer\s+)[A-Za-z0-9._~+\/=-]+/) { String($0.output.1) + redaction }
+        t = t.replacing(/(?i)((?:x-)?api[_-]?key["']?\s*[:=]\s*["']?)[^"'\s,;&}]+/) { String($0.output.1) + redaction }
+        return t
+    }
+}
+
+extension LLMError {
+    /// The same error with `secret` (the stored key) removed from the server's message, for the errors that carry one.
+    func redacting(_ secret: String?) -> LLMError {
+        guard let secret, !secret.isEmpty else { return self }
+        let clean = { (m: String) in ServerErrorBody.redacted(m, secret: secret) }
+        return switch self {
+        case .http(let status, let m): .http(status, message: m.map(clean))
+        case .contextLengthExceeded(let m): .contextLengthExceeded(message: m.map(clean))
+        case .modelNotFound(let m): .modelNotFound(message: m.map(clean))
+        case .server(let m): .server(message: clean(m))
+        default: self
+        }
     }
 }

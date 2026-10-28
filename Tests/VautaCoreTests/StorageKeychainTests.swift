@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
+import CryptoKit
 import Foundation
 import Security
 import Testing
@@ -78,6 +79,26 @@ struct StorageKeychainTests {
         #expect(throws: StoreError.self) { try store.createKey() }
         try store.remove()
         #expect(try store.existingKey() == nil)
+    }
+
+    @Test func stagedKeyIsASecondItemThatReplaceAndRemoveHandle() throws {
+        let store = KeychainDatabaseKeyStore(service: service, account: "database-key-\(UUID().uuidString)")
+        defer { try? store.remove() }
+        let old = try store.createKey()
+        #expect(try store.stagedKey() == nil)
+        let new = SymmetricKey(size: .bits256)
+        try store.stage(new)
+        try store.stage(new)   // a second stage replaces the first, it does not fail on the duplicate
+        #expect(try store.stagedKey() == new)
+        #expect(try store.existingKey() == old, "staging never touches the store key")
+        try store.replace(with: new)
+        #expect(try store.existingKey() == new)
+        store.discardStaged()
+        #expect(try store.stagedKey() == nil)
+        try store.stage(SymmetricKey(size: .bits256))
+        try store.remove()
+        #expect(try store.existingKey() == nil)
+        #expect(try store.stagedKey() == nil, "Erase shreds a staged key too")
     }
 }
 

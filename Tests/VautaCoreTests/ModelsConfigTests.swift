@@ -15,11 +15,11 @@ struct ModelsConfigTests {
         (.remote, "https://192.168.1.50:8443/v1"), (.remote, "https://10.0.0.7/v1"), (.remote, "https://100.101.102.103:8443/v1"),
         (.remote, "https://[fd12:3456::1]:8443/v1"), (.remote, "https://[fe80::1%25en0]:8443/v1"), (.remote, "https://[fc00::5]/v1"),
         (.remote, "https://[::ffff:192.168.1.9]/v1"),
-        // Legacy (no profile) configs with names keep working.
+        // Saved legacy (no profile) configs with names keep working.
         (.remote, "https://servidor.local:8443/v1"), (.remote, "https://gpu.tail1234.ts.net/v1"),
     ])
     func acceptedDestinations(mode: LLMServerConfig.Mode, url: String) {
-        #expect((try? F.config(mode, url).validated()) != nil)
+        #expect((try? F.config(mode, url).validated(keepingLegacyNames: true)) != nil)
     }
 
     @Test(arguments: [
@@ -125,7 +125,11 @@ struct ModelsConfigTests {
 
     @Test func legacyRemoteNamesWarnInsteadOfFailing() {
         let legacy = F.config(.remote, "https://gpu.local:8443/v1")
-        #expect((try? legacy.validated()) != nil)
+        // Only an already saved config keeps working; pasting, editing or checking one without a profile needs the trust.
+        #expect((try? legacy.validated(keepingLegacyNames: true)) != nil)
+        #expect((try? legacy.validatedEndpoints(keepingLegacyNames: true)) != nil)
+        #expect(throws: LLMServerConfig.Invalid.hostNameRequiresTrust("gpu.local")) { try legacy.validated() }
+        #expect(throws: LLMServerConfig.Invalid.hostNameRequiresTrust("gpu.local")) { try LLMServerConfig.save(legacy, service: "unused") }
         #expect(legacy.securityWarnings == [.hostNameWithoutPinnedTrust("gpu.local")])
         #expect(F.config(.remote, "https://gpu.local/v1", pins: [F.serverPin]).securityWarnings.isEmpty)
         #expect(F.config(.remote, "https://10.0.0.7/v1").securityWarnings.isEmpty)
@@ -207,5 +211,22 @@ struct ModelsConfigTests {
         #expect(!LLMClient.peerAllowed("2a01:db8:1:2::7", mode: .local, onLink: { _ in true }))
         // The real interface table never makes a well-known public resolver on-link.
         #expect(!ServerAddress.isOnLink("8.8.8.8") && !ServerAddress.isOnLink("not-an-ip"))
+    }
+
+    @Test func onLinkAcceptanceIsIPv6Only() throws {
+        // A Mac on a public IPv4 subnet (here a /8) does not make its neighbours acceptable peers.
+        let subnets: [(address: ServerAddress.IP, mask: ServerAddress.IP)] = [
+            (.v4([203, 0, 113, 10]), .v4([255, 0, 0, 0])),
+            (try #require(ServerAddress.ip("2a01:db8:1:2::1")), try #require(ServerAddress.ip("ffff:ffff:ffff:ffff::"))),
+        ]
+        #expect(!ServerAddress.isOnLink("203.7.7.7", subnets: subnets))
+        #expect(!ServerAddress.isOnLink("::ffff:203.7.7.7", subnets: subnets))
+        #expect(ServerAddress.isOnLink("2a01:db8:1:2::7", subnets: subnets))
+        #expect(!ServerAddress.isOnLink("2a01:db8:1:3::7", subnets: subnets))
+        // Even when the interface check says yes, a public IPv4 peer (plain or mapped) is refused.
+        #expect(!LLMClient.peerAllowed("203.7.7.7", mode: .remote, onLink: { _ in true }))
+        #expect(!LLMClient.peerAllowed("::ffff:203.7.7.7", mode: .remote, onLink: { _ in true }))
+        #expect(LLMClient.peerAllowed("::ffff:192.168.1.4", mode: .remote, onLink: { _ in false }))
+        #expect(ServerAddress.isIPv6("2a01:db8::1") && !ServerAddress.isIPv6("::ffff:10.0.0.1") && !ServerAddress.isIPv6("10.0.0.1"))
     }
 }

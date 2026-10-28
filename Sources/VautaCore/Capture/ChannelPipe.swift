@@ -8,27 +8,34 @@ import AVFoundation
 /// makes 10 inputs/s per channel instead of ~94). Memory only; released in
 /// stop(). The lock guards against the last in-flight callback during flush().
 /// With a `diarizer` (the Others channel), every chunk also goes to it with the transcriber's frame counter.
+/// Each chunk carries the time it was captured at (from the buffers' host time, against the session `origin`), so
+/// the transcriber keeps the channel on the session's clock across device gaps.
 final class ChannelPipe: @unchecked Sendable {
     private let lock = NSLock()
     private let channel: ChannelTranscriber
     private let diarizer: Diarizer?
     private let levels: LevelMeter
+    private let origin: SessionOrigin
     private let chunkFrames: AVAudioFrameCount
     private let bytesPerFrame: Int
     private var resampler: Resampler?
     private var inputFormat: AVAudioFormat?
     private var chunk: AVAudioPCMBuffer?
+    private var chunkCapturedAt: Double?
     private var scratch: [Float] = []
 
-    init(channel: ChannelTranscriber, levels: LevelMeter, diarizer: Diarizer? = nil) {
+    init(channel: ChannelTranscriber, levels: LevelMeter, origin: SessionOrigin, diarizer: Diarizer? = nil) {
         self.channel = channel
         self.diarizer = diarizer
         self.levels = levels
+        self.origin = origin
         chunkFrames = AVAudioFrameCount(max(channel.analyzerFormat.sampleRate / 10, 160))
         bytesPerFrame = Int(channel.analyzerFormat.streamDescription.pointee.mBytesPerFrame)
     }
 
-    func push(_ buffer: AVAudioPCMBuffer) {
+    /// `hostTime`: when the buffer's first frame was captured (host clock ticks), nil when the device didn't say.
+    func push(_ buffer: AVAudioPCMBuffer, hostTime: UInt64?) {
+        let capturedAt = hostTime.map { origin.offset(ofHostSeconds: HostTime.seconds($0)) }
         lock.withLock {
             if resampler == nil || inputFormat != buffer.format {
                 emitLocked()   // never mix audio of two input formats in one chunk
@@ -40,7 +47,10 @@ final class ChannelPipe: @unchecked Sendable {
             let total = Int(converted.frameLength)
             var offset = 0
             while offset < total {
-                if chunk == nil { chunk = AVAudioPCMBuffer(pcmFormat: channel.analyzerFormat, frameCapacity: chunkFrames) }
+                if chunk == nil {
+                    chunk = AVAudioPCMBuffer(pcmFormat: channel.analyzerFormat, frameCapacity: chunkFrames)
+                    chunkCapturedAt = capturedAt.map { $0 + Double(offset) / channel.analyzerFormat.sampleRate }
+                }
                 guard let chunk, let dst = chunk.mutableAudioBufferList.pointee.mBuffers.mData else { return }
                 let n = min(total - offset, Int(chunk.frameCapacity - chunk.frameLength))
                 (dst + Int(chunk.frameLength) * bytesPerFrame)
@@ -60,7 +70,8 @@ final class ChannelPipe: @unchecked Sendable {
         self.chunk = nil
         chunk.mutableAudioBufferList.pointee.mBuffers.mDataByteSize = UInt32(Int(chunk.frameLength) * bytesPerFrame)
         levels.add(channel.channel, meanSquare(chunk, scratch: &scratch))
-        let start = channel.feed(chunk)
+        let start = channel.feed(chunk, capturedAt: chunkCapturedAt)
+        chunkCapturedAt = nil
         diarizer?.push(chunk, startFrame: start)
     }
 }

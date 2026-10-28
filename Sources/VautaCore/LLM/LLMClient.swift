@@ -4,157 +4,6 @@
 import Foundation
 import Security
 
-/// The role of each model; the user picks the actual names in Settings → Models.
-public enum LLMRole: String, Codable, Sendable, CaseIterable {
-    /// Live notes while recording: fast, no reasoning.
-    case fast
-    /// Final minutes and Ask with citations.
-    case deep
-    /// Embeddings for Ask.
-    case embedding
-}
-
-public struct ChatMessage: Sendable, Codable, Equatable {
-    public let role: String
-    public let content: String
-    public init(_ role: String, _ content: String) {
-        self.role = role
-        self.content = content
-    }
-    public static func system(_ c: String) -> ChatMessage { ChatMessage("system", c) }
-    public static func user(_ c: String) -> ChatMessage { ChatMessage("user", c) }
-}
-
-/// Which of the integrated model's two kept prefixes a call uses: the meeting being recorded (or just recorded), or anything else.
-public enum KeptSlot: Sendable, Equatable { case meeting, ask }
-
-public struct ChatOptions: Sendable {
-    public var model: LLMRole
-    public var maxTokens: Int
-    /// Reasoning on or off; how it is requested depends on the server profile.
-    public var thinking: Bool
-    /// "low" | "medium" | "high" (with reasoning only).
-    public var reasoningEffort: String?
-    /// Structured output, sent only when the server profile supports it.
-    public var responseFormat: ResponseFormat?
-    /// Throw `LLMError.outputTruncated` instead of returning a cut-off answer.
-    public var failOnTruncation: Bool
-    /// A model name to use instead of the role's configured one (the role still
-    /// picks the server address). nil = the role's model.
-    public var modelOverride: String?
-    /// Replaces the sampling preset's temperature. nil = the profile decides.
-    public var temperature: Double?
-    /// What the request is for, as the Network Activity window lists it.
-    public var purpose: NetworkPurpose
-    /// Only the integrated language model: decode within this grammar (see `OutputSchemas`).
-    public var constraint: (any OutputConstraint)?
-    /// Only the integrated language model: the shape of the JSON answer; it builds the grammar from it.
-    public var outputSchema: OutputSchema?
-    /// Only the integrated language model: keep the state of everything before the last message for the next call (live answers).
-    public var reusePrefix: Bool
-    /// Only the integrated language model: who waits for the GPU first.
-    public var priority: MLXWorkGate.Priority
-    /// Only the integrated language model: stop writing after this many seconds of decoding (a constrained value is still closed as
-    /// valid JSON, finish `length`). nil = no limit.
-    public var maxSeconds: Double?
-    /// Only the integrated language model: which kept prefix a call with `reusePrefix` uses. nil = by priority (live work and the
-    /// minutes use the meeting's, an answer uses the Ask one).
-    public var slot: KeptSlot?
-    /// Only the integrated language model: called as the prompt is read, with the tokens in the caches (kept ones included) and the
-    /// prompt's length.
-    public var onPrefill: (@Sendable (Int, Int) -> Void)?
-
-    public init(model: LLMRole, maxTokens: Int, thinking: Bool = false, reasoningEffort: String? = nil,
-                responseFormat: ResponseFormat? = nil, failOnTruncation: Bool = false,
-                modelOverride: String? = nil, temperature: Double? = nil, purpose: NetworkPurpose = .other,
-                constraint: (any OutputConstraint)? = nil, outputSchema: OutputSchema? = nil, reusePrefix: Bool = false, priority: MLXWorkGate.Priority = .minutes,
-                maxSeconds: Double? = nil, slot: KeptSlot? = nil, onPrefill: (@Sendable (Int, Int) -> Void)? = nil) {
-        self.slot = slot
-        self.onPrefill = onPrefill
-        self.maxSeconds = maxSeconds
-        self.constraint = constraint
-        self.outputSchema = outputSchema
-        self.reusePrefix = reusePrefix
-        self.priority = priority
-        self.modelOverride = modelOverride
-        self.temperature = temperature
-        self.purpose = purpose
-        self.model = model
-        self.maxTokens = maxTokens
-        self.thinking = thinking
-        self.reasoningEffort = reasoningEffort
-        self.responseFormat = responseFormat
-        self.failOnTruncation = failOnTruncation
-    }
-}
-
-public struct LatencyBreakdown: Codable, Sendable, Equatable {
-    public var tokenizeSeconds = 0.0
-    public var slotWaitSeconds = 0.0
-    public var gateWaitSeconds = 0.0
-    public var newPrefillTokens = 0
-    public var prefillChunks = 0
-    public var prefillSeconds = 0.0
-    public init() {}
-}
-
-/// What a schema-constrained call cost in grammar work (evaluation only): masks computed, their percentiles, the first one (which
-/// builds the lazy tables), and the time to build the constraint (the first use builds the trie of the whole vocabulary).
-public struct ConstraintTiming: Codable, Sendable, Equatable {
-    public var masks: Int
-    public var totalSeconds: Double
-    public var p50Seconds: Double
-    public var p99Seconds: Double
-    public var maxSeconds: Double
-    public var firstSeconds: Double
-    public var setupSeconds: Double
-    /// Host time of turning the allowed set into the additive mask array of the logits (the per-step upload of the vocabulary-sized mask).
-    public var uploadSeconds: Double
-    public init(masks: Int, totalSeconds: Double, p50Seconds: Double, p99Seconds: Double, maxSeconds: Double, firstSeconds: Double, setupSeconds: Double, uploadSeconds: Double) {
-        self.masks = masks
-        self.totalSeconds = totalSeconds
-        self.p50Seconds = p50Seconds
-        self.p99Seconds = p99Seconds
-        self.maxSeconds = maxSeconds
-        self.firstSeconds = firstSeconds
-        self.setupSeconds = setupSeconds
-        self.uploadSeconds = uploadSeconds
-    }
-}
-
-public struct ChatResult: Sendable {
-    public let content: String
-    public let promptTokens: Int
-    public let cachedTokens: Int
-    public let completionTokens: Int
-    /// nil when the provider does not report it.
-    public let finishReason: FinishReason?
-    /// Seconds from the entry of `ChatModel.chat` to the first generated token, for the on-device models (the evaluation reads it);
-    /// nil when not measured. The same starting point for every provider, so it includes loading, tokenisation and queueing.
-    public let firstTokenSeconds: Double?
-    /// The integrated model's own figure, from the start of its generation loop (excludes the setup above); nil for other providers.
-    public let engineFirstTokenSeconds: Double?
-    /// Grammar-work timing of a schema-constrained call on the integrated model (evaluation); nil otherwise.
-    public var constraintTiming: ConstraintTiming?
-    /// Where the time before the first token went on the integrated model (evaluation): tokenising the prompt, waiting for the kept
-    /// prefix's lock and for the GPU, the prompt tokens that had to be read (the kept prefix is not counted), and the prefill chunks.
-    public var breakdown: LatencyBreakdown?
-
-    public init(content: String, promptTokens: Int, cachedTokens: Int, completionTokens: Int, finishReason: FinishReason? = nil,
-                firstTokenSeconds: Double? = nil, engineFirstTokenSeconds: Double? = nil) {
-        self.firstTokenSeconds = firstTokenSeconds
-        self.engineFirstTokenSeconds = engineFirstTokenSeconds
-        self.content = content
-        self.promptTokens = promptTokens
-        self.cachedTokens = cachedTokens
-        self.completionTokens = completionTokens
-        self.finishReason = finishReason
-    }
-
-    /// The answer stopped at the token limit and is incomplete.
-    public var isTruncated: Bool { finishReason == .length }
-}
-
 /// Vauta's only network channel: to the configured model server and nothing else.
 /// Every request goes through `AuditedSession`, which records it (metadata only)
 /// in the Network Activity log.
@@ -165,11 +14,14 @@ public struct ChatResult: Sendable {
 ///   origin) and re-checked before each request and on each response.
 /// - HTTPS: TLS 1.3 minimum; ephemeral session with no cache, cookies,
 ///   credentials or proxy. Redirects are refused.
-/// - Trust: a private CA bundle, when given, holds the ONLY anchors (no network
-///   fetches during evaluation); otherwise the system anchors. With pins, the
-///   leaf certificate's SPKI SHA-256 must also match one of them.
+/// - Trust: a private CA bundle, when given, holds the ONLY anchors; otherwise
+///   the system anchors. No network fetches during evaluation in either case.
+///   With pins, the leaf certificate's SPKI SHA-256 must also match one of them.
 /// - For hosts given by name, the connected peer address must be private
-///   (loopback for local mode); otherwise further requests are refused.
+///   (loopback for local mode): a probe that carries no body and no key checks
+///   it before the first request of a session (`LLMClient+PeerCheck.swift`),
+///   and every completed request checks it again; otherwise further requests
+///   are refused.
 /// - The key (optional) is read from the Keychain for each request and never logged.
 public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Sendable {
     /// Keychain account of the server key (optional: local LM Studio or Ollama need none).
@@ -184,32 +36,44 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         case embeddings = "embeddings"
     }
 
-    private let bearer: @Sendable () throws -> String?
+    let bearer: @Sendable () throws -> String?
     private let protocolClasses: [AnyClass]?
     private let log: NetworkActivityLog
+    /// The connected addresses in a request's metrics (tests replace it: a URL protocol stub has no socket).
+    let peerAddresses: @Sendable (URLSessionTaskMetrics) -> [String]
+    /// How long a peer probe waits for its metrics before it fails closed.
+    let peerCheckTimeout: Duration
     private let lock = NSLock()
     private var _session: AuditedSession?
+    /// Which name-based servers the current session has probed; replaced with the session.
+    private var _peerGate = PeerGate()
     private var _config: LLMServerConfig?
     private var _endpoints: [LLMRole: LLMServerConfig.Endpoint] = [:]
     private var _primary: LLMServerConfig.Endpoint?
     /// Set when a host name resolved outside the allowed network.
     private var _peerViolation: String?
 
-    private var config: LLMServerConfig? { lock.withLock { _config } }
+    var config: LLMServerConfig? { lock.withLock { _config } }
     private var primary: LLMServerConfig.Endpoint? { lock.withLock { _primary } }
-    private var allEndpoints: [LLMServerConfig.Endpoint] {
+    var allEndpoints: [LLMServerConfig.Endpoint] {
         lock.withLock { (_primary.map { [$0] } ?? []) + Array(_endpoints.values) }
     }
 
-    /// Created on first use (URLSession retains its delegate: this client lives as long as the app).
-    private var session: AuditedSession {
+    /// The session, created on first use (URLSession retains its delegate: this client lives as long as the app),
+    /// and the peer checks of its connections, which start empty with each new session.
+    var connection: (session: AuditedSession, peers: PeerGate) {
         lock.withLock {
-            if let s = _session { return s }
+            if let s = _session { return (s, _peerGate) }
             let s = makeSession()
             _session = s
-            return s
+            _peerGate = PeerGate()
+            return (s, _peerGate)
         }
     }
+
+    var peerViolation: String? { lock.withLock { _peerViolation } }
+
+    func recordPeerViolation(_ address: String) { lock.withLock { _peerViolation = address } }
 
     private func makeSession() -> AuditedSession {
         let c = URLSessionConfiguration.ephemeral
@@ -237,12 +101,16 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         self.init(config: config, bearer: bearer, protocolClasses: nil)
     }
 
-    /// `protocolClasses`: URL loading stubs for tests.
+    /// `protocolClasses`: URL loading stubs for tests; `peerAddresses` and `peerCheckTimeout` likewise.
     init(config: LLMServerConfig?, bearer: @escaping @Sendable () throws -> String?, protocolClasses: [AnyClass]?,
-         log: NetworkActivityLog = .shared) {
+         log: NetworkActivityLog = .shared,
+         peerAddresses: @escaping @Sendable (URLSessionTaskMetrics) -> [String] = { $0.transactionMetrics.compactMap(\.remoteAddress) },
+         peerCheckTimeout: Duration = .seconds(10)) {
         self.bearer = bearer
         self.log = log
         self.protocolClasses = protocolClasses
+        self.peerAddresses = peerAddresses
+        self.peerCheckTimeout = peerCheckTimeout
         super.init()
         apply(config)
     }
@@ -252,8 +120,8 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     public func apply(_ config: LLMServerConfig?) {
         // The client does not know whether embeddings run on the server; an
         // empty embedding model only fails the embedding calls (`modelName`).
-        let primary = try? config?.validated(embeddingsOnServer: false)
-        let endpoints = (try? config?.validatedEndpoints(embeddingsOnServer: false)) ?? [:]
+        let primary = try? config?.validated(embeddingsOnServer: false, keepingLegacyNames: true)
+        let endpoints = (try? config?.validatedEndpoints(embeddingsOnServer: false, keepingLegacyNames: true)) ?? [:]
         let valid = primary != nil && !endpoints.isEmpty
         lock.withLock {
             _config = valid ? config : nil
@@ -324,8 +192,8 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         let name = try options.modelOverride.flatMap { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 } ?? modelName(options.model)
         let body = try ServerRequests.chatBody(model: name, messages: messages, options: options,
                                                profile: config.effectiveProfile)
-        let request = try await preparedRequest(.chat, role: options.model, body: body, purpose: options.purpose)
-        let (bytes, response) = try await perform { try await self.session.bytes(for: request, purpose: options.purpose) }
+        let (request, session) = try await preparedRequest(.chat, role: options.model, body: body, purpose: options.purpose)
+        let (bytes, response) = try await perform { try await session.bytes(for: request, purpose: options.purpose) }
         try await check(response, bytes)
         var parser = ChatStreamParser()
         var lastReported = 0
@@ -340,7 +208,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
             }
             try parser.finish()
         } catch let e as LLMError {
-            throw e
+            throw e.redacting(storedToken)
         } catch is CancellationError {
             throw CancellationError()
         } catch let e as URLError where e.code == .cancelled && Task.isCancelled {
@@ -427,14 +295,16 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
             throw LLMError.network(Self.destinationNotAllowed)
         }
         var request: URLRequest
+        let session: AuditedSession
         do {
             request = try authorizedRequest(url, target: target, body: body)
+            session = try await checkedSession(for: target)
         } catch {
             await recordRefusal(error, url: url, body: body, purpose: purpose)
             throw error
         }
         request.timeoutInterval = 10
-        let (bytes, response) = try await perform { try await self.session.bytes(for: request, purpose: purpose) }
+        let (bytes, response) = try await perform { try await session.bytes(for: request, purpose: purpose) }
         guard let http = response as? HTTPURLResponse, let url = http.url else { return nil }
         try Self.requireAllowed(url, target)
         guard (200..<300).contains(http.statusCode) else {
@@ -475,8 +345,8 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     /// Whole response with a cap: reading stops as soon as it is exceeded.
     private func send(_ endpoint: Endpoint, role: LLMRole?, body: Data?, limit: Int,
                       purpose: NetworkPurpose) async throws -> (Data, HTTPURLResponse) {
-        let request = try await preparedRequest(endpoint, role: role, body: body, purpose: purpose)
-        let (bytes, response) = try await perform { try await self.session.bytes(for: request, purpose: purpose) }
+        let (request, session) = try await preparedRequest(endpoint, role: role, body: body, purpose: purpose)
+        let (bytes, response) = try await perform { try await session.bytes(for: request, purpose: purpose) }
         try await check(response, bytes)
         guard let http = response as? HTTPURLResponse, response.expectedContentLength <= Int64(limit) else {
             await bytes.finish()
@@ -533,10 +403,13 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         if !line.isEmpty { _ = try body(String(decoding: line, as: UTF8.self)) }
     }
 
-    /// `makeRequest`, listing in the network audit a request that the destination rules refuse before it is sent.
-    private func preparedRequest(_ endpoint: Endpoint, role: LLMRole?, body: Data?, purpose: NetworkPurpose) async throws -> URLRequest {
+    /// `makeRequest` and the session to send it on (once the peer of a name-based server is checked), listing in the
+    /// network audit a request that the destination rules refuse before it is sent.
+    private func preparedRequest(_ endpoint: Endpoint, role: LLMRole?, body: Data?,
+                                 purpose: NetworkPurpose) async throws -> (URLRequest, AuditedSession) {
         do {
-            return try makeRequest(endpoint, role: role, body: body)
+            let request = try makeRequest(endpoint, role: role, body: body)
+            return (request, try await checkedSession(for: try target(for: role)))
         } catch {
             if let url = try? target(for: role).base.appending(path: endpoint.rawValue) {
                 await recordRefusal(error, url: url, body: body, purpose: purpose)
@@ -617,7 +490,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         !t.isEmpty && t.count <= 512 && t.unicodeScalars.allSatisfy { $0.value > 0x20 && $0.value < 0x7f }
     }
 
-    private func perform<T>(_ work: () async throws -> T) async throws -> T {
+    func perform<T>(_ work: () async throws -> T) async throws -> T {
         do {
             return try await work()
         } catch let e as LLMError {
@@ -627,8 +500,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         } catch let e as URLError where e.code == .cancelled {
             if Task.isCancelled { throw CancellationError() }
             if let address = lock.withLock({ _peerViolation }) { throw LLMError.untrustedPeerAddress(address) }
-            throw LLMError.network(String(localized: "connection refused (invalid certificate or destination)",
-                                          comment: "Network error detail when TLS trust or the destination check fails"))
+            throw LLMError.network(Self.connectionRefused)
         } catch {
             throw LLMError.network(from: error)
         }
@@ -654,45 +526,11 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         }
         await bytes.finish()
         throw ServerErrorBody.error(status: http.statusCode, body: body, retryAfter: http.value(forHTTPHeaderField: "Retry-After"))
+            .redacting(storedToken)
     }
 
-    // MARK: Trust and peer checks
-
-    public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async
-        -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        ServerTrust.evaluate(challenge, allEndpoints)
-    }
-
-    public func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge) async
-        -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        ServerTrust.evaluate(challenge, allEndpoints)
-    }
-
-    public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,
-                           newRequest request: URLRequest) async -> URLRequest? {
-        nil
-    }
-
-    /// For hosts given by name, the address actually connected to must be
-    /// private (or loopback in local mode); otherwise later requests are refused
-    /// until the configuration is applied again.
-    public func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
-        guard let url = task.originalRequest?.url, let host = url.host()?.lowercased(),
-              let mode = config?.mode, !ServerAddress.isIPLiteral(host) else { return }
-        for address in metrics.transactionMetrics.compactMap(\.remoteAddress) where !Self.peerAllowed(address, mode: mode) {
-            lock.withLock { _peerViolation = address }
-        }
-    }
-
-    /// In remote mode the peer may also be a global address on a subnet this
-    /// Mac is directly attached to (e.g. a `.local` name answered over IPv6).
-    static func peerAllowed(_ address: String, mode: LLMServerConfig.Mode,
-                            onLink: (String) -> Bool = ServerAddress.isOnLink) -> Bool {
-        switch mode {
-        case .local: ServerAddress.isLoopback(address)
-        case .remote:
-            ServerAddress.isIPLiteral(address) && !ServerAddress.isLoopback(address)
-                && (ServerAddress.isPrivateOrLoopbackPeer(address) || onLink(address))
-        }
+    static var connectionRefused: String {
+        String(localized: "connection refused (invalid certificate or destination)",
+               comment: "Network error detail when TLS trust or the destination check fails")
     }
 }

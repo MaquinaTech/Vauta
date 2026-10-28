@@ -10,7 +10,8 @@ public enum ChannelHealth: Sendable, Equatable {
     case lagging
     /// The audio device changed or stalled; capture is being rebuilt.
     case reconnecting
-    /// Capture gave up after repeated attempts (a later device change retries).
+    /// Capture gave up after repeated attempts (a later device change retries; the microphone also keeps trying
+    /// every few seconds).
     case lost(CaptureError)
     /// The analyzer failed: the channel no longer transcribes.
     case failed(CaptureError)
