@@ -3,6 +3,7 @@
 
 import VautaCore
 import Foundation
+import SwiftUI
 import Observation
 import ServiceManagement
 
@@ -36,6 +37,23 @@ final class SettingsModel {
         /// such button reads the same. "Open <Pane> Settings" is reserved for the panes of System Settings.
         var openTitle: String {
             String(localized: "Show \(title) Pane", comment: "Button that goes to a pane of Vauta's own Settings; the argument is the pane name, e.g. Calendar, so it reads \"Show Calendar Pane\". Not System Settings, whose buttons read \"Open Sound Settings\"")
+        }
+
+        /// The colour of the pane's icon in the sidebar: Vauta's own for what is Vauta's (recording, speakers, models,
+        /// translation), the system's usual ones for the rest.
+        var tint: Color {
+            switch self {
+            case .general, .about: .gray
+            case .recording: Brand.red
+            case .speakers: Brand.magenta
+            case .translation: Brand.teal
+            case .models: Brand.indigo
+            case .privacy: .blue
+            case .context: .purple
+            case .documents: .brown
+            case .calendar: .orange
+            case .status: .green
+            }
         }
 
         var symbol: String {

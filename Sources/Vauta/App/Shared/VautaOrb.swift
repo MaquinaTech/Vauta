@@ -27,6 +27,7 @@ struct VautaOrb: View {
     var carriesGlyph = true
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
+    @ViewLocalState private var appeared = false
 
     private var still: Bool {
         if reduceMotion || Brand.freezesMotion { return true }
@@ -46,10 +47,31 @@ struct VautaOrb: View {
                 .frame(width: canvasSize.width, height: canvasSize.height)
             }
             .allowsHitTesting(false)
+            // A new state fades in over the old one (the colours can't be interpolated inside the canvas).
+            .id(modeKey)
+            .transition(.opacity)
         }
         .frame(width: diameter, height: diameter)
-        .animation(.easeInOut(duration: 0.5), value: mode)
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.6), value: modeKey)
+        // It comes in with a slight grow and fade when it appears (the panel opening, a page of Setup).
+        .scaleEffect(appeared ? 1 : 0.86)
+        .opacity(appeared ? 1 : 0)
+        .onAppear {
+            guard !appeared else { return }
+            if still { appeared = true; return }
+            withAnimation(.spring(response: 0.55, dampingFraction: 0.72)) { appeared = true }
+        }
         .accessibilityHidden(true)
+    }
+
+    private var modeKey: String {
+        switch mode {
+        case .idle: "idle"
+        case .listening: "listening"
+        case .working: "working"
+        case .muted: "muted"
+        case .blocked: "blocked"
+        }
     }
 
     /// Smooth while listening or working; slower at rest and when quiet, where the motion is slow anyway, to save energy.

@@ -32,7 +32,7 @@ struct RecordButton: View {
                     }
                 }
             }
-            .buttonStyle(.plain)
+            .buttonStyle(OrbPressStyle())
             // Without Full Keyboard Access Tab skips buttons: Return starts or stops from the open panel (plain style, no default-button look).
             .keyboardShortcut(model.isBusy || restoringNow ? nil : KeyboardShortcut(.return, modifiers: []))
             .frame(width: 64, height: 64)
@@ -183,6 +183,17 @@ struct RecordButton: View {
         case _ where restoringNow: ""
         default: String(localized: "Not recording", comment: "Record button state for VoiceOver")
         }
+    }
+}
+
+/// The record button gives a little under the pointer, like a physical key (not with Reduce Motion).
+private struct OrbPressStyle: ButtonStyle {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !reduceMotion ? 0.92 : 1)
+            .animation(.spring(response: 0.28, dampingFraction: 0.55), value: configuration.isPressed)
     }
 }
 
