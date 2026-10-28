@@ -137,8 +137,9 @@ struct VautaOrb: View {
                                                   center: CGPoint(x: center.x, y: center.y - radius * 0.15),
                                                   startRadius: radius * 0.55, endRadius: radius * 1.15))
         if carriesGlyph {
-            sphere.fill(circle, with: .radialGradient(Gradient(colors: [.black.opacity(0.2), .black.opacity(0)]),
-                                                      center: center, startRadius: 0, endRadius: radius * 0.5))
+            // Measured over the glyph's box through a whole cycle: white on it keeps at least 3:1.
+            sphere.fill(circle, with: .radialGradient(Gradient(colors: [.black.opacity(0.5), .black.opacity(0.38), .black.opacity(0)]),
+                                                      center: center, startRadius: 0, endRadius: radius * 0.72))
         }
         // A thin rim of light.
         canvas.stroke(Path(ellipseIn: disc.insetBy(dx: 0.5, dy: 0.5)), with: .color(.white.opacity(0.32)), lineWidth: 1)

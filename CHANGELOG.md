@@ -9,7 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 ### Changed
 
 - A new app icon in the website's colours: a lit sphere in indigo, blue and teal carrying a white waveform, with an orbit around it, on a dark sky (`tools/make-icon.swift`).
-- The menu-bar panel takes Vauta's own colours, as on the website: the record button is a lit sphere in indigo, blue and teal, red into magenta while recording, with a ring around it; while recording, rings breathe out from it (still with Reduce Motion) and its glow follows the loudest channel. A soft glow in the same colours sits behind the header and fades out below the meters (none with Increase Contrast), the header shows the app icon, and the elapsed time uses rounded figures.
+- Vauta's core, as on the website: one animated view, a lit sphere with colours drifting inside and a ring of particles in orbit. It is the record button (red into magenta while recording, with two soft rings that ripple with the loudest channel; the orbit spins while Vauta starts or saves), the hero of Welcome, the base of the empty and locked states, and a small "thinking" sphere wherever Vauta's model works (answers, the brief, notes, Ask, the minutes, finding names). Still with Reduce Motion and in renders; 15 to 60 frames a second depending on the state.
+- The menu-bar panel takes Vauta's colours: a soft glow behind the header that fades out below the meters (none with Increase Contrast), the app icon in the header, rounded figures for the elapsed time, card icons in Vauta's gradient, level meters that glow in each speaker's colour, and a hairline edge in Vauta's colours on what Vauta writes on its own (live notes, answers, the brief, the follow-up).
+- Welcome shows what Vauta does in four short cards (transcription, minutes and tasks, Ask, privacy) that come in one after another; the full privacy promise stays in Settings › Privacy & Security. Setup has a progress line in Vauta's colours above its buttons, page symbols in Vauta's gradient, and the sphere with a check mark when everything is set up.
+- The sparkles that mark what the model wrote (decisions, tasks, notes, the minutes) are Vauta's indigo instead of the system blue, with the same contrast; a faint glow in Vauta's colours sits behind the top of each meeting.
 
 ### Security
 
