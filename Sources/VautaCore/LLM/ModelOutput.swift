@@ -150,11 +150,11 @@ extension KeyedDecodingContainer where Key == AnyKey {
         return nil
     }
 
-    /// A text value; numbers are accepted as text.
+    /// A text value; numbers are accepted as text, written the same in every locale (`plainText`).
     func text(_ keys: String...) -> String? {
         for key in keys {
             if let s = try? decodeIfPresent(String.self, forKey: AnyKey(key)) { return s }
-            if let n = try? decodeIfPresent(Double.self, forKey: AnyKey(key)) { return n.formatted() }
+            if let n = try? decodeIfPresent(Double.self, forKey: AnyKey(key)) { return n.plainText }
         }
         return nil
     }
@@ -222,5 +222,14 @@ struct FlexibleID: Decodable {
         if let n = try? c.decode(Int64.self) { id = n }
         else if let s = try? c.decode(String.self) { id = KeyedDecodingContainer<AnyKey>.parseID(s) }
         else { id = nil }
+    }
+}
+
+extension Double {
+    /// A number as the model wrote it, whatever the Mac's region: no grouping, a "." decimal point, a whole number without
+    /// ".0" ("2026", "1.5"). `formatted()` would write "2.026" or "1,5" in German.
+    var plainText: String {
+        if rounded() == self, abs(self) < 9_007_199_254_740_992 { return String(Int64(self)) }
+        return String(self)
     }
 }

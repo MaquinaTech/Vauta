@@ -54,6 +54,7 @@ Generic-password items in your **login keychain**, with the app's bundle ID as t
 | Account | Label | Contents |
 |---|---|---|
 | `database-key-v1` | Vauta database key | The 256-bit key that encrypts the store |
+| `database-key-v1.staged` | Vauta database key | Only while a backup is being restored: the store's new key, until it replaces `database-key-v1` |
 | `llm-server-v1` | Vauta model server | Your model server settings as JSON: address, mode, private CA, certificate pins, model names, context size and request options. No key, no meeting content |
 | `llm-bearer-v1` | Vauta model server key | The model server's key, if you set one |
 | `mlx-bearer-v1` | — | Where an earlier version kept the server key. Vauta moves it to `llm-bearer-v1` and deletes it the first time it reads it |

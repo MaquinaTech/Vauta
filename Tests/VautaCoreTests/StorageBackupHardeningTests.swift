@@ -82,6 +82,19 @@ struct StorageBackupHardeningTests {
         #expect(BackupSchemaGuard.normalized("CREATE TABLE t(/* it's */ a)") == BackupSchemaGuard.normalized("CREATE TABLE t(a)"))
     }
 
+    /// Comment markers inside a quoted identifier are part of the name, not a comment: they must not hide the live SQL
+    /// after them (an extra column, or statements added to a trigger body).
+    @Test func commentMarkersInAQuotedIdentifierHideNothing() throws {
+        let reference = "CREATE TABLE t(a TEXT, b TEXT)"
+        #expect(BackupSchemaGuard.normalized("CREATE TABLE t(a TEXT \"--\", hidden BLOB\n, b TEXT)") != BackupSchemaGuard.normalized(reference))
+        #expect(BackupSchemaGuard.normalized("CREATE TABLE t(a TEXT `/*`, hidden BLOB, b TEXT /**/)") != BackupSchemaGuard.normalized(reference))
+        #expect(BackupSchemaGuard.normalized("CREATE TABLE t(a TEXT [--], hidden BLOB\n, b TEXT)") != BackupSchemaGuard.normalized(reference))
+        // A quoted name holding SQL is never the same text as that SQL.
+        #expect(BackupSchemaGuard.normalized("CREATE TABLE t(\"a TEXT, b\" TEXT)") != BackupSchemaGuard.normalized(reference))
+        #expect(BackupSchemaGuard.normalized("CREATE TABLE \"t\"(\"a\" TEXT, `b` TEXT)") == BackupSchemaGuard.normalized(reference))
+        #expect(BackupSchemaGuard.normalized("CREATE TABLE t(\"a\"\"b\" TEXT)") == BackupSchemaGuard.normalized("CREATE TABLE t(`a\"b` TEXT)"))
+    }
+
     @Test func connectionsDoNotTrustTheSchema() throws {
         let db = try SQLiteDatabase(image: nil, size: 0)
         #expect(try db.query("PRAGMA trusted_schema")[0].int(0) == 0)

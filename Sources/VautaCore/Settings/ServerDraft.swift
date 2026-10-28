@@ -127,12 +127,26 @@ public struct ServerDraft: Equatable, Sendable {
         if let context = Self.detectedContext(server, fast: fastModel, deep: deepModel) { contextTokens = context }
     }
 
-    /// The context the chosen chat models are loaded with (the smaller), clamped
-    /// to the supported range; nil when the server does not say.
+    /// The context the chosen chat models are loaded with (the smaller), capped
+    /// to the supported maximum; nil when the server does not say, or when it is
+    /// below the supported minimum (see `contextShortfall`): the server would
+    /// keep its smaller window and cut the prompt, so a raised value would only
+    /// pretend.
     public static func detectedContext(_ server: DiscoveredServer, fast: String, deep: String) -> Int? {
-        let lengths = [fast, deep].compactMap { name in server.models.first { $0.id == name }?.contextLength }
-        guard let smallest = lengths.min() else { return nil }
-        return min(max(smallest, LLMServerConfig.contextRange.lowerBound), LLMServerConfig.contextRange.upperBound)
+        guard let smallest = loadedContext(server, fast: fast, deep: deep),
+              smallest >= LLMServerConfig.contextRange.lowerBound else { return nil }
+        return min(smallest, LLMServerConfig.contextRange.upperBound)
+    }
+
+    /// The chosen chat model loaded with less context than Vauta supports, and that context; nil when none is.
+    public static func contextShortfall(_ server: DiscoveredServer, fast: String, deep: String) -> (model: String, context: Int)? {
+        let loaded = [fast, deep].compactMap { name in server.models.first { $0.id == name }.flatMap { m in m.contextLength.map { (name, $0) } } }
+        guard let short = loaded.min(by: { $0.1 < $1.1 }), short.1 < LLMServerConfig.contextRange.lowerBound else { return nil }
+        return (short.0, short.1)
+    }
+
+    private static func loadedContext(_ server: DiscoveredServer, fast: String, deep: String) -> Int? {
+        [fast, deep].compactMap { name in server.models.first { $0.id == name }?.contextLength }.min()
     }
 
     /// Switches between this Mac and the network, clearing an address that

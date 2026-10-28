@@ -30,8 +30,15 @@ if [[ -e "$KC" ]]; then
     if [[ -s scripts/signing-identity.txt ]]; then
       echo "Vauta's signing identity is already set up ($KC). Nothing to do: run ./scripts/install.sh."; exit 0
     fi
-    # An attempt that stopped after the import (for example at the trust step) leaves the identity without
-    # scripts/signing-identity.txt, so install.sh cannot use it: say how to start over instead of looping.
+    # The keychain is per user but signing-identity.txt is per checkout (git-ignored): a new clone of a finished
+    # setup only needs the fingerprint written again. Deleting the keychain would change Vauta's signature.
+    SHA1="$(security find-identity -v -p codesigning "$KC" 2>/dev/null | awk -v cn="\"$CN\"" '$0 ~ cn {print $2; exit}')"
+    if [[ -n "$SHA1" ]]; then
+      echo "$SHA1" > scripts/signing-identity.txt
+      echo "Vauta's signing identity is already set up ($KC); this folder now uses it. Run ./scripts/install.sh."; exit 0
+    fi
+    # An attempt that stopped after the import (for example at the trust step) leaves an identity that is not
+    # valid for code signing: say how to start over instead of looping.
     echo "$KC is left over from an attempt that did not finish. Delete it and run this script again:"
     echo "  security delete-keychain \"$KC\""
     exit 1
@@ -48,7 +55,8 @@ echo "2/5 Generating the identity and importing it into the signing keychain…"
 # that only you can read, and erased on exit. The .p12 that carries it into the keychain uses a random one-time
 # password, which `security import` takes as an argument (it has no other non-interactive way): a process running as
 # you could see it in that moment, but such a process could read the key file in the folder as well.
-D="$(mktemp -d)"; trap 'rm -rfP "$D"' EXIT; umask 077
+# The signing keychain is locked again however the script ends (it is unlocked from the import on).
+D="$(mktemp -d)"; trap 'rm -rfP "$D"; security lock-keychain "$KC" 2>/dev/null || true' EXIT; umask 077
 "$OPENSSL" req -x509 -newkey rsa:3072 -nodes -keyout "$D/key.pem" -out "$D/cert.pem" -days 3650 -sha256 \
   -subj "/CN=$CN" -addext "basicConstraints=critical,CA:FALSE" \
   -addext "keyUsage=critical,digitalSignature" -addext "extendedKeyUsage=critical,codeSigning" 2>/dev/null \
@@ -86,10 +94,13 @@ NEW_SHA1="$(security find-identity -v -p codesigning "$KC" | awk -v cn="\"$CN\""
 echo "$NEW_SHA1" > scripts/signing-identity.txt   # public fingerprint, read by build-app.sh (git-ignored)
 
 echo "4/5 Removing the old identity from the login keychain…"
-while OLD="$(security find-identity -v -p codesigning "$LOGIN_KC" | awk -v cn="\"$CN\"" '$0 ~ cn {print $2; exit}')" && [[ -n "$OLD" ]]; do
+# All of them, valid or not (an old identity may be untrusted or expired). A failure here is only a warning: the new
+# identity is already set up.
+while OLD="$(security find-identity -p codesigning "$LOGIN_KC" | awk -v cn="\"$CN\"" '$0 ~ cn {print $2; exit}')" && [[ -n "$OLD" ]]; do
   security find-certificate -Z -a -c "$CN" -p "$LOGIN_KC" > "$D/old.pem" 2>/dev/null || true
   [[ -s "$D/old.pem" ]] && security remove-trusted-cert "$D/old.pem" 2>/dev/null || true
-  security delete-identity -Z "$OLD" "$LOGIN_KC" >/dev/null
+  security delete-identity -Z "$OLD" "$LOGIN_KC" >/dev/null \
+    || { echo "   WARNING: could not remove the old identity $OLD from the login keychain; delete it in Keychain Access."; break; }
 done
 
 security lock-keychain "$KC"

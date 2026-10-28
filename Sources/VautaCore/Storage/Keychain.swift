@@ -80,26 +80,6 @@ enum Keychain {
         guard status == errSecSuccess else { throw error(status, operation: "add", account: account) }
     }
 
-    /// Replaces the item's data in place, or adds it if it does not exist.
-    ///
-    /// Never delete-then-add: if the add failed (locked keychain, denied
-    /// prompt) the previous value would already be gone.
-    static func upsert(_ data: Data, service: String, account: String, label: String) throws {
-        let attributes: [String: Any] = [
-            kSecValueData as String: data,
-            kSecAttrLabel as String: label,
-        ]
-        let status = SecItemUpdate(baseQuery(service: service, account: account) as CFDictionary, attributes as CFDictionary)
-        switch status {
-        case errSecSuccess:
-            return
-        case errSecItemNotFound:
-            try add(data, service: service, account: account, label: label)
-        default:
-            throw error(status, operation: "update", account: account)
-        }
-    }
-
     /// Writes the item as a new one: deletes whatever is there, then adds it. An item someone else created (another
     /// process of this user can plant one before Vauta writes, with an access list that lets it read the item) is
     /// never updated in place, so a secret never lands under that access list. If the add fails, the previous value

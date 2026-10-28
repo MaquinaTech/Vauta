@@ -280,7 +280,7 @@ struct AnswerRowView: View {
                     }
                 }
                 .buttonStyle(.plain)
-                    .accessibilityLabel(Text(verbatim: cite.fileName ?? ""))
+                    .accessibilityLabel(cite.fileName.flatMap { $0.isEmpty ? nil : Text(verbatim: $0) } ?? Text("Document", comment: "VoiceOver, brief: what a line is; a file or a passage of one"))
                     .accessibilityHint(Text("Opens the document at this passage", comment: "Hint of a citation chip that opens a document"))
             }
         }

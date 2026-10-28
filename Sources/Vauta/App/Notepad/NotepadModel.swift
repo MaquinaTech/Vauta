@@ -472,174 +472,14 @@ final class NotepadModel {
                                 id, before: before, after: try? await store.expansion(of: id))
     }
 
-    func removeExpansion(_ id: Int64) async {
-        guard let store else { return }
-        do {
-            let before = try await store.expansion(of: id)
-            try await store.dismissExpansion(noteID: id)
-            updated = []
-            await reload(markUpdates: false)
-            registerExpansionChange(String(localized: "Remove Expansion", comment: "Undo menu item and menu command"),
-                                    id, before: before, after: try await store.expansion(of: id))
-        } catch {
-            report(String(localized: "Couldn’t change the note", comment: "Alert title"), error)
-        }
-    }
-
-    /// Brings back what the user removed (the previous version), or writes it again when there is none.
-    func showExpansion(_ id: Int64) async {
-        if let e = try? await store?.expansion(of: id), e.previous != nil { await revert(id) } else { await expandAgain(id) }
-    }
-
-    /// The user's own version of an expansion (one sentence per line). An empty editor removes the expansion.
-    func saveExpansion(_ id: Int64, text: String) async {
-        guard let store else { return }
-        guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { await removeExpansion(id); return }
-        do {
-            let before = try await store.expansion(of: id)
-            try await store.editExpansion(noteID: id, text: text)
-            updated = []
-            await reload(markUpdates: false)
-            registerExpansionChange(String(localized: "Edit Expansion", comment: "Undo menu item and menu command"),
-                                    id, before: before, after: try await store.expansion(of: id))
-        } catch {
-            report(String(localized: "Couldn’t change the note", comment: "Alert title"), error)
-        }
-    }
-
-    /// The user checked a sentence the transcript did not back: the mark goes, the text stays the model's.
-    func markChecked(_ id: Int64, sentence: Int) async {
-        guard let store else { return }
-        do {
-            let before = try await store.expansion(of: id)
-            try await store.markSentenceChecked(noteID: id, index: sentence)
-            await reload(markUpdates: false)
-            registerExpansionChange(String(localized: "Mark as Checked", comment: "Button on an item the model proposed and nobody has confirmed: the user has checked it"),
-                                    id, before: before, after: try await store.expansion(of: id))
-        } catch {
-            report(String(localized: "Couldn’t change the note", comment: "Alert title"), error)
-        }
-    }
-
-    /// "Updated · Undo": the version before the last change comes back. The live pass leaves the note alone from then on
-    /// (it would only write the update again); the final pass has the last word.
-    func revert(_ id: Int64) async {
-        guard let store else { return }
-        do {
-            let before = try await store.expansion(of: id)
-            try await store.restorePreviousExpansion(noteID: id)
-            updated.remove(id)
-            reverted.insert(id)
-            await reload(markUpdates: false)
-            registerExpansionChange(String(localized: "Undo", comment: "Undo menu item"), id, before: before, after: try await store.expansion(of: id))
-        } catch {
-            report(String(localized: "Couldn’t change the note", comment: "Alert title"), error)
-        }
-    }
-
     /// Notes whose update the user took back during this recording.
     @ObservationIgnored var reverted: Set<Int64> = []
-
-    /// Whether two snapshots are the same expansion (the error code and the clock do not count).
-    private func sameExpansion(_ a: NoteExpansion?, _ b: NoteExpansion?) -> Bool {
-        guard let a, let b else { return a == nil && b == nil }
-        return a.state == b.state && a.sentences == b.sentences && a.userEdited == b.userEdited && a.sourceKey == b.sourceKey
-            && a.pass == b.pass && a.previous == b.previous
-    }
-
-    /// One undo step for one change: it holds the exact version before and after, so undoing it brings back precisely
-    /// what it replaced, however many other changes came between.
-    private func registerExpansionChange(_ name: String, _ id: Int64, before: NoteExpansion?, after: NoteExpansion?) {
-        guard !sameExpansion(before, after) else { return }
-        registerUndo(name, undo: { await $0.putExpansion(id, before) }, redo: { await $0.putExpansion(id, after) })
-    }
-
-    private func putExpansion(_ id: Int64, _ snapshot: NoteExpansion?) async {
-        guard let store else { return }
-        do {
-            try await store.restoreExpansion(noteID: id, to: snapshot)
-            updated.remove(id)
-            await reload(markUpdates: false)
-        } catch {
-            report(String(localized: "Couldn’t change the note", comment: "Alert title"), error)
-        }
-    }
 
     func toggle(_ id: Int64) {
         if disclosed.contains(id) { disclosed.remove(id) } else { disclosed.insert(id) }
     }
 
-    /// What could not be saved when a meeting was left, kept for when it is shown again (never dropped).
-    struct Rescue: Equatable {
-        var draft: String?
-        var words: (id: Int64, text: String)?
-        var expansion: (id: Int64, text: String)?
-        static func == (a: Rescue, b: Rescue) -> Bool { a.draft == b.draft && a.words?.id == b.words?.id && a.words?.text == b.words?.text
-            && a.expansion?.id == b.expansion?.id && a.expansion?.text == b.expansion?.text }
-    }
-
     @ObservationIgnored var rescued: [Int64: Rescue] = [:]
-
-    /// Brings back what a failed save left for the meeting now shown (called after its notes are read).
-    func restoreRescued() {
-        guard let meeting = meetingID, let r = rescued.removeValue(forKey: meeting) else { return }
-        if let text = r.draft, draft.isEmpty, editingID == nil { draft = text }
-        if let (id, text) = r.words, rows.contains(where: { $0.id == id }), editingWordsID == nil { editingWordsID = id; wordsDraft = text }
-        if let (id, text) = r.expansion, rows.contains(where: { $0.id == id }), editingExpansionID == nil { editingExpansionID = id; expansionDraft = text }
-    }
-
-    /// Another meeting is about to be shown (or the window closes, or the app quits): the words being edited, the
-    /// expansion being rewritten and the note not yet added are saved in the meeting they belong to (captured now; the
-    /// lists are about to be replaced). A rewrite to nothing is not a delete: nothing confirmed it, so the note stays as
-    /// it was. What cannot be saved is kept in `rescued` and comes back when that meeting is shown again. The task
-    /// finishes when the writes are done (quitting waits for it).
-    @discardableResult
-    func commitPendingBeforeLeaving() -> Task<Void, Never>? {
-        guard let store, let meeting = meetingID else { return nil }
-        let edit = editingWordsID.flatMap { id in rows.first(where: { $0.id == id }).map { (id, wordsDraft.trimmingCharacters(in: .whitespacesAndNewlines), $0.note.text) } }
-        let rewrite = editingExpansionID.map { ($0, expansionDraft) }
-        let text = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        let t = offset()
-        let expander = (modelConfigured && hasTranscript) ? llm : nil
-        editingWordsID = nil
-        wordsDraft = ""
-        editingExpansionID = nil
-        expansionDraft = ""
-        draft = ""
-        editingID = nil
-        guard edit != nil || rewrite != nil || !text.isEmpty else { return nil }
-        let notify = notesChanged
-        return Task { @MainActor [report, weak self] in
-            var lost = Rescue()
-            do {
-                if let (id, words, before) = edit, !words.isEmpty, words != before {
-                    do { try await store.updateNote(id, text: words) } catch { lost.words = (id, words); throw error }
-                }
-                if let (id, body) = rewrite, !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                    do { try await store.editExpansion(noteID: id, text: body) } catch { lost.expansion = (id, body); throw error }
-                }
-                if !text.isEmpty {
-                    do {
-                        let id = try await store.addNote(meeting, at: t, text: text, addedAfter: true)
-                        // Written out without waiting (quitting must not wait for a model): the note does not stay unexpanded
-                        // until that meeting is opened again.
-                        if let expander { Task { _ = try? await expander.expandNote(noteID: id) } }
-                    } catch { lost.draft = text; throw error }
-                }
-                notify()
-            } catch {
-                if lost.draft == nil, !text.isEmpty, lost.words != nil || lost.expansion != nil { lost.draft = text }
-                if lost != Rescue() { self?.rescued[meeting] = lost }
-                report(String(localized: "The note couldn’t be saved.", comment: "Warning while recording"), error)
-            }
-        }
-    }
-
-    /// Saves everything pending and waits for it, for quitting and closing: nothing typed is lost.
-    func commitAndSettle() async {
-        await commitPendingBeforeLeaving()?.value
-        await settled()
-    }
 
     // MARK: VoiceOver
 
@@ -666,7 +506,7 @@ final class NotepadModel {
     /// Registers the way back with the window's undo manager, and the way forward: the handler files the opposite step
     /// before it returns (the manager makes it the Redo while undoing and the Undo while redoing) and then runs this one.
     /// Steps run one after the other, so an undo that follows a slow one sees its result.
-    private func registerUndo(_ name: String, undo: @escaping Step, redo: @escaping Step) {
+    func registerUndo(_ name: String, undo: @escaping Step, redo: @escaping Step) {
         guard let undoManager else { return }
         undoManager.registerUndo(withTarget: self) { model in
             MainActor.assumeIsolated {

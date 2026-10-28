@@ -43,7 +43,7 @@ It handles **confidential conversations**. The rules below protect the user's da
 
    Ask with concrete options and a reasoned recommendation that fits the Mac's memory (`sysctl -n hw.memsize`).
 7. **Commands that ask for passwords run in the user's own Terminal**, not in yours: `scripts/setup-signing.sh`,
-   `scripts/install.sh` with a local signing identity, and `server-check --ask-key`.
+   `scripts/install.sh` and `scripts/update.sh` with a local signing identity, and `server-check --ask-key`.
 
 ## Working on the code
 
@@ -55,7 +55,7 @@ It handles **confidential conversations**. The rules below protect the user's da
 | Test (Xcode selected) | `swift test` |
 | Translations check | `scripts/check-strings.sh` |
 | License headers check | `scripts/check-headers.sh` |
-| App bundle without a signing identity | `VAUTA_ALLOW_ADHOC=1 scripts/build-app.sh` (builds `build/Vauta.app`; don't open it unless the user asks) |
+| App bundle without a signing identity | `VAUTA_BUNDLE_ID=local.vauta.dev VAUTA_ALLOW_ADHOC=1 scripts/build-app.sh` (builds `build/Vauta.app` with its own bundle ID, so it never touches the installed app's data; don't open it unless the user asks) |
 | Dependencies check | `scripts/check-dependencies.sh` (only the pinned mlx-swift fork and swift-numerics) |
 | GPU kernels and the search model in the shipped binary | `build/Vauta.app/Contents/MacOS/Vauta mlx-selftest [--model]` (hidden command; exit 0 pass, 1 fail, 2 unsupported, 3 model missing) |
 
@@ -295,7 +295,8 @@ Create `vauta-server.json` (it is git-ignored). It may contain the address, CA a
   `ca.crt`, with line breaks written as `\n`) and/or `"pins": ["<pin>"]`.
 - `profile.kind` is one of `lmStudio`, `ollama`, `llamaCpp`, `mlx`, `vllm`, `jan`, `localAI` or `openAICompatible`;
   the other profile fields take that kind's defaults. A configuration without `profile` uses the legacy request
-  dialect (`ServerProfile.legacy`).
+  dialect (`ServerProfile.legacy`); a host given by name still needs `caPEM` or `pins` (only a configuration saved by
+  0.1.x keeps working without them, with a warning).
 - `contextTokens` must be between 8192 and 262144.
 
 Test it with the binary built in step 3, not the installed one (the installed app is sandboxed and can't read files
@@ -347,6 +348,19 @@ Then the user checks Settings › **Status** (every item should be green or expl
 recording with **⌃⌥R** (press again to stop). If the first-run setup was skipped, microphone and system audio
 permissions are requested at the first recording. Afterwards, the meeting should have minutes in Meetings, and Ask should answer with citations. Settings ›
 Status › **Copy Diagnostics** copies versions and the checklist, with no meeting content, for a support request.
+
+## Updating Vauta for a user
+
+```sh
+./scripts/update.sh                       # local signing identity: the user runs it in their own Terminal
+VAUTA_ALLOW_ADHOC=1 ./scripts/update.sh   # ad-hoc: you may run it
+```
+
+It installs the newest release tag only if it is signed by the maintainer's key (checked against the
+`.github/allowed_signers` already in the checkout and the fingerprint in SECURITY.md), never an older version than the
+installed one, and only after the tests pass. It stops on local changes. If it says the key does not match, stop and
+tell the user: never edit `.github/allowed_signers` or the script to make it pass. A checkout before 0.9.3 needs one
+`git pull` first.
 
 ## Troubleshooting
 

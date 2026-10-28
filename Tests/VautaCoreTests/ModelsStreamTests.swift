@@ -66,6 +66,34 @@ struct ModelsStreamTests {
         #expect(try parse(ModelsFixtures.sse([chunk])).cachedTokens == 42)
     }
 
+    @Test func largeMalformedStreamsFinishQuickly() throws {
+        // Many partial `data:` lines with no blank line, and a long plain body: each line is handled once.
+        let start = ContinuousClock.now
+        var parser = ChatStreamParser()
+        for _ in 0..<50_000 { _ = try parser.consume(#"data: {"choices":[{"delta":"#) }
+        try parser.finish()
+        #expect(parser.content.isEmpty)
+        var plain = ChatStreamParser()
+        _ = try plain.consume("{")
+        for _ in 0..<200_000 { _ = try plain.consume(#""k": 1,"#) }
+        #expect(throws: LLMError.invalidResponse("not a chat completion")) { try plain.finish() }
+        #expect(ContinuousClock.now - start < .seconds(10))
+    }
+
+    @Test func pendingDataIsCapped() throws {
+        var parser = ChatStreamParser(maxPendingBytes: 1024)
+        #expect(throws: LLMError.tooLarge) {
+            for _ in 0..<200 { _ = try parser.consume("data: " + String(repeating: "x", count: 20)) }
+        }
+    }
+
+    @Test func aPartialPayloadThenOneLineObjectsStillWork() throws {
+        let text = "data: {\"choices\":\n" + #"data: {"choices":[{"delta":{"content":"a"}}]}"# + "\n"
+            + #"data: {"choices":[{"delta":{"content":"b"},"finish_reason":"stop"}]}"#
+        let p = try parse(text)
+        #expect(p.content == "ab" && p.finishReason == .stop)
+    }
+
     @Test func finishReasons() {
         #expect(FinishReason("length") == .length && FinishReason("stop") == .stop && FinishReason("eos") == .stop)
         #expect(FinishReason("tool_calls") == .toolCalls && FinishReason("weird") == .other("weird"))
@@ -88,6 +116,33 @@ struct ModelsStreamTests {
         #expect(error(401, "{}") == .unauthorized)
         #expect(error(503, #"{"error":{"message":"Loading model"}}"#, retryAfter: "7") == .busy(retryAfter: 7))
         #expect(LLMError.http(502, message: nil).isRetryable && !LLMError.http(400, message: nil).isRetryable)
+    }
+
+    @Test func credentialsInServerMessagesAreRedacted() {
+        let echoed = ServerErrorBody.error(status: 400, body: Data(#"{"error":{"message":"bad header Authorization: Bearer sk-live-123 rejected"}}"#.utf8),
+                                           retryAfter: nil)
+        #expect(echoed == .http(400, message: "bad header Authorization: ••• rejected"))
+        #expect(ServerErrorBody.sanitized("token Bearer abc.def-123 is invalid") == "token Bearer ••• is invalid")
+        #expect(ServerErrorBody.sanitized(#"{"api_key": "k-998877", "x-api-key=zz"}"#) == #"{"api_key": "•••", "x-api-key=•••"}"#)
+        #expect(ServerErrorBody.sanitized("model not found") == "model not found")
+        // The stored key, anywhere and in any case, even cut by the 300-character clip.
+        let key = "s3cr3t-key-value-0123456789"
+        #expect(LLMError.server(message: "no key S3CR3T-KEY-VALUE-0123456789 here").redacting(key) == .server(message: "no key ••• here"))
+        let clipped = ServerErrorBody.sanitized(String(repeating: "a", count: 290) + " " + key)
+        #expect(clipped.hasSuffix("…") && clipped.contains("s3cr3t"))   // only the client knows the key: it redacts the rest
+        let cut = LLMError.http(500, message: clipped).redacting(key)
+        guard case .http(_, let message?) = cut else { Issue.record("not an http error"); return }
+        #expect(!message.contains("s3cr3t") && message.hasSuffix("•••…"))
+        #expect(LLMError.unauthorized.redacting(key) == .unauthorized)
+    }
+
+    @Test func aChatErrorNeverShowsTheStoredKey() async throws {
+        let port = StubServer.register { _ in .json(["error": ["message": "invalid key sk-stored-0123 for this proxy"]], status: 400) }
+        defer { StubServer.unregister(port) }
+        let client = ModelsFixtures.client(port: port, bearer: { "sk-stored-0123" })
+        await #expect(throws: LLMError.http(400, message: "invalid key ••• for this proxy")) {
+            _ = try await client.chat([.user("q")], ChatOptions(model: .deep, maxTokens: 5))
+        }
     }
 
     @Test func retryAfter() {

@@ -53,7 +53,7 @@ final class SystemAudioTap: @unchecked Sendable {
     private var systemListeners: [Listener] = []
     private var tapListeners: [Listener] = []
     private var aggregateListeners: [Listener] = []
-    private var onBuffer: (@Sendable (AVAudioPCMBuffer) -> Void)?
+    private var onBuffer: (@Sendable (AVAudioPCMBuffer, _ hostTime: UInt64?) -> Void)?
     private var isRunning = false
     private var rebuildItem: DispatchWorkItem?
     private var retargetItem: DispatchWorkItem?
@@ -84,7 +84,7 @@ final class SystemAudioTap: @unchecked Sendable {
     /// The scope in use (`.auto` is resolved when capture starts).
     var activeScope: SystemAudioScope { onControl { scope } }
 
-    func start(onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) throws {
+    func start(onBuffer: @escaping @Sendable (AVAudioPCMBuffer, _ hostTime: UInt64?) -> Void) throws {
         try onControl {
             do {
                 try startLocked(onBuffer)
@@ -101,7 +101,7 @@ final class SystemAudioTap: @unchecked Sendable {
 
     // MARK: Lifecycle (controlQueue)
 
-    private func startLocked(_ onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) throws {
+    private func startLocked(_ onBuffer: @escaping @Sendable (AVAudioPCMBuffer, _ hostTime: UInt64?) -> Void) throws {
         scope = requestedScope == .auto ? requestedScope.resolved(with: MeetingPresence.currentState()) : requestedScope
         self.onBuffer = onBuffer
         isRunning = true
@@ -266,7 +266,7 @@ final class SystemAudioTap: @unchecked Sendable {
         lock.withLock { lastCallback = mach_absolute_time() }
         lastRebuild = mach_absolute_time()
         let probe = probe
-        try check(AudioDeviceCreateIOProcIDWithBlock(&procID, aggregateID, ioQueue) { [weak self] _, inputData, _, _, _ in
+        try check(AudioDeviceCreateIOProcIDWithBlock(&procID, aggregateID, ioQueue) { [weak self] _, inputData, inputTime, _, _ in
             guard let self else { return }
             let format = self.lock.withLock {
                 self.lastCallback = mach_absolute_time()
@@ -279,7 +279,9 @@ final class SystemAudioTap: @unchecked Sendable {
             }
             // Memory lent by Core Audio: valid only during this callback.
             guard let buffer = AVAudioPCMBuffer(pcmFormat: format, bufferListNoCopy: list, deallocator: nil) else { return }
-            onBuffer(buffer)
+            // When the input was captured: places the audio on the session's clock across rebuilds (no gap is lost).
+            let stamp = inputTime.pointee
+            onBuffer(buffer, stamp.mFlags.contains(.hostTimeValid) ? stamp.mHostTime : nil)
         }, .systemAudioStartFailed)
         if streams.count > 1, let procID { TapStream.enableOnlyInputStream(streams.count - 1, of: streams.count, aggregateID, procID) }
         try check(AudioDeviceStart(aggregateID, procID), .systemAudioStartFailed)

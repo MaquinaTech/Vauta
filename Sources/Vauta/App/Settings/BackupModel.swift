@@ -88,7 +88,7 @@ final class BackupModel {
         var messages: [String] = []
         switch strength {
         case .tooShort: messages.append(Self.tooShortMessage)
-        case .weak: messages.append(String(localized: "Weak: add more words or characters."))
+        case .weak: messages.append(Self.weakMessage)
         case .good: messages.append(String(localized: "Good"))
         case .strong: messages.append(String(localized: "Strong"))
         }
@@ -98,10 +98,13 @@ final class BackupModel {
 
     static var tooShortMessage: String { String(localized: "Too short. Use at least \(BackupPassword.minimumLength) characters.") }
     static var mismatchMessage: String { String(localized: "The passwords don’t match.") }
+    static var weakMessage: String { String(localized: "Weak: add more words or characters.") }
 
     /// Why "Choose Location…" can't be used yet; nil when it can.
     var backUpBlocker: String? {
-        if !BackupPassword.isAcceptable(password) { return Self.tooShortMessage }
+        if strength == .tooShort { return Self.tooShortMessage }
+        // Long enough but trivially repetitive (`111111111111`).
+        if !BackupPassword.isAcceptable(password) { return Self.weakMessage }
         if password != confirmation { return Self.mismatchMessage }
         return nil
     }
@@ -194,7 +197,7 @@ final class BackupModel {
     }
 
     /// Cancel while encrypting: back to the form with what was typed; nothing is written (the file is only
-    /// written after the encryption finished, and removed again if the cancel came during the write).
+    /// written after the encryption finished, and a new file is removed again if the cancel came during the write).
     func cancelBackUp() {
         backUpTask?.cancel()
         backUpTask = nil
@@ -225,12 +228,13 @@ final class BackupModel {
             // The settings go inside the encrypted file with the meetings; the server key stays in the Keychain.
             let data = try await store.createBackup(password: password, appVersion: version, preferences: BackupPreferences(from: .standard))
             guard !Task.isCancelled else { return }
+            let replaces = FileManager.default.fileExists(atPath: url.path)
             // Off the main actor: a large backup would freeze the spinner and the Cancel button while it is written.
-            try await Task.detached(priority: .userInitiated) {
-                do { try data.write(to: url, options: .atomic) } catch { try data.write(to: url) }
-            }.value
+            try await Task.detached(priority: .userInitiated) { try Self.write(data, to: url) }.value
             guard !Task.isCancelled else {
-                try? FileManager.default.removeItem(at: url)
+                // A cancel during the write removes the new file only when it replaced nothing: a backup it replaced is
+                // already gone, and the new one is complete.
+                if !replaces { try? FileManager.default.removeItem(at: url) }
                 return
             }
             savedFile = url
@@ -243,6 +247,23 @@ final class BackupModel {
             self.error = Self.message(error)
             errorHint = Self.hint(for: error)
             stage = .form
+        }
+    }
+
+    /// Writes the backup atomically (a temporary file, then a rename), so a file it replaces is either kept whole or
+    /// replaced whole. Where an atomic write is refused (some volumes), a plain write is tried only for a new file, which
+    /// is removed again if that write fails: an existing backup is never rewritten in place.
+    nonisolated static func write(_ data: Data, to url: URL) throws {
+        do {
+            try data.write(to: url, options: .atomic)
+        } catch {
+            guard !FileManager.default.fileExists(atPath: url.path) else { throw error }
+            do {
+                try data.write(to: url, options: .withoutOverwriting)
+            } catch let plain {
+                if (plain as NSError).code != NSFileWriteFileExistsError { try? FileManager.default.removeItem(at: url) }
+                throw error
+            }
         }
     }
 

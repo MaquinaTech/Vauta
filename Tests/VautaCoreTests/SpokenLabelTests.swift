@@ -35,8 +35,9 @@ struct SpokenLabelTests {
     @Test func noViewJoinsTwoPartsWithAListFormatter() throws {
         // The VoiceOver labels of buttons and rows must not go through ListFormatter (its conjunction comes from the system locale).
         let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-        for file in ["Sources/Vauta/App/Onboarding/OnboardingSetupPages.swift", "Sources/Vauta/App/Meetings/OtherPossibleItemsSection.swift",
-                     "Sources/Vauta/App/Meetings/SummaryTab.swift", "Sources/Vauta/App/Panel/AnswersCard.swift", "Sources/Vauta/App/Panel/LiveTools.swift"] {
+        for file in ["Sources/Vauta/App/Onboarding/OnboardingSetupPages.swift", "Sources/Vauta/App/Onboarding/OnboardingModelsPage.swift",
+                     "Sources/Vauta/App/Meetings/OtherPossibleItemsSection.swift", "Sources/Vauta/App/Meetings/SummaryTab.swift",
+                     "Sources/Vauta/App/Panel/AnswersCard.swift", "Sources/Vauta/App/Panel/LiveTools.swift", "Sources/Vauta/App/Panel/TranscriptView.swift"] {
             let text = try String(contentsOf: root.appendingPathComponent(file), encoding: .utf8)
             #expect(!text.contains("ListFormatter") && !text.contains(".formatted(.list"), "\(file) joins a VoiceOver label with ListFormatter")
         }

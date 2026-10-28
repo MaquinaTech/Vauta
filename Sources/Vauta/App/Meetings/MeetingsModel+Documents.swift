@@ -114,9 +114,19 @@ extension MeetingsModel {
         case .attached(let id): (id, material.name)
         case .linked(let id, let path): (id, path)
         }
+        openInApp(source: sourceID, relPath: relPath, indexer: indexer)
+    }
+
+    /// Hands a document to its app, unless a cloud service keeps it online only: its app would make the service download
+    /// it, and Vauta never starts a download (as in the passage viewer). A notice says so instead, with Show in Finder.
+    func openInApp(source: Int64, relPath: String, indexer: DocumentIndexer) {
         Task {
-            guard let file = await indexer.openForViewing(source: sourceID, relPath: relPath) else { return }
-            NSWorkspace.shared.open(file.url)
+            guard let file = await indexer.openForViewing(source: source, relPath: relPath) else { return }
+            if await indexer.isNotOnThisMac(file) {
+                show(MeetingsNotice(text: DocumentSkipReason.cloudNotDownloaded.localizedText, symbol: "icloud.slash", reveal: file.url))
+            } else {
+                NSWorkspace.shared.open(file.url)
+            }
             try? await Task.sleep(for: .seconds(2))
             await indexer.closeViewing(file)
         }

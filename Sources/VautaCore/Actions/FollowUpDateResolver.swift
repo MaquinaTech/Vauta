@@ -30,7 +30,8 @@ enum FollowUpDateResolver {
 
     // MARK: Day
 
-    /// The day a text says, strictly after `meetingDay`; nil when it says none.
+    /// The day a text says, strictly after `meetingDay` and not more than a year after it (`DueDay.isPlausible`, the rule
+    /// for due days); nil when it says none.
     static func day(in text: String, meetingDay: DueDay, order: DateOrder) -> Day? {
         let simple = Self.simple(text)
         let norm = TextKeys.norm(text)
@@ -45,8 +46,10 @@ enum FollowUpDateResolver {
             nextWeek(norm, meetingDay: meetingDay),
             bareDay(simple, tokens: tokens, meetingDay: meetingDay),
         ]
-        return candidates.compactMap { $0 }.first { $0.day > meetingDay }
+        return candidates.compactMap { $0 }.first { accepts($0.day, meetingDay: meetingDay) }
     }
+
+    private static func accepts(_ day: DueDay, meetingDay: DueDay) -> Bool { day > meetingDay && day.isPlausible(meetingDay: meetingDay) }
 
     static func simple(_ text: String) -> String {
         text.folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
@@ -68,9 +71,11 @@ enum FollowUpDateResolver {
         }
     }
 
+    /// A date that is past or too far ("the 2025-03-01 release, then 2026-11-20") does not hide a later one in the same text.
     private static func explicit(_ simple: String, tokens: [String], meetingDay: DueDay, order: DateOrder) -> Day? {
         for g in groups(iso, simple) {
-            if let y = g[0].flatMap(Int.init), let m = g[1].flatMap(Int.init), let d = g[2].flatMap(Int.init), let day = DueDay(year: y, month: m, day: d) {
+            if let y = g[0].flatMap(Int.init), let m = g[1].flatMap(Int.init), let d = g[2].flatMap(Int.init), let day = DueDay(year: y, month: m, day: d),
+               accepts(day, meetingDay: meetingDay) {
                 return Day(day: day, inferred: false)
             }
         }
@@ -100,9 +105,10 @@ enum FollowUpDateResolver {
             ?? ((first.month > 12 || first.day > 31) ? nextOccurrence(month: second.month, day: second.day, year: year, after: meetingDay) : nil)
     }
 
-    /// The first date with this month and day after `meetingDay` (this year or the next), or exactly `year` when it was said.
+    /// The first date with this month and day after `meetingDay` (this year or the next), or exactly `year` when it was said
+    /// (nil when that day is past or more than a year away, so the caller looks at the next date in the text).
     private static func nextOccurrence(month: Int, day: Int, year: Int?, after meetingDay: DueDay) -> DueDay? {
-        if let year { return DueDay(year: year, month: month, day: day) }
+        if let year { return DueDay(year: year, month: month, day: day).flatMap { accepts($0, meetingDay: meetingDay) ? $0 : nil } }
         for y in [meetingDay.year, meetingDay.year + 1] {
             if let candidate = DueDay(year: y, month: month, day: day), candidate > meetingDay { return candidate }
         }

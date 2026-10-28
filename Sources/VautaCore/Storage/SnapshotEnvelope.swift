@@ -69,6 +69,16 @@ enum SnapshotEnvelope {
         return out
     }
 
+    /// Whether `data` is an envelope sealed with `key`. Only authenticates: the plaintext is wiped at once.
+    static func isSealed(_ data: Data, with key: SymmetricKey) -> Bool {
+        guard data.starts(with: magic), data.count > magic.count + 1,
+              let version = EnvelopeVersion(rawValue: data[data.startIndex + magic.count]),
+              let box = try? AES.GCM.SealedBox(combined: data.dropFirst(magic.count + 1)),
+              var opened = try? AES.GCM.open(box, using: key, authenticating: header(version)) else { return false }
+        wipe(&opened)
+        return true
+    }
+
     /// Returns the database image in `sqlite3_malloc64` memory (the caller,
     /// `SQLiteDatabase`, takes ownership). Plaintext intermediates are zeroed.
     static func open(_ data: Data, key: SymmetricKey) throws -> (UnsafeMutableRawPointer, Int) {

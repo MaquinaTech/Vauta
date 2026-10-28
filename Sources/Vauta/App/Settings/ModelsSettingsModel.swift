@@ -218,7 +218,14 @@ final class ModelsSettingsModel {
         provider = .localServer
         draft.adopt(server)
         testedServer = server
-        testFeedback = Feedback(kind: .success, text: Self.summary(server))
+        testFeedback = Self.contextWarning(server, draft) ?? Feedback(kind: .success, text: Self.summary(server))
+    }
+
+    /// A chosen model the server loads with less context than Vauta supports: said, never hidden behind a raised value.
+    static func contextWarning(_ server: DiscoveredServer, _ draft: ServerDraft) -> Feedback? {
+        guard let short = ServerDraft.contextShortfall(server, fast: draft.fastModel, deep: draft.deepModel) else { return nil }
+        return Feedback(kind: .warning, text: ModelGuideModel.contextTitle(current: short.context, name: short.model),
+                        note: ModelGuideModel.contextDetail(required: LLMServerConfig.contextRange.lowerBound))
     }
 
     /// Connects to the draft server without saving anything. The saved key is
@@ -244,7 +251,7 @@ final class ModelsSettingsModel {
             if let context = ServerDraft.detectedContext(server, fast: draft.fastModel, deep: draft.deepModel) {
                 draft.contextTokens = context
             }
-            testFeedback = Feedback(kind: .success, text: Self.summary(server))
+            testFeedback = Self.contextWarning(server, draft) ?? Feedback(kind: .success, text: Self.summary(server))
         } catch {
             testedServer = nil
             testFeedback = Self.feedback(for: error)

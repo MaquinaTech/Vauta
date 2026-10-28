@@ -55,7 +55,7 @@ person on their own Mac. Audio itself is never written to disk. The voice data r
 |---|---|
 | Someone reads the store from the disk, a stolen backup or a copied file | The store is encrypted with AES-256-GCM; the key is in the login keychain, not next to the file. Audio is never written to disk |
 | Another app on the Mac reads Vauta's data | The store is in Vauta's sandbox container and is ciphertext. The database key's Keychain access is bound to Vauta's code signature: another app asking for it triggers a macOS prompt |
-| Someone on the network reads or changes what Vauta sends to a model server | Network servers are reached only over HTTPS with TLS 1.3, with your private CA as the only trust anchor and optional certificate pins. Vauta refuses non-private addresses, proxies and redirects |
+| Someone on the network reads or changes what Vauta sends to a model server | Network servers are reached only over HTTPS with TLS 1.3, with your private CA as the only trust anchor when you set one (otherwise the system's, for a publicly trusted certificate) and optional certificate pins. Vauta refuses non-private addresses, proxies and redirects |
 | A misconfiguration sends meetings to the internet | Destinations are validated in code: loopback, or private network addresses and local names only |
 | Meeting text leaks through other channels | No telemetry, no logs, no window restoration, notifications without meeting text, optional copy protection |
 | Someone gets a backup file | AES-256-GCM with a PBKDF2-derived key (1,000,000 iterations); only as strong as the password you chose |
@@ -114,7 +114,7 @@ setting is on, a voice summary per speaker with each meeting (`speaker_voices`).
 - **A key item planted before Vauta creates its store.** When no store exists yet, Vauta uses a `database-key-v1` item
   that is already in the login keychain (so a store restored next to it still opens). A process running as you that
   created that item beforehand, with an access list open to it, could read the key. Such a process is already in the
-  threat above; "Erase Everything" replaces the item with one only Vauta can read.
+  threat above; "Erase Everything" and a restore replace the item with one only Vauta can read.
 - **Other accounts on this Mac, with a server on this Mac.** In **This Mac** mode Vauta talks plain HTTP to
   `127.0.0.1`, which is shared by every account on the Mac. While your server is stopped, a process of another
   account can listen on its port and receive Vauta's requests (meeting text and the server key). On a Mac shared
@@ -245,14 +245,14 @@ Format of a backup file (`.vautabackup`; backups from an earlier version are sti
 - Restore decrypts and validates in memory (authentication, manifest, schema no newer than the app's, the image's
   schema compared object by object with Vauta's own DDL for that version, so a backup carrying any extra or changed
   table, index, trigger, view or virtual table is refused before anything runs; SQLite `integrity_check`;
-  migrations for older schemas) before touching the store. Then, with no suspension point: the
-  Keychain database key is replaced in place with a new random key; the backup is written as the new snapshot,
-  sealed with the new key, atomically over the old one (`F_FULLFSYNC`, rename, directory sync); the journal is removed.
-  The new snapshot is encrypted before the key changes, so only the file write lies between the two. If writing
-  fails, the previous key is put back and the old store is untouched; if the Keychain also refuses that, the current
-  store is re-saved with the new key instead, so it stays readable. After success the old key no longer
-  exists, which is the same crypto-shred as Erase Everything. A crash in the instant between the key replacement and
-  the rename would leave the old file without its key; the backup file is the recovery in that case.
+  migrations for older schemas) before touching the store. Then, with no suspension point: a new random key is
+  stored in a second Keychain item (`database-key-v1.staged`); the backup is written as the new snapshot, sealed with
+  the new key, atomically over the old one (`F_FULLFSYNC`, rename, directory sync); the database key item is deleted
+  and added again with the new key and Vauta's own access list; the staged item is deleted; the journal is removed.
+  If writing fails, the staged key is deleted and the old store is untouched. If the process stops at any step, the
+  next launch opens the store with whichever of the two keys authenticates the snapshot and finishes the change, so
+  the store opens with either the old data or the restored data. After success the old key no longer exists, which
+  is the same crypto-shred as Erase Everything.
 - A wrong password, a changed header or payload, and a truncated file are indistinguishable by design (GCM
   authentication fails); a file without the header, or cut inside it, is reported as not being a backup.
 - Not protected: a backup is only as strong as its password; an attacker with the file can guess offline. A backup also
@@ -275,10 +275,10 @@ discovery, goes through one choke point, `AuditedSession` (see [Network audit](#
 | Two modes | **This Mac**: loopback only (`127.0.0.0/8`, `::1`, `localhost`); plain HTTP allowed. **Network**: HTTPS only, never loopback |
 | Private addresses only | `10/8`, `172.16/12`, `192.168/16`, `100.64/10` (CGNAT, Tailscale), `169.254/16`, `fc00::/7`, `fe80::/10`, IPv4-mapped forms, and names ending in `.local`, `.lan`, `.home.arpa`, `.internal` or `.ts.net`. IP literals are parsed into bytes (no leading zeros or textual tricks) |
 | TLS 1.3 only | `tlsMinimumSupportedProtocolVersion = .TLSv13` |
-| Private CA | When set, the certificates in your CA bundle are the **only** trust anchors, with no network fetches during evaluation. Without one, the system anchors are used. The host name must match the certificate |
+| Private CA | When set, the certificates in your CA bundle are the **only** trust anchors. Without one, the system anchors are used (for a publicly trusted certificate, such as one from `tailscale cert`). Either way, evaluation makes no network fetches (no OCSP, CRL or missing intermediates), so a publicly trusted server must send its full chain. The host name must match the certificate |
 | Certificate pins | SHA-256 of the leaf certificate's SubjectPublicKeyInfo (base64). Several are allowed for rotation. EC P-256/P-384/P-521 and RSA keys |
 | Names need trust | A host given by name (not an IP address) needs a private CA or a pin. Configurations saved by an earlier version without either keep working and show a warning |
-| Peer check | For hosts given by name, the address actually connected to must be private (or on a subnet this Mac is directly attached to); otherwise further requests are refused until the configuration is applied again. The check runs when a request completes, so it stops the requests that follow, not the first one; this is why new configurations need a private CA or a pin for names |
+| Peer check | For hosts given by name, the address actually connected to must be private (or, for IPv6 only, on a subnet this Mac is directly attached to; an IPv4 peer must always be private); otherwise further requests are refused until the configuration is applied again. Before the first request of a session to such a host, Vauta sends a probe with no body and no key (`GET …/models`) and waits for its connection metrics: nothing else is sent until the connected address is known to be allowed, and nothing is sent if the metrics don't arrive within 10 seconds. Every completed request is checked again. What remains: the system may open another connection later (a second one in parallel, or a new one after the idle one closed) and resolve the name again; a request on that connection is checked only once it completes, and stops the ones after it. TLS runs first on that connection too, which is why new configurations need a private CA or a pin for names |
 | No proxies, no redirects | HTTP, HTTPS, SOCKS, PAC and proxy auto-discovery are disabled; redirects are refused |
 | Fixed destinations | URLs are built only from the configured base URL (plus a few read-only identification paths of the chosen server type on the same origin) and checked again on every response |
 | No state | Ephemeral session: no cache, cookies or credential storage. Response sizes are capped |

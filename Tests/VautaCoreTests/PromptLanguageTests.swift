@@ -93,4 +93,22 @@ struct PromptLanguageTests {
         #expect(PromptText.parseDay("2031-01-01", reference: late, timeZone: Self.utcMinus7) == nil)
         #expect(PromptText.parseDay("tomorrow", reference: late) == nil)
     }
+
+    /// Days whose midnight does not exist (daylight saving starts at 00:00): the due day is kept, at its first moment.
+    @Test(arguments: [("America/Santiago", "2026-09-06"), ("America/Havana", "2026-03-08"), ("Asia/Beirut", "2026-03-29")])
+    func dueDayWithoutAMidnightIsKept(zone: String, day: String) throws {
+        let timeZone = try #require(TimeZone(identifier: zone))
+        let expected = try #require(DueDay(day))
+        // The case this guards: the zone really skips that midnight on this system.
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        #expect(formatter.date(from: day) == nil)
+        let reference = expected.adding(days: -2).startOfDay(in: timeZone)
+        let due = try #require(PromptText.parseDay(day, reference: reference, timeZone: timeZone))
+        #expect(DueDay.containing(due, in: timeZone) == expected)
+        #expect(PromptText.parseDay(" \(day) ", reference: reference, timeZone: timeZone) == due)
+        #expect(PromptText.parseDay("2026-3-9", reference: reference, timeZone: timeZone) != nil, "looser forms still read")
+    }
 }

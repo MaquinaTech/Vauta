@@ -15,9 +15,9 @@
 #   VAUTA_ALLOW_ADHOC=1                  ad-hoc; macOS asks for permissions again after each update.
 #
 # Version:
-#   CFBundleShortVersionString  VAUTA_VERSION if set, else the version in the latest tag
-#                               (`git describe --tags --always`, "v1.2.3" -> "1.2.3"),
-#                               else the value in Resources/Info.plist.
+#   CFBundleShortVersionString  VAUTA_VERSION if set, else the value in Resources/Info.plist (the source of
+#                               truth: a clone without the newest tag still builds the right version). A
+#                               checkout exactly at a release tag that says otherwise gets a warning.
 #   CFBundleVersion             number of commits (`git rev-list --count HEAD`),
 #                               else the value in Resources/Info.plist.
 set -euo pipefail
@@ -35,10 +35,9 @@ if [[ -n "${VAUTA_VERSION:-}" ]]; then
 else
   VERSION="$(plist_value CFBundleShortVersionString)"
   if in_repo; then
-    DESCRIBE="$(git describe --tags --always 2>/dev/null || true)"
-    # "v1.2.3", "v1.2.3-4-gabc1234" or "1.2.3"; never a bare commit hash that happens to be all digits.
-    if [[ "$DESCRIBE" =~ ^v([0-9]+(\.[0-9]+){0,2})(-|$) || "$DESCRIBE" =~ ^([0-9]+(\.[0-9]+){1,2})(-|$) ]]; then
-      VERSION="${BASH_REMATCH[1]}"
+    TAG="$(git describe --tags --exact-match 2>/dev/null || true)"
+    if [[ "$TAG" =~ ^v([0-9]+(\.[0-9]+){0,2})$ && "${BASH_REMATCH[1]}" != "$VERSION" ]]; then
+      echo "WARNING: this commit is tagged $TAG but Resources/Info.plist says $VERSION; building $VERSION" >&2
     fi
   fi
 fi
@@ -55,6 +54,13 @@ fi
 # signature lets macOS keep permissions and Keychain access across updates.
 KC="$HOME/Library/Keychains/vauta-signing.keychain-db"
 IDENTITY_SHA1="$(cat scripts/signing-identity.txt 2>/dev/null || true)"
+# signing-identity.txt is per checkout (git-ignored) but the keychain is per user: a new clone of a finished setup
+# finds the identity again instead of being told to delete the keychain, which would change Vauta's signature.
+if [[ -z "$IDENTITY_SHA1" && -f "$KC" && -z "${VAUTA_SIGN_IDENTITY:-}" ]]; then
+  IDENTITY_SHA1="$(security find-identity -v -p codesigning "$KC" 2>/dev/null \
+    | awk -v cn="\"Vauta Local Code Signing\"" '$0 ~ cn {print $2; exit}')"
+  [[ -z "$IDENTITY_SHA1" ]] || echo "$IDENTITY_SHA1" > scripts/signing-identity.txt
+fi
 KEYCHAIN_ARGS=()
 TIMESTAMP_ARGS=(--timestamp=none)
 if [[ -n "${VAUTA_SIGN_IDENTITY:-}" ]]; then

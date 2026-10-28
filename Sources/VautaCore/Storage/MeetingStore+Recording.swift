@@ -65,6 +65,14 @@ extension MeetingStore {
         return true
     }
 
+    /// Removes the transcript of the meeting being recorded, for a start that was cancelled or failed before the
+    /// recording began: what was captured meanwhile is not kept. Notes stay, so `endMeeting` keeps the meeting only
+    /// for them. Does nothing unless `id` is the active meeting.
+    public func discardTranscript(ofActiveMeeting id: Int64) throws {
+        guard activeMeetingID == id else { return }
+        try run("DELETE FROM segments WHERE meeting_id = ?", [.integer(id)])
+    }
+
     /// Closes the meeting (or removes it if nobody spoke and it has no notes or
     /// marks), writes it in a snapshot (the journal is removed) and then runs
     /// any pending compaction (and saves again): what was just recorded reaches

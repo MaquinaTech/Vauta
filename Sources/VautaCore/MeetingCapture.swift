@@ -39,6 +39,7 @@ public final class MeetingCapture: @unchecked Sendable {
     private var micPipe: ChannelPipe?
     private var systemPipe: ChannelPipe?
     private let levels = LevelMeter()
+    private let origin = SessionOrigin()
 
     /// Diagnostic messages (audio formats, device changes). No content.
     public var onDiagnostic: (@Sendable (String) -> Void)?
@@ -52,6 +53,10 @@ public final class MeetingCapture: @unchecked Sendable {
 
     /// The system-audio scope in use; `.auto` is resolved once capture starts.
     public var systemAudioScope: SystemAudioScope { system.activeScope }
+
+    /// Seconds since the first audio was captured, on the transcript's clock (time 0 of both channels, monotonic): the
+    /// offset for marks and notes made now. nil before any audio arrived.
+    public var elapsedSeconds: Double? { origin.elapsed(atHostSeconds: HostTime.now) }
 
     /// Same language on both channels.
     public func start(locale: Locale, engines: [Channel: TranscriptionEngine] = [:], diarizer: Diarizer? = nil,
@@ -94,19 +99,19 @@ public final class MeetingCapture: @unchecked Sendable {
 
             // Microphone first: with Bluetooth headsets opening it switches the
             // profile (A2DP → HFP) and the output rate, so the tap starts with the right one.
-            let micPipe = ChannelPipe(channel: micChannel, levels: levels)
+            let micPipe = ChannelPipe(channel: micChannel, levels: levels, origin: origin)
             self.micPipe = micPipe
             mic.onDiagnostic = diagnostic
             mic.onHealth = { health.report($0, for: .me, from: .device) }
-            try mic.start { micPipe.push($0) }
+            try mic.start { micPipe.push($0, hostTime: $1) }
             let micFormat = mic.format
             diagnostic?("microphone: \(Int(micFormat.sampleRate)) Hz, \(micFormat.channelCount) channel(s)")
 
-            let systemPipe = ChannelPipe(channel: systemChannel, levels: levels, diarizer: diarizer)
+            let systemPipe = ChannelPipe(channel: systemChannel, levels: levels, origin: origin, diarizer: diarizer)
             self.systemPipe = systemPipe
             system.onDiagnostic = diagnostic
             system.onHealth = { health.report($0, for: .others, from: .device) }
-            try system.start { systemPipe.push($0) }
+            try system.start { systemPipe.push($0, hostTime: $1) }
         } catch {
             // No analyzers or taps left open if something fails halfway.
             try? await stop()

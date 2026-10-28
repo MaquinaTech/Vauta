@@ -34,6 +34,8 @@ enum BackupSchemaGuard {
     /// an older macOS must still match. Whitespace is collapsed (and dropped beside brackets and commas) and identifier quotes dropped; string literals stay
     /// exactly as they are, so a changed default, check or trigger body is still a difference. Comments outside literals
     /// count as whitespace: an apostrophe in one (`-- the person's …`) must not be taken for the start of a literal.
+    /// A quoted identifier is read whole, so `"--"` or `"/*"` inside one never hides the SQL after it; one that is
+    /// not a plain word keeps canonical quotes, so `"a, b"` is never the same text as two columns.
     static func normalized(_ sql: String) -> String {
         let chars = Array(sql)
         var out = ""
@@ -63,10 +65,25 @@ enum BackupSchemaGuard {
             }
             i += 1
             if ch.isWhitespace { pendingSpace = !out.isEmpty; continue }
-            if ch == "\"" || ch == "`" || ch == "[" || ch == "]" { continue }
-            if pendingSpace, ch != ")", ch != ",", out.last != "(" { out.append(" ") }
+            var token = String(ch)
+            if let close: Character = ch == "\"" ? "\"" : ch == "`" ? "`" : ch == "[" ? "]" : nil {
+                var name = ""
+                while i < chars.count {
+                    if chars[i] == close {
+                        // A doubled quote is one quote inside the name ("" and ``; ] cannot be escaped).
+                        guard close != "]", i + 1 < chars.count, chars[i + 1] == close else { break }
+                        i += 1
+                    }
+                    name.append(chars[i])
+                    i += 1
+                }
+                i = min(i + 1, chars.count)
+                let plain = !name.isEmpty && name.unicodeScalars.allSatisfy { $0.isASCII && ($0 == "_" || CharacterSet.alphanumerics.contains($0)) }
+                token = plain ? name : "\"" + name.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+            }
+            if pendingSpace, token != ")", token != ",", out.last != "(" { out.append(" ") }
             pendingSpace = false
-            out.append(ch)
+            out.append(token)
             if ch == "'" { inLiteral = true }
         }
         return out

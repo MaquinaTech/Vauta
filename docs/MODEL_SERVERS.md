@@ -309,7 +309,10 @@ in the background after the meeting and notifies you when they are ready.
 Vauta reaches other computers only over **HTTPS with TLS 1.3**, and only at private addresses (`10.x`, `172.16–31.x`,
 `192.168.x`, `100.64–127.x` such as Tailscale, link-local, IPv6 `fc00::/7` and `fe80::/10`) or local names (`.local`,
 `.lan`, `.home.arpa`, `.internal`, `.ts.net`). A host given by name also needs a private CA or a certificate pin,
-because a name could resolve anywhere. Proxies and redirects are refused. See
+because a name could resolve anywhere: before the first request, Vauta checks where the name connects with a request that
+carries no data and no key (see [SECURITY.md](../SECURITY.md#network-policy) for what that check does not cover). A
+publicly trusted certificate (for example from `tailscale cert`) works without a CA, but the server must send its full
+chain: Vauta never downloads missing intermediate certificates. Proxies and redirects are refused. See
 [SECURITY.md](../SECURITY.md#network-policy) for all the rules.
 
 Most model servers don't speak HTTPS themselves, so the usual setup is: the model server on `127.0.0.1` of the server
@@ -415,7 +418,7 @@ installed app is sandboxed and cannot read files you name on the command line.
 | A model server on your network must be reached over HTTPS… | Use `https://` and a TLS proxy (see above) |
 | "…" is not a local network address… | Use the server's private IP address or a local name. Vauta never sends meetings to the internet |
 | "…" is a name, which could resolve outside your network… | Import the private CA or add a pin, or use the IP address |
-| Can’t reach the model server: connection refused (invalid certificate or destination) | The certificate doesn't match: wrong CA, the address isn't in the certificate (rerun `make-server-cert.sh` with it), the pin doesn't match, the server offers TLS older than 1.3, or it redirects |
+| Can’t reach the model server: connection refused (invalid certificate or destination) | The certificate doesn't match: wrong CA, the address isn't in the certificate (rerun `make-server-cert.sh` with it), the pin doesn't match, a publicly trusted server doesn't send its intermediate certificates, the server offers TLS older than 1.3, or it redirects |
 | Can’t reach the model server: … | The server isn't running, the port is wrong, or a firewall blocks it |
 | The model server name resolved to …, which is not on your local network. | The name points outside your network. Fix DNS or use the IP address, then apply the settings again |
 | The model server rejected the key. | Enter the key again in Settings → Models |

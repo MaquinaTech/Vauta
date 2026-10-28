@@ -64,7 +64,10 @@ flowchart LR
    `ChannelTranscriber` feeds Apple's `SpeechAnalyzer` with `SpeechTranscriber`, or `DictationTranscriber` for custom
    vocabulary and for languages `SpeechTranscriber` does not support (`SpeechLanguages`). The two channels tell *you*
    (`Channel.me`, always one speaker) from everyone else (`Channel.others`); the people inside Others are told apart
-   by speaker separation (next section).
+   by speaker separation (next section). Both channels share one clock: time 0 is the first audio captured, and
+   each chunk is placed by its capture host time (`ChannelTimeline`), so a device gap stays a gap instead of shifting
+   one channel against the other; marks and notes use the same clock. An analyzer that fails mid-recording is
+   rebuilt at the same position (`AnalyzerRetryPolicy`) before the channel is reported as stopped.
 3. **Store.** `RecorderModel` receives segments and appends final ones to `MeetingStore`. Every 10 seconds the new
    writes go to the encrypted journal; a full encrypted snapshot is written when the recording ends.
 4. **Knowledge.** When a meeting ends, the store resolves names in the transcript against the user's context
@@ -111,7 +114,7 @@ Others ChannelPipe (100 ms chunks, analyzer format)
           AudioChunkConverter → 16 kHz mono Float
           DiarizationSession: absolute-index ring buffer, one 10 s window every 2 s
             WindowAnalyzer: segmentation (Core ML) → masks → fbank → embeddings (Core ML)
-            SpeakerTracker: online clustering, re-clustered every 45 s, labels kept by Hungarian mapping
+            SpeakerTracker: online clustering, re-clustered every 45 s (up to 5 min in long meetings), labels kept by Hungarian mapping
           WindowRecord batches ─► windowSink ─► RecorderModel ─► store.diarization_windows (encrypted)
 At Stop:
   Diarizer.finish() → tail windows (silence-padded) → DiarizationRun

@@ -31,12 +31,7 @@ extension MeetingsModel {
             }
         case .file(let source, let path):
             guard let indexer = documentsModel?.indexer else { return }
-            Task {
-                guard let file = await indexer.openForViewing(source: source, relPath: path) else { return }
-                NSWorkspace.shared.open(file.url)
-                try? await Task.sleep(for: .seconds(2))
-                await indexer.closeViewing(file)
-            }
+            openInApp(source: source, relPath: path, indexer: indexer)
         case .reminder(let id): brief?.openReminders(id: id)
         case .event(let identifier): brief?.openCalendar(eventIdentifier: identifier)
         case .none: break
