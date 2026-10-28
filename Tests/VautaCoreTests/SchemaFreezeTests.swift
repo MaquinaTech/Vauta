@@ -8,17 +8,18 @@ import Testing
 
 /// Published migrations are frozen: stores out there already ran them, so an edit would leave those stores with a schema or data
 /// this build does not expect. A change to the schema is a new migration.
+///
+/// A migration is published once it is merged to `main`, not only once it is in a release: Vauta is built from source and
+/// `scripts/install.sh` builds whatever is checked out, so stores built from `main` already ran every migration merged there.
+/// Every migration in `Schema.migrations` is therefore frozen here. The pull request that adds one also adds its fingerprint (the
+/// failing test prints it); while that pull request is open, an edit to it only updates its line. A change to any other line of
+/// the table edits a published migration.
 @Suite("Storage schema: published migrations are frozen")
 struct SchemaFreezeTests {
-    /// The last migration in a release (0.9.3 shipped 1 to 30). A migration after it is not published yet: it can still be edited
-    /// until the release, so nothing here freezes it. When a release ships new migrations, raise this and add their fingerprints;
-    /// the failing test prints the lines to add (docs/RELEASING.md).
-    static let lastPublished: SchemaVersion = 30
-
-    /// What each published migration leaves, applied one at a time on an empty database: the number of objects in `sqlite_schema`,
-    /// the SHA-256 of their dump (type, name, table and SQL, sorted), and the SHA-256 of the migration's steps. The steps' hash
-    /// covers their SQL text, so also the statements that only change data, which `sqlite_schema` does not show; a code step counts
-    /// by its place only, and what it writes is checked on seeded rows below. Version 7 is the schema Acta 0.1.0 created (computed
+    /// What each migration leaves, applied one at a time on an empty database: the number of objects in `sqlite_schema`, the
+    /// SHA-256 of their dump (type, name, table and SQL, sorted), and the SHA-256 of the migration's steps. The steps' hash covers
+    /// their SQL text, so also the statements that only change data, which `sqlite_schema` does not show; a code step counts by
+    /// its place only, and what it writes is checked on seeded rows below. Version 7 is the schema Acta 0.1.0 created (computed
     /// from the 0.1.0 SQL), which is also what makes the v7 fixtures of `StorageSchemaTests` equivalent to real 0.1.0 stores.
     static let fingerprints: [Fingerprint] = [
         Fingerprint(1, 10, "8e061852457a7bb7a707e714a6782fe4d81ef3257db3d389a4c9342b91a5c8de", "bafafe7c52dfba7623464b04c9ca07c43e4fbfb18cba14e503963be01b7bf9d7"),
@@ -85,27 +86,29 @@ struct SchemaFreezeTests {
         return Fingerprint(migration.version, rows.count, hex(SHA256.hash(data: Data(dump.utf8))), hex(SHA256.hash(data: Data(steps.utf8))))
     }
 
-    /// The fingerprints of every published migration in this build.
+    /// The fingerprints of every migration in this build.
     static func computed() throws -> [Fingerprint] {
         let db = try SQLiteDatabase(image: nil, size: 0)
-        return try Schema.migrations.filter { $0.version <= lastPublished }.map { migration in
+        return try Schema.migrations.map { migration in
             try Schema.migrate(db, upTo: migration.version)
             return try fingerprint(of: migration, on: db)
         }
     }
 
-    @Test func theTableListsEveryPublishedMigration() throws {
-        #expect(Self.lastPublished <= Schema.currentVersion)
+    @Test func theTableListsEveryMigration() throws {
         let listed = Self.fingerprints.map(\.version)
-        guard listed != Array(1...Self.lastPublished) else { return }
+        guard listed != Array(1...Schema.currentVersion) else { return }
+        // Only the missing lines: a listed one is never replaced by what this build computes.
+        let missing = try Self.computed().filter { !listed.contains($0.version) }
         Issue.record("""
-            The fingerprints must list versions 1 to \(Self.lastPublished) in order. This build computes:
-            \(try Self.computed().map(\.description).joined(separator: "\n"))
+            The fingerprints must list versions 1 to \(Schema.currentVersion) in order, each once. Missing, as this build computes them:
+            \(missing.map(\.description).joined(separator: "\n"))
             """)
     }
 
     @Test func noPublishedMigrationWasEdited() throws {
-        let expected = Dictionary(uniqueKeysWithValues: Self.fingerprints.map { ($0.version, $0) })
+        // A version listed twice fails the test above; here its first line counts.
+        let expected = Dictionary(Self.fingerprints.map { ($0.version, $0) }, uniquingKeysWith: { first, _ in first })
         let edited = try Self.computed().filter { now in expected[now.version].map { $0 != now } ?? false }
         #expect(edited.isEmpty, """
             A published migration was edited (or what it builds changed); add a new migration instead. Now:
@@ -115,13 +118,13 @@ struct SchemaFreezeTests {
 
     // MARK: Code steps
 
-    /// A code step changes data, which `sqlite_schema` does not show: each published one is also frozen by what it writes on a few
-    /// seeded rows (the tests below).
-    @Test func everyPublishedCodeStepHasADataFingerprint() {
+    /// A code step changes data, which `sqlite_schema` does not show: each one is also frozen by what it writes on a few seeded
+    /// rows (the tests below).
+    @Test func everyCodeStepHasADataFingerprint() {
         let withCode = Schema.migrations.filter { migration in
-            migration.version <= Self.lastPublished && migration.steps.contains { if case .code = $0 { true } else { false } }
+            migration.steps.contains { if case .code = $0 { true } else { false } }
         }
-        #expect(withCode.map(\.version) == [9, 28], "a published migration with a code step needs a test of the rows it writes")
+        #expect(withCode.map(\.version) == [9, 28], "a migration with a code step needs a test of the rows it writes")
     }
 
     /// Migration 9 rekeys the aliases with `TextKeys.norm` and merges the aliases of one person that now share a key. It runs live
@@ -132,9 +135,10 @@ struct SchemaFreezeTests {
         try Schema.migrate(db, upTo: 8)
         try db.query("""
             INSERT INTO entities(id, kind, name, created_at) VALUES
-                (1, 'person', 'Łukasz', 0), (2, 'person', 'Bjørn', 0), (3, 'person', 'Ana', 0), (4, 'person', 'Mía', 0)
+                (1, 'person', 'Łukasz', 0), (2, 'person', 'Bjørn', 0), (3, 'person', 'Ana', 0), (4, 'person', 'Mía', 0),
+                (5, 'person', 'Øyvind', 0)
             """)
-        // Keys as 0.1.0 wrote them (it kept ł and ø); each pair of one person now shares a key.
+        // Old keys: ł and ø as 0.1.0 kept them; the others are seeded so that each pair of one person now shares a key.
         try db.query("""
             INSERT INTO aliases(id, alias_norm, alias, entity_id, source, weight) VALUES
                 (1, 'łukasz', 'Łukasz', 1, 'llm', 2),
@@ -146,30 +150,36 @@ struct SchemaFreezeTests {
                 (7, 'mia', 'Mia', 4, 'llm', 1),
                 (8, 'mía', 'Mía', 4, 'llm', 1.5),
                 (9, '-', '—', 3, 'llm', 1),
-                (10, 'lukasz', 'Łukasz', 3, 'learned', 1)
+                (10, 'lukasz', 'Łukasz', 3, 'learned', 1),
+                (11, 'øyvind', 'Øyvind', 5, 'llm', 1),
+                (12, 'oyvind', 'Oyvind', 5, 'llm', 1)
             """)
         try Schema.migrate(db, upTo: 9)
         let rows = try db.query("SELECT id, alias_norm, alias, entity_id, source, weight FROM aliases ORDER BY id").map {
             "\($0.int(0))|\($0.string(1))|\($0.string(2))|\($0.int(3))|\($0.string(4))|\($0.double(5))"
         }
-        // Of each pair, the stronger origin stays (user > learned > calendar > llm; then the higher weight) with the highest weight
-        // of the two. 9's key is empty: removed. 10 is another person's alias with the same key: kept.
+        // Of each pair, the stronger origin stays (user > learned > calendar > llm; then the higher weight; then the lower id) with
+        // the highest weight of the two. 9's key is empty: removed. 10 is another person's alias with the same key: kept.
         #expect(rows == ["2|lukasz|Lukasz|1|calendar|2.0", "3|bjorn|Bjørn|2|learned|3.0", "6|ana|Ána|3|user|1.0", "8|mia|Mía|4|llm|1.5",
-                         "10|lukasz|Łukasz|3|learned|1.0"])
+                         "10|lukasz|Łukasz|3|learned|1.0", "11|oyvind|Øyvind|5|llm|1.0"])
     }
 
     /// Migration 28 fills `tasks.due_day` with the day of each due date in this Mac's time zone. The seeded due dates are local
-    /// times of the Mac running the test, so the days written are the same in every zone.
+    /// times of the Mac running the test, so the days written are the same in every zone. A migration that used another zone
+    /// (UTC instead of this Mac's) is caught only off UTC: by the 00:01 date east of it, by the 23:59 one west of it. A runner in
+    /// UTC, such as CI's, does not see it; the release procedure also runs the tests on the maintainer's Mac.
     @Test func migration28BackfillsDueDaysAsPublished() throws {
         let db = try SQLiteDatabase(image: nil, size: 0)
         try Schema.migrate(db, upTo: 27)
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .current
         func local(_ year: Int, _ month: Int, _ day: Int, _ hour: Int, _ minute: Int) throws -> SQLiteValue {
-            .real(try #require(calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute))).timeIntervalSince1970)
+            let date = try #require(calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute)))
+            return .real(date.timeIntervalSince1970)
         }
-        try db.query("INSERT INTO tasks(id, text, due, created_at) VALUES (1, 'a', ?, 0), (2, 'b', ?, 0), (3, 'c', ?, 0), (4, 'd', NULL, 0)",
-                     [try local(2026, 3, 14, 12, 0), try local(2025, 12, 31, 23, 59), try local(2024, 2, 29, 0, 1)])
+        try db.query(
+            "INSERT INTO tasks(id, text, due, created_at) VALUES (1, 'a', ?, 0), (2, 'b', ?, 0), (3, 'c', ?, 0), (4, 'd', NULL, 0)",
+            [try local(2026, 3, 14, 12, 0), try local(2025, 12, 31, 23, 59), try local(2024, 2, 29, 0, 1)])
         try Schema.migrate(db, upTo: 28)
         let rows = try db.query("SELECT id, ifnull(due_day, 'NULL') FROM tasks ORDER BY id").map { "\($0.int(0))|\($0.string(1))" }
         #expect(rows == ["1|2026-03-14", "2|2025-12-31", "3|2024-02-29", "4|NULL"])

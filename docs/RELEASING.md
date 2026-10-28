@@ -31,10 +31,6 @@ No secrets and no `release` environment are needed.
 1. On `main`, with CI green: set the version in `CHANGELOG.md` (replace "Unreleased" with the version and date), in
    `Resources/Info.plist` (`CFBundleShortVersionString`, and `CFBundleVersion` one higher) and in `scripts/render-ui.sh`, and
    commit. The plist is the version every build uses; the release workflow refuses a tag that doesn't match it.
-   If the release ships new schema migrations (`Schema.migrations` after `lastPublished` in
-   `Tests/VautaCoreTests/SchemaFreezeTests.swift`), add their fingerprints in the same commit: raise `lastPublished` to the last
-   migration, run `swift test --filter SchemaFreezeTests` and add the `Fingerprint(…)` lines the failing test prints. A new
-   migration with a code step also needs a test there of the rows it writes. From then on those migrations are never edited.
    Run locally: `swift build -c release --arch arm64`, the tests, `scripts/check-strings.sh`, `scripts/check-headers.sh`, `scripts/check-dependencies.sh`.
    Check the search model ([SEARCH_MODEL.md](SEARCH_MODEL.md)): its download hosts resolve from the EU and APAC, `Vauta mlx-selftest --model` passes on a locally signed build, and the licences and model card terms are unchanged.
 2. Run the cryptography review check: the `git diff` command in [CRYPTO_REVIEW.md](CRYPTO_REVIEW.md) (from the commit it names
