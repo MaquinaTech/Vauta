@@ -83,10 +83,11 @@ struct LiveAnswersCardTests {
     /// A new answer must not move the panel's scroll: on a short screen it hid Mark a Moment and the quick note (and the person may be
     /// typing in the quick note). The panel's source has no programmatic scroll.
     @Test func theArrivalOfAnAnswerNeverScrollsThePanel() throws {
-        let file = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("Sources/Vauta/App/Panel/RecorderPanel.swift")
-        let source = try String(contentsOf: file, encoding: .utf8)
-        #expect(!source.contains("scrollTo(") && !source.contains("ScrollViewReader"))
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+        for path in ["Sources/Vauta/App/Panel/RecorderPanel.swift", "Sources/Vauta/App/Panel/PanelWarnings.swift"] {
+            let source = try String(contentsOf: root.appendingPathComponent(path), encoding: .utf8)
+            #expect(!source.contains("scrollTo(") && !source.contains("ScrollViewReader"), "\(path) scrolls the panel")
+        }
     }
 
     @Test func theFirstRunHintCountsAsSeenOnlyOnceItWasOnScreen() {
