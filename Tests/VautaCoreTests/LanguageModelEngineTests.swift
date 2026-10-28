@@ -34,9 +34,11 @@ struct LanguageModelEngineTests {
             let order = logits.indices.sorted { logits[$0] > logits[$1] }
             #expect(Array(order.prefix(3)) == Array(g.top.prefix(3)), "n = \(g.n): the three best tokens")
             for (t, v) in zip(g.top, g.topValues) {
-                // Measured on this model: 0.0 (5 tokens), 0.125 (40) and 0.1875 (120) on logits near 28, where bf16 moves in steps of 0.125.
-                // 2% of the largest logit is about three steps: a wrong scale, a missing offset or a mis-ordered operation on any
-                // layer type shows up here, which the real model's wider end-to-end limit (1.25, see LanguageModelSelfTest) cannot.
+                // Measured on this model (M2): 0.0 (5 tokens), 0.375 (40) and 0.1875 (120) on logits near 28, where bf16 moves in
+                // steps of 0.125 (every layer on every position gives 0.0, 0.125 and 0.1875: the last position alone through the
+                // layers that share keys and values runs other kernels, see LanguageModelSharedLayerCutTests). 2% of the largest
+                // logit, about 0.57, is tight enough that a wrong scale, a missing offset or a mis-ordered operation on any layer type
+                // shows up here, which the real model's wider end-to-end limit (1.25, see LanguageModelSelfTest) cannot.
                 #expect(abs(Double(logits[t]) - v) <= 0.02 * max(g.logitsMax, 1), "n = \(g.n), token \(t): \(logits[t]) against \(v)")
             }
         }
