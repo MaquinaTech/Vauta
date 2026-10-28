@@ -931,7 +931,8 @@ private struct CaptionMessage<Action: View>: View {
                         .symbolEffect(.pulse, options: .repeating, isActive: pulses)
                         .accessibilityHidden(true)
                 } else {
-                    ProgressView().controlSize(.regular)
+                    // Vauta's sphere turning, as everywhere Vauta is getting something ready.
+                    ThinkingOrb(diameter: titleSize * 1.2)
                 }
             }
             .frame(width: titleSize * 1.8, height: titleSize * 1.4)
