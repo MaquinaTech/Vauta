@@ -40,8 +40,8 @@ main() {
   [[ -z "$(git status --porcelain --untracked-files=no)" ]] \
     || fail "this folder has local changes; commit or stash them first (git stash)"
 
-  # The trusted key, from what is already on this Mac.
-  local dir; dir="$(mktemp -d)"
+  # The trusted key, from what is already on this Mac. Not local: the EXIT trap runs after main has returned.
+  dir="$(mktemp -d)"
   trap 'rm -rf "$dir"' EXIT
   cp .github/allowed_signers "$dir/allowed_signers"
   local found
