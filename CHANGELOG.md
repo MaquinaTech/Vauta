@@ -6,11 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [0.9.2] - 2026-10-28
 
-A fix for installing from source. No change to the app.
+Fixes for installing from source. No change to the app.
 
 ### Fixed
 
 - `scripts/setup-signing.sh` failed on Macs with a newer OpenSSL from Homebrew (4.x): the certificate file it hands to the Keychain used algorithms `security import` cannot read, and macOS reported it as "MAC verification failed during PKCS12 import (wrong password?)", although no password was wrong. The script now names the algorithms macOS reads, whatever the OpenSSL version, and if the import still fails it says so instead of looking like a wrong password. To recover from the failed attempt, run the script again: it rebuilds the empty signing keychain on its own.
+- A signing setup that stopped half-way (for example a wrong or cancelled Mac password at the trust step) no longer leaves you going in circles between `install.sh` ("run setup-signing.sh") and `setup-signing.sh` ("already exists"): both now say the keychain is left over and give the command that deletes it. Running `setup-signing.sh` again after a finished setup says there is nothing to do.
+- The trust step of `setup-signing.sh` asks for the Mac's login password up to three times, and says it is the Mac's password, not the new one.
+- `install.sh` asks for the signing keychain's password up to three times, says which password it is, and explains what to do if it is lost, instead of stopping at the first mistake after the whole build.
+- If OpenSSL cannot create the certificate, `setup-signing.sh` says so instead of stopping without a message.
 
 ## [0.9.1] - 2026-10-28
 
