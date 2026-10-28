@@ -21,6 +21,43 @@ Fixes from a review of the code after 0.9.2, and a safe way to update.
 - A second clone of Vauta, or a new folder, on a Mac where `setup-signing.sh` had already finished was told to delete the signing keychain, which changes Vauta's signature and makes macOS ask for every permission again. `setup-signing.sh` and `install.sh` now find the existing identity and use it.
 - `install.sh` and the README no longer say to deny every later Keychain prompt: macOS asks again after each update of an ad-hoc build and after a new signing identity, and denying it then leaves Vauta without its store.
 
+Recording:
+
+- Me and Others now share one clock. Each channel's audio is placed by the time it was captured, so a gap (a Bluetooth headset dropping out, the microphone being reconfigured, the system audio being reconnected) stays a gap instead of shifting that channel for the rest of the meeting, and the transcript stays in order. Marks, notes and live notes use the same clock, so a slow start (for example the first microphone prompt) no longer moves them later than the transcript.
+- If on-device transcription fails in the middle of a meeting, that channel is restarted at the same point (up to three times) instead of staying silent for the rest of the meeting.
+- Saving a meeting can no longer stay in "Saving" forever: finishing the transcription, the speaker separation and the speaker names each have a time limit.
+- A lost microphone is tried again every few seconds while recording, so one that comes back late is used again.
+- Stopping while a recording was still starting no longer leaves live answers running, and what was transcribed during a cancelled start is not kept (notes typed meanwhile are).
+- Live speaker labels are recomputed less often as a meeting grows (meetings under about 7 minutes are unchanged), so they keep up in meetings of several hours.
+
+Model servers:
+
+- For a server given by name, nothing with content or the key is sent until Vauta knows the address it connects to is on your network: a first request without either checks it. A later new connection is checked when it completes, as before, and the private CA or pin still protects it.
+- "On the same network" addresses are accepted only for IPv6; an IPv4 address must be private.
+- Checking a server's certificate never fetches anything from a certificate authority, with or without a private CA. A server with a public certificate must send its full chain (`tailscale cert`, Caddy and `fullchain.pem` do).
+- A model loaded with less than 8K of context is no longer shown as 8K: Settings says it is too short, and `server-check` warns when a model is loaded with less context than configured.
+- Error messages from a server never show a key or an `Authorization` header.
+- Finding servers on this Mac and reading a streamed answer stay fast and bounded with a misbehaving server.
+
+Backups and your data:
+
+- A restore interrupted by a crash or a power cut no longer leaves the store unreadable: the new key is kept next to the old one until the restored data is on disk, and the next launch finishes the restore. The key item is written anew with Vauta's own access list.
+- Saving a backup over an existing file never truncates it if the write fails, and cancelling no longer deletes the new file after the old one was replaced.
+
+Meetings, actions and documents:
+
+- Due days on a day that has no midnight in its time zone (for example 6 September 2026 in Chile) are no longer dropped.
+- Follow-up meetings read from the transcript more than a year away are no longer suggested, and a past date no longer hides a later one in the same sentence.
+- Opening a linked material or a brief's file that is only in iCloud or Dropbox no longer downloads it: Vauta says it is online only, as it already did elsewhere.
+- Numbers the model writes in the minutes no longer take the Mac's number format: 2026 stays 2026, never "2.026".
+- VoiceOver reads "Document" for a citation without a file name instead of nothing.
+
+Install and release:
+
+- The version comes from `Resources/Info.plist`, so a clone without the newest tag builds the right version; the release workflow refuses a tag that doesn't match it.
+- A throwaway build can use its own bundle ID (`VAUTA_BUNDLE_ID=local.vauta.dev`), so it never opens your installed Vauta's data.
+- `install.sh` opens Vauta when the same build is already installed, and a protected Trash no longer stops it after installing; `setup-signing.sh` locks the signing keychain however it ends.
+
 ## [0.9.2] - 2026-10-28
 
 Fixes for installing from source. No change to the app.
