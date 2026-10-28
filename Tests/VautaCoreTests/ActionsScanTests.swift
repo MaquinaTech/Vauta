@@ -71,16 +71,99 @@ struct ActionsScanTests {
 
     // MARK: The mail draft is never logged
 
-    @Test func theMailOpenerLogsNothingAboutTheDraftExceptAsPrivate() throws {
+    @Test func theMailOpenerLogsOnlyCounts() throws {
         let root = NetworkAuditSourceScanTests.packageRoot()
         let text = try String(contentsOf: root.appending(path: "Sources/Vauta/App/Actions/MailHandoffOpener.swift"), encoding: .utf8)
         let code = NetworkAuditSourceScanTests.code(text)
         #expect(code.range(of: #"\bprint\s*\(|NSLog\s*\(|debugPrint"#, options: .regularExpression) == nil)
+        var interpolated: [String] = []
         for line in code.split(separator: "\n") where line.contains("log.") {
-            let interpolations = line.components(separatedBy: "\\(").dropFirst()
-            for part in interpolations { #expect(part.contains("privacy: .private") || part.contains("privacy: .public") && part.contains(".count"), "\(line)") }
+            interpolated += line.components(separatedBy: "\\(").dropFirst().map { String($0.prefix { $0 != ")" }) }
         }
-        #expect(code.contains("absoluteString, privacy: .private"))
+        #expect(interpolated == ["recipients.count, privacy: .public", "recipients.count, privacy: .public", "bytes, privacy: .public"])
+        #expect(!code.contains("privacy: .private"), "nothing of the draft is logged, not even as private")
+    }
+
+    /// What the actions code never logs: the words of a draft, a task, a reminder or an event, and the URLs that carry them.
+    static let unloggable: Set<String> = ["subject", "body", "url", "text", "title", "notes"]
+
+    /// The logging calls of `code` (`Logger`, `os_log`, `NSLog`) and the `unloggable` names they interpolate or pass. An identifier
+    /// counts by its words (`mailtoURL`, `draftBody`); the words of the string literals themselves do not.
+    static func loggedNames(in code: String) throws -> (calls: Int, names: [String]) {
+        let call = try NSRegularExpression(pattern: #"\b[\w.]*[Ll]og[\w.]*\s*\.\s*(debug|info|notice|log|error|warning|fault|critical|trace)\s*\(|\b(os_log|NSLog)\s*\("#)
+        let identifier = try NSRegularExpression(pattern: #"[A-Za-z_][A-Za-z0-9_]*"#)
+        let word = try NSRegularExpression(pattern: #"[A-Z]+(?![a-z])|[A-Z]?[a-z0-9]+"#)
+        func strings(_ regex: NSRegularExpression, in text: String) -> [String] {
+            regex.matches(in: text, range: NSRange(text.startIndex..., in: text)).compactMap { Range($0.range, in: text).map { String(text[$0]) } }
+        }
+        let calls = call.matches(in: code, range: NSRange(code.startIndex..., in: code))
+        var names: [String] = []
+        for match in calls {
+            guard let range = Range(match.range, in: code) else { continue }
+            for name in strings(identifier, in: arguments(code[range.upperBound...])) {
+                names += strings(word, in: name).map { $0.lowercased() }.filter { unloggable.contains($0) }
+            }
+        }
+        return (calls.count, names)
+    }
+
+    /// The arguments of a call, from just after its `(` to its `)`, without the words of their string literals; what a literal
+    /// interpolates stays.
+    static func arguments(_ text: Substring) -> String {
+        var out = ""
+        var depth = 1, interpolation = 0
+        var inLiteral = false, escaped = false
+        for ch in text {
+            if inLiteral && interpolation == 0 {
+                if escaped {
+                    escaped = false
+                    if ch == "(" { interpolation = 1; out.append(" ") }
+                } else if ch == "\\" {
+                    escaped = true
+                } else if ch == "\"" {
+                    inLiteral = false
+                }
+                continue
+            }
+            if inLiteral {
+                if ch == "(" { interpolation += 1 } else if ch == ")" { interpolation -= 1 }
+                out.append(interpolation == 0 ? " " : ch)
+                continue
+            }
+            if ch == "\"" { inLiteral = true; continue }
+            if ch == "(" { depth += 1 } else if ch == ")" { depth -= 1; if depth == 0 { break } }
+            out.append(ch)
+        }
+        return out
+    }
+
+    @Test func noLogOfTheActionsCodeCarriesTheWordsOfADraftOrAnItem() throws {
+        var calls = 0
+        for (path, code) in try Self.sources() where path.hasPrefix("Sources/VautaCore/Actions/") || path.hasPrefix("Sources/Vauta/App/Actions/") {
+            let found = try Self.loggedNames(in: code)
+            calls += found.calls
+            #expect(found.names.isEmpty, "\(path) logs \(found.names): log counts and states, never the words")
+        }
+        #expect(calls >= 3, "the scan sees the mail opener's log lines")
+    }
+
+    @Test func theLogScanCatchesTheWordsOfADraftInALog() throws {
+        let caught: [(String, [String])] = [
+            (#"log.info("mailto opened: \(url.absoluteString, privacy: .private)")"#, ["url"]),
+            (#"Self.log.debug("draft \(draft.subject) of \(body.count, privacy: .public) bytes")"#, ["subject", "body"]),
+            (#"logger.error("failed \(reminder.title ?? "")")"#, ["title"]),
+            (#"os_log("%{private}@", log: .default, type: .info, task.notes)"#, ["notes"]),
+            (#"NSLog("%@", mailtoURL.absoluteString)"#, ["url"]),
+            ("Log.actions.notice(\"\"\"\n    added \\(itemText)\n    \"\"\")", ["text"]),
+        ]
+        for (code, names) in caught { #expect(try Self.loggedNames(in: code).names == names, "\(code)") }
+        let fine = [
+            #"log.info("mail composer opened, \(recipients.count, privacy: .public) recipients")"#,
+            #"log.info("the subject, the body and the notes are never logged \(route.rawValue, privacy: .public)")"#,
+            #"let text = draft.body + url.absoluteString"#,
+            #"if case .error(let text) = state { show(text) }"#,
+        ]
+        for code in fine { #expect(try Self.loggedNames(in: code).names.isEmpty, "\(code)") }
     }
 
     // MARK: Meeting text stays protected in new fields

@@ -13,7 +13,7 @@ struct NetworkAuditSourceScanTests {
 
     /// Ways to reach the network (checked on code, not comments).
     static let forbidden: [(name: String, pattern: String)] = [
-        ("URLSession(...)", #"\bURLSession\s*\("#),
+        ("URLSession(...)", #"\bURLSession\s*(\.\s*init\s*)?\("#),
         ("URLSession.shared", #"\bURLSession\s*\.\s*shared\b"#),
         ("URL task", #"\.(dataTask|uploadTask|downloadTask|streamTask|webSocketTask)\s*\("#),
         ("async URL loading", #"\.(bytes|data|upload|download)\s*\(\s*(for|from)\s*:(?![^\n]*purpose:)"#),   // AuditedSession's own calls name a purpose
@@ -22,7 +22,71 @@ struct NetworkAuditSourceScanTests {
         ("web view", #"\bWKWebView\b"#),
         ("raw sockets", #"\b(getaddrinfo|gethostbyname)\s*\(|\bsocket\s*\(\s*(AF_|PF_)|getStreamsToHost"#),
         ("remote contents", #"contentsOf:\s*(try\??\s*)?URL\s*\(\s*string"#),
-        ("child process", #"\bProcess\s*\(\s*\)|\bNSTask\b|\bposix_spawn\s*\(|(?<![.\w])(?<!func )system\s*\("#),
+        ("child process", #"\bProcess\s*(\.\s*init\s*)?\(|\bNSTask\b|\bposix_spawnp?\s*\(|\bpopen\s*\(|\bv?fork\s*\(\s*\)|(?<![.\w])(?<!func )system\s*\("#),
+        ("exec", #"\bf?exec(l|le|lp|v|ve|vp|vP|vpe)\s*\("#),
+        ("XPC service", #"\bNSXPCConnection\s*\(\s*machServiceName\s*:"#),
+        // Initializers that load the URL they are given, a remote one too.
+        ("Data(contentsOf:)", #"\b(NS)?Data\s*\(\s*contentsOf\s*:"#),
+        ("String(contentsOf:)", #"\b(NS)?String\s*\(\s*contentsOf\s*:"#),
+        ("NSImage(contentsOf:)", #"\bNSImage\s*\(\s*contentsOf\s*:"#),
+        ("PDFDocument(url:)", #"\bPDFDocument\s*\(\s*url\s*:"#),
+        ("AVURLAsset(url:)", #"\bAV(URL)?Asset\s*\(\s*url\s*:"#),
+        ("NSAttributedString(contentsOf:)", #"\bNSAttributedString\s*\(\s*(contentsOf|url)\s*:"#),
+        ("XMLParser(contentsOf:)", #"\bXMLParser\s*\(\s*contentsOf\s*:"#),
+    ]
+
+    /// Flagged calls that never leave this Mac, with how many each file has: a new call in one of these files is flagged again, and
+    /// an entry the code no longer matches fails too. Each says why its URL is a local file.
+    static let localUses: [(path: String, name: String, count: Int)] = [
+        // The encrypted store: the snapshots in the store folder (current and legacy name, checked before a migration).
+        ("Sources/VautaCore/Storage/StoreFiles.swift", "Data(contentsOf:)", 3),
+        // The journal next to the snapshot.
+        ("Sources/VautaCore/Storage/Journal.swift", "Data(contentsOf:)", 1),
+        // The snapshot the store opens, in the store folder.
+        ("Sources/VautaCore/Storage/MeetingStore.swift", "Data(contentsOf:)", 1),
+        // The snapshot just written by a restore, read back from the store folder.
+        ("Sources/VautaCore/Backup/MeetingStore+Backup.swift", "Data(contentsOf:)", 2),
+        // The backup file the person chose in a file panel.
+        ("Sources/Vauta/App/Settings/BackupModel.swift", "Data(contentsOf:)", 1),
+        // The documents index (`vauta.docs.enc`) in the store folder.
+        ("Sources/VautaCore/Documents/DocumentIndex.swift", "Data(contentsOf:)", 1),
+        // The indexer's crash marker in the store folder.
+        ("Sources/VautaCore/Documents/DocumentIndexer.swift", "Data(contentsOf:)", 1),
+        // A PDF the person added as a document source (a file on this Mac, by bookmark).
+        ("Sources/VautaCore/Documents/PDFExtractor.swift", "PDFDocument(url:)", 2),
+        // An RTF or Word file the person added as a document source.
+        ("Sources/VautaCore/Documents/TextExtractors.swift", "NSAttributedString(contentsOf:)", 1),
+        // The PDF of a passage, from a document source.
+        ("Sources/Vauta/App/Documents/PassageViewer.swift", "PDFDocument(url:)", 1),
+        // The audio file the person chose to import.
+        ("Sources/VautaCore/Import/RecordingTranscriber.swift", "AVURLAsset(url:)", 1),
+        ("Sources/VautaCore/Import/AudioFileDecoder.swift", "AVURLAsset(url:)", 1),
+        // The search model's install record, in the models folder of the app's container.
+        ("Sources/VautaCore/SearchModel/SearchModelStore.swift", "Data(contentsOf:)", 1),
+        // A downloaded model's tokenizer, in the models folder.
+        ("Sources/VautaCore/SearchModel/GemmaTokenizer.swift", "Data(contentsOf:)", 1),
+        // The integrated model's install record, in the models folder.
+        ("Sources/VautaCore/LanguageModel/LanguageModelStore.swift", "Data(contentsOf:)", 1),
+        // The integrated model's progress journal, in the staging folder of the models folder.
+        ("Sources/VautaCore/LanguageModel/LanguageModelDownloader.swift", "Data(contentsOf:)", 1),
+        ("Sources/VautaCore/LanguageModel/LanguageModelController.swift", "Data(contentsOf:)", 1),
+        // A downloaded model's weights, mapped from the models folder.
+        ("Sources/VautaMLX/SafetensorsFile.swift", "Data(contentsOf:)", 1),
+        // The golden files of `llm-selftest --goldens`, a folder given as a path.
+        ("Sources/VautaCore/LanguageModel/LanguageModelSelfTest.swift", "String(contentsOf:)", 1),
+        // Evaluation inputs given as paths on the command line (`URL(fileURLWithPath:)`).
+        ("Sources/VautaCore/Diagnostics/BriefEvaluation.swift", "String(contentsOf:)", 1),
+        ("Sources/VautaCore/Diagnostics/LLMEvaluation+LiveAnswers.swift", "String(contentsOf:)", 1),
+        ("Sources/VautaCore/Diagnostics/LLMEvaluation+Notes.swift", "String(contentsOf:)", 2),
+        ("Sources/VautaCore/Diagnostics/LLMEvaluation+AskRetrieval.swift", "String(contentsOf:)", 1),
+        // The configuration file of `server-check`, given as a path.
+        ("Sources/Vauta/CLI+Doctor.swift", "Data(contentsOf:)", 1),
+        // The certificate files chosen in a file panel (Settings › Models).
+        ("Sources/Vauta/App/Settings/ModelsSettingsModel.swift", "Data(contentsOf:)", 2),
+        // UI snapshots (a developer tool): a PDF it just wrote to the temporary folder.
+        ("Sources/Vauta/Snapshots/SnapshotScenesNotepad.swift", "PDFDocument(url:)", 1),
+        // UI snapshots: the snapshot app relaunches itself (`execv` of its own binary) to change the interface language.
+        ("Sources/Vauta/Snapshots/RenderUICommand.swift", "exec", 1),
     ]
 
     static func packageRoot(from file: String = #filePath) -> URL {
@@ -37,10 +101,30 @@ struct NetworkAuditSourceScanTests {
         }.joined(separator: "\n")
     }
 
+    /// How many times each forbidden construct appears in the code of `source`.
+    static func occurrences(in source: String) -> [String: Int] {
+        let text = code(source)
+        let range = NSRange(text.startIndex..., in: text)
+        var counts: [String: Int] = [:]
+        for (name, pattern) in forbidden {
+            let matches = (try? NSRegularExpression(pattern: pattern))?.numberOfMatches(in: text, range: range) ?? 0
+            if matches > 0 { counts[name] = matches }
+        }
+        return counts
+    }
+
     /// The names of the forbidden constructs found in `source`.
     static func violations(in source: String) -> [String] {
-        let text = code(source)
-        return forbidden.filter { text.range(of: $0.pattern, options: .regularExpression) != nil }.map(\.name)
+        let counts = occurrences(in: source)
+        return forbidden.map(\.name).filter { counts[$0] != nil }
+    }
+
+    /// The forbidden constructs in the file at `path` that its local uses do not account for.
+    static func violations(in source: String, at path: String) -> [String] {
+        let counts = occurrences(in: source)
+        return forbidden.map(\.name).filter { name in
+            (counts[name] ?? 0) > (localUses.first { $0.path == path && $0.name == name }?.count ?? 0)
+        }
     }
 
     static func sourceFiles() throws -> [(path: String, text: String)] {
@@ -56,28 +140,48 @@ struct NetworkAuditSourceScanTests {
     }
 
     @Test func onlyTheChokePointReachesTheNetwork() async throws {
-        let (count, problems) = try await offPool { () -> (Int, [String]) in
+        let (count, problems, stale) = try await offPool { () -> (Int, [String], [String]) in
             let files = try Self.sourceFiles()
             var problems: [String] = []
+            var stale: [String] = []
             for (path, text) in files where path != Self.chokePoint {
-                for name in Self.violations(in: text) { problems.append("\(path): \(name)") }
+                for name in Self.violations(in: text, at: path) { problems.append("\(path): \(name)") }
+                let counts = Self.occurrences(in: text)
+                for use in Self.localUses where use.path == path && (counts[use.name] ?? 0) < use.count {
+                    stale.append("\(path): \(use.name) is allowed \(use.count) times, found \(counts[use.name] ?? 0)")
+                }
             }
-            return (files.count, problems)
+            let paths = Set(files.map(\.path))
+            for use in Self.localUses where !paths.contains(use.path) { stale.append("\(use.path): no such file") }
+            return (files.count, problems, stale)
         }
         #expect(count > 50, "the scan must actually see the sources")
         #expect(problems.isEmpty, """
             Network access outside \(Self.chokePoint) bypasses the Network Activity log. \
-            Route the request through AuditedSession instead:
+            Route the request through AuditedSession instead (a call that only reads a local file goes in localUses, saying why):
             \(problems.joined(separator: "\n"))
             """)
+        #expect(stale.isEmpty, "localUses no longer matches the code; update the entry:\n\(stale.joined(separator: "\n"))")
     }
 
     @Test func theScanSeesTheChokePoint() async throws {
-        let found = try await offPool { () -> [String]? in
-            try Self.sourceFiles().first { $0.path == Self.chokePoint }.map { Self.violations(in: $0.text) }
+        let found = try await offPool { () -> (choke: String, journal: String)? in
+            let files = try Self.sourceFiles()
+            guard let choke = files.first(where: { $0.path == Self.chokePoint }),
+                  let journal = files.first(where: { $0.path == "Sources/VautaCore/Storage/Journal.swift" }) else { return nil }
+            return (choke.text, journal.text)
         }
-        let violations = try #require(found)
-        #expect(violations.contains("URLSession(...)"))
+        let sources = try #require(found)
+        #expect(Self.violations(in: sources.choke).contains("URLSession(...)"))
+        // The same code anywhere else is a bypass.
+        #expect(Self.violations(in: sources.choke, at: "Sources/VautaCore/Network/LLMClient.swift").contains("URLSession(...)"))
+        // A file's local uses excuse only the calls they count, of the kinds they name.
+        #expect(Self.violations(in: sources.journal, at: "Sources/VautaCore/Storage/Journal.swift").isEmpty)
+        #expect(Self.violations(in: sources.journal + "\nlet more = try Data(contentsOf: remote)", at: "Sources/VautaCore/Storage/Journal.swift")
+                == ["Data(contentsOf:)"])
+        #expect(Self.violations(in: sources.journal + "\nlet d = PDFDocument(url: remote)", at: "Sources/VautaCore/Storage/Journal.swift")
+                == ["PDFDocument(url:)"])
+        #expect(Self.violations(in: sources.journal, at: "Sources/VautaCore/Storage/Other.swift") == ["Data(contentsOf:)"])
     }
 
     @Test func detectorFlagsEveryKindOfBypass() {
@@ -92,13 +196,50 @@ struct NetworkAuditSourceScanTests {
             "web view": "let v = WKWebView()",
             "raw sockets": "let fd = socket(AF_INET, SOCK_STREAM, 0)",
             "remote contents": "let d = try Data(contentsOf: URL(string: \"https://x.test\")!)",
+            "exec": "execv(path, argv)",
+            "XPC service": "let c = NSXPCConnection(machServiceName: \"com.example.helper\")",
+            "Data(contentsOf:)": "let d = try Data(contentsOf: url)",
+            "String(contentsOf:)": "let s = try String(contentsOf: url, encoding: .utf8)",
+            "NSImage(contentsOf:)": "let i = NSImage(contentsOf: url)",
+            "PDFDocument(url:)": "let p = PDFDocument(url: url)",
+            "AVURLAsset(url:)": "let a = AVURLAsset(url: url)",
+            "NSAttributedString(contentsOf:)": "let s = try NSAttributedString(url: url, options: [:], documentAttributes: nil)",
+            "XMLParser(contentsOf:)": "let p = XMLParser(contentsOf: url)",
         ]
         for (name, source) in samples { #expect(Self.violations(in: source).contains(name), "\(name) not detected") }
         #expect(Self.violations(in: "let p = Process()").contains("child process"))
         #expect(Self.violations(in: "import Network").contains("Network framework"))
+        let variants: [(String, String)] = [
+            ("URLSession(...)", "let s = URLSession.init(configuration: .default)"),
+            ("child process", "let p = Process.init()"),
+            ("child process", "let p = Process(); p.executableURL = tool"),
+            ("child process", "let f = popen(\"ls\", \"r\")"),
+            ("child process", "posix_spawn(&pid, path, nil, nil, argv, environ)"),
+            ("child process", "posix_spawnp(&pid, \"curl\", nil, nil, argv, environ)"),
+            ("child process", "if fork() == 0 { }"),
+            ("child process", "let pid = vfork()"),
+            ("exec", "execve(path, argv, envp)"),
+            ("exec", "execvp(\"curl\", argv)"),
+            ("exec", "execl(path, path, nil)"),
+            ("exec", "fexecve(fd, argv, envp)"),
+            ("Data(contentsOf:)", "let d = NSData(contentsOf: url)"),
+            ("String(contentsOf:)", "let s = try NSString(contentsOf: url, encoding: 4)"),
+            ("AVURLAsset(url:)", "let a = AVAsset(url: url)"),
+            ("NSAttributedString(contentsOf:)", "let s = try NSAttributedString(contentsOf: url, documentAttributes: nil)"),
+        ]
+        for (name, source) in variants { #expect(Self.violations(in: source).contains(name), "\(source)") }
         // Ordinary code and comments are not flagged.
         #expect(Self.violations(in: "let m = ChatMessage.system(text)\ntry await session.bytes(for: r, purpose: .ask)").isEmpty)
         #expect(Self.violations(in: "// URLSession(configuration:) is only in AuditedSession").isEmpty)
         #expect(Self.violations(in: "let u = URL(string: \"http://127.0.0.1/\")!\nfunc f(_ s: URLSession.AuthChallengeDisposition) {}").isEmpty)
+        #expect(Self.violations(in: """
+            let cores = ProcessInfo.processInfo.activeProcessorCount
+            try db.execute("BEGIN")
+            let text = try String(contentsOfFile: path, encoding: .utf8)
+            let data = try Data(contentsOfFile: path)
+            let c = NSXPCConnection(serviceName: "local.vauta.helper")
+            let p = RecordingProcess(url: url)
+            // the MLX build is a fork (it compiles its kernels)
+            """).isEmpty)
     }
 }
