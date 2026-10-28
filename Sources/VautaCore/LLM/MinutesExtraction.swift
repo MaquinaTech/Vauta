@@ -108,4 +108,20 @@ public enum MinutesRelease {
     /// judgement of the ranked list against the old one (equal recall, a list 64% shorter, fewer proposals stated as firm); the integrated
     /// model never ranks (`MinutesRanking` applies to Apple's list).
     public static func ranked(integrated: Bool) -> Bool { !integrated }
+
+    /// Everything the minutes run on a backend when nothing is forced: the harness phase's choices for Apple's model (and what stands in
+    /// for it) and the integrated model, the old ones for a model server, which was not measured (`ChatProvider.releasedHarness`).
+    static func choices(for chat: ChatProvider) -> MinutesChoices {
+        guard chat.releasedHarness else { return MinutesChoices(extraction: .legacy, summary: .legacy, harness: .legacy, questions: .legacy) }
+        return MinutesChoices(extraction: extraction(integrated: chat.integrated), summary: MinutesSummaryRelease.summary(integrated: chat.integrated),
+                              harness: MinutesHarnessRelease.harness(integrated: chat.integrated), questions: MinutesQuestionsRelease.questions(integrated: chat.integrated))
+    }
+}
+
+/// The parts one run of the minutes uses: the extraction, the summary, the integrated model's request and the open questions' checks.
+struct MinutesChoices: Sendable, Equatable {
+    var extraction: MinutesExtraction
+    var summary: MinutesSummary
+    var harness: MinutesHarness
+    var questions: MinutesQuestions
 }
