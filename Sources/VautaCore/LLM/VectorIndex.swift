@@ -76,6 +76,15 @@ struct VectorIndex: @unchecked Sendable {
         return out
     }
 
+    /// The `k` of `ids` most similar to the query, best first (ids it does not hold are left out). A search within a scope (one
+    /// meeting, some files) ranks the scope's own vectors this way: a top K of the whole index, filtered by the scope afterwards,
+    /// loses them whenever more than K vectors elsewhere are closer.
+    func search(_ query: [Float], k: Int, among wanted: [Int64]) -> [(id: Int64, score: Float)] {
+        guard k > 0 else { return [] }
+        return score(query, ids: wanted).sorted { $0.value == $1.value ? $0.key < $1.key : $0.value > $1.value }
+            .prefix(k).map { (id: $0.key, score: $0.value) }
+    }
+
     /// The `k` chunks most similar (approximate cosine) to the query. A query
     /// of another length (another space) finds nothing.
     func search(_ query: [Float], k: Int) -> [(id: Int64, score: Float)] {
