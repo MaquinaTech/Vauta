@@ -3305,9 +3305,6 @@
 /* VoiceOver announcement when the Meetings window closes, or Settings → Context empties, because Meetings were locked */
 "Meetings and context locked. Unlock them with Touch ID or your password." = "회의와 컨텍스트가 잠겼습니다. Touch ID 또는 암호로 잠금을 해제하세요.";
 
-/* No comment provided by engineer. */
-"Meetings and context stay on this Mac, encrypted." = "회의와 컨텍스트는 암호화되어 이 Mac에 보관됩니다.";
-
 /* Tooltip of the Ask search label */
 "Meetings are found by meaning; documents use keyword search until they are indexed. Click to open Settings." = "회의는 의미로 찾고, 문서는 색인되기 전까지 키워드 검색을 사용합니다. 클릭하면 설정이 열립니다.";
 
@@ -7961,3 +7958,17 @@
 
 /* Label of the notes field of a reminder or an event in the editor; Apple’s Reminders and Calendar name this field (zh-Hans 备注), unlike the Notes tab of a meeting */
 "event.field.notes" = "메모";
+
+"Transcription on this Mac" = "이 Mac에서 받아쓰기";
+
+"Any call app. No bot joins the call." = "어떤 통화 앱이든 됩니다. 통화에 봇이 참여하지 않습니다.";
+
+"Minutes and tasks" = "회의록과 할 일";
+
+"Decisions, tasks with owner and date, and open questions." = "결정 사항, 담당자와 날짜가 있는 할 일, 남은 질문.";
+
+"One question across your meetings, notes and files." = "질문 하나로 회의, 메모, 파일을 함께 찾습니다.";
+
+"Private" = "개인정보 보호";
+
+"Audio is never saved. No account, no analytics." = "오디오는 저장되지 않습니다. 계정도 분석 데이터 수집도 없습니다.";

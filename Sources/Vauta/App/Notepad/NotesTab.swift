@@ -361,7 +361,7 @@ private struct NoteBlock: View {
     private func statusLine(_ text: String, symbol: String?) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
             if status == .working {
-                ProgressView().controlSize(.small).scaleEffect(0.7).frame(width: 16, height: 12)
+                ThinkingOrb(diameter: 12).frame(width: 16, height: 12)
             } else if let symbol {
                 Image(systemName: symbol).frame(width: 16).accessibilityHidden(true)
             }

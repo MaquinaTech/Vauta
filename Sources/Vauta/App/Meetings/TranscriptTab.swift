@@ -140,7 +140,7 @@ struct TranscriptTab: View {
                     .help("Show the stored translation in gray under each line of “Others”")
             }
             if model.reanalyzing {
-                ProgressView().controlSize(.small).accessibilityLabel(Text("Finding names…"))
+                ThinkingOrb().accessibilityElement().accessibilityLabel(Text("Finding names…"))
             }
             Button("Find Names in This Meeting") { Task { await model.reanalyze() } }
                 .controlSize(.small)

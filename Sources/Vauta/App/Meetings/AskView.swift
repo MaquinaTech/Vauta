@@ -20,7 +20,11 @@ struct AskView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: PaneLayout.section) {
-                Text(headerTitle).font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                HStack(spacing: 10) {
+                    // Vauta's sphere next to the question, quiet (the progress line has its own while it writes the answer).
+                    VautaOrb(mode: .muted, diameter: 22, showsOrbit: false, carriesGlyph: false)
+                    Text(headerTitle).font(.title2.bold()).accessibilityAddTraits(.isHeader)
+                }
                 NoCopyField(title: String(localized: "What did we decide about…? Who was handling…?", comment: "Placeholder of the Ask field"),
                             text: $model.question,
                             accessibilityLabel: String(localized: "Question", comment: "Accessibility label of the Ask field"),
@@ -69,6 +73,8 @@ struct AskView: View {
             .padding(20)
             .frame(maxWidth: 760, alignment: .leading)
         }
+        // Vauta's colours glow faintly behind the question, as behind a meeting.
+        .background(alignment: .top) { PanelGlow(isRecording: false).frame(height: 280).opacity(0.7) }
         .onAppear {
             if model.meetingID == nil { model.meetingID = meetings.selectedID }
             // The first question should not wait for the search model to load.
@@ -203,8 +209,7 @@ struct AskView: View {
                     model.question = question
                     submit()
                 }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
+                    .buttonStyle(AskExampleStyle())
             }
         }
     }
@@ -352,7 +357,7 @@ struct AskView: View {
 
     private var progress: some View {
         HStack {
-            ProgressView().controlSize(.small).accessibilityHidden(true)
+            ThinkingOrb().accessibilityHidden(true)
             Text(progressText)
                 .font(.callout)
                 .foregroundStyle(.secondary)
@@ -505,7 +510,7 @@ struct AskView: View {
             }
         }
         .padding(12)
-        .cardBackground()
+        .vautaCardBackground()
     }
 
     /// The moments a "not yet" answer relates to: one link each, in the order they were said, without the model's sentences.
@@ -636,5 +641,30 @@ struct AskView: View {
         guard let export = model.copyableAnswer() else { return }
         MeetingExporter.copy(markdown ? export.markdown() : export.plainText())
         meetings.show(.copied)
+    }
+}
+
+/// An example question: a capsule with a hairline edge in Vauta's colours and a sparkle, like a suggestion from Vauta.
+private struct AskExampleStyle: ButtonStyle {
+    @Environment(\.colorSchemeContrast) private var systemContrast
+    private var contrast: ColorSchemeContrast { systemContrast.snapshotResolved }
+
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: "sparkles").foregroundStyle(Brand.sparkle).accessibilityHidden(true)
+            configuration.label
+        }
+        .font(.callout)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 5)
+        .background(.quinary, in: Capsule())
+        .overlay {
+            Capsule().strokeBorder(contrast == .increased
+                                   ? AnyShapeStyle(Color.primary.opacity(0.5))
+                                   : AnyShapeStyle(LinearGradient(colors: [Brand.indigo, Brand.teal], startPoint: .leading, endPoint: .trailing).opacity(0.55)),
+                                   lineWidth: 1)
+        }
+        .opacity(configuration.isPressed ? 0.7 : 1)
+        .contentShape(Capsule())
     }
 }

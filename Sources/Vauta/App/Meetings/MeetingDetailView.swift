@@ -56,6 +56,8 @@ struct MeetingDetailView: View {
                 }
             }
         }
+        // Vauta's colours glow faintly behind the top of the meeting, as in the menu-bar panel.
+        .background(alignment: .top) { PanelGlow(isRecording: false).frame(height: 280).opacity(0.7) }
     }
 }
 

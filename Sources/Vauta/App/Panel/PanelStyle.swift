@@ -30,8 +30,11 @@ private struct PanelSurface: ViewModifier {
     let tint: Color
     let fill: AnyShapeStyle
     let strokeOpacity: Double
+    /// What Vauta writes on its own (live notes, answers, the brief, the follow-up): a hairline edge in Vauta's colours.
+    var isVautaWork = false
     @Environment(\.colorSchemeContrast) private var systemContrast
     private var contrast: ColorSchemeContrast { systemContrast.snapshotResolved }
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceTransparency) private var systemReduceTransparency
     private var reduceTransparency: Bool {
         #if VAUTA_DIAGNOSTICS
@@ -49,6 +52,9 @@ private struct PanelSurface: ViewModifier {
             .overlay {
                 if contrast == .increased || reduceTransparency {
                     shape.strokeBorder(tint.opacity(strokeOpacity), lineWidth: 1)
+                } else if isVautaWork {
+                    shape.strokeBorder(AngularGradient(colors: [Brand.indigo, Brand.cyan, Brand.teal, Brand.pink, Brand.indigo], center: .center)
+                        .opacity(colorScheme == .dark ? 0.55 : 0.45), lineWidth: 1)
                 }
             }
     }
@@ -60,12 +66,18 @@ extension View {
         modifier(PanelSurface(tint: .primary, fill: AnyShapeStyle(.quinary), strokeOpacity: 0.4))
     }
 
+    /// A card with what Vauta writes on its own (live notes, answers, the brief, the follow-up): the neutral card with a
+    /// hairline edge in Vauta's colours.
+    func panelVautaCard() -> some View {
+        modifier(PanelSurface(tint: .primary, fill: AnyShapeStyle(.quinary), strokeOpacity: 0.4, isVautaWork: true))
+    }
+
     /// A banner: suggestions, warnings and the stop notices.
     func panelBanner(_ style: PanelBannerStyle) -> some View {
         modifier(PanelSurface(tint: style.tint, fill: AnyShapeStyle(style.tint.opacity(style == .warning ? 0.15 : 0.12)), strokeOpacity: 0.7))
     }
 
-    /// The title of a card: same size and weight everywhere, with a quiet icon.
+    /// The title of a card: same size and weight everywhere, with the icon in Vauta's colours.
     func panelCardTitle() -> some View {
         font(.callout.weight(.medium))
             .labelStyle(PanelCardTitleLabelStyle())
@@ -110,7 +122,8 @@ private struct PanelCardTitleLabelStyle: LabelStyle {
             // Every title's icon in the same square, scale and weight, so the symbols weigh the same.
             configuration.icon
                 .imageScale(.medium)
-                .foregroundStyle(.secondary)
+                // Vauta's colours, as on the record button: the cards are what Vauta does while it listens.
+                .foregroundStyle(Brand.symbolGradient)
                 .frame(width: PanelMetrics.titleIconWidth, height: PanelMetrics.titleIconWidth, alignment: .center)
             configuration.title
         }

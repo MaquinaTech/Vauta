@@ -3,17 +3,12 @@
 
 import SwiftUI
 
-/// The privacy promises said the same way on Welcome and in Settings → Privacy & Security
-/// (the panel header carries a deliberate short form of the first one). All four icons are
+/// The privacy promises in Settings → Privacy & Security (Welcome sums them up in one card,
+/// and the panel header carries a deliberate short form of the first one). All four icons are
 /// outline glyphs of one weight, sized so that no promise looks heavier than the others.
 enum PrivacyPromise {
     static var audioNeverSaved: Label<Text, PromiseGlyph> {
         Label { Text("Audio is never saved to disk.") } icon: { PromiseGlyph("waveform.slash") }
-    }
-
-    /// The short form, on Welcome. Settings → Privacy & Security says the same with the details.
-    static var transcriptsEncrypted: Label<Text, PromiseGlyph> {
-        Label { Text("Meetings and context stay on this Mac, encrypted.") } icon: { PromiseGlyph("lock") }
     }
 
     static var transcriptsEncryptedDetailed: Label<Text, PromiseGlyph> {
@@ -55,13 +50,13 @@ struct PromiseGlyph: View {
     }
 }
 
-/// One icon rendering for the promises: monochrome, in the accent tint and the same 22 pt column and
-/// 10 pt gap as `SetupBulletStyle`, so Welcome and the last setup page style their lists alike.
+/// One icon rendering for the promises: monochrome, in Vauta's gradient and the same 22 pt column and
+/// 10 pt gap as `SetupBulletStyle`, so Settings and the setup pages style their lists alike.
 struct PromiseLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 10) {
             configuration.icon
-                .foregroundStyle(.tint)
+                .foregroundStyle(Brand.symbolGradient)
                 // A fixed square box, so the four glyphs line up in one column whatever their own width.
                 .frame(width: 22, height: 20, alignment: .center)
                 .accessibilityHidden(true)

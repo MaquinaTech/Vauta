@@ -156,7 +156,7 @@ struct SetupBulletStyle: LabelStyle {
     static let textIndent: CGFloat = 32
     /// The space between two bullets.
     static let spacing: CGFloat = 10
-    /// Icons keep their own colour (status icons) instead of the tint.
+    /// Icons keep their own colour (status icons) instead of Vauta's gradient.
     var keepsIconColor = false
     /// A heavier stroke for thin outline glyphs (the privacy promises).
     var iconWeight: Font.Weight?
@@ -170,7 +170,7 @@ struct SetupBulletStyle: LabelStyle {
                 .overlay {
                     configuration.icon
                         .fontWeight(iconWeight)
-                        .foregroundStyle(keepsIconColor ? AnyShapeStyle(.foreground) : AnyShapeStyle(.tint))
+                        .foregroundStyle(keepsIconColor ? AnyShapeStyle(.foreground) : AnyShapeStyle(Brand.symbolGradient))
                         .fixedSize()
                 }
                 .accessibilityHidden(true)

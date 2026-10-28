@@ -5,18 +5,14 @@ import VautaCore
 import AppKit
 import SwiftUI
 
-/// Page 1: what Vauta does and the privacy promise.
+/// Page 1: what Vauta does, shown as four short cards under Vauta's sphere. The privacy promise is the last card;
+/// Settings → Privacy & Security says it in full.
 struct WelcomePage: View {
-    private static let icon = AppIconImage.image(points: 80)
-
     var body: some View {
         VStack(spacing: 18) {
-            // From the bundle's icon file, as in About: the application icon image can carry a square backing plate.
-            Image(nsImage: Self.icon)
-                .resizable()
-                .interpolation(.high)
-                .frame(width: 80, height: 80)
-                .accessibilityHidden(true)
+            // Vauta's core, as on the website: the sphere with its orbit, turning slowly.
+            VautaOrb(mode: .idle, diameter: 92, carriesGlyph: false)
+                .padding(.vertical, 16)
             Text("Welcome to Vauta")
                 .font(.largeTitle.bold())
                 .accessibilityAddTraits(.isHeader)
@@ -26,16 +22,65 @@ struct WelcomePage: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: OnboardingMetrics.readableWidth)
-            OnboardingCard {
-                VStack(alignment: .leading, spacing: SetupBulletStyle.spacing) {
-                    PrivacyPromise.audioNeverSaved
-                    PrivacyPromise.transcriptsEncrypted
-                    PrivacyPromise.nothingLeaves
-                    PrivacyPromise.noAnalytics
+            Grid(horizontalSpacing: 10, verticalSpacing: 10) {
+                GridRow {
+                    WelcomeFeature(symbol: "waveform", index: 0,
+                                   title: String(localized: "Transcription on this Mac", comment: "Welcome card title"),
+                                   detail: String(localized: "Any call app. No bot joins the call.", comment: "Welcome card text under “Transcription on this Mac”"))
+                    WelcomeFeature(symbol: "checklist", index: 1,
+                                   title: String(localized: "Minutes and tasks", comment: "Welcome card title"),
+                                   detail: String(localized: "Decisions, tasks with owner and date, and open questions.", comment: "Welcome card text under “Minutes and tasks”"))
                 }
-                // The tint, as the bullets of the other setup pages: thin grey outlines nearly vanish on the card.
-                .labelStyle(SetupBulletStyle(iconWeight: .medium))
+                GridRow {
+                    WelcomeFeature(symbol: "sparkle.magnifyingglass", index: 2,
+                                   title: String(localized: "Ask", comment: "Welcome card title: the Ask feature (one question across meetings, notes and files)"),
+                                   detail: String(localized: "One question across your meetings, notes and files.", comment: "Welcome card text under “Ask”"))
+                    WelcomeFeature(symbol: "lock", index: 3,
+                                   title: String(localized: "Private", comment: "Welcome card title: Vauta keeps meetings private"),
+                                   detail: String(localized: "Audio is never saved. No account, no analytics.", comment: "Welcome card text under “Private”"))
+                }
             }
+            // As tall as the cards' text: the two cards of a row share the taller one's height, nothing more.
+            .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+/// One thing Vauta does: a symbol in Vauta's colours, a name and one line. The four cards come in one after another.
+private struct WelcomeFeature: View {
+    let symbol: String
+    let index: Int
+    let title: String
+    let detail: String
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ViewLocalState private var shown = false
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 20, weight: .medium))
+                .foregroundStyle(Brand.symbolGradient)
+                .frame(width: 26, height: 26)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title).font(.headline)
+                Text(wrapping: detail.keepingLastWordsTogether)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .cardBackground()
+        .accessibilityElement(children: .combine)
+        .opacity(shown ? 1 : 0)
+        .offset(y: shown ? 0 : 8)
+        .onAppear {
+            guard !shown else { return }
+            if reduceMotion || Brand.freezesMotion { shown = true; return }
+            withAnimation(.smooth(duration: 0.6).delay(0.15 + 0.09 * Double(index))) { shown = true }
         }
     }
 }
@@ -127,6 +172,9 @@ struct DonePage: View {
             // the instruction to fix them.
             let blocked = model.hasBlockingProblem(preferences)
             OnboardingHeader(symbol: allSet ? StatusSymbol.ok.name : (blocked ? StatusSymbol.warning.name : "checkmark.circle"),
+                             // Vauta's sphere on every variant, so the title never moves: lit with a check when all is set,
+                             // quiet with a check or an exclamation mark otherwise (the title and the cards say what is missing).
+                             orbGlyph: blocked ? "exclamationmark" : "checkmark", orbLit: allSet,
                              tint: allSet ? StatusSymbol.ok.color : (blocked ? StatusSymbol.warning.color : .accentColor),
                              title: model.finishedTitle(recorder, preferences),
                              subtitle: blocked

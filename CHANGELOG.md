@@ -4,7 +4,20 @@ All notable changes to Vauta are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Vauta follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.9.1] - 2026-10-28
+
+The look of the website comes to the app (a new icon, Vauta's animated sphere, Welcome and the menu-bar panel in Vauta's colours) and the security fixes of the audit after 0.9.0. No change to recording, transcription, the minutes or the stored data.
+
+### Changed
+
+- A new app icon in the website's colours: a lit sphere in indigo, blue and teal carrying a white waveform, with an orbit around it, on a dark sky (`tools/make-icon.swift`).
+- Vauta's core, as on the website: one animated view, a lit sphere with colours drifting inside and a ring of particles in orbit. It is the record button (red into magenta while recording, with two soft rings that ripple with the loudest channel; the orbit spins while Vauta starts or saves), the hero of Welcome, the base of the empty and locked states, and a small "thinking" sphere wherever Vauta's model works (answers, the brief, notes, Ask, the minutes, finding names). Still with Reduce Motion and in renders; 15 to 60 frames a second depending on the state.
+- The menu-bar panel takes Vauta's colours: a soft glow behind the header that fades out below the meters (none with Increase Contrast), the app icon in the header, rounded figures for the elapsed time, card icons in Vauta's gradient, level meters that glow in each speaker's colour, and a hairline edge in Vauta's colours on what Vauta writes on its own (live notes, answers, the brief, the follow-up).
+- Welcome shows what Vauta does in four short cards (transcription, minutes and tasks, Ask, privacy) that come in one after another; the full privacy promise stays in Settings › Privacy & Security. Setup has a progress line in Vauta's colours above its buttons, page symbols in Vauta's gradient, and the sphere with a check mark when everything is set up.
+- The sphere fades between states, comes in with a slight grow when it appears, and the record button gives a little when pressed (none of this with Reduce Motion). A faint orbit stays on the quieter button while a suggestion sits above it, restoring or erasing use the working sphere, the sphere has no halo with Increase Contrast, and its rings are calmer in light appearance. Every last page of Setup and the search results show the sphere.
+- Ask: Vauta's sphere by the title, example questions as capsules with a sparkle and an edge in Vauta's colours, and the answer in a card with the same edge as in the panel.
+- Settings' sidebar shows each pane's symbol in white on a coloured square, as in System Settings; Setup's lists and the privacy promises use Vauta's gradient, deeper in light appearance.
+- The sparkles that mark what the model wrote (decisions, tasks, notes, the minutes) are Vauta's indigo instead of the system blue, with the same contrast; a faint glow in Vauta's colours sits behind the top of each meeting.
 
 ### Security
 
@@ -111,4 +124,5 @@ The first public release (public beta). Compared with 0.1.0, Vauta is open sourc
 
 The first version, used privately before the project was published. Safari and Spanish (Spain) only, with minutes written by an OpenAI-compatible model server on this Mac or on the local network.
 
+[0.9.1]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.1
 [0.9.0]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.0

@@ -3,6 +3,25 @@
 What the interface does for VoiceOver and keyboard users, per area. A section says when its manual pass with
 VoiceOver is still to be recorded.
 
+## Vauta's sphere and the panel's look
+
+Status: designed and checked in renders (light, dark, Increase Contrast, Reduce Transparency); the manual pass with
+VoiceOver and Reduce Motion on a real recording is part of the panel checklist at the end.
+
+- The sphere (`VautaOrb`) is decorative: it is hidden from VoiceOver. The record button keeps its own label ("Start
+  Recording", "Stop Recording", or the state while Vauta is busy), value, hint and tooltip; the small "thinking" sphere
+  that replaces a spinner keeps the label or value the spinner had.
+- Reduce Motion: the sphere, its orbit, the rings while recording and the Welcome cards do not move (one still frame;
+  the cards appear without sliding). Renders use the same still frame.
+- The white glyph on the sphere keeps at least 3:1 against the sphere under it (WCAG 1.4.11 for graphics): measured
+  over the glyph's box at 120 moments of the animation, the worst case is 3.5:1 at rest and while recording, 3.7:1 for
+  the quieter sphere. When a permission or the store blocks recording, the button is the opaque grey of before
+  (5.1:1 and 5.9:1), with an outline under Increase Contrast.
+- Increase Contrast: the glow behind the panel's header, Setup and a meeting is not drawn, and the coloured edge of the
+  cards Vauta writes becomes the plain outline every card gets. The sparkles that mark what the model wrote are Vauta's
+  indigo (#554AE0 on light backgrounds, #9D95FF on dark ones), at least 4.5:1, and the primary colour on a selected row.
+- The orbit and the rings never carry information: the state is in the words next to the button and in the header.
+
 ## Speakers in the Meetings window
 
 Status: designed and unit-tested where logic is involved; **the manual VoiceOver pass is still to be recorded here

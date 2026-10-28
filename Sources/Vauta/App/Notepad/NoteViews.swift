@@ -92,7 +92,7 @@ struct ModelSparkle: View {
 
     var body: some View {
         Image(systemName: "sparkles")
-            .foregroundStyle(prominence == .increased ? AnyShapeStyle(.primary) : AnyShapeStyle(Color.blue))
+            .foregroundStyle(prominence == .increased ? AnyShapeStyle(.primary) : AnyShapeStyle(Brand.sparkle))
             .help(NoteText.byModel)
             .accessibilityLabel(Text(NoteText.byModel))
     }
@@ -204,7 +204,7 @@ struct NoteLine: View {
             // Only the spinner, in the panel and the notepad, so the user's words keep their room (the state is also its
             // help and its VoiceOver value).
             HStack(spacing: 4) {
-                ProgressView().controlSize(.mini).scaleEffect(0.8).frame(width: 14, height: 14)
+                ThinkingOrb(diameter: 12).frame(width: 14, height: 14)
             }
             .fixedSize()
             .help(NoteText.expanding)

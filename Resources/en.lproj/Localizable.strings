@@ -646,6 +646,9 @@
 /* Live answers: reminder next to the verified seal of an answer, in Settings and as the tooltip and VoiceOver hint of an answer. The quote was found in the source, but the answer may still be wrong */
 "Answers quote your meetings and documents, but can still be wrong: check the source." = "Answers quote your meetings and documents, but can still be wrong: check the source.";
 
+/* Welcome card text under “Transcription on this Mac” */
+"Any call app. No bot joins the call." = "Any call app. No bot joins the call.";
+
 /* No comment provided by engineer. */
 "App" = "App";
 
@@ -705,7 +708,8 @@
 "Approve Vauta in System Settings → General → Login Items & Extensions." = "Approve Vauta in System Settings → General → Login Items & Extensions.";
 
 /* Meetings window mode: ask questions about your meetings
-   Network Activity purpose: questions about meetings */
+   Network Activity purpose: questions about meetings
+   Welcome card title: the Ask feature (one question across meetings, notes and files) */
 "Ask" = "Ask";
 
 /* No comment provided by engineer. */
@@ -789,6 +793,9 @@
 
 /* No comment provided by engineer. */
 "Audio is never saved to disk. Meetings and context are encrypted (AES-256) on this Mac. Meeting text leaves this Mac only through a model server on another computer, or in what you choose to add to Reminders, Calendar or an email." = "Audio is never saved to disk. Meetings and context are encrypted (AES-256) on this Mac. Meeting text leaves this Mac only through a model server on another computer, or in what you choose to add to Reminders, Calendar or an email.";
+
+/* Welcome card text under “Private” */
+"Audio is never saved. No account, no analytics." = "Audio is never saved. No account, no analytics.";
 
 /* No comment provided by engineer. */
 "Audio source" = "Audio source";
@@ -1683,6 +1690,9 @@
 /* Exported minutes: section title
    Section title in a meeting */
 "Decisions" = "Decisions";
+
+/* Welcome card text under “Minutes and tasks” */
+"Decisions, tasks with owner and date, and open questions." = "Decisions, tasks with owner and date, and open questions.";
 
 /* Settings → Calendar & Reminders: the calendar a new follow-up event starts in */
 "Default calendar" = "Default calendar";
@@ -3343,9 +3353,6 @@
 /* VoiceOver announcement when the Meetings window closes, or Settings → Context empties, because Meetings were locked */
 "Meetings and context locked. Unlock them with Touch ID or your password." = "Meetings and context locked. Unlock them with Touch ID or your password.";
 
-/* No comment provided by engineer. */
-"Meetings and context stay on this Mac, encrypted." = "Meetings and context stay on this Mac, encrypted.";
-
 /* Tooltip of the Ask search label */
 "Meetings are found by meaning; documents use keyword search until they are indexed. Click to open Settings." = "Meetings are found by meaning; documents use keyword search until they are indexed. Click to open Settings.";
 
@@ -3441,6 +3448,9 @@
 
 /* No comment provided by engineer. */
 "Minutes and notes" = "Minutes and notes";
+
+/* Welcome card title */
+"Minutes and tasks" = "Minutes and tasks";
 
 /* Model guide result; arguments are a model name and an app name */
 "Minutes are now written with %@ in %@. The model runs on this Mac, so meeting text sent to it stays here." = "Minutes are now written with %@ in %@. The model runs on this Mac, so meeting text sent to it stays here.";
@@ -4112,6 +4122,9 @@
 /* No comment provided by engineer. */
 "One per owner" = "One per owner";
 
+/* Welcome card text under “Ask” */
+"One question across your meetings, notes and files." = "One question across your meetings, notes and files.";
+
 /* Placeholder of the editor of an expanded note */
 "One sentence per line" = "One sentence per line";
 
@@ -4517,6 +4530,9 @@
 
 /* Settings pane */
 "Privacy & Security" = "Privacy & Security";
+
+/* Welcome card title: Vauta keeps meetings private */
+"Private" = "Private";
 
 /* No comment provided by engineer. */
 "Private certificate authority (optional)" = "Private certificate authority (optional)";
@@ -6712,6 +6728,9 @@
 
 /* Channel warning while recording; the argument is the channel name */
 "Transcription of “%@” is lagging and some audio was lost." = "Transcription of “%@” is lagging and some audio was lost.";
+
+/* Welcome card title */
+"Transcription on this Mac" = "Transcription on this Mac";
 
 /* Capture error while recording */
 "Transcription stopped unexpectedly." = "Transcription stopped unexpectedly.";

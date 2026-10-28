@@ -25,11 +25,14 @@ struct SettingsWindow: View {
                 Label {
                     Text(pane.title)
                 } icon: {
+                    // As in System Settings: a white symbol on a rounded square in the pane's colour.
                     Image(systemName: pane.symbol)
-                        .imageScale(.medium)
-                        .fixedSize()
+                        .symbolVariant(.fill)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(.white)
                         .frame(width: 20, height: 20)
-                        .clipped()
+                        .background(pane.tint.gradient, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+                        .accessibilityHidden(true)
                 }
                 .frame(height: 24)
                 .tag(pane)

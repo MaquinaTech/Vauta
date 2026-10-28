@@ -37,7 +37,8 @@ struct EmptyStateView<Actions: View>: View {
     var body: some View {
         ContentUnavailableView {
             Label { title } icon: {
-                if let symbolColor { Image(systemName: symbol).foregroundStyle(symbolColor) } else { Image(systemName: symbol) }
+                // A problem keeps the system's symbol in its colour; every other state sits on Vauta's sphere.
+                if let symbolColor { Image(systemName: symbol).foregroundStyle(symbolColor) } else { BrandSymbol(symbol: symbol) }
             }
         } description: {
             // A narrow measure keeps Latin lines balanced (no one-word last line). CJK text has no
@@ -91,7 +92,7 @@ struct SearchEmptyStateView: View {
         ContentUnavailableView {
             Label {
                 if trimmed.isEmpty { Text("No Results") } else { Text("No Results for “\(trimmed)”") }
-            } icon: { Image(systemName: "magnifyingglass") }
+            } icon: { BrandSymbol(symbol: "magnifyingglass") }
         } description: {
             // Same line-break rule as the other empty states: the last words (and short articles) stay together.
             if let message { Text(wrapping: message.keepingLastWordsTogether) }
@@ -135,5 +136,23 @@ struct LockedStateView: View {
                 .accessibilityElement(children: .combine)
             }
         }
+    }
+}
+
+/// A state's symbol in white on a small Vauta sphere: quiet (no orbit, no glow) unless `showsOrbit`.
+struct BrandSymbol: View {
+    let symbol: String
+    var diameter: CGFloat = 54
+    /// The lit sphere with its orbit (a success), instead of the quiet one.
+    var showsOrbit = false
+
+    var body: some View {
+        ZStack {
+            VautaOrb(mode: showsOrbit ? .idle : .muted, diameter: diameter, showsOrbit: showsOrbit)
+            Image(systemName: symbol)
+                .font(.system(size: diameter * 0.38, weight: .semibold))
+                .foregroundStyle(.white)
+        }
+        .padding(.bottom, 4)
     }
 }

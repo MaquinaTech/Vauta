@@ -205,6 +205,7 @@ At Stop:
 | `App/Network/` | Network Activity window: live list, summary, filter, export | `NetworkActivityModel`, `NetworkActivityView` |
 | `App/Settings/` | Settings window | `SettingsModel`, `ModelsSettingsModel`, `SpeechSettingsModel`, `SearchModelModel`, `IntegratedModelModel` and the panes (`SearchModelSection` and `IntegratedModelSection` are the cards of Models) |
 | `App/Onboarding/` | First-run setup | `OnboardingModel`, `OnboardingView` |
+| `App/Shared/` (look: `Brand`, `VautaOrb`, `CardStyle`, `EmptyStateView`) | What the windows share: Vauta's colours, the animated sphere (record button, Welcome, empty states, the small "thinking" sphere), cards and empty states | `Brand`, `VautaOrb`, `ThinkingOrb`, `BrandSymbol` |
 | `App/Notifier.swift`, `GlobalHotKey.swift`, `CalendarWatcher.swift`, `NoCopyText.swift` | Notifications, global shortcuts, calendar matching, copy protection | |
 
 ## Network audit

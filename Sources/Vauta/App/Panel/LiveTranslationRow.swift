@@ -220,8 +220,8 @@ private struct StatusLineRow<Action: View>: View {
     private var glyph: some View {
         Group {
             if showsProgress {
-                // No figure is known: a small spinner says that it is running, as in the captions panel.
-                ProgressView().controlSize(.mini)
+                // No figure is known: Vauta's small sphere says that it is running, as in the captions panel.
+                ThinkingOrb(diameter: 12)
             } else {
                 Image(systemName: symbol).imageScale(symbolScale).foregroundStyle(color)
             }

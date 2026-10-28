@@ -54,7 +54,7 @@ struct FollowUpCardContent: View {
             }
             .controlSize(.small)
         }
-        .panelCard()
+        .panelVautaCard()
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text("Follow-up", comment: "Menu-bar panel: heading of the card that offers to review the tasks and follow-up meetings of a meeting. It names the feature (like the Follow Up sheet), not a meeting"))
     }
