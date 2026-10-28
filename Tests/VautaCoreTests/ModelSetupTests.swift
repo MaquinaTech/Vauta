@@ -206,22 +206,30 @@ struct ModelSetupEvaluationTests {
     }
 }
 
-/// A scanner that counts its calls and returns a scripted list.
+/// A scanner that counts its calls and returns a scripted list. A blocking one never ends a scan by itself:
+/// each scan waits until its task is cancelled, and counts the cancellation.
 private actor StubScanner: ServerScanning {
     private(set) var scans = 0
+    private(set) var cancelled = 0
     private var servers: [DiscoveredServer]
-    private let delay: Duration
+    private let blocks: Bool
 
-    init(servers: [DiscoveredServer] = [], delay: Duration = .zero) {
+    init(servers: [DiscoveredServer] = [], blocksUntilCancelled: Bool = false) {
         self.servers = servers
-        self.delay = delay
+        self.blocks = blocksUntilCancelled
     }
 
     func set(_ servers: [DiscoveredServer]) { self.servers = servers }
 
     func scan() async -> [DiscoveredServer] {
         scans += 1
-        if delay > .zero { try? await Task.sleep(for: delay) }
+        if blocks {
+            do {
+                while true { try await Task.sleep(for: .seconds(3_600)) }
+            } catch {
+                cancelled += 1
+            }
+        }
         return servers
     }
 }
@@ -276,13 +284,15 @@ struct ModelSetupWatcherTests {
     }
 
     @Test func stopCancelsAScanInFlight() async {
-        let stub = StubScanner(delay: .seconds(30))
+        // Only stop() can end this scan, so no deadline decides the result, however slow the runner is.
+        let stub = StubScanner(blocksUntilCancelled: true)
         let watcher = ModelSetupWatcher(scanner: stub, interval: .milliseconds(5), configuration: configuration())
         watcher.start()
         #expect(await wait { await stub.scans == 1 })
         watcher.stop()
-        try? await Task.sleep(for: .milliseconds(50))
+        #expect(await wait { await stub.cancelled == 1 }, "stop() cancels the scan in flight")
         #expect(watcher.status == .searching, "a cancelled scan publishes nothing")
+        #expect(await stub.scans == 1, "no scan after stop()")
     }
 
     @Test func canRestartAfterStop() async {
@@ -301,7 +311,8 @@ struct ModelSetupWatcherTests {
         let ollama = DiscoveredServer(kind: .ollama, baseURL: URL(string: "http://127.0.0.1:11434/v1/")!, version: nil,
                                       models: [DiscoveredModel(id: "qwen3.5:9b", kind: .chat, contextLength: 8192)])
         let stub = StubScanner(servers: [ollama])
-        let watcher = ModelSetupWatcher(scanner: stub, interval: .seconds(60), configuration: configuration())
+        // An interval no test run reaches: a second scan cannot come in before the count is compared.
+        let watcher = ModelSetupWatcher(scanner: stub, interval: .seconds(86_400), configuration: configuration())
         watcher.start()
         #expect(await wait { watcher.status != .searching })
         let scans = await stub.scans
