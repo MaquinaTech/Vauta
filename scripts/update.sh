@@ -72,7 +72,7 @@ main() {
       || fail "the installed Vauta ($installed) is newer than the newest release tag ($latest)"
   fi
 
-  echo "Verifying $latest…"
+  echo "Verifying ${latest}…"
   [[ "$(git cat-file -t "$latest")" == "tag" ]] || fail "$latest is not a signed tag"
   local verify
   verify="$(git -c gpg.ssh.allowedSignersFile="$dir/allowed_signers" tag -v "$latest" 2>&1)" \

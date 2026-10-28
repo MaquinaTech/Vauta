@@ -4,6 +4,12 @@ All notable changes to Vauta are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Vauta follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `scripts/update.sh` stopped with `unbound variable` before verifying the release, in shells that read the `…` after a variable name as part of the name. If it stopped for you, run `git checkout main && git pull` once and run it again.
+
 ## [0.9.3] - 2026-10-28
 
 Fixes from a review of the code after 0.9.2, and a safe way to update.
