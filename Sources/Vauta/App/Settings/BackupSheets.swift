@@ -427,7 +427,8 @@ private struct PasswordHint: View {
                     case .tooShort:
                         NoticeLabel(Text(verbatim: messages[0]), status: .error)
                     case .weak:
-                        NoticeLabel(Text(verbatim: messages[0]), status: .warning)
+                        // Repetitive passwords are weak and also refused.
+                        NoticeLabel(Text(verbatim: messages[0]), status: BackupPassword.isAcceptable(model.password) ? .warning : .error)
                     case .good, .strong:
                         NoticeLabel(Text(verbatim: messages[0]), status: .ok)
                     }

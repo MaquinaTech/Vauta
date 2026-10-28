@@ -55,6 +55,13 @@ fi
 # signature lets macOS keep permissions and Keychain access across updates.
 KC="$HOME/Library/Keychains/vauta-signing.keychain-db"
 IDENTITY_SHA1="$(cat scripts/signing-identity.txt 2>/dev/null || true)"
+# signing-identity.txt is per checkout (git-ignored) but the keychain is per user: a new clone of a finished setup
+# finds the identity again instead of being told to delete the keychain, which would change Vauta's signature.
+if [[ -z "$IDENTITY_SHA1" && -f "$KC" && -z "${VAUTA_SIGN_IDENTITY:-}" ]]; then
+  IDENTITY_SHA1="$(security find-identity -v -p codesigning "$KC" 2>/dev/null \
+    | awk -v cn="\"Vauta Local Code Signing\"" '$0 ~ cn {print $2; exit}')"
+  [[ -z "$IDENTITY_SHA1" ]] || echo "$IDENTITY_SHA1" > scripts/signing-identity.txt
+fi
 KEYCHAIN_ARGS=()
 TIMESTAMP_ARGS=(--timestamp=none)
 if [[ -n "${VAUTA_SIGN_IDENTITY:-}" ]]; then

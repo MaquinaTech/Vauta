@@ -252,8 +252,8 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     public func apply(_ config: LLMServerConfig?) {
         // The client does not know whether embeddings run on the server; an
         // empty embedding model only fails the embedding calls (`modelName`).
-        let primary = try? config?.validated(embeddingsOnServer: false)
-        let endpoints = (try? config?.validatedEndpoints(embeddingsOnServer: false)) ?? [:]
+        let primary = try? config?.validated(embeddingsOnServer: false, keepingLegacyNames: true)
+        let endpoints = (try? config?.validatedEndpoints(embeddingsOnServer: false, keepingLegacyNames: true)) ?? [:]
         let valid = primary != nil && !endpoints.isEmpty
         lock.withLock {
             _config = valid ? config : nil

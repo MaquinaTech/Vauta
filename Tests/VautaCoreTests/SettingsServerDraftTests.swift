@@ -96,6 +96,9 @@ struct SettingsServerDraftTests {
         draft.mode = .remote
         #expect(draft.validationError == .remoteRequiresHTTPS)
         draft.baseURL = "https://gpu.local/v1"
+        // Without a server type too: clearing it must not lift the rule.
+        draft.setKind(nil)
+        #expect(draft.validationError == .hostNameRequiresTrust("gpu.local"))
         draft.setKind(.vllm)
         // New-format configs that name a host need a CA or a pin.
         #expect(draft.validationError == .hostNameRequiresTrust("gpu.local"))

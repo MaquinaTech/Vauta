@@ -30,8 +30,15 @@ if [[ -e "$KC" ]]; then
     if [[ -s scripts/signing-identity.txt ]]; then
       echo "Vauta's signing identity is already set up ($KC). Nothing to do: run ./scripts/install.sh."; exit 0
     fi
-    # An attempt that stopped after the import (for example at the trust step) leaves the identity without
-    # scripts/signing-identity.txt, so install.sh cannot use it: say how to start over instead of looping.
+    # The keychain is per user but signing-identity.txt is per checkout (git-ignored): a new clone of a finished
+    # setup only needs the fingerprint written again. Deleting the keychain would change Vauta's signature.
+    SHA1="$(security find-identity -v -p codesigning "$KC" 2>/dev/null | awk -v cn="\"$CN\"" '$0 ~ cn {print $2; exit}')"
+    if [[ -n "$SHA1" ]]; then
+      echo "$SHA1" > scripts/signing-identity.txt
+      echo "Vauta's signing identity is already set up ($KC); this folder now uses it. Run ./scripts/install.sh."; exit 0
+    fi
+    # An attempt that stopped after the import (for example at the trust step) leaves an identity that is not
+    # valid for code signing: say how to start over instead of looping.
     echo "$KC is left over from an attempt that did not finish. Delete it and run this script again:"
     echo "  security delete-keychain \"$KC\""
     exit 1

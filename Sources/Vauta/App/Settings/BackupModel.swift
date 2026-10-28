@@ -88,7 +88,7 @@ final class BackupModel {
         var messages: [String] = []
         switch strength {
         case .tooShort: messages.append(Self.tooShortMessage)
-        case .weak: messages.append(String(localized: "Weak: add more words or characters."))
+        case .weak: messages.append(Self.weakMessage)
         case .good: messages.append(String(localized: "Good"))
         case .strong: messages.append(String(localized: "Strong"))
         }
@@ -98,10 +98,13 @@ final class BackupModel {
 
     static var tooShortMessage: String { String(localized: "Too short. Use at least \(BackupPassword.minimumLength) characters.") }
     static var mismatchMessage: String { String(localized: "The passwords don’t match.") }
+    static var weakMessage: String { String(localized: "Weak: add more words or characters.") }
 
     /// Why "Choose Location…" can't be used yet; nil when it can.
     var backUpBlocker: String? {
-        if !BackupPassword.isAcceptable(password) { return Self.tooShortMessage }
+        if strength == .tooShort { return Self.tooShortMessage }
+        // Long enough but trivially repetitive (`111111111111`).
+        if !BackupPassword.isAcceptable(password) { return Self.weakMessage }
         if password != confirmation { return Self.mismatchMessage }
         return nil
     }

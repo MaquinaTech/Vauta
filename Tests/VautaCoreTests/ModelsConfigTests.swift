@@ -15,11 +15,11 @@ struct ModelsConfigTests {
         (.remote, "https://192.168.1.50:8443/v1"), (.remote, "https://10.0.0.7/v1"), (.remote, "https://100.101.102.103:8443/v1"),
         (.remote, "https://[fd12:3456::1]:8443/v1"), (.remote, "https://[fe80::1%25en0]:8443/v1"), (.remote, "https://[fc00::5]/v1"),
         (.remote, "https://[::ffff:192.168.1.9]/v1"),
-        // Legacy (no profile) configs with names keep working.
+        // Saved legacy (no profile) configs with names keep working.
         (.remote, "https://servidor.local:8443/v1"), (.remote, "https://gpu.tail1234.ts.net/v1"),
     ])
     func acceptedDestinations(mode: LLMServerConfig.Mode, url: String) {
-        #expect((try? F.config(mode, url).validated()) != nil)
+        #expect((try? F.config(mode, url).validated(keepingLegacyNames: true)) != nil)
     }
 
     @Test(arguments: [
@@ -125,7 +125,11 @@ struct ModelsConfigTests {
 
     @Test func legacyRemoteNamesWarnInsteadOfFailing() {
         let legacy = F.config(.remote, "https://gpu.local:8443/v1")
-        #expect((try? legacy.validated()) != nil)
+        // Only an already saved config keeps working; pasting, editing or checking one without a profile needs the trust.
+        #expect((try? legacy.validated(keepingLegacyNames: true)) != nil)
+        #expect((try? legacy.validatedEndpoints(keepingLegacyNames: true)) != nil)
+        #expect(throws: LLMServerConfig.Invalid.hostNameRequiresTrust("gpu.local")) { try legacy.validated() }
+        #expect(throws: LLMServerConfig.Invalid.hostNameRequiresTrust("gpu.local")) { try LLMServerConfig.save(legacy, service: "unused") }
         #expect(legacy.securityWarnings == [.hostNameWithoutPinnedTrust("gpu.local")])
         #expect(F.config(.remote, "https://gpu.local/v1", pins: [F.serverPin]).securityWarnings.isEmpty)
         #expect(F.config(.remote, "https://10.0.0.7/v1").securityWarnings.isEmpty)

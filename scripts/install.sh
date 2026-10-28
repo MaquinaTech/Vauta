@@ -77,6 +77,6 @@ if legacy_same_id; then
   mv "$LEGACY_APP" "$TRASHED"
   echo "Moved the earlier version's Acta.app, which shares this bundle ID and data, to the Trash: $TRASHED"
 fi
-echo 'When this version opens, macOS asks ONCE for the Keychain password for "Vauta": choose "Always Allow". If it ever appears at any other time, click Deny.'
+echo 'When this version opens, macOS may ask for the Keychain password for "Vauta": choose "Always Allow". It asks again after every update of an ad-hoc build and after a new signing identity. If it appears when you have not just installed or updated Vauta, click Deny.'
 open ~/Applications/Vauta.app
 echo "Vauta is installed in ~/Applications and running: look for the waveform in the menu bar (use the shortcut shown in its menu to record)."

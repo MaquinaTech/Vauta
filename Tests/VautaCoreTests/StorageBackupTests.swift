@@ -227,6 +227,12 @@ struct StorageBackupTests {
         #expect(BackupPassword.strength(of: "aaaaaaaaaaaaaaaa") == .weak)
         #expect(BackupPassword.strength(of: "correct horse battery staple") == .strong)
         #expect(!BackupPassword.isAcceptable("12345678"))
+        // Long enough but trivially repetitive: weak, and refused.
+        #expect(!BackupPassword.isAcceptable("aaaaaaaaaaaaaaaa"))
+        #expect(!BackupPassword.isAcceptable("111111111111"))
+        #expect(!BackupPassword.isAcceptable("abcabcabcabc"))
+        #expect(BackupPassword.isAcceptable("abcdefabcdef"))
+        #expect(BackupPassword.isAcceptable("correct horse battery staple"))
     }
 
     @Test func nfcAndNfdPasswordsDeriveTheSameKey() throws {

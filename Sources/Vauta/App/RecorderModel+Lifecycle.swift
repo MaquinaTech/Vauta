@@ -150,14 +150,17 @@ extension RecorderModel {
     func finishSession() async {
         var problems: [String] = []
         let endOffset = currentOffset
-        // A note being typed (or an edit with ↑) when the recording ends is saved first, while the meeting is known. If
-        // it cannot be saved the text stays in the notepad and the failure is shown.
-        await notepad.flushPending()
+        // The microphone and the system audio stop first: once the user hears that the recording stopped, nothing more
+        // they say may reach the meeting, however long the note below takes to save.
         do {
             try await capture?.stop()
         } catch {
             problems.append(Self.describe(error))
         }
+        // A note being typed (or an edit with ↑) when the recording ends is saved next, while the meeting is known, at
+        // the end of the recording. If it cannot be saved the text stays in the notepad and the failure is shown.
+        notepad.offset = { endOffset }
+        await notepad.flushPending()
         // capture.stop() waits for the last results: all have been emitted.
         segmentInput?.finish()
         await consumer?.value

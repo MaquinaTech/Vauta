@@ -4,6 +4,23 @@ All notable changes to Vauta are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Vauta follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.3] - 2026-10-28
+
+Fixes from a review of the code after 0.9.2, and a safe way to update.
+
+### Added
+
+- `scripts/update.sh` updates Vauta to the newest release: it verifies that the release tag is signed by the maintainer's key (against the `.github/allowed_signers` already on your Mac and the fingerprint in SECURITY.md), refuses to go back to an older version, shows the release notes, runs the tests and installs with the same bundle ID and signing method. From a version before 0.9.3, run `git pull` once first.
+
+### Fixed
+
+- Pressing Stop now stops the microphone and the system audio at once. Before, they kept running while a note being typed was saved, so a few words said right after the stop sound could reach the meeting.
+- A backup could pass the schema check with SQL hidden behind comment markers inside a quoted name (`"--"`), such as an extra trigger that would then run in your store. The check now reads quoted names whole.
+- A model server on another computer given by name (for example `gpu.local`) needs a private CA or a certificate pin, as documented, also when the pasted configuration or the `server-check` file has no server type. Only a configuration saved by 0.1.x keeps working without them, with a warning; editing it asks for the CA or pin.
+- Backup passwords of 12 or more characters but fewer than 6 different ones (such as `111111111111`) are refused, as the hint already said.
+- A second clone of Vauta, or a new folder, on a Mac where `setup-signing.sh` had already finished was told to delete the signing keychain, which changes Vauta's signature and makes macOS ask for every permission again. `setup-signing.sh` and `install.sh` now find the existing identity and use it.
+- `install.sh` and the README no longer say to deny every later Keychain prompt: macOS asks again after each update of an ad-hoc build and after a new signing identity, and denying it then leaves Vauta without its store.
+
 ## [0.9.2] - 2026-10-28
 
 Fixes for installing from source. No change to the app.
@@ -136,6 +153,7 @@ The first public release (public beta). Compared with 0.1.0, Vauta is open sourc
 
 The first version, used privately before the project was published. Safari and Spanish (Spain) only, with minutes written by an OpenAI-compatible model server on this Mac or on the local network.
 
+[0.9.3]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.3
 [0.9.2]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.2
 [0.9.1]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.1
 [0.9.0]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.0
