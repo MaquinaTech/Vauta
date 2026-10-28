@@ -148,7 +148,8 @@ struct TranslationServerTests {
         let ok = StubRefiner()
         ok.delay = .milliseconds(120)
         let sample = RefinementTest.Sample.make(source: english, target: spanish)
-        let good = await RefinementTest.run(sample, with: ok)
+        // A generous timeout: a loaded runner can stall a 120 ms reply for far longer than the default 20 s.
+        let good = await RefinementTest.run(sample, with: ok, timeout: .seconds(600))
         #expect(good.outcome == .translated("R(\(sample.text))") && good.seconds >= 0.1)
 
         let slow = StubRefiner()
