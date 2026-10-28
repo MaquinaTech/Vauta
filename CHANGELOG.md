@@ -4,6 +4,14 @@ All notable changes to Vauta are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Vauta follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] - 2026-10-28
+
+A fix for installing from source. No change to the app.
+
+### Fixed
+
+- `scripts/setup-signing.sh` failed on Macs with a newer OpenSSL from Homebrew (4.x): the certificate file it hands to the Keychain used algorithms `security import` cannot read, and macOS reported it as "MAC verification failed during PKCS12 import (wrong password?)", although no password was wrong. The script now names the algorithms macOS reads, whatever the OpenSSL version, and if the import still fails it says so instead of looking like a wrong password. To recover from the failed attempt, run the script again: it rebuilds the empty signing keychain on its own.
+
 ## [0.9.1] - 2026-10-28
 
 The look of the website comes to the app (a new icon, Vauta's animated sphere, Welcome and the menu-bar panel in Vauta's colours) and the security fixes of the audit after 0.9.0. No change to recording, transcription, the minutes or the stored data.
@@ -124,5 +132,6 @@ The first public release (public beta). Compared with 0.1.0, Vauta is open sourc
 
 The first version, used privately before the project was published. Safari and Spanish (Spain) only, with minutes written by an OpenAI-compatible model server on this Mac or on the local network.
 
+[0.9.2]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.2
 [0.9.1]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.1
 [0.9.0]: https://github.com/MaquinaTech/Vauta/releases/tag/v0.9.0

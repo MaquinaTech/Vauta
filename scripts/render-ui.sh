@@ -58,8 +58,8 @@ cp Resources/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"
 cp -R Resources/*.lproj "$APP/Contents/Resources/"
 PLIST="$APP/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier $BUNDLE_ID" "$PLIST"
-/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 0.9.1" "$PLIST"
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion 2" "$PLIST"
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 0.9.2" "$PLIST"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion 3" "$PLIST"
 xattr -cr "$APP"
 # Ad hoc, without the sandbox: the images are written outside any container.
 codesign --force --sign - --timestamp=none "$APP" >&2
