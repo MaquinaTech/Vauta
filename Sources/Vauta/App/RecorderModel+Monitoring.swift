@@ -93,8 +93,9 @@ extension RecorderModel {
         }
         let left = pendingAutoStopAt.map { max(0, Int($0.timeIntervalSinceNow.rounded(.up))) }
         if left != autoStopRemaining { autoStopRemaining = left }
-        if let startedAt {
-            let s = Int(AppClock.now.timeIntervalSince(startedAt))
+        if startedAt != nil {
+            // The transcript's clock, so the time shown matches where marks and notes land.
+            let s = Int(currentOffset)
             if s != elapsedSeconds { elapsedSeconds = s }
         }
     }

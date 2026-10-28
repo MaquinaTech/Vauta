@@ -291,8 +291,11 @@ final class RecorderModel {
             || pendingAutoStopAt != nil || hangupNotice || missingModel != nil
     }
     var elapsed: String { ElapsedTime.stamp(elapsedSeconds) }
-    /// Seconds into the meeting (same origin as the segments).
-    var currentOffset: Double { startedAt.map { max(0, AppClock.now.timeIntervalSince($0)) } ?? 0 }
+    /// Seconds into the meeting, where "now" is in the transcript: seconds since the first captured audio, on the capture's monotonic clock, so
+    /// marks, notes and live notes line up with the segments. The wall clock since the start only before any audio.
+    var currentOffset: Double {
+        capture?.elapsedSeconds ?? startedAt.map { max(0, AppClock.now.timeIntervalSince($0)) } ?? 0
+    }
     /// Something must be closed or saved before quitting.
     var needsGracefulStop: Bool { capture != nil || phase == .starting || phase == .stopping || stopTask != nil || store != nil }
 
@@ -673,6 +676,11 @@ final class RecorderModel {
                 charsSinceLiveNotes = 0
                 serverDownNotified = false
                 await llm?.setRecording(true, meetingID: id)
+                // The recording may have been stopped (and even saved) during that wait: nothing more starts for it.
+                guard phase == .recording, meetingID == id else {
+                    if meetingID == nil, stopTask == nil { await llm?.setRecording(false, meetingID: nil) }
+                    return
+                }
                 startLiveAnswers(meetingID: id, locale: plan.language.locale.identifier)
                 await prepareConsentPrompt(meetingID: id, sourceApp: sourceFamily?.rawValue, language: plan.language.locale)
                 // Asked once capture runs, never before: answering the prompt

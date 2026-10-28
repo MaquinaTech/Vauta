@@ -39,6 +39,11 @@ public struct DiarizationConfig: Sendable, Equatable {
     public var onlineNewClusterSeconds: Double = 4.0
     /// Live labels are re-clustered globally this often (seconds of audio) and mapped back onto the old labels.
     public var liveReclusterSeconds: Double = 45
+    /// Each live re-clustering clusters every window so far (O(n^2)), so it runs less often as the meeting grows: the
+    /// interval is at least this share of the windows analysed, up to `liveReclusterMaxSeconds`. Meetings shorter than
+    /// about 7.5 minutes (230 windows at the 2 s step) keep the fixed `liveReclusterSeconds`.
+    public var liveReclusterShare: Double = 0.1
+    public var liveReclusterMaxSeconds: Double = 300
 
     /// Final clustering: cut height of the centroid-linkage dendrogram (Euclidean, L2-normalised embeddings).
     /// 0.75 is a cliff on some recordings (speakers merge), so the default sits one notch below it.
@@ -99,4 +104,11 @@ public struct DiarizationConfig: Sendable, Equatable {
     public var minClusterSize: Int { max(2, Int((minClusterSeconds / stepSeconds).rounded())) }
     public var establishedEmbeddings: Int { max(2, Int((establishedSeconds / stepSeconds).rounded())) }
     public var liveReclusterWindows: Int { max(1, Int((liveReclusterSeconds / stepSeconds).rounded())) }
+    /// Windows between two live re-clusterings once `windows` have been analysed.
+    public func liveReclusterInterval(windows: Int) -> Int {
+        let base = liveReclusterWindows
+        let ceiling = max(base, Int((liveReclusterMaxSeconds / stepSeconds).rounded()))
+        let grown = Int((liveReclusterShare * Double(max(0, windows))).rounded(.down))
+        return min(ceiling, max(base, grown))
+    }
 }

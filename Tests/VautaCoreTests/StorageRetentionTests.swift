@@ -158,4 +158,34 @@ struct StorageRetentionTests {
         #expect(try await store.endMeeting(id, at: .now))
         #expect(try await store.meeting(id) != nil)
     }
+
+    @Test func anAbortedStartKeepsNoTranscript() async throws {
+        let fx = StoreFixture()
+        let store = try fx.open()
+        let id = try await store.startMeeting(at: .now)
+        try await store.append(segment(.me, 0, "captured while starting"), to: id)
+        try await store.discardTranscript(ofActiveMeeting: id)
+        #expect(try await store.endMeeting(id, at: .now) == false, "nothing left: the meeting is removed")
+        #expect(try await store.meeting(id) == nil)
+    }
+
+    @Test func anAbortedStartKeepsTheNotesTypedMeanwhile() async throws {
+        let fx = StoreFixture()
+        let store = try fx.open()
+        let id = try await store.startMeeting(at: .now)
+        try await store.append(segment(.me, 0, "captured while starting"), to: id)
+        _ = try await store.addNote(id, at: 0, text: "agenda")
+        try await store.discardTranscript(ofActiveMeeting: id)
+        #expect(try await store.endMeeting(id, at: .now))
+        #expect(try await store.segments(of: id).isEmpty)
+        #expect(try await store.notes(id).map(\.text) == ["agenda"])
+    }
+
+    @Test func discardingTouchesOnlyTheActiveMeeting() async throws {
+        let fx = StoreFixture()
+        let store = try fx.open()
+        let past = try await record(store, "a saved meeting")
+        try await store.discardTranscript(ofActiveMeeting: past)
+        #expect(try await store.segments(of: past).count == 1)
+    }
 }

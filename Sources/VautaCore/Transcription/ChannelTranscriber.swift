@@ -57,118 +57,96 @@ public enum TranscriptionEngine: Sendable, Equatable {
     }
 }
 
-/// One SpeechAnalyzer plus on-device transcriber per audio channel.
+/// The transcription of one audio channel: places each chunk on the channel's timeline (`ChannelTimeline`) and hands
+/// it to an analyzer session (SpeechAnalyzer with an on-device transcriber, see `SpeechAnalyzerSession`).
 ///
-/// Privacy: audio is not processed in this process but in system XPC services
-/// (localspeechrecognition), which don't inherit Vauta's sandbox. That nothing
-/// leaves the Mac is guaranteed by Apple (these modules only run on device).
+/// If the analyzer fails mid-recording, the session is rebuilt and the channel goes on at the same place of the
+/// timeline (what arrives meanwhile is lost, shown as lagging). Only when `AnalyzerRetryPolicy` gives up is the channel
+/// reported as failed.
 final class ChannelTranscriber: @unchecked Sendable {
     /// Maximum pending audio if the analyzer falls behind (chunks are ~100 ms).
     static let maxPendingSeconds = 120.0
     static var capacity: Int { Int(maxPendingSeconds * 10) }
+    /// How long stopping waits for a rebuild in progress.
+    static let recoveryWaitSeconds = 15.0
 
     let channel: Channel
     let analyzerFormat: AVAudioFormat
-    private let module: any SpeechModule
-    private let vocabulary: [String]
-    private let analyzer: SpeechAnalyzer
-    private let input: AsyncStream<AnalyzerInput>.Continuation
-    private let inputStream: AsyncStream<AnalyzerInput>
-    private var resultsTask: Task<Void, Error>?
+    private let makeSession: @Sendable (_ collectsWords: Bool) -> any AnalyzerSession
 
     private let lock = NSLock()
-    private var framePosition: AVAudioFramePosition = 0
+    private var session: (any AnalyzerSession)?
+    private var sessionStarted: TimeInterval = 0
+    private var onSegment: (@Sendable (Segment) -> Void)?
+    private var recovery: Task<Void, Never>?
+    private var retry: AnalyzerRetryPolicy
+    private var timeline: ChannelTimeline
     private var dropped = 0
+    /// No session transcribes any more (it never started, or the retries ran out).
     private var failed = false
+    private var stopping = false
     private var collectsWords = false
     private var lag = LagMonitor(capacity: ChannelTranscriber.capacity)
 
-    /// Content-free notices (audio dropped because of lag).
+    /// Content-free notices (audio dropped because of lag, analyzer restarts).
     var onDiagnostic: (@Sendable (String) -> Void)?
-    /// `.lagging` when audio starts being dropped, `.ok` once it caught up.
+    /// `.lagging` when audio starts being dropped (or the analyzer is being restarted), `.ok` once it caught up.
     var onHealth: (@Sendable (ChannelHealth) -> Void)?
-    /// The analyzer failed mid-recording: the channel stops transcribing.
+    /// The analyzer failed mid-recording and could not be restarted: the channel stops transcribing.
     var onFailure: (@Sendable (Channel, Error) -> Void)?
 
-    init(channel: Channel, locale: Locale, engine: TranscriptionEngine = .speech) async throws {
+    init(channel: Channel, format: AVAudioFormat, retry: AnalyzerRetryPolicy = AnalyzerRetryPolicy(),
+         makeSession: @escaping @Sendable (_ collectsWords: Bool) -> any AnalyzerSession) {
         self.channel = channel
+        analyzerFormat = format
+        self.retry = retry
+        self.makeSession = makeSession
+        timeline = ChannelTimeline(sampleRate: format.sampleRate)
+    }
+
+    convenience init(channel: Channel, locale: Locale, engine: TranscriptionEngine = .speech) async throws {
+        let vocabulary: [String]
+        let makeModule: @Sendable () -> any SpeechModule
         switch engine {
         case .speech:
-            module = SpeechAssets.speechModule(locale)
+            makeModule = { SpeechAssets.speechModule(locale) }
             vocabulary = []
         case .dictation(let words):
-            module = SpeechAssets.dictationModule(locale)
+            makeModule = { SpeechAssets.dictationModule(locale) }
             vocabulary = Array(words.prefix(TranscriptionEngine.maxVocabulary))
         }
-        guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith: [module]) else {
+        guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith: [makeModule()]) else {
             throw CaptureError(.analyzerFormatUnavailable, locale: locale)
         }
-        analyzerFormat = format
-        analyzer = SpeechAnalyzer(modules: [module])
-        // Bounded queue: if the analyzer stalls or falls behind, audio doesn't
-        // pile up in RAM. .bufferingOldest keeps the order of what is already
-        // queued and drops the newest.
-        (inputStream, input) = AsyncStream.makeStream(of: AnalyzerInput.self, bufferingPolicy: .bufferingOldest(Self.capacity))
+        self.init(channel: channel, format: format) { collectsWords in
+            SpeechAnalyzerSession(channel: channel, module: makeModule(), vocabulary: vocabulary, format: format,
+                                  collectsWords: collectsWords, capacity: ChannelTranscriber.capacity)
+        }
     }
 
     /// Keep the word times of final results (for splitting segments at speaker changes). Set before `start`.
     func collectWordTimes(_ collect: Bool) { lock.withLock { collectsWords = collect } }
 
     func start(onSegment: @escaping @Sendable (Segment) -> Void) async throws {
-        try await analyzer.prepareToAnalyze(in: analyzerFormat)
-        if !vocabulary.isEmpty {
-            let context = AnalysisContext()
-            context.contextualStrings[.general] = vocabulary
-            try await analyzer.setContext(context)
-        }
-        let channel = channel
-        let module = module
-        let input = input
-        let collectsWords = lock.withLock { self.collectsWords }
-        @Sendable func emit(_ attributed: AttributedString, _ range: CMTimeRange, _ isFinal: Bool) {
-            let text = String(attributed.characters).trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !text.isEmpty else { return }
-            let words = collectsWords && isFinal ? SpeechWordTimes.runs(in: attributed, trimmedTo: text) : []
-            onSegment(Segment(channel: channel, start: range.start.seconds, end: range.end.seconds, text: text, isFinal: isFinal,
-                              words: words))
-        }
-        resultsTask = Task { [weak self] in
-            do {
-                if let speech = module as? SpeechTranscriber {
-                    for try await r in speech.results { emit(r.text, r.range, r.isFinal) }
-                } else if let dictation = module as? DictationTranscriber {
-                    for try await r in dictation.results { emit(r.text, r.range, r.isFinal) }
-                }
-            } catch is CancellationError {
-            } catch {
-                // Without an analyzer, later yields are discarded: no audio piles up.
-                input.finish()
-                self?.lock.withLock { self?.failed = true }
-                self?.onFailure?(channel, error)
-                throw error
-            }
-        }
+        lock.withLock { self.onSegment = onSegment }
         do {
-            try await analyzer.start(inputSequence: inputStream)
+            try await startSession()
         } catch {
-            input.finish()
-            resultsTask?.cancel()
+            // A session that never started is cancelled when finishing, never finalized.
+            lock.withLock { failed = true }
             throw error
         }
     }
 
-    /// Takes audio already converted to `analyzerFormat`. Each chunk carries its
-    /// explicit start time, so a dropped chunk doesn't shift the following ones.
-    /// Returns the chunk's first frame, the counter the speaker diarizer shares.
+    /// Takes audio already converted to `analyzerFormat`, captured `offset` seconds after the session origin (nil:
+    /// right after the previous chunk). Returns the chunk's first frame, the counter the speaker diarizer shares.
     @discardableResult
-    func feed(_ buffer: AVAudioPCMBuffer) -> AVAudioFramePosition {
-        let start = lock.withLock {
-            defer { framePosition += AVAudioFramePosition(buffer.frameLength) }
-            return framePosition
+    func feed(_ buffer: AVAudioPCMBuffer, capturedAt offset: Double? = nil) -> AVAudioFramePosition {
+        let (start, session) = lock.withLock {
+            (timeline.place(frames: Int64(buffer.frameLength), capturedAt: offset), failed ? nil : self.session)
         }
-        let time = CMTime(value: start, timescale: CMTimeScale(analyzerFormat.sampleRate))
         let now = ProcessInfo.processInfo.systemUptime
-        switch input.yield(AnalyzerInput(buffer: buffer, bufferStartTime: time)) {
+        switch session?.yield(buffer, startFrame: start) ?? .terminated {
         case .dropped:
             let (n, change) = lock.withLock {
                 dropped += 1
@@ -182,30 +160,115 @@ final class ChannelTranscriber: @unchecked Sendable {
             if let change = lock.withLock({ lag.enqueued(remaining: remaining, at: now) }) { onHealth?(change) }
         case .terminated:
             break
-        @unknown default:
-            break
         }
         return start
     }
 
-    /// Closes the input and waits for the last final results. It always waits
-    /// for `resultsTask`, even if finalizing fails.
+    /// Closes the input and waits for the last final results. Every step has a deadline: stopping never hangs.
     func finish() async throws {
-        input.finish()
-        var firstError: Error?
-        if lock.withLock({ failed }) {
-            await analyzer.cancelAndFinishNow()
-        } else {
+        let recovery = lock.withLock {
+            stopping = true
+            return self.recovery
+        }
+        recovery?.cancel()
+        _ = await waitForTask(recovery, seconds: Self.recoveryWaitSeconds)
+        let (session, failed) = lock.withLock { (self.session, self.failed) }
+        try await session?.finish(cancel: failed)
+    }
+
+    // MARK: Sessions
+
+    /// Makes a new session current and starts it. It is current before it starts, so audio queues meanwhile and a
+    /// failure right after the start is not missed.
+    private func startSession() async throws {
+        let (session, onSegment) = lock.withLock { () -> (any AnalyzerSession, (@Sendable (Segment) -> Void)?) in
+            let session = makeSession(collectsWords)
+            self.session = session
+            sessionStarted = ProcessInfo.processInfo.systemUptime
+            return (session, self.onSegment)
+        }
+        try await session.start(onSegment: onSegment ?? { _ in }) { [weak self, weak session] error in
+            guard let self, let session else { return }
+            self.sessionFailed(session, error)
+        }
+    }
+
+    private enum Decision { case ignore, retry(after: Double, attempt: Int), giveUp }
+
+    private func sessionFailed(_ failedSession: any AnalyzerSession, _ error: Error) {
+        let now = ProcessInfo.processInfo.systemUptime
+        let decision: Decision = lock.withLock {
+            guard !stopping, !failed, recovery == nil, session === failedSession else { return .ignore }
+            guard let delay = retry.failed(at: now, runningSince: sessionStarted) else {
+                failed = true
+                return .giveUp
+            }
+            recovery = Task { [weak self] in await self?.recover(after: delay) }
+            return .retry(after: delay, attempt: retry.attempts)
+        }
+        switch decision {
+        case .ignore:
+            break
+        case .giveUp:
+            onFailure?(channel, error)
+        case .retry(let delay, let attempt):
+            onDiagnostic?("\(channel.rawValue): analyzer failed: \(error); restarting in \(delay) s (attempt \(attempt))")
+            onHealth?(.lagging)
+        }
+    }
+
+    /// Replaces the failed session after `delay`, again while the policy allows. Stopping cancels it.
+    private func recover(after delay: Double) async {
+        var delay = delay
+        while true {
+            if let old = lock.withLock({ session }) { try? await old.finish(cancel: true) }
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled, !lock.withLock({ stopping }) else { break }
             do {
-                try await analyzer.finalizeAndFinishThroughEndOfInput()
+                try await startSession()
+                lock.withLock { recovery = nil }
+                onDiagnostic?("\(channel.rawValue): analyzer restarted")
+                onHealth?(.ok)
+                return
             } catch {
-                firstError = error
-                await analyzer.cancelAndFinishNow()
+                let now = ProcessInfo.processInfo.systemUptime
+                let next: Double? = lock.withLock { retry.failed(at: now, runningSince: now) }
+                guard let next else {
+                    let report = lock.withLock {
+                        failed = true
+                        recovery = nil
+                        return !stopping
+                    }
+                    if report { onFailure?(channel, error) }
+                    return
+                }
+                delay = next
             }
         }
-        do { try await resultsTask?.value } catch is CancellationError {} catch { firstError = firstError ?? error }
-        resultsTask = nil
-        if let firstError { throw firstError }
+        lock.withLock { recovery = nil }
+    }
+}
+
+/// How often a channel's analyzer is rebuilt after it fails: up to `maxAttempts` times in a row, waiting longer each
+/// time. A session that ran for `stableSeconds` before it failed starts the count over.
+struct AnalyzerRetryPolicy: Sendable {
+    var maxAttempts: Int
+    var delays: [Double]
+    var stableSeconds: TimeInterval
+    private(set) var attempts = 0
+
+    init(maxAttempts: Int = 3, delays: [Double] = [1, 3, 10], stableSeconds: TimeInterval = 300) {
+        self.maxAttempts = maxAttempts
+        self.delays = delays
+        self.stableSeconds = stableSeconds
+    }
+
+    /// A session that started at `start` failed at `now`: the delay before the next one, or nil to give up.
+    mutating func failed(at now: TimeInterval, runningSince start: TimeInterval) -> Double? {
+        if now - start >= stableSeconds { attempts = 0 }
+        attempts += 1
+        guard attempts <= maxAttempts, !delays.isEmpty else { return nil }
+        return delays[min(attempts - 1, delays.count - 1)]
     }
 }
 

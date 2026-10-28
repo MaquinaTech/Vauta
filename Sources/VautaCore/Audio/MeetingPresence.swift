@@ -19,6 +19,7 @@ public final class MeetingPresence: @unchecked Sendable {
     private typealias Listener = (AudioObjectID, AudioObjectPropertyAddress, AudioObjectPropertyListenerBlock)
 
     private let queue = DispatchQueue(label: "vauta.presence")
+    private let queueKey = DispatchSpecificKey<Bool>()
     private let onChange: @Sendable (PresenceState) -> Void
     private let ownPID = getpid()
 
@@ -35,11 +36,22 @@ public final class MeetingPresence: @unchecked Sendable {
     /// and reopen the microphone when the audio device changes).
     public init(onChange: @escaping @Sendable (PresenceState) -> Void) {
         self.onChange = onChange
+        queue.setSpecific(key: queueKey, value: true)
         queue.async { self.start() }
     }
 
+    /// The listener state belongs to `queue`. The last reference may be dropped on it (by the block that runs
+    /// `start`), so this never waits for the queue from inside it.
     deinit {
-        removeAll()
+        if DispatchQueue.getSpecific(key: queueKey) == true {
+            pending?.cancel()
+            removeAll()
+        } else {
+            queue.sync {
+                pending?.cancel()
+                removeAll()
+            }
+        }
     }
 
     private func start() {

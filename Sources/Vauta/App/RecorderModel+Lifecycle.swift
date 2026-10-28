@@ -55,6 +55,9 @@ extension RecorderModel {
 
 
     func abortStart(_ error: Error?) async {
+        // The recording never began (the panel says the start was cancelled or failed): what was transcribed while the
+        // capture was starting is not kept. Only a start still in progress; a running recording is never discarded.
+        let discardCaptured = phase == .starting
         try? await capture?.stop()
         segmentInput?.finish()
         await consumer?.value
@@ -75,6 +78,12 @@ extension RecorderModel {
         writes = nil
         lateTarget?.complete(meetingID: meetingID, rows: segmentRowIDs)
         if hadDiarizer, let store, let id = meetingID { try? await store.deleteDiarizationWindows(meetingID: id) }
+        if discardCaptured, let store, let id = meetingID {
+            try? await store.discardTranscript(ofActiveMeeting: id)
+            segments = []
+            volatile = [:]
+            volatileSegments = []
+        }
         // endMeeting closes the meeting (or removes it when empty) and saves.
         if let store, let id = meetingID, (try? await store.endMeeting(id, at: .now)) != nil {
             UserDefaults.standard.removeObject(forKey: Self.recordingMeetingKey)
@@ -147,6 +156,11 @@ extension RecorderModel {
         if !NSApp.isActive { post(.startFailed(kind, reason: reason)) }
     }
 
+    /// Deadlines of the steps of saving a meeting that depend on work outside the store (finalizing the transcription
+    /// has its own, in `SpeechAnalyzerSession`).
+    static let diarizationFinishSeconds = 120.0
+    static let speakerFinalizeSeconds = 180.0
+
     func finishSession() async {
         var problems: [String] = []
         let endOffset = currentOffset
@@ -167,7 +181,16 @@ extension RecorderModel {
         segmentInput = nil
         consumer = nil
         // The audio is over: the diarizer analyses what it still holds (it never waited for the transcript).
-        let diarization = await diarizer?.finish()
+        // With a deadline: a diarizer that never finishes must not keep the meeting in "Saving" (it is cancelled and the
+        // meeting is saved without separated speakers).
+        var diarization: DiarizationRun?
+        if let diarizer {
+            do {
+                diarization = try await withDeadline(seconds: Self.diarizationFinishSeconds) { await diarizer.finish() }
+            } catch {
+                diarizer.cancel()
+            }
+        }
         if let id = meetingID { saveSpooledWindows(meetingID: id) }
         // The last sentences get a moment to be translated; their rows are queued before the writes are awaited.
         let lateTarget = beginEndedTranslationTarget()
@@ -177,7 +200,9 @@ extension RecorderModel {
         stopLiveAnswers()
         // Speakers next: the segments are all saved and nothing else has touched them yet. A late translation is
         // stored only after this (the target is completed below), so it is never cut by a split.
-        await finalizeSpeakers(run: diarization)
+        // Also with a deadline; past it the speakers are written in the background and the meeting is saved now.
+        let run = diarization
+        await waitAtMost(until: .now + .seconds(Self.speakerFinalizeSeconds)) { await self.finalizeSpeakers(run: run) }
         lateTarget?.complete(meetingID: meetingID, rows: segmentRowIDs)
         await autosave?.value
         autosave = nil
