@@ -135,4 +135,23 @@ struct ModelsDiscoveryTests {
         #expect(await ServerDiscovery.inspectLoopback(baseURL: "https://127.0.0.1:1234/v1") == nil)
         #expect(await ServerDiscovery.inspectLoopback(baseURL: "http://example.com/v1") == nil)
     }
+
+    @Test func answersPastTheCapAreDropped() async {
+        let big = Data(repeating: UInt8(ascii: "a"), count: 4096)
+        let port = StubServer.register { r in
+            switch r.url.path() {
+            case "/v1/models": StubServer.Reply(headers: ["Content-Type": "application/json"], body: big)   // no length: read until the cap
+            case "/api/tags": StubServer.Reply(headers: ["Content-Type": "application/json", "Content-Length": "4096"], body: big)
+            case "/api/version": StubServer.Reply(body: Data(#"{"version":"1"}"#.utf8))
+            default: nil
+            }
+        }
+        defer { StubServer.unregister(port) }
+        let session = ServerDiscovery.loopbackSession(timeout: 5, protocolClasses: [StubServer.self])
+        defer { session.invalidateAndCancel() }
+        let fetch = ServerDiscovery.loopbackFetch(session: session, root: URL(string: "http://127.0.0.1:\(port)/")!, timeout: 5, maxBytes: 1024)
+        #expect(await fetch(.openAI("models"), nil) == nil)
+        #expect(await fetch(.native("api/tags"), nil) == nil)
+        #expect(await fetch(.native("api/version"), nil) == Data(#"{"version":"1"}"#.utf8))
+    }
 }

@@ -212,4 +212,21 @@ struct ModelsConfigTests {
         // The real interface table never makes a well-known public resolver on-link.
         #expect(!ServerAddress.isOnLink("8.8.8.8") && !ServerAddress.isOnLink("not-an-ip"))
     }
+
+    @Test func onLinkAcceptanceIsIPv6Only() throws {
+        // A Mac on a public IPv4 subnet (here a /8) does not make its neighbours acceptable peers.
+        let subnets: [(address: ServerAddress.IP, mask: ServerAddress.IP)] = [
+            (.v4([203, 0, 113, 10]), .v4([255, 0, 0, 0])),
+            (try #require(ServerAddress.ip("2a01:db8:1:2::1")), try #require(ServerAddress.ip("ffff:ffff:ffff:ffff::"))),
+        ]
+        #expect(!ServerAddress.isOnLink("203.7.7.7", subnets: subnets))
+        #expect(!ServerAddress.isOnLink("::ffff:203.7.7.7", subnets: subnets))
+        #expect(ServerAddress.isOnLink("2a01:db8:1:2::7", subnets: subnets))
+        #expect(!ServerAddress.isOnLink("2a01:db8:1:3::7", subnets: subnets))
+        // Even when the interface check says yes, a public IPv4 peer (plain or mapped) is refused.
+        #expect(!LLMClient.peerAllowed("203.7.7.7", mode: .remote, onLink: { _ in true }))
+        #expect(!LLMClient.peerAllowed("::ffff:203.7.7.7", mode: .remote, onLink: { _ in true }))
+        #expect(LLMClient.peerAllowed("::ffff:192.168.1.4", mode: .remote, onLink: { _ in false }))
+        #expect(ServerAddress.isIPv6("2a01:db8::1") && !ServerAddress.isIPv6("::ffff:10.0.0.1") && !ServerAddress.isIPv6("10.0.0.1"))
+    }
 }

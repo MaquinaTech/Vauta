@@ -137,11 +137,28 @@ struct SettingsServerDraftTests {
         #expect(chosen.contextTokens == 40_960)
     }
 
-    @Test func detectedContextIsClamped() {
+    @Test func aContextBelowTheMinimumIsNeverRaisedSilently() {
         let server = DiscoveredServer(kind: .llamaCpp, baseURL: URL(string: "http://127.0.0.1:8080/v1/")!, version: nil,
-                                      models: [DiscoveredModel(id: "m", kind: .chat, contextLength: 4_096)])
-        #expect(ServerDraft.detectedContext(server, fast: "m", deep: "m") == LLMServerConfig.contextRange.lowerBound)
+                                      models: [DiscoveredModel(id: "m", kind: .chat, contextLength: 4_096),
+                                               DiscoveredModel(id: "big", kind: .chat, contextLength: 1_000_000)])
+        // The server keeps its 4K window: no raised value is filled in, the shortfall is reported instead.
+        #expect(ServerDraft.detectedContext(server, fast: "m", deep: "m") == nil)
+        #expect(ServerDraft.contextShortfall(server, fast: "big", deep: "m").map { [$0.model: $0.context] } == ["m": 4_096])
+        #expect(ServerDraft.contextShortfall(server, fast: "big", deep: "big") == nil)
+        #expect(ServerDraft.detectedContext(server, fast: "big", deep: "big") == LLMServerConfig.contextRange.upperBound)
         #expect(ServerDraft.detectedContext(server, fast: "x", deep: "y") == nil)
+        var draft = ServerDraft(config: nil)
+        draft.contextTokens = 16_384
+        draft.fastModel = "m"
+        draft.deepModel = "m"
+        draft.adopt(server)
+        #expect(draft.contextTokens == 16_384)
+        let small = DiscoveredServer(kind: .ollama, baseURL: URL(string: "http://127.0.0.1:11434/v1/")!,
+                                     models: [DiscoveredModel(id: "only", kind: .chat, contextLength: 2_048)])
+        #expect(small.suggestedConfig().contextTokens == LLMServerConfig.defaultContext)
+        // server-check compares with the configured context.
+        #expect(server.models(["m", "big", "m", "x"], loadedWithLessThan: 32_768).map(\.id) == ["m"])
+        #expect(server.models(["big"], loadedWithLessThan: 32_768).isEmpty)
     }
 
     @Test func switchingModeClearsAnAddressThatCannotWork() {

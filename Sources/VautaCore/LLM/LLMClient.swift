@@ -165,11 +165,14 @@ public struct ChatResult: Sendable {
 ///   origin) and re-checked before each request and on each response.
 /// - HTTPS: TLS 1.3 minimum; ephemeral session with no cache, cookies,
 ///   credentials or proxy. Redirects are refused.
-/// - Trust: a private CA bundle, when given, holds the ONLY anchors (no network
-///   fetches during evaluation); otherwise the system anchors. With pins, the
-///   leaf certificate's SPKI SHA-256 must also match one of them.
+/// - Trust: a private CA bundle, when given, holds the ONLY anchors; otherwise
+///   the system anchors. No network fetches during evaluation in either case.
+///   With pins, the leaf certificate's SPKI SHA-256 must also match one of them.
 /// - For hosts given by name, the connected peer address must be private
-///   (loopback for local mode); otherwise further requests are refused.
+///   (loopback for local mode): a probe that carries no body and no key checks
+///   it before the first request of a session (`LLMClient+PeerCheck.swift`),
+///   and every completed request checks it again; otherwise further requests
+///   are refused.
 /// - The key (optional) is read from the Keychain for each request and never logged.
 public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Sendable {
     /// Keychain account of the server key (optional: local LM Studio or Ollama need none).
@@ -184,32 +187,44 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         case embeddings = "embeddings"
     }
 
-    private let bearer: @Sendable () throws -> String?
+    let bearer: @Sendable () throws -> String?
     private let protocolClasses: [AnyClass]?
     private let log: NetworkActivityLog
+    /// The connected addresses in a request's metrics (tests replace it: a URL protocol stub has no socket).
+    let peerAddresses: @Sendable (URLSessionTaskMetrics) -> [String]
+    /// How long a peer probe waits for its metrics before it fails closed.
+    let peerCheckTimeout: Duration
     private let lock = NSLock()
     private var _session: AuditedSession?
+    /// Which name-based servers the current session has probed; replaced with the session.
+    private var _peerGate = PeerGate()
     private var _config: LLMServerConfig?
     private var _endpoints: [LLMRole: LLMServerConfig.Endpoint] = [:]
     private var _primary: LLMServerConfig.Endpoint?
     /// Set when a host name resolved outside the allowed network.
     private var _peerViolation: String?
 
-    private var config: LLMServerConfig? { lock.withLock { _config } }
+    var config: LLMServerConfig? { lock.withLock { _config } }
     private var primary: LLMServerConfig.Endpoint? { lock.withLock { _primary } }
     private var allEndpoints: [LLMServerConfig.Endpoint] {
         lock.withLock { (_primary.map { [$0] } ?? []) + Array(_endpoints.values) }
     }
 
-    /// Created on first use (URLSession retains its delegate: this client lives as long as the app).
-    private var session: AuditedSession {
+    /// The session, created on first use (URLSession retains its delegate: this client lives as long as the app),
+    /// and the peer checks of its connections, which start empty with each new session.
+    var connection: (session: AuditedSession, peers: PeerGate) {
         lock.withLock {
-            if let s = _session { return s }
+            if let s = _session { return (s, _peerGate) }
             let s = makeSession()
             _session = s
-            return s
+            _peerGate = PeerGate()
+            return (s, _peerGate)
         }
     }
+
+    var peerViolation: String? { lock.withLock { _peerViolation } }
+
+    func recordPeerViolation(_ address: String) { lock.withLock { _peerViolation = address } }
 
     private func makeSession() -> AuditedSession {
         let c = URLSessionConfiguration.ephemeral
@@ -237,12 +252,16 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         self.init(config: config, bearer: bearer, protocolClasses: nil)
     }
 
-    /// `protocolClasses`: URL loading stubs for tests.
+    /// `protocolClasses`: URL loading stubs for tests; `peerAddresses` and `peerCheckTimeout` likewise.
     init(config: LLMServerConfig?, bearer: @escaping @Sendable () throws -> String?, protocolClasses: [AnyClass]?,
-         log: NetworkActivityLog = .shared) {
+         log: NetworkActivityLog = .shared,
+         peerAddresses: @escaping @Sendable (URLSessionTaskMetrics) -> [String] = { $0.transactionMetrics.compactMap(\.remoteAddress) },
+         peerCheckTimeout: Duration = .seconds(10)) {
         self.bearer = bearer
         self.log = log
         self.protocolClasses = protocolClasses
+        self.peerAddresses = peerAddresses
+        self.peerCheckTimeout = peerCheckTimeout
         super.init()
         apply(config)
     }
@@ -324,8 +343,8 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         let name = try options.modelOverride.flatMap { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 } ?? modelName(options.model)
         let body = try ServerRequests.chatBody(model: name, messages: messages, options: options,
                                                profile: config.effectiveProfile)
-        let request = try await preparedRequest(.chat, role: options.model, body: body, purpose: options.purpose)
-        let (bytes, response) = try await perform { try await self.session.bytes(for: request, purpose: options.purpose) }
+        let (request, session) = try await preparedRequest(.chat, role: options.model, body: body, purpose: options.purpose)
+        let (bytes, response) = try await perform { try await session.bytes(for: request, purpose: options.purpose) }
         try await check(response, bytes)
         var parser = ChatStreamParser()
         var lastReported = 0
@@ -340,7 +359,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
             }
             try parser.finish()
         } catch let e as LLMError {
-            throw e
+            throw e.redacting(storedToken)
         } catch is CancellationError {
             throw CancellationError()
         } catch let e as URLError where e.code == .cancelled && Task.isCancelled {
@@ -427,14 +446,16 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
             throw LLMError.network(Self.destinationNotAllowed)
         }
         var request: URLRequest
+        let session: AuditedSession
         do {
             request = try authorizedRequest(url, target: target, body: body)
+            session = try await checkedSession(for: target)
         } catch {
             await recordRefusal(error, url: url, body: body, purpose: purpose)
             throw error
         }
         request.timeoutInterval = 10
-        let (bytes, response) = try await perform { try await self.session.bytes(for: request, purpose: purpose) }
+        let (bytes, response) = try await perform { try await session.bytes(for: request, purpose: purpose) }
         guard let http = response as? HTTPURLResponse, let url = http.url else { return nil }
         try Self.requireAllowed(url, target)
         guard (200..<300).contains(http.statusCode) else {
@@ -475,8 +496,8 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     /// Whole response with a cap: reading stops as soon as it is exceeded.
     private func send(_ endpoint: Endpoint, role: LLMRole?, body: Data?, limit: Int,
                       purpose: NetworkPurpose) async throws -> (Data, HTTPURLResponse) {
-        let request = try await preparedRequest(endpoint, role: role, body: body, purpose: purpose)
-        let (bytes, response) = try await perform { try await self.session.bytes(for: request, purpose: purpose) }
+        let (request, session) = try await preparedRequest(endpoint, role: role, body: body, purpose: purpose)
+        let (bytes, response) = try await perform { try await session.bytes(for: request, purpose: purpose) }
         try await check(response, bytes)
         guard let http = response as? HTTPURLResponse, response.expectedContentLength <= Int64(limit) else {
             await bytes.finish()
@@ -533,10 +554,13 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         if !line.isEmpty { _ = try body(String(decoding: line, as: UTF8.self)) }
     }
 
-    /// `makeRequest`, listing in the network audit a request that the destination rules refuse before it is sent.
-    private func preparedRequest(_ endpoint: Endpoint, role: LLMRole?, body: Data?, purpose: NetworkPurpose) async throws -> URLRequest {
+    /// `makeRequest` and the session to send it on (once the peer of a name-based server is checked), listing in the
+    /// network audit a request that the destination rules refuse before it is sent.
+    private func preparedRequest(_ endpoint: Endpoint, role: LLMRole?, body: Data?,
+                                 purpose: NetworkPurpose) async throws -> (URLRequest, AuditedSession) {
         do {
-            return try makeRequest(endpoint, role: role, body: body)
+            let request = try makeRequest(endpoint, role: role, body: body)
+            return (request, try await checkedSession(for: try target(for: role)))
         } catch {
             if let url = try? target(for: role).base.appending(path: endpoint.rawValue) {
                 await recordRefusal(error, url: url, body: body, purpose: purpose)
@@ -617,7 +641,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         !t.isEmpty && t.count <= 512 && t.unicodeScalars.allSatisfy { $0.value > 0x20 && $0.value < 0x7f }
     }
 
-    private func perform<T>(_ work: () async throws -> T) async throws -> T {
+    func perform<T>(_ work: () async throws -> T) async throws -> T {
         do {
             return try await work()
         } catch let e as LLMError {
@@ -627,8 +651,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         } catch let e as URLError where e.code == .cancelled {
             if Task.isCancelled { throw CancellationError() }
             if let address = lock.withLock({ _peerViolation }) { throw LLMError.untrustedPeerAddress(address) }
-            throw LLMError.network(String(localized: "connection refused (invalid certificate or destination)",
-                                          comment: "Network error detail when TLS trust or the destination check fails"))
+            throw LLMError.network(Self.connectionRefused)
         } catch {
             throw LLMError.network(from: error)
         }
@@ -654,6 +677,12 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         }
         await bytes.finish()
         throw ServerErrorBody.error(status: http.statusCode, body: body, retryAfter: http.value(forHTTPHeaderField: "Retry-After"))
+            .redacting(storedToken)
+    }
+
+    static var connectionRefused: String {
+        String(localized: "connection refused (invalid certificate or destination)",
+               comment: "Network error detail when TLS trust or the destination check fails")
     }
 
     // MARK: Trust and peer checks
@@ -675,24 +704,26 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
 
     /// For hosts given by name, the address actually connected to must be
     /// private (or loopback in local mode); otherwise later requests are refused
-    /// until the configuration is applied again.
+    /// until the configuration is applied again. This catches, once its request
+    /// completes, a connection the probe did not check (`LLMClient+PeerCheck.swift`).
     public func urlSession(_ session: URLSession, task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
         guard let url = task.originalRequest?.url, let host = url.host()?.lowercased(),
               let mode = config?.mode, !ServerAddress.isIPLiteral(host) else { return }
-        for address in metrics.transactionMetrics.compactMap(\.remoteAddress) where !Self.peerAllowed(address, mode: mode) {
-            lock.withLock { _peerViolation = address }
+        for address in peerAddresses(metrics) where !Self.peerAllowed(address, mode: mode) {
+            recordPeerViolation(address)
         }
     }
 
-    /// In remote mode the peer may also be a global address on a subnet this
-    /// Mac is directly attached to (e.g. a `.local` name answered over IPv6).
+    /// In remote mode the peer may also be a global IPv6 address on a subnet this
+    /// Mac is directly attached to (e.g. a `.local` name answered over IPv6); an
+    /// IPv4 peer must always be private.
     static func peerAllowed(_ address: String, mode: LLMServerConfig.Mode,
-                            onLink: (String) -> Bool = ServerAddress.isOnLink) -> Bool {
+                            onLink: (String) -> Bool = { ServerAddress.isOnLink($0) }) -> Bool {
         switch mode {
         case .local: ServerAddress.isLoopback(address)
         case .remote:
             ServerAddress.isIPLiteral(address) && !ServerAddress.isLoopback(address)
-                && (ServerAddress.isPrivateOrLoopbackPeer(address) || onLink(address))
+                && (ServerAddress.isPrivateOrLoopbackPeer(address) || (ServerAddress.isIPv6(address) && onLink(address)))
         }
     }
 }

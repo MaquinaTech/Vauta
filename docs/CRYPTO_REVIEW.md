@@ -52,7 +52,7 @@ model and the search model (`LanguageModel/`, `SearchModel/`), and the text fing
 | Backup `.vautabackup` | PBKDF2-HMAC-SHA256, 1,000,000 iterations (accepts 600,000 to 2,000,000), 16-byte random salt, 32-byte key; AES-256-GCM, AAD = the 28-byte header | `Backup/BackupFormat.swift`, `Backup/BackupPassword.swift` |
 | Backup restore | New random store key, staged first under account `database-key-v1.staged`; store re-sealed; then the key item is deleted and added again with Vauta's own access list and the staged item deleted; the documents index and its marker are deleted | `Backup/MeetingStore+Backup.swift` |
 | Erase Meetings and Context | Key deleted and verified gone, new key added (crypto-shred); the documents index and its marker are deleted | `Storage/MeetingStore+Erase.swift`, `Storage/DatabaseKeyStore.swift` |
-| Model server TLS | TLS 1.3 only, private CA as sole anchor when set, optional SHA-256 SPKI pins | `LLM/ServerTrust.swift`, `LLM/LLMClient.swift` |
+| Model server TLS | TLS 1.3 only, private CA as sole anchor when set (system anchors otherwise), no network fetch during evaluation, optional SHA-256 SPKI pins | `LLM/ServerTrust.swift`, `LLM/LLMClient.swift` |
 | Bundled speaker models | SHA-256 tree hash over every file, compared with a constant in the source before Core ML loads them | `Diarization/DiarizationModels.swift` |
 | Search-cache fingerprint | First 8 bytes of SHA-256 of a text, as a change detector inside the encrypted store (not a security control) | `LLM/MeetingStore+Search.swift` |
 | Release | Source-only: a tag and a draft GitHub release with CHANGELOG notes; no binaries, no signing material, no secrets in the workflow | `.github/workflows/release.yml`, [RELEASING.md](RELEASING.md) |
@@ -97,7 +97,7 @@ model and the search model (`LanguageModel/`, `SearchModel/`), and the text fing
 8. **Erase.** The Keychain item and any staged key are deleted, read back to confirm, and replaced; an interrupted erase is completed on the
    next launch by a marker file. Erase and restore also delete `vauta.docs.enc` and `vauta.docs.extracting`; the
    in-memory index is emptied and takes the new derived key.
-9. **Network.** TLS minimum is set to 1.3, trust is evaluated with the private CA as the only anchor and no network fetch,
+9. **Network.** TLS minimum is set to 1.3, trust is evaluated with the private CA as the only anchor when one is set (the system anchors otherwise) and no network fetch in either case,
    host names are checked, pins compare the leaf SPKI hash. Tests cover these rules; TLS 1.3 and the absence of proxies and
    redirects are verified by reading the code and by Network Activity, not by a unit test (see [CLAIMS.md](CLAIMS.md)).
 

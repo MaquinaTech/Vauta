@@ -54,11 +54,22 @@ public struct DiscoveredServer: Sendable, Equatable {
         self.models = models
     }
 
+    /// Which of `names` the server says it loads with less context than `tokens`, and with how much (models it says
+    /// nothing about are left out).
+    public func models(_ names: [String], loadedWithLessThan tokens: Int) -> [(id: String, context: Int)] {
+        var out: [(id: String, context: Int)] = []
+        for name in names where !out.contains(where: { $0.id == name }) {
+            if let context = models.first(where: { $0.id == name })?.contextLength, context < tokens { out.append((name, context)) }
+        }
+        return out
+    }
+
     /// A local config for this server with the suggested models and its profile.
     public func suggestedConfig() -> LLMServerConfig {
         let roles = suggestedRoles
         let chatContext = [roles.fast, roles.deep].compactMap { name in models.first { $0.id == name }?.contextLength }.min()
-        let context = chatContext.map { min(max($0, LLMServerConfig.contextRange.lowerBound), LLMServerConfig.contextRange.upperBound) }
+        // Below the minimum the default stays: a raised value would not change the server's window (see `ServerDraft.contextShortfall`).
+        let context = chatContext.flatMap { $0 < LLMServerConfig.contextRange.lowerBound ? nil : min($0, LLMServerConfig.contextRange.upperBound) }
         var base = baseURL.absoluteString
         while base.hasSuffix("/") { base.removeLast() }
         return LLMServerConfig(mode: .local, baseURL: base, fastModel: roles.fast ?? "", deepModel: roles.deep ?? "",
@@ -145,8 +156,12 @@ public enum ServerDiscovery {
         return AuditedSession(configuration: c, delegate: NoRedirects(), log: log)
     }
 
+    /// The most a discovery answer may hold; reading stops as soon as it is exceeded.
+    static let maxAnswerBytes = 8 << 20
+
     /// Fetches from `root` on loopback only; never follows redirects.
-    static func loopbackFetch(session: AuditedSession, root: URL, timeout: TimeInterval, purpose: NetworkPurpose = .discovery) -> Fetch {
+    static func loopbackFetch(session: AuditedSession, root: URL, timeout: TimeInterval, purpose: NetworkPurpose = .discovery,
+                              maxBytes: Int = maxAnswerBytes) -> Fetch {
         { path, body in
             let url: URL = switch path {
             case .openAI(let p): root.appending(path: "v1/" + p)
@@ -162,10 +177,34 @@ public enum ServerDiscovery {
             request.httpBody = body
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             if body != nil { request.setValue("application/json", forHTTPHeaderField: "Content-Type") }
-            guard let (data, response) = try? await session.data(for: request, purpose: purpose),
-                  let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode), data.count <= 8 << 20
+            // Streamed with a cap: a status or a declared length that cannot be used is refused before any body is
+            // read, and the task stops as soon as the body grows past `maxBytes`.
+            let body = CappedBody(limit: maxBytes)
+            let accept: @Sendable (HTTPURLResponse) -> Bool = { http in
+                (200..<300).contains(http.statusCode) && http.expectedContentLength <= Int64(maxBytes)
+            }
+            guard (try? await session.stream(request, purpose: purpose, accept: accept, sink: { try body.append($0) })) != nil
             else { return nil }
-            return data
+            return body.data
+        }
+    }
+
+    /// The body of one discovery answer, filled on the session's queue.
+    /// `@unchecked Sendable`: `bytes` is read and written under `lock` only.
+    private final class CappedBody: @unchecked Sendable {
+        private let limit: Int
+        private let lock = NSLock()
+        private var bytes = Data()
+
+        init(limit: Int) { self.limit = limit }
+
+        var data: Data { lock.withLock { bytes } }
+
+        func append(_ chunk: Data) throws {
+            try lock.withLock {
+                guard bytes.count + chunk.count <= limit else { throw LLMError.tooLarge }
+                bytes.append(chunk)
+            }
         }
     }
 

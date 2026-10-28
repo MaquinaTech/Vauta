@@ -34,11 +34,13 @@ final class AuditedSession: Sendable {
         await log.recordBlocked(purpose: purpose, url: url, method: method, reason: reason)
     }
 
-    /// A streamed response. The entry completes when the body ends, fails or is abandoned.
-    func bytes(for request: URLRequest, purpose: NetworkPurpose) async throws -> (AuditedBytes, URLResponse) {
+    /// A streamed response. The entry completes when the body ends, fails or is abandoned. `delegate` receives this
+    /// task's events first (the session's delegate gets the ones it does not implement).
+    func bytes(for request: URLRequest, purpose: NetworkPurpose,
+               delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (AuditedBytes, URLResponse) {
         let call = await begin(request, purpose)
         do {
-            let (bytes, response) = try await session.bytes(for: request)
+            let (bytes, response) = try await session.bytes(for: request, delegate: delegate)
             let tracker = ActivityTracker(call: call, status: (response as? HTTPURLResponse)?.statusCode)
             return (AuditedBytes(base: bytes, tracker: tracker), response)
         } catch {
