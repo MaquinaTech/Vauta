@@ -100,7 +100,7 @@ final class CaptionsPanelController: NSObject, NSWindowDelegate {
         panel.isReleasedWhenClosed = false
         panel.isExcludedFromWindowsMenu = true
         panel.animationBehavior = .none
-        // What the other people say stays out of screen shares and screenshots.
+        // What the other people say: asks macOS to keep it out of screen sharing (not guaranteed against ScreenCaptureKit).
         panel.sharingType = .none
         panel.isRestorable = false
         panel.title = String(localized: "Live Translation", comment: "Window title of the captions panel (read by VoiceOver)")

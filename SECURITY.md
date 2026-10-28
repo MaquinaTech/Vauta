@@ -12,7 +12,12 @@ Vauta is distributed as source code only (no signed or notarized downloads): you
 
 To update, run `./scripts/update.sh` in your clone ([README](README.md#install-from-source), "Update"): it installs the newest
 release only if its tag verifies as below. From a checkout of 0.9.3 or earlier, run `git checkout main && git pull` once
-first: versions before 0.9.3 have no script, and the one in 0.9.3 stops with "unbound variable" when a newer release is there.
+first: versions before 0.9.3 have no script, and the one in 0.9.3 can stop with "unbound variable" when a newer release is
+there. That one pull is not covered by the signature check: `update.sh`, the fingerprint in it and `.github/allowed_signers`
+then come from `main` as GitHub serves it, not from a verified tag (merges on `main` are signed by GitHub, not by the
+maintainer's key, so `git verify-commit` does not cover them either). If that matters to you, check the file's key
+independently as in [Verifying what you run](#verifying-what-you-run) and read the script before you run it; after that
+update this folder is at a verified release tag, and the next update starts from its files.
 
 ## Reporting a vulnerability
 
@@ -270,9 +275,10 @@ The search model (public weights, no personal data) is not part of the store and
 
 ## Network policy
 
-Apart from the two optional model downloads (below), Vauta's only network client is `LLMClient`, which talks to the model server you configured. The rules are enforced in
-code (`LLMServerConfig`, `ServerAddress`, `ServerTrust`, `LLMClient`). Every request, from `LLMClient` and from
-discovery, goes through one choke point, `AuditedSession` (see [Network audit](#network-audit)):
+Apart from the two optional model downloads (below), Vauta's only network client is `LLMClient`, which talks to the
+model server you configured. The rules are enforced in code (`LLMServerConfig`, `ServerAddress`, `ServerTrust`,
+`LLMClient`). Every request, from `LLMClient` and from discovery, goes through one choke point, `AuditedSession` (see
+[Network audit](#network-audit)):
 
 | Rule | Detail |
 |---|---|
@@ -355,7 +361,7 @@ checked on a running app and not only read in the source.
 | Purposes | Improved live translations are requested with the `translation` purpose, so they show as such (`ServerTranslator` → `ChatOptions.purpose`); a test follows one through the live translator into the log |
 | In memory | An actor with a ring buffer of the last 1,000 entries for this run of the app. Nothing is persisted; the only file is the JSON the user chooses to export |
 | Classification | Destinations are labelled *on this Mac*, *on your local network* or *outside your local network*, using the same address rules as `ServerAddress`. The last one should never appear: the destination checks refuse such requests before anything is sent, and the label exists so a violation could not hide |
-| Model downloads | Listed with the purpose "Search model download" or "Integrated model download": one `huggingface.co` row per file lookup (302) and one row per range from the download host (206). A redirect to a host outside the list is a Blocked row. These destinations are labelled "A download you started" and the summary does not warn about them; the "outside your local network" warning stays for anything else, which should never appear |
+| Model downloads | Listed with the purpose "Search model download" or "Integrated model download": one `huggingface.co` row per file lookup (302), and from the download host one row for the tokenizer (200) and one row per range of the weights (206). A redirect to a host outside the list is a Blocked row. These destinations are labelled "A download you started" and the summary does not warn about them; the "outside your local network" warning stays for anything else, which should never appear |
 | Limits | It records Vauta's own requests. Downloads that macOS makes (speech and translation languages, Apple Intelligence model files) are outside the app and are not listed. An independent network monitor such as Little Snitch or LuLu covers those. The log is evidence for the user, not a security boundary: code that bypassed `AuditedSession` would not be listed, which is why the source scan test exists |
 
 ## App Sandbox, hardened runtime and entitlements

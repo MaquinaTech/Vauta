@@ -360,8 +360,9 @@ It installs the newest release tag only if it is signed by the maintainer's key 
 `.github/allowed_signers` already in the checkout and the fingerprint in SECURITY.md), never an older version than the
 installed one, and only after the tests pass. It stops on local changes. If it says the key does not match, stop and
 tell the user: never edit `.github/allowed_signers` or the script to make it pass. A checkout of 0.9.3 or earlier needs
-`git checkout main && git pull` once first: versions before 0.9.3 have no script, and the one in 0.9.3 stops with
-"unbound variable" when a newer release is there.
+`git checkout main && git pull` once first: versions before 0.9.3 have no script, and the one in 0.9.3 can stop with
+"unbound variable" when a newer release is there. That pull is not covered by the signature check (SECURITY.md,
+"Supported versions").
 
 ## Troubleshooting
 

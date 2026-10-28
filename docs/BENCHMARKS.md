@@ -494,9 +494,13 @@ scheduled. **Verdict: the email draft stays off on both backends.**
 | `FBL` / integrated | 2 | 0.50 | 1 of 103 = 0.01 | 0.03 | 1 of 1 | 1 of 1 |
 
 Both detector arms read the stored minutes of the **new extraction** (its cited segments and tasks, with a due day stored only when the words say it). The app
-runs the new extraction on the integrated model; Apple's minutes use the ranked extraction (since the harness phase) and the servers' the old one, and neither was run through the detector, so these figures are not shown for them. Since then the detector's task path ignores a task
-marked "to be confirmed" and a day outside a year after the meeting (the old extraction could keep a day the model worked out); the sentences inserted in the test transcripts sat in the
-last tenth, which the detector always reads (`FD` equals `FDX`), so the gap is expected to be small, but it is not measured.
+runs the new extraction on the integrated model, the ranked extraction on Apple's model (since the harness phase) and the old one on the servers. Since then the detector's task path ignores
+a day outside a year after the meeting (the old extraction could keep a day the model worked out) and, since rules version 2, counts a task marked "to be confirmed" only when the clause of
+its cited passage that says the day neither asks nor hedges. Rules version 2 was run on 2026-10-24 on these 15 meetings with minutes made by what the app ships on each backend, scored by
+day match to this phase's gold and with no judge ([LANGUAGE_MODEL.md](LANGUAGE_MODEL.md), "DEV check of the shipped combinations"): on Apple's ranked minutes (14 meetings: its model
+declined to write one) 24 candidates, 24 correct, 24 of 28 with the cap of 2 (0.857) and day accuracy 1.00; on the integrated model's, the figures above again. The servers' minutes of the
+old extraction were never run through the detector, so no figure is shown for them; the sentences inserted in the test transcripts sat in the last tenth, which the detector always reads
+(`FD` equals `FDX`), so the gap is expected to be small, but it is not measured.
 
 Gates: precision at least 0.90, capped recall at least 0.60 and day accuracy at least 0.90 all pass, so the detector is on. The two time misses are
 "the 18th around one o'clock" offered without a time. In the 4 Concejo meetings it offers one candidate, which caps recall there at 1 of 2. The only
