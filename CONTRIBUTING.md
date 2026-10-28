@@ -230,8 +230,9 @@ them and read them correctly.
 - **Schema changes** go into the single ordered registry `Schema.migrations` in
   [`Sources/VautaCore/Storage/Schema.swift`](Sources/VautaCore/Storage/Schema.swift). Add a new `Migration` with the next
   version number. A test checks that versions are strictly increasing and contiguous.
-- **Never edit a published migration.** Another test fingerprints the schema produced by migrations 1–7 and fails if
-  any of them changes. Fix mistakes with a new migration.
+- **Never edit a published migration.** `SchemaFreezeTests` fingerprints every migration that shipped in a release (the
+  schema it builds, its SQL and, for a code step, the rows it writes) and fails if any of them changes. Fix mistakes with
+  a new migration. A migration that is not in a release yet can still be edited.
 - Migrations run after the journal is replayed, so a migration must also be correct on data replayed with an older
   schema. Use a `.code` step when SQL alone can't do it.
 - Add a test that builds a store with the old schema, migrates it and reads the data back
