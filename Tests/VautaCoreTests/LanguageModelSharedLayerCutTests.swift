@@ -74,6 +74,78 @@ struct LanguageModelSharedLayerCutTests {
         }
     }
 
+    /// What `layerProbe` reports: the positions each layer ran its queries for, one list per `forward`.
+    final class LayerTrace {
+        var runs: [[Int]] = []
+        func attach(_ model: Gemma4TextModel) {
+            model.layerProbe = { [self] layer, positions in
+                if layer == 0 { runs.append([]) }
+                runs[runs.count - 1].append(positions)
+            }
+        }
+    }
+
+    /// The parity tests pass just as well when nothing is cut, so this one checks that the cut is made, and where.
+    @Test func theSharedLayersRunOnTheLastPositionOnlyAndNotAtAllForTheCachesOnly() throws {
+        let model = try Self.engine().model
+        let trace = LayerTrace()
+        trace.attach(model)
+        defer { model.layerProbe = nil }
+        // The tiny model: layers 0-5 own keys and values and 6-8 read them, so the cut is at layer 5 (`firstSharedLayer - 1`).
+        let (layers, cut) = (model.config.layers, model.config.firstSharedLayer - 1)
+        #expect(layers == 9 && cut == 5)
+        let prompt = LanguageModelGenerationTests.prompt(40, seed: 2)
+        let expected: [(Gemma4TextModel.ForwardOutput, [Int])] = [
+            (.allHidden, Array(repeating: 40, count: layers)),
+            // Layer 5 writes its keys and values from all 40 positions, then runs its queries on the last one only.
+            (.lastHidden, Array(repeating: 40, count: cut) + Array(repeating: 1, count: layers - cut)),
+            // Layer 5 writes its keys and values, and nothing runs after that.
+            (.cachesOnly, Array(repeating: 40, count: cut)),
+        ]
+        for (output, positions) in expected {
+            trace.runs = []
+            _ = try model.forward(prompt, caches: model.newCaches(), output: output)
+            #expect(trace.runs == [positions], "\(output)")
+        }
+        // One position: nothing to cut.
+        trace.runs = []
+        _ = try model.forward([7], caches: model.newCaches(), output: .lastHidden)
+        #expect(trace.runs == [Array(repeating: 1, count: layers)])
+    }
+
+    @Test func aPrefillRunsTheSharedLayersOnlyOnTheLastPositionOfAPromptThatIsDecodedFrom() async throws {
+        let engine = try Self.engine()
+        let trace = LayerTrace()
+        trace.attach(engine.model)
+        defer { engine.model.layerProbe = nil; engine.cutsSharedLayers = true }
+        let (layers, cut) = (engine.model.config.layers, engine.model.config.firstSharedLayer - 1)
+        func cachesOnly(_ n: Int) -> [Int] { Array(repeating: n, count: cut) }
+        func last(_ n: Int) -> [Int] { Array(repeating: n, count: cut) + Array(repeating: 1, count: layers - cut) }
+        func every(_ n: Int) -> [Int] { Array(repeating: n, count: layers) }
+        engine.fixedChunk = 33
+        let prompt = LanguageModelGenerationTests.prompt(150, seed: 4)
+        // 150 tokens: four chunks of 33 that only fill the caches and a last one of 18; then the decode, one position a step.
+        _ = try await engine.generate(GenerationRequest(prompt: prompt, maxTokens: 3))
+        #expect(Array(trace.runs.prefix(5)) == [cachesOnly(33), cachesOnly(33), cachesOnly(33), cachesOnly(33), last(18)])
+        #expect(trace.runs.dropFirst(5).allSatisfy { $0 == every(1) })
+        // A kept prefix of 100 - 16 = 84 tokens only fills the caches (33, 33, 18); the 66 tokens after it are two chunks of 33.
+        trace.runs = []
+        let kept = try await engine.generate(GenerationRequest(prompt: prompt, maxTokens: 1, sharedPrefix: 100))
+        #expect(kept.reusedTokens == 0)
+        #expect(trace.runs == [cachesOnly(33), cachesOnly(33), cachesOnly(18), cachesOnly(33), last(33)])
+        // A decode step that feeds the five tokens a grammar forces is cut the same way.
+        trace.runs = []
+        _ = try await engine.generate(GenerationRequest(prompt: Array(prompt.prefix(20)), maxTokens: 12), constraint: Forced())
+        #expect(Array(trace.runs.prefix(3)) == [last(20), every(1), last(5)])
+        // The path of the golden check against mlx-lm (`lastLogits`), and the reference, which runs every layer on every position.
+        for (cuts, expected) in [(true, [cachesOnly(33), last(7)]), (false, [every(33), every(7)])] {
+            engine.cutsSharedLayers = cuts
+            trace.runs = []
+            _ = try await engine.lastLogits(Array(prompt.prefix(40)))
+            #expect(trace.runs == expected, "cuts \(cuts)")
+        }
+    }
+
     /// Forces a few tokens at once (a decode step that feeds several positions, as a grammar does), then writes freely.
     final class Forced: LogitConstraint, @unchecked Sendable {
         var step = 0

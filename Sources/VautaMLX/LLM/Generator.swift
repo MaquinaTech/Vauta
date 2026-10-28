@@ -177,13 +177,18 @@ public final class Gemma4Engine {
         return max(16, min(memoryCap, byTime))
     }
 
-    /// Runs `ids` into `caches` and returns the last position's hidden state [1, 1, hidden], or nil when `hidden` is false and only
-    /// the caches are wanted.
-    private func run(_ ids: [Int32], caches: LayerCaches, hidden: Bool) throws -> MLXArray? {
-        guard cutsSharedLayers else {
-            return try model.forward(ids, caches: caches, output: .allHidden).map { $0[0..., (ids.count - 1)..., 0...] }
-        }
-        return try model.forward(ids, caches: caches, output: hidden ? .lastHidden : .cachesOnly)
+    /// Runs `ids` into `caches` and returns the last position's hidden state [1, 1, hidden].
+    private func lastHidden(_ ids: [Int32], caches: LayerCaches) throws -> MLXArray {
+        // `forward` returns nil for `.cachesOnly` only.
+        if cutsSharedLayers { return try model.forward(ids, caches: caches, output: .lastHidden)! }
+        return try model.forward(ids, caches: caches, output: .allHidden)![0..., (ids.count - 1)..., 0...]
+    }
+
+    /// Runs a prefill chunk whose hidden states nobody reads into `caches`, and returns what to evaluate besides the caches: nothing
+    /// with the cut; without it the last hidden state, so that the reference still runs every layer on every position.
+    private func fill(_ ids: [Int32], caches: LayerCaches) throws -> MLXArray? {
+        if cutsSharedLayers { return try model.forward(ids, caches: caches, output: .cachesOnly) }
+        return try lastHidden(ids, caches: caches)
     }
 
     private func prefill(_ ids: ArraySlice<Int32>, caches: LayerCaches, contextEnd: Int, wantHidden: Bool,
@@ -199,7 +204,8 @@ public final class Gemma4Engine {
             let j = min(ids.endIndex, i + size)
             let started = Date()
             // Only the last chunk of a prompt that is decoded from needs a hidden state; the others only fill the caches.
-            let h = try run(Array(ids[i..<j]), caches: caches, hidden: wantHidden && j == ids.endIndex)
+            let chunk = Array(ids[i..<j])
+            let h: MLXArray? = try wantHidden && j == ids.endIndex ? lastHidden(chunk, caches: caches) : fill(chunk, caches: caches)
             eval([h].compactMap { $0 } + caches.arrays)
             let elapsed = Date().timeIntervalSince(started)
             // Short tails say little about the speed; the rest feed a moving average.
@@ -338,7 +344,7 @@ public final class Gemma4Engine {
                 if closing == nil, out.count == request.maxTokens { done = true; break }
             }
             if done { break }
-            guard let h = try run(feed, caches: caches, hidden: true) else { throw Gemma4Error.emptyPrompt }
+            let h = try lastHidden(feed, caches: caches)
             logits = model.logits(h)
             eval(logits)
             if out.count % 16 < feed.count { peak = max(peak, MLXRuntime.physFootprintMB()) }

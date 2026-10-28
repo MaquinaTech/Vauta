@@ -135,7 +135,16 @@ tied 4-bit output head with `tanh(x/30)*30`, bf16 activations and bf16 key/value
   speed is known). At the measured 193 to 224 tokens/s that is 64 to 80 tokens, so cancellation, the gate and the heat check are
   looked at every 0.3 to 0.4 s, not after a 512-token chunk (2.3 to 2.7 s). Measured on the real model (release, 4,000 tokens,
   interleaved, load1 4 to 6): 512-token chunks 219 tokens/s, 256 218, 128 215, time-sized 205, so the guarantee costs 6 to 7% of
-  prefill speed. Cancelling a 12,000-token prefill 30 s in was seen after 0.25 s (the GPU was shared at the time).
+  prefill speed. Cancelling a 12,000-token prefill 30 s in was seen after 0.25 s (the GPU was shared at the time). These speeds and
+  chunk sizes were measured before the cut of the shared layers (next entry).
+- **The shared layers run only where they are read.** Layers 24 to 41 write no cache, so a prefill chunk whose hidden states are
+  thrown away (every chunk of a kept prefix, and every chunk but the last of a prompt that is decoded from) stops once layer 23 has
+  written its keys and values. On the last chunk, and on a decode step that feeds several forced tokens, only the last position goes
+  on from there. That is about 45% fewer matrix products per chunk. The caches are the same bits as without the cut; the last
+  position's logits are not, because one position alone runs other kernels (matrix-vector products, the vector attention kernel) than
+  the same position among many: on the tiny model up to 0.77 on logits near 28 against the uncut run, and 0.375 instead of 0.125
+  against mlx-lm on the 40-token golden (below). Prefill is 1.4 to 1.5 times as fast on the tiny model (M2). The real model has not
+  been measured with the cut yet: its parity against mlx-lm and its prefill speed (`llm-selftest --model --long --goldens`).
 - **Kept prefix** (live answers and Ask): the state after `prefix - 16` tokens is kept (the last 16 are re-run so a token that merges
   across the boundary is right); the next request with the same ids up to there continues from it, the question and the answer are
   never kept. The tiny-model test shows identical text with and without it. There are two slots, **Ask** (interactive priority) and
@@ -294,15 +303,17 @@ the largest logit, same five best tokens, same twenty) and 16 greedy ids of 24 s
 
 On the real file, 8 prompts (English, Spanish, German, Japanese, a multi-turn chat, 2,015 and 8,534 tokens of public AMI text, a
 JSON-minutes prompt): the top-1 token matches on 8 of 8, the first 32 greedy ids are identical on 8 of 8, and the largest difference
-over the top-20 logits is 0.06 to 1.06 (logits near 25 move in bf16 steps of 0.125). The brief's 0.05 tolerance cannot be met by any
+over the top-20 logits is 0.06 to 1.06 (logits near 25 move in bf16 steps of 0.125), measured before the cut of the shared layers
+(see "Running it"), which moves the last position's logits by bf16 rounding. The brief's 0.05 tolerance cannot be met by any
 bf16 implementation: **mlx-lm differs from itself by up to 1.09 on the same 404-token prompt when its prefill chunk changes from 512
 to 128 tokens** (and 0.25 on 2,015 tokens). The self-test's limit is therefore 1.25 with identical top-1 and greedy ids.
 
 That limit is wide on purpose, so a systematic error smaller than it could pass the real-model check. The tiny-model CI test is the
-tight one: it agrees with mlx-lm to 0.0, 0.125 and 0.1875 on logits near 28 (5, 40 and 120 tokens, every layer type, the window wrap,
-shared keys and values, proportional RoPE, per-layer inputs), and its bound is 2% of the largest logit, about three bf16 steps. A
-float32 reference of the real model (mlx-lm and the port both in float32) was not built: the port's constants are bf16 by design, so
-it would need a dtype-generic port and a second reference run.
+tight one: it agrees with mlx-lm to 0.0, 0.375 and 0.1875 on logits near 28 (5, 40 and 120 tokens, every layer type, the window wrap,
+shared keys and values, proportional RoPE, per-layer inputs), and its bound is 2% of the largest logit, about 0.57. Without the cut of
+the shared layers it agreed to 0.0, 0.125 and 0.1875 (M2): the 40-token prompt's last position now goes alone through layers 5 to 8,
+on other kernels. A float32 reference of the real model (mlx-lm and the port both in float32) was not built: the port's constants are
+bf16 by design, so it would need a dtype-generic port and a second reference run.
 
 ## Measurements (Mac mini M2, 24 GB, macOS 27, release build, 2026-10-12 and 13)
 

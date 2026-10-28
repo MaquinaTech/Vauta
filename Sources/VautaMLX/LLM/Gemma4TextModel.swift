@@ -173,10 +173,13 @@ public final class Gemma4TextModel {
         /// computed (logits are only ever needed for the last position of a chunk).
         case lastHidden
         /// The final-normalised hidden states of every position [1, n, 2560], every position through every layer, as before the
-        /// cut: the reference the parity tests compare with, and what verifying several drafted tokens at once (speculative
-        /// decoding) would need.
+        /// cut: the reference the parity tests compare with (`Gemma4Engine.cutsSharedLayers = false`).
         case allHidden
     }
+
+    /// Test hook: called for every layer that runs its queries, with the layer's index and the positions it runs them for. A
+    /// `.cachesOnly` run stops once layer `firstSharedLayer - 1` has written its keys and values, so it reports the layers before.
+    var layerProbe: ((_ layer: Int, _ positions: Int) -> Void)?
 
     /// Runs `ids` through the network, appending to `caches`, and returns the hidden states `output` asks for (nil for
     /// `.cachesOnly`).
@@ -239,11 +242,13 @@ public final class Gemma4TextModel {
                     (rows, first) = (1, n - 1)
                 }
             }
+            layerProbe?(i, rows)
             var queries = L.q(x).reshaped([1, rows, config.heads, L.headDim])
             queries = rms(queries, L.qNorm).transposed(0, 2, 1, 3)
             // A query's position is the cache offset plus its place in the chunk.
             queries = rope(queries, L, offset: offset + first)
-            let mask: MLXFast.ScaledDotProductAttentionMaskMode = rows == n ? (L.full ? fullMask : slidingMask) : (L.full ? .none : lastSlidingMask)
+            let cutMask: MLXFast.ScaledDotProductAttentionMaskMode = L.full ? .none : lastSlidingMask
+            let mask: MLXFast.ScaledDotProductAttentionMaskMode = rows == n ? (L.full ? fullMask : slidingMask) : cutMask
             var a = MLXFast.scaledDotProductAttention(queries: queries, keys: keys, values: values, scale: 1.0, mask: mask)
             a = a.transposed(0, 2, 1, 3).reshaped([1, rows, config.heads * L.headDim])
             h = h + rms(L.o(a), L.postAttnNorm)
