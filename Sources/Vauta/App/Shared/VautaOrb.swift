@@ -37,7 +37,7 @@ struct VautaOrb: View {
     var body: some View {
         ZStack {
             Color.clear.frame(width: diameter, height: diameter)
-            TimelineView(.animation(minimumInterval: 1 / 60, paused: still)) { context in
+            TimelineView(.animation(minimumInterval: frameInterval, paused: still)) { context in
                 // A fixed moment when still, so the frame is always the same one.
                 let time = still ? 2.6 : context.date.timeIntervalSinceReferenceDate
                 Canvas { canvas, size in
@@ -50,6 +50,15 @@ struct VautaOrb: View {
         .frame(width: diameter, height: diameter)
         .animation(.easeInOut(duration: 0.5), value: mode)
         .accessibilityHidden(true)
+    }
+
+    /// Smooth while listening or working; slower at rest and when quiet, where the motion is slow anyway, to save energy.
+    private var frameInterval: Double {
+        switch mode {
+        case .listening, .working: 1 / 60
+        case .idle: 1 / 30
+        default: 1 / 15
+        }
     }
 
     /// The canvas reaches past the sphere for the orbit and the corona; the layout is only the sphere.

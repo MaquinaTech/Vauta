@@ -52,7 +52,7 @@ struct UpcomingLoadingView: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            ProgressView()
+            ThinkingOrb(diameter: 28)
             Text("Preparing brief…", comment: "Menu-bar panel, brief card: the brief is being built").foregroundStyle(.secondary)
             if slow || waited {
                 Button(String(localized: "Refresh", comment: "Meetings, Upcoming: builds the brief again"), action: refresh).controlSize(.small)
@@ -179,7 +179,7 @@ struct UpcomingEntriesView: View {
                 ForEach([BriefSectionKind.people, .lastTime, .openTasks], id: \.self) { kind in
                     Label(BriefLabels.title(kind), systemImage: BriefLabels.symbol(kind)).font(.headline).foregroundStyle(.tertiary)
                 }
-                ProgressView().controlSize(.small)
+                ThinkingOrb()
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(Text("Preparing brief…", comment: "Menu-bar panel, brief card: the brief is being built"))

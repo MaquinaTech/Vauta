@@ -352,7 +352,7 @@ struct AskView: View {
 
     private var progress: some View {
         HStack {
-            ProgressView().controlSize(.small).accessibilityHidden(true)
+            ThinkingOrb().accessibilityHidden(true)
             Text(progressText)
                 .font(.callout)
                 .foregroundStyle(.secondary)
