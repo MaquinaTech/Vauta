@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  English · <a href="README.es.md">Español</a>
+  <a href="https://maquinatech.github.io/Vauta-landing/"><strong>Website</strong></a> · English · <a href="README.es.md">Español</a>
 </p>
 
 ---
