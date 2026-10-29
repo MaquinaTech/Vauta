@@ -92,7 +92,7 @@ struct GeneralPane: View {
             Section {
                 Toggle(isOn: $preferences.openNotepadOnStart) {
                     Text("Open the notepad when recording starts")
-                    Text(description: String(localized: "A small floating window for short notes. It stays out of screen sharing and never takes the keyboard from your meeting app until you click it or use the shortcut.",
+                    Text(description: String(localized: "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed.",
                          comment: "Settings → General, under the switch that opens the notepad when a recording starts"))
                 }
             }

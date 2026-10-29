@@ -10,6 +10,15 @@ Vauta is distributed as source code only (no signed or notarized downloads): you
 | Older tags | No. Please update |
 | Builds from `main` | Fixed on `main`; no backports |
 
+To update, run `./scripts/update.sh` in your clone ([README](README.md#install-from-source), "Update"): it installs the newest
+release only if its tag verifies as below. From a checkout of 0.9.3 or earlier, run `git checkout main && git pull` once
+first: versions before 0.9.3 have no script, and the one in 0.9.3 can stop with "unbound variable" when a newer release is
+there. That one pull is not covered by the signature check: `update.sh`, the fingerprint in it and `.github/allowed_signers`
+then come from `main` as GitHub serves it, not from a verified tag (merges on `main` are signed by GitHub, not by the
+maintainer's key, so `git verify-commit` does not cover them either). If that matters to you, check the file's key
+independently as in [Verifying what you run](#verifying-what-you-run) and read the script before you run it; after that
+update this folder is at a verified release tag, and the next update starts from its files.
+
 ## Reporting a vulnerability
 
 Please report vulnerabilities **privately**, through GitHub's private vulnerability reporting:
@@ -266,9 +275,10 @@ The search model (public weights, no personal data) is not part of the store and
 
 ## Network policy
 
-Vauta's only network client is `LLMClient`, which talks to the model server you configured. The rules are enforced in
-code (`LLMServerConfig`, `ServerAddress`, `ServerTrust`, `LLMClient`). Every request, from `LLMClient` and from
-discovery, goes through one choke point, `AuditedSession` (see [Network audit](#network-audit)):
+Apart from the two optional model downloads (below), Vauta's only network client is `LLMClient`, which talks to the
+model server you configured. The rules are enforced in code (`LLMServerConfig`, `ServerAddress`, `ServerTrust`,
+`LLMClient`). Every request, from `LLMClient` and from discovery, goes through one choke point, `AuditedSession` (see
+[Network audit](#network-audit)):
 
 | Rule | Detail |
 |---|---|
@@ -293,8 +303,9 @@ the network.
 
 ### The search model (optional download)
 
-The one other outgoing connection is the optional search model, only after you click **Download** (see
-[PRIVACY.md](PRIVACY.md#the-search-model)). It has its own session and its own rules, in `SearchModelDestinations`
+The other outgoing connections are the two optional models, each only after you click **Download**: the search model,
+here, and the integrated language model ([next section](#the-integrated-language-model-optional-download)). The search
+model (see [PRIVACY.md](PRIVACY.md#the-search-model)) has its own session and its own rules, in `SearchModelDestinations`
 and `SearchModelDownloader`, and also goes through `AuditedSession` with the purpose `modelDownload`:
 
 | Rule | Detail |
@@ -306,6 +317,21 @@ and `SearchModelDownloader`, and also goes through `AuditedSession` with the pur
 | Integrity from hashes | Default TLS trust with no pinning (Hugging Face rotates certificates), so the guarantee is the checksums: per block (as it arrives), per tensor and for the assembled file. A block that differs is fetched once more; a second difference deletes the partial file. No self-hosted conversion exists |
 | Ephemeral and anonymous | No cache, cookies or credential storage; no `Authorization` header and no token (the model is not gated); default User-Agent. System proxies are honoured (unlike the model-server session), because the destination is on the internet. The signed CDN address is kept in memory only and its query string never reaches the log, the export or a file |
 | Import | Files you choose are identified by size and checked with the same hashes before they are used; symbolic links are followed, as in the Hugging Face cache |
+
+### The integrated language model (optional download)
+
+The integrated model (Gemma 4 E4B by Google, see [PRIVACY.md](PRIVACY.md#the-integrated-model)) is fetched from
+`huggingface.co` only after you click **Download** in Settings → Models → Integrated model (or **Try Again**, **Resume**,
+**Repair**). `LanguageModelDownloader` uses a session made the same way as the search model's
+(`SearchModelDownloader.makeSession`), goes through `AuditedSession` with the purpose `languageModelDownload` and follows the
+rules above, with these differences:
+
+| Rule | Detail |
+|---|---|
+| Exact destinations | `huggingface.co` with exactly `/google/gemma-4-E4B-it/resolve/ee0ef6023621cff504d758262d4e04895a5af4a2/model.safetensors` or `…/tokenizer.json`; the redirect target must be on the same exact host list as the search model's (`SearchModelDestinations`). Anything else is a **Blocked** row and nothing is sent |
+| Only the language tower | The weights are requested in 64 MiB ranges of the language tower of Google's file, never the whole file: each must be answered `206` with `Content-Range: bytes a-b/15992595884` and exactly the requested length. The audio and vision towers are never fetched |
+| Integrity before use | Each block is held in memory, compared with its pinned SHA-256 and only then converted to the 4-bit file that is kept (about 4.2 GB); the 15 GB original is never stored. A block that differs is fetched once more; a second difference deletes everything. Each tensor of the converted file and the whole file are checked against hashes built into Vauta before the model is installed |
+| When | A recording pauses a running download, and it continues two minutes after the recording ends. **Import from a File…** makes no connection |
 
 Running the model adds no entitlement: Vauta compiles MLX's GPU kernels from embedded source on the first use, which runs in
 Apple's Metal compiler service. If `Vauta mlx-selftest` ever fails in a signed build, the answer is to stop and report, never to
@@ -335,7 +361,7 @@ checked on a running app and not only read in the source.
 | Purposes | Improved live translations are requested with the `translation` purpose, so they show as such (`ServerTranslator` → `ChatOptions.purpose`); a test follows one through the live translator into the log |
 | In memory | An actor with a ring buffer of the last 1,000 entries for this run of the app. Nothing is persisted; the only file is the JSON the user chooses to export |
 | Classification | Destinations are labelled *on this Mac*, *on your local network* or *outside your local network*, using the same address rules as `ServerAddress`. The last one should never appear: the destination checks refuse such requests before anything is sent, and the label exists so a violation could not hide |
-| Search model download | Listed with the purpose "Search model download": one `huggingface.co` row per file lookup (302) and one row per range from the download host (206). A redirect to a host outside the list is a Blocked row. These destinations are labelled "A download you started" and the summary does not warn about them; the "outside your local network" warning stays for anything else, which should never appear |
+| Model downloads | Listed with the purpose "Search model download" or "Integrated model download": one `huggingface.co` row per file lookup (302), and from the download host one row for the tokenizer (200) and one row per range of the weights (206). A redirect to a host outside the list is a Blocked row. These destinations are labelled "A download you started" and the summary does not warn about them; the "outside your local network" warning stays for anything else, which should never appear |
 | Limits | It records Vauta's own requests. Downloads that macOS makes (speech and translation languages, Apple Intelligence model files) are outside the app and are not listed. An independent network monitor such as Little Snitch or LuLu covers those. The log is evidence for the user, not a security boundary: code that bypassed `AuditedSession` would not be listed, which is why the source scan test exists |
 
 ## App Sandbox, hardened runtime and entitlements
@@ -349,7 +375,7 @@ unsigned executable memory, no disabled library validation). The entitlements, f
 | `com.apple.security.app-sandbox` | Confines Vauta to its container; nothing else on disk is reachable without you |
 | `com.apple.security.device.audio-input` | The microphone, transcribed on device as "Me". Meeting-app audio is captured with a Core Audio process tap, which needs no entitlement; macOS asks for your permission |
 | `com.apple.security.personal-information.calendars` | Optional, off by default: reads the calendars you choose to name the meeting and its attendees. The same access lets Vauta, only when you press Add for one item, add that reminder or event and read the titles of the one list (or day) it adds to, so it does not add it twice, and remove only what it created. One source file does the writing and a test enforces it; Vauta never edits, completes or deletes anything it did not create |
-| `com.apple.security.network.client` | Outgoing connections to your model server and, only when you click Download, to Hugging Face for the search model, as enforced above. There is no `network.server` |
+| `com.apple.security.network.client` | Outgoing connections to your model server and, only when you click Download, to Hugging Face for the search model or the integrated model, as enforced above. There is no `network.server` |
 | `com.apple.security.files.user-selected.read-write` | Only files you pick: a recording to import (read), your server's CA certificate (read), an export (write) |
 | `com.apple.security.files.bookmarks.app-scope` | Remembers, read-only, the folders and files you added as document sources, so they work after a restart. Revocable: removing a source deletes its bookmark |
 

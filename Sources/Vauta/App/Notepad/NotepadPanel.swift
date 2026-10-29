@@ -7,7 +7,8 @@ import SwiftUI
 
 /// The floating notepad. The menu-bar panel closes as soon as the user clicks into the meeting app, so this is the
 /// surface for typing during a call: it floats over every app and every Space, takes typing WITHOUT activating Vauta (the
-/// meeting app stays the front app, as with Spotlight) and is hidden from screen sharing and screenshots.
+/// meeting app stays the front app, as with Spotlight) and asks macOS to keep it out of screen sharing (`sharingType = .none`, not
+/// guaranteed against ScreenCaptureKit).
 final class NotepadPanel: NSPanel {
     var onEscape: (() -> Void)?
     override var canBecomeKey: Bool { true }
@@ -59,7 +60,7 @@ final class NotepadPanelController: NSObject, NSWindowDelegate {
         model?.notepadWindowClosed()
     }
 
-    /// The window as it must be: floating, key-capable without activating Vauta, out of screen sharing.
+    /// The window as it must be: floating, key-capable without activating Vauta, asking to stay out of screen sharing.
     static func makeBarePanel() -> NotepadPanel {
         let panel = NotepadPanel(contentRect: CGRect(origin: .zero, size: defaultSize),
                                  styleMask: [.titled, .closable, .resizable, .utilityWindow, .nonactivatingPanel], backing: .buffered, defer: false)
@@ -73,7 +74,8 @@ final class NotepadPanelController: NSObject, NSWindowDelegate {
         panel.animationBehavior = .none
         panel.isRestorable = false
         panel.minSize = CGSize(width: 260, height: 180)
-        // What the user writes about the meeting stays out of screen shares and screenshots, like the captions.
+        // What the user writes about the meeting: asks macOS to keep it out of screen sharing, like the captions (not guaranteed
+        // against ScreenCaptureKit).
         panel.sharingType = .none
         panel.title = String(localized: "Notepad", comment: "Window title of the floating notepad where the user types short notes during a recording (read by VoiceOver)")
         return panel
