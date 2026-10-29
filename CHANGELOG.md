@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+Developer tools:
+
+- `Vauta llm-eval` can write the minutes of public transcripts and answer their questions on a model server (`--providers server --server <config.json> [--ask-key]`), through the app's own client and address rules, and runs several minutes variants of one backend interleaved in one run (`--variants old,new`).
+- Ask on a model server can reason briefly before an answer after the meeting (`low` effort, with its own room and no schema over it). It stays off in this release until it is measured: `llm-eval --tasks live-answer --providers server --after-meeting --ask-reasoning on,off` asks each question both ways in one run.
+- The statistics the evaluation gates use (Wilson intervals, exact sign and McNemar tests, meeting-cluster bootstrap, kappa, Jeffreys gates, paired TOST, Holm and BH) are in `tools/llm-eval/stats.py`, standard library only, with tests that CI runs.
+
+### Changed
+
+- With a model server whose structured output is "JSON schema" or "JSON object" (Settings → Models → Advanced), the minutes' block extracts, merges and closing request and the live notes ask for their shape in `response_format`, as Ask already did. The requests with reasoning on send none. A server that answers 400, 415 or 422 to it is asked once more without it.
+
 ### Fixed
 
 - `scripts/update.sh` stopped with `unbound variable` before verifying the release, in shells that read the `…` after a variable name as part of the name. If it stopped for you, run `git checkout main && git pull` once and run it again.
@@ -16,6 +28,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - When a follow-up email draft is handed to the mail app through a `mailto:` link, the system log no longer receives the link (with the addresses, the subject and the body, marked private). It records only the number of recipients and the link's length.
 - The notepad's note in Settings → General and the documentation no longer say that Vauta's windows are always hidden from screen sharing: Vauta asks macOS to keep them out, which is not guaranteed. The documentation also corrects other claims the code no longer supports, among them the integrated model's download in SECURITY.md.
 - `Vauta minutes-file` (an evaluation command) measures the minutes the app actually sends to Apple's model, and its result file names the parts that ran.
+- Minutes no longer fail when Apple's model declines part of a meeting, or a part does not fit the model's window. A meeting declined as a whole is written by blocks; a declined block is left out and counted, a declined merge keeps its group, a final request that does not fit goes by the digest, and a digest declined twice keeps the checked decisions, tasks, topics and questions without a title or summary. Only a meeting whose every block is declined fails, and it says the model declined.
+- On a model server, minutes whose reasoning runs past the length limit are asked once more without reasoning, at the same limit, instead of with twice the limit. With Qwen3.5-9B on an MLX server the closing request's reasoning ran to the 10,000-token limit and then to about 20,000 (some 30 minutes in all), and the minutes failed.
+- `Vauta server-check --ask-key` stops and says so when nothing was typed at the key prompt, instead of sending the requests without a key and reporting that the server rejected it.
 
 ## [0.9.3] - 2026-10-28
 
