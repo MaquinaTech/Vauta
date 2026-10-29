@@ -152,12 +152,7 @@ extension LLMService {
 
     /// One request; a server that does not understand `response_format` (400, 415 or 422) is asked again without it.
     static func chatOnce(_ model: any ChatModel, _ messages: [ChatMessage], _ options: ChatOptions) async throws -> ChatResult {
-        do {
-            return try await model.chat(messages, options, onProgress: nil)
-        } catch LLMError.http(let status, _) where options.responseFormat != nil && [400, 415, 422].contains(status) {
-            var plain = options
-            plain.responseFormat = nil
-            return try await model.chat(messages, plain, onProgress: nil)
-        }
+        var options = options
+        return try await StructuredOutputRetry.run(&options) { try await model.chat(messages, $0, onProgress: nil) }
     }
 }

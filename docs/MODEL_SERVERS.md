@@ -176,6 +176,12 @@ citation and `found: false` has none. The schema never lists the passages that w
 itself, whatever the server does, and shows an answer whose claims fail the check as unverified (not as "not found"). With "JSON
 object" or "Off" the same shape is asked for in the prompt and checked the same way.
 
+**Minutes, live notes and structured output.** With "JSON schema" (or "JSON object"), the minutes' block extracts, merges and closing
+request and the live notes also send their shape as `response_format`: the same keys in the same order, without the passage and person
+numbers, the length caps or the date pattern, which Vauta checks in the reply. The requests with reasoning on (the minutes of a meeting
+that fits one request, and the final request of a long one) send none, so the server never constrains the reasoning. A server that
+answers 400, 415 or 422 to a `response_format` is asked once more without it, and the rest of that minutes run sends none.
+
 If the server rejects requests (HTTP 400) after you change models, set **Thinking control** to "Don't send" and
 **Structured output** to "Off", then test again. If live notes are slow because the model keeps reasoning, choose a
 thinking control the server understands, or use an instruct (non-reasoning) model as the fast model.

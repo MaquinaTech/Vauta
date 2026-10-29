@@ -102,13 +102,8 @@ extension LLMService {
         var options = ChatOptions(model: .deep, maxTokens: maxTokens, purpose: .brief, outputSchema: chat.integrated ? schema : nil, priority: .brief,
                                   maxSeconds: chat.integrated ? backend.timeoutSeconds : nil)
         if backend == .server { options.responseFormat = .jsonSchema(name: "brief_agenda", schema: schema.jsonSchemaData()) }
-        do {
-            return try await chat.model.chat(messages, options, onProgress: nil).content
-        } catch LLMError.http(let status, _) where options.responseFormat != nil && [400, 415, 422].contains(status) {
-            // A server that does not understand the schema is asked once more without it: the prompt carries the same shape.
-            options.responseFormat = nil
-            return try await chat.model.chat(messages, options, onProgress: nil).content
-        }
+        // A server that does not understand the schema is asked once more without it: the prompt carries the same shape.
+        return try await StructuredOutputRetry.run(&options) { try await chat.model.chat(messages, $0, onProgress: nil).content }
     }
 
     /// The retrieval and the writer of the brief, backed by this service.

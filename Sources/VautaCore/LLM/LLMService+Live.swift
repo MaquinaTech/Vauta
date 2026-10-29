@@ -70,8 +70,11 @@ extension LLMService {
                 if readsTexts { for segment in all { texts[segment.id] = segment.text; if segment.channel == .me { mine.insert(segment.id) } } }
             }
         }
-        var options = ChatOptions(model: .fast, maxTokens: budget.liveOutput, purpose: .liveNotes,
-                                  outputSchema: OutputSchemas.liveNotes(.init(segments: Set(knownSegments.map { Int($0) }))), reusePrefix: true, priority: .live, slot: slot)
+        let schema = OutputSchemas.liveNotes(.init(segments: Set(knownSegments.map { Int($0) })))
+        // A model server gets the same shape as `response_format` (the profile decides whether it is sent), without the segment numbers.
+        var options = ChatOptions(model: .fast, maxTokens: budget.liveOutput,
+                                  responseFormat: chat.onDevice ? nil : .jsonSchema(name: "live_notes", schema: schema.serverJSONSchemaData()), purpose: .liveNotes,
+                                  outputSchema: schema, reusePrefix: true, priority: .live, slot: slot)
         var result: ChatResult
         let check = LiveCheck(harness: harness, lines: texts, mine: mine, earlier: session.taken)
         // A reply the checks can read: as it is, or (`.repair`) with the segment tags put right and a cut closed at its last finished note.
@@ -87,12 +90,12 @@ extension LLMService {
         }
         var salvaged: LiveNotesBatch?
         do {
-            result = try await chat.model.chat(messages, options, onProgress: nil)
+            result = try await StructuredOutputRetry.run(&options) { try await chat.model.chat(messages, $0, onProgress: nil) }
             // A reply cut at the limit is read up to its last finished note instead of asking again (`.repair`): no second call.
             if result.isTruncated, harness.contains(.repair), let notes = try? read(result.content), !notes.isEmpty { salvaged = notes }
             if salvaged == nil, result.isTruncated, let raised = budget.raisedOutput(from: options.maxTokens, promptTokens: PromptText.tokens(messages)) {
                 options.maxTokens = raised
-                result = try await chat.model.chat(messages, options, onProgress: nil)
+                result = try await StructuredOutputRetry.run(&options) { try await chat.model.chat(messages, $0, onProgress: nil) }
             }
         } catch is GenerationPreempted {
             // A question took the integrated model's slot while the notes waited: nothing is wrong, and the session did not advance,

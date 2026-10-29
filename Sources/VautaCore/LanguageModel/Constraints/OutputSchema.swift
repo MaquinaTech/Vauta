@@ -81,7 +81,7 @@ public indirect enum OutputSchema: Sendable, Equatable {
     /// order of that map, so `found` has to come first there and not wherever a sorted dictionary would put it.
     public func jsonSchemaData() -> Data { Data(orderedJSONSchema().utf8) }
 
-    private static func literal(_ value: Any) -> String {
+    static func literal(_ value: Any) -> String {
         guard let data = try? JSONSerialization.data(withJSONObject: value, options: [.sortedKeys, .fragmentsAllowed]) else { return "null" }
         return String(decoding: data, as: UTF8.self)
     }

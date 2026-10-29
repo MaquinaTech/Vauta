@@ -510,14 +510,8 @@ extension LLMService {
     /// again once without `response_format`: the prompt carries the same shape and the answer is validated either way.
     func askChat(_ model: any ChatModel, _ messages: [ChatMessage], _ options: inout ChatOptions, meetingID: Int64? = nil,
                  onProgress: (@Sendable (Int) -> Void)?) async throws -> ChatResult {
-        do {
-            let sent = options
-            return try await keeping(sent.slot, meetingID: meetingID) { try await model.chat(messages, sent, onProgress: onProgress) }
-        } catch LLMError.http(let status, _) where options.responseFormat != nil && [400, 415, 422].contains(status) {
-            try Task.checkCancellation()
-            options.responseFormat = nil
-            let sent = options
-            return try await keeping(sent.slot, meetingID: meetingID) { try await model.chat(messages, sent, onProgress: onProgress) }
+        try await StructuredOutputRetry.run(&options) { sent in
+            try await keeping(sent.slot, meetingID: meetingID) { try await model.chat(messages, sent, onProgress: onProgress) }
         }
     }
 
