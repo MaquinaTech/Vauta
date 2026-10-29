@@ -19,6 +19,8 @@ extension LLMService {
     public func setAnswerGuards(_ guards: AnswerGuards) { answerGuards = guards }
     /// Forces which parts of Ask's request and retrieval are on (the evaluation); nil goes back to the release choice.
     func setAskHarness(_ harness: AskHarness?) { askHarnessOverride = harness }
+    /// Forces bounded reasoning in a model server's Ask after the meeting on or off (the evaluation); nil goes back to `AskReasoningRelease`.
+    func setServerAskReasoning(_ on: Bool?) { serverAskReasoningOverride = on }
     public func setAppleGuidedAsk(_ on: Bool) { appleGuidedAsk = on }
 
     /// The check gives up after this long.

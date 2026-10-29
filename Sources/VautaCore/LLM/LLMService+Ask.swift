@@ -356,10 +356,22 @@ extension LLMService {
             options.responseFormat = .jsonSchema(name: "answer", schema: OutputSchemas.answerForServer(documents: hasDocumentExcerpts, maxClaims: claimCap).jsonSchemaData())
         }
         if auto != nil, !chat.integrated { options.maxTokens = min(options.maxTokens, AutoAskRequest.otherTokens) }
+        // A model server's main model may reason briefly over a question asked outside a recording (`AskReasoningRelease`). It goes
+        // without the schema, as the minutes' reasoning requests do: on the servers that apply it to the whole reply, a grammar over the
+        // reasoning would constrain the reasoning too.
+        var schemaBesideReasoning: ResponseFormat?
+        if !chat.integrated, !chat.onDevice, !recording, auto == nil, !budget.isSmall, serverAskReasoningOverride ?? AskReasoningRelease.serverAfterMeeting {
+            options.thinking = true
+            options.reasoningEffort = "low"
+            options.maxTokens += AskReasoningRelease.tokens
+            schemaBesideReasoning = options.responseFormat
+            options.responseFormat = nil
+        }
         var result = try await askChat(chat.model, messages, &options, meetingID: meetingID, onProgress: onProgress)
         // An answer cut off at the length limit keeps the claims it finished (all providers without a grammar: the integrated model
         // closes its own JSON). It is closed at its last complete element; if that leaves a verified claim it is used as it is,
-        // else the request is made again once with a larger limit, and a second cut is closed the same way before giving up.
+        // else the request is made again once (without reasoning if it reasoned, at the same limit: twice the limit would only give the
+        // reasoning room to run on; else with a larger limit), and a second cut is closed the same way before giving up.
         let transcriptLanguage = meeting?.transcriptionLocale.identifier
         // Across the library each passage's meeting has its own transcription language (its filler words are the ones ignored).
         var segmentLanguages: [Int64: String] = [:]
@@ -376,6 +388,12 @@ extension LLMService {
         if result.isTruncated, !chat.integrated {
             if let kept = closing(result.content), (try? VautaPrompts.verifyAnswer(kept, sent: sent, documents: sentDocuments, language: transcriptLanguage, languages: segmentLanguages))?.hasEvidence == true {
                 closedCut = kept
+            } else if options.thinking {
+                options.thinking = false
+                options.reasoningEffort = nil
+                options.responseFormat = schemaBesideReasoning
+                result = try await askChat(chat.model, messages, &options, meetingID: meetingID, onProgress: onProgress)
+                if result.isTruncated { closedCut = closing(result.content) }
             } else if let raised = budget.raisedOutput(from: options.maxTokens, promptTokens: PromptText.tokens(messages)) {
                 options.maxTokens = raised
                 result = try await askChat(chat.model, messages, &options, meetingID: meetingID, onProgress: onProgress)

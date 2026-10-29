@@ -57,17 +57,21 @@ extension LLMEvaluation {
             let date = Date(timeIntervalSince1970: 1_104_537_600)
             let meeting = try await meetingStore.startMeeting(at: date, locale: locale, outputLocale: locale)
             var services: [String: (LLMService, EvaluationProviders, EvaluationModel)] = [:]
-            for kind in o.providers {
-                let m = model(kind, store: store, greedy: o.greedy, engine: engine)
+            let runs = o.answerRuns
+            for run in runs {
+                let m = model(run.kind, store: store, greedy: o.greedy, engine: engine, server: o.server)
                 let providers = EvaluationProviders(m, searchModel: o.searchModel)
                 let service = LLMService(store: meetingStore, providers: providers, searchDefaults: EvaluationDefaults.suite)   // never .standard
                 await service.forgetSearchModelCoverage()   // the suite is shared by every set of the run: no marker from an earlier one
                 await service.setAnswerGuards(o.guards)
                 await configureAsk(service, o)
+                await service.setServerAskReasoning(run.reasoning)
                 // The questions are asked while the meeting is "recording", as the app asks them: the live rules, caps and schema apply.
                 await service.setRecording(true, meetingID: meeting)
-                services[kind] = (service, providers, m)
+                services[run.label] = (service, providers, m)
             }
+            let labels = runs.map(\.label)
+            let reasoning = Dictionary(uniqueKeysWithValues: runs.map { ($0.label, $0.reasoning) })
             var added = 0
             var passageOf: [Int64: Int64] = [:]
             var clock = 0.0
@@ -98,14 +102,14 @@ extension LLMEvaluation {
                 if o.warm, !o.afterMeeting, let (service, _, _) = services["integrated"] { await service.readMeetingNow(meeting) }
                 try await append(until: upTo)
                 let (waited, _) = await waitForQuiet(o)
-                let sequence = order(pair, o.providers)
+                let sequence = order(pair, labels)
                 for kind in sequence {
                     guard let (service, providers, m) = services[kind] else { continue }
                     var answerText = ""
                     var cited: [Int64] = []
                     var sentPassages: [Int64] = []
                     let before = providers.chatModel.records.count
-                    let trace = await measure(task: "live-answer", provider: kind, item: q.qid, pair: pair, order: sequence[0] == o.providers[0] ? "AB" : "BA",
+                    let trace = await measure(task: "live-answer", provider: kind, item: q.qid, pair: pair, order: sequence[0] == labels[0] ? "AB" : "BA",
                                               model: m, waited: waited, options: o) {
                         let r = try await service.ask(q.question, meetingID: meeting)
                         sentPassages = Array(Set(r.sent.keys.compactMap { passageOf[$0] })).sorted()
@@ -125,7 +129,8 @@ extension LLMEvaluation {
                                  "noEvidence": "\(r.answer.claims.isEmpty)", "answerable": "\(q.answerable ?? true)", "category": q.category ?? "",
                                  "language": q.question_language ?? "", "answerChars": "\(answerText.count)", "tSeg": "\(q.t_seg)",
                                  "warmPrefix": "\(providers.chatModel.records.dropFirst(before).first.map { $0.cachedTokens > 0 } ?? false)",
-                                 "ask": o.ask.names, "sent": sentPassages.map(String.init).joined(separator: ",")])
+                                 "ask": o.ask.names, "sent": sentPassages.map(String.init).joined(separator: ","),
+                                 "askReasoning": reasoning[kind].flatMap { $0.map { $0 ? "on" : "off" } } ?? "release"])
                     }
                     write(trace)
                     // The model's reply as it came, to see what the checks were given (the sets are public transcripts).

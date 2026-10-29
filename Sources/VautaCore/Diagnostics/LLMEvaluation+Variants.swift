@@ -34,4 +34,14 @@ extension LLMEvaluation.Options {
         }
         return (parts[0], o.minutesChoices(provider: parts[0]))
     }
+
+    /// The runs of `live-answer`: one per provider, and the model server once per `--ask-reasoning` value when there are two
+    /// (`server.reasoning`, `server.plain`), interleaved per question as the providers are. `reasoning` nil is the release choice.
+    var answerRuns: [(label: String, kind: String, reasoning: Bool?)] {
+        providers.flatMap { p -> [(label: String, kind: String, reasoning: Bool?)] in
+            guard p == "server", !askReasoning.isEmpty else { return [(p, p, nil)] }
+            if askReasoning.count == 1 { return [(p, p, askReasoning[0])] }
+            return askReasoning.map { ("\(p).\($0 ? "reasoning" : "plain")", p, $0) }
+        }
+    }
 }

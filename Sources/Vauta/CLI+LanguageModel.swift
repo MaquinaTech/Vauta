@@ -104,10 +104,12 @@ private func throw_usage() { printError("usage: llm-install status|verify|adopt|
 /// about the finished meeting, whose whole transcript was read while it recorded.
 /// Runs the app's minutes code and Ask with both providers interleaved item by item (ABAB) on PUBLIC transcripts, in a throwaway
 /// store; never the user's store. See docs/LANGUAGE_MODEL.md. The integrated model comes from `VAUTA_LLM_MODEL_DIR`.
-/// `--providers server --server <config.json> [--ask-key]` (minutes only) adds a model server, from the same file as `server-check`: its
+/// `--providers server --server <config.json> [--ask-key]` (minutes, live-answer) adds a model server, from the same file as `server-check`: its
 /// requests go through the app's client, address rules and Network Activity purposes, and the key, if any, is typed without echo.
 /// Without `server` in `--providers` no model server is contacted. `--variants old,new` (minutes) runs each provider with each variant
 /// interleaved per meeting, under the label `<provider>.<variant>`: one server check and one key prompt for both arms.
+/// `--ask-reasoning on|off|on,off` (live-answer, server, `--after-meeting`) turns Ask's bounded reasoning on the server's main model on or
+/// off; `on,off` asks each question both ways, interleaved, under `server.reasoning` and `server.plain`.
 func llmEval(_ invocation: CommandInvocation) async -> Int32 {
     if invocation.has("--print-context") { print(await LLMEvaluation.contextLine()); return 0 }
     guard let sets = invocation.values["--sets"], let out = invocation.values["--out"] else { printError("usage: llm-eval --sets <dir> --out <dir> [--tasks minutes,live-answer] [--providers apple,integrated] [--questions <file>]"); return 1 }
@@ -209,6 +211,16 @@ func llmEval(_ invocation: CommandInvocation) async -> Int32 {
         // A variant with the new extraction runs its closing request, as `--extraction new` does.
         if options.variants.contains(where: { MinutesExtraction.parse($0)?.contains(.closing) == true }) { options.arms.insert(.closingPass) }
     }
+    if let list = invocation.values["--ask-reasoning"] {
+        let words = list.lowercased().split(separator: ",").map(String.init)
+        let values = words.compactMap { ["on": true, "off": false][$0] }
+        guard !values.isEmpty, values.count == words.count, Set(values).count == values.count else { printError("--ask-reasoning: on, off, or on,off"); return 1 }
+        // Ask reasons only on a model server's main model, after the meeting: anywhere else the switch would change nothing.
+        guard options.tasks == ["live-answer"], options.providers.contains("server"), options.afterMeeting else {
+            printError("--ask-reasoning: with --tasks live-answer, --providers server and --after-meeting"); return 1
+        }
+        options.askReasoning = values
+    }
     options.meetings = invocation.values["--meetings"].map { Set($0.split(separator: ",").map(String.init)) }
     options.replayLive = invocation.has("--replay-live")
     options.replayFrom = invocation.values["--replay-from"].map { URL(fileURLWithPath: $0) }
@@ -261,7 +273,7 @@ func llmEval(_ invocation: CommandInvocation) async -> Int32 {
     if options.providers.contains("server") {
         // The same file as `server-check` and Settings › Models › Paste Configuration; the key is typed without echo, never an argument.
         guard let path = invocation.values["--server"] else { printError("--providers server needs --server <config.json> (and --ask-key if the server needs a key)"); return 1 }
-        guard options.tasks == ["minutes"] else { printError("--providers server runs the minutes task only (--tasks minutes)"); return 1 }
+        guard options.tasks.isSubset(of: ["minutes", "live-answer"]) else { printError("--providers server runs the minutes and live-answer tasks only"); return 1 }
         do {
             let config = try JSONDecoder().decode(LLMServerConfig.self, from: Data(contentsOf: URL(fileURLWithPath: path)))
             _ = try config.validated(embeddingsOnServer: false)
