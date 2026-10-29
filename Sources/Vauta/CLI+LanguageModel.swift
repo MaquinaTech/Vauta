@@ -106,7 +106,8 @@ private func throw_usage() { printError("usage: llm-install status|verify|adopt|
 /// store; never the user's store. See docs/LANGUAGE_MODEL.md. The integrated model comes from `VAUTA_LLM_MODEL_DIR`.
 /// `--providers server --server <config.json> [--ask-key]` (minutes only) adds a model server, from the same file as `server-check`: its
 /// requests go through the app's client, address rules and Network Activity purposes, and the key, if any, is typed without echo.
-/// Without `server` in `--providers` no model server is contacted.
+/// Without `server` in `--providers` no model server is contacted. `--variants old,new` (minutes) runs each provider with each variant
+/// interleaved per meeting, under the label `<provider>.<variant>`: one server check and one key prompt for both arms.
 func llmEval(_ invocation: CommandInvocation) async -> Int32 {
     if invocation.has("--print-context") { print(await LLMEvaluation.contextLine()); return 0 }
     guard let sets = invocation.values["--sets"], let out = invocation.values["--out"] else { printError("usage: llm-eval --sets <dir> --out <dir> [--tasks minutes,live-answer] [--providers apple,integrated] [--questions <file>]"); return 1 }
@@ -199,6 +200,14 @@ func llmEval(_ invocation: CommandInvocation) async -> Int32 {
         options.extraction = parsed
         // The integrated closing request needs the extraction's closing step and the arm: an explicit `--arms` list must not turn it off silently.
         if parsed.contains(.closing) { options.arms.insert(.closingPass) }
+    }
+    if let list = invocation.values["--variants"] {
+        options.variants = list.split(separator: ",").map(String.init)
+        guard !options.variants.isEmpty, options.variants.allSatisfy(LLMEvaluation.Options.isMinutesVariant), Set(options.variants).count == options.variants.count else { printError("--variants: release, old or new, each once, separated by commas"); return 1 }
+        guard ["--extraction", "--summary", "--harness", "--open-questions"].allSatisfy({ invocation.values[$0] == nil }) else { printError("--variants sets the four minutes choices: leave out --extraction, --summary, --harness and --open-questions"); return 1 }
+        guard options.tasks == ["minutes"] else { printError("--variants: only with --tasks minutes"); return 1 }
+        // A variant with the new extraction runs its closing request, as `--extraction new` does.
+        if options.variants.contains(where: { MinutesExtraction.parse($0)?.contains(.closing) == true }) { options.arms.insert(.closingPass) }
     }
     options.meetings = invocation.values["--meetings"].map { Set($0.split(separator: ",").map(String.init)) }
     options.replayLive = invocation.has("--replay-live")

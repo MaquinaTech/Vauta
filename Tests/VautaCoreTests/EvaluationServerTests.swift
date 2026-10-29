@@ -76,6 +76,58 @@ struct EvaluationServerTests {
         #expect(Self.messages(chats[0]).map(\.content).joined().contains("item 0"), "the transcript is in the request")
     }
 
+    @Test func eachVariantRunsTheChoicesItNames() {
+        var o = LLMEvaluation.Options(sets: URL(fileURLWithPath: "/nonexistent"), out: URL(fileURLWithPath: "/nonexistent"))
+        o.providers = ["server", "integrated"]
+        #expect(o.minutesLabels == ["server", "integrated"], "without variants the labels are the providers")
+        o.variants = ["old", "new", "release"]
+        #expect(o.minutesLabels == ["server.old", "server.new", "server.release", "integrated.old", "integrated.new", "integrated.release"])
+        let old = o.minutesRun("server.old")
+        #expect(old.provider == "server" && old.choices.extraction == .legacy && old.choices.summary == .legacy && old.choices.questions == .legacy)
+        let new = o.minutesRun("server.new")
+        #expect(new.choices.extraction == .ranked && new.choices.summary == .shipped && new.choices.questions == .shipped && new.choices.harness == .shipped)
+        #expect(o.minutesRun("server.release").choices.extraction == .legacy, "a server's release is the old request")
+        let integrated = o.minutesRun("integrated.release")
+        #expect(integrated.provider == "integrated" && integrated.choices.extraction == MinutesRelease.extraction(integrated: true)
+            && integrated.choices.harness == MinutesHarnessRelease.harness(integrated: true))
+        for word in ["old", "new", "release", "shipped", "legacy"] { #expect(LLMEvaluation.Options.isMinutesVariant(word), "\(word)") }
+        for word in ["integrated", "outcomes", "old,new", "", "fast"] { #expect(!LLMEvaluation.Options.isMinutesVariant(word), "\(word)") }
+    }
+
+    @Test func bothVariantsRunInOneRunWithOneServerCheck() async throws {
+        let port = StubServer.register { received in
+            if received.url.path.hasSuffix("/models") { return .json(["object": "list", "data": [["id": "fast-model"], ["id": "deep-model"]]]) }
+            guard received.url.path.hasSuffix("/chat/completions") else { return nil }
+            return .text(ModelsFixtures.sse([ModelsFixtures.delta(ScriptedChat.minutesJSON(Self.messages(received)), finish: "stop")]))
+        }
+        defer { StubServer.unregister(port) }
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-eval-variants-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let sets = root.appendingPathComponent("sets", isDirectory: true)
+        try FileManager.default.createDirectory(at: sets, withIntermediateDirectories: true)
+        let passages = Self.transcript.passages.map { ["id": $0.id, "text": $0.text, "start": $0.start ?? 0, "speaker": $0.speaker ?? ""] as [String: Any] }
+        for name in ["m1", "m2"] {
+            try JSONSerialization.data(withJSONObject: ["passages": passages, "meeting": name, "language": "en"]).write(to: sets.appendingPathComponent("\(name).json"))
+        }
+        var o = LLMEvaluation.Options(sets: sets, out: root.appendingPathComponent("out", isDirectory: true))
+        o.tasks = ["minutes"]
+        o.providers = ["server"]
+        o.variants = ["old", "new"]
+        o.server = serverModel(port: port)
+        let log = LogLines()
+        try await LLMEvaluation.run(o, store: LanguageModelStore(applicationSupport: root), log: { log.append($0) })
+        let lines = try String(contentsOf: o.out.appendingPathComponent("traces.jsonl"), encoding: .utf8).split(separator: "\n")
+        let traces = try lines.map { try JSONDecoder().decode(LLMEvaluation.Trace.self, from: Data($0.utf8)) }
+        #expect(traces.map(\.provider) == ["server.old", "server.new", "server.new", "server.old"], "interleaved per meeting, the order alternated")
+        #expect(traces.allSatisfy { $0.error == nil })
+        #expect(traces.first { $0.provider == "server.old" }?.detail["extraction"] == MinutesExtraction.legacy.names)
+        #expect(traces.first { $0.provider == "server.new" }?.detail["extraction"] == MinutesExtraction.ranked.names)
+        for file in ["m1.server.old.json", "m1.server.new.json", "m2.server.old.json", "m2.server.new.json"] {
+            #expect(FileManager.default.fileExists(atPath: o.out.appendingPathComponent("minutes/\(file)").path), "\(file)")
+        }
+        #expect(log.all.filter { $0.hasPrefix("model server: ") }.count == 1, "the server is checked once for the whole run")
+    }
+
     @Test func theServerIsCheckedBeforeTheFirstRun() async throws {
         let listed = StubServer.register { received in
             received.url.path.hasSuffix("/models") ? .json(["object": "list", "data": [["id": "fast-model"], ["id": "deep-model"]]]) : nil

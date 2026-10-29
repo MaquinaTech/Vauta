@@ -70,6 +70,8 @@ public enum LLMEvaluation {
         /// `--extraction`, `--summary`, `--harness` or `--open-questions` given as `release`: each backend runs the choices the app ships for it
         /// (`MinutesRelease`, `MinutesSummaryRelease`, `MinutesHarnessRelease`, `MinutesQuestionsRelease`), so one run measures the shipped combination.
         public var release = false
+        /// `--variants old,new` (minutes): each provider runs each variant, interleaved per meeting (`LLMEvaluation+Variants.swift`).
+        public var variants: [String] = []
         /// Only these meetings (exact names), in the order of the sets folder.
         public var meetings: Set<String>?
         /// `--tasks minutes-replay`: the folder with the result files of an earlier minutes run (`<meeting>.<provider>.json`).
@@ -523,12 +525,13 @@ public enum LLMEvaluation {
                 let name = file.deletingPathExtension().lastPathComponent + (o.repetitions > 1 ? "#\(rep)" : "")
                 let language = Locale(identifier: transcript.language == "es" || name.hasPrefix("es_") ? "es-ES" : "en-US")
                 let (waited, _) = await waitForQuiet(o)
-                let sequence = order(pair, o.providers)
-                for kind in sequence {
+                let labels = o.minutesLabels
+                let sequence = order(pair, labels)
+                for label in sequence {
+                    let (kind, choices) = o.minutesRun(label)
                     let m = model(kind, store: store, greedy: o.greedy, engine: engine, server: o.server)
-                    let choices = o.minutesChoices(provider: kind)
                     var result: MinutesEvaluation.Result?
-                    let trace = await measure(task: "minutes", provider: kind, item: name, pair: pair, order: sequence[0] == o.providers[0] ? "AB" : "BA",
+                    let trace = await measure(task: "minutes", provider: label, item: name, pair: pair, order: sequence[0] == labels[0] ? "AB" : "BA",
                                               model: m, waited: waited, options: o) {
                         let r = try await MinutesEvaluation.run(transcript, language: language, model: m, arms: o.arms, warm: o.warm && kind == "integrated", renumberFinal: o.renumberFinal,
                                                          decidedFilter: o.decidedFilter, extraction: choices.extraction, summary: choices.summary, harness: choices.harness,
@@ -551,8 +554,8 @@ public enum LLMEvaluation {
                     if let result {
                         let enc = JSONEncoder()
                         enc.outputFormatting = [.prettyPrinted, .sortedKeys]
-                        try? enc.encode(result).write(to: minutesDir.appendingPathComponent("\(name).\(kind).json"))
-                        try? Self.writeMinutes(result, name: name, kind: kind, to: minutesDir)
+                        try? enc.encode(result).write(to: minutesDir.appendingPathComponent("\(name).\(label).json"))
+                        try? Self.writeMinutes(result, name: name, kind: label, to: minutesDir)
                     }
                     write(trace)
                 }
