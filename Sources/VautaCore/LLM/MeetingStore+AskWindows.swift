@@ -24,7 +24,7 @@ extension MeetingStore {
             let match = spaced.map { "\"\($0.replacingOccurrences(of: "\"", with: ""))\"*" }.joined(separator: " OR ")
             let rows = try db.query("""
                 SELECT s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
-                WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) ORDER BY rank LIMIT 80
+                WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 80
                 """, [.text(match), within.map { .integer($0) }, excluding.map { .integer($0) }])
             for (rank, row) in rows.enumerated() { hits.append((row.int(0), row.double(1), 1 / Double(60 + rank))) }
         }
@@ -32,7 +32,7 @@ extension MeetingStore {
             let rows = try db.query("""
                 SELECT meeting_id, start FROM (
                     SELECT s.meeting_id, s.start, (SELECT COUNT(*) FROM json_each(?1) WHERE instr(s.text, value) > 0) AS found
-                    FROM segments s WHERE (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3))
+                    FROM segments s WHERE (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho))
                 WHERE found > 0 ORDER BY found DESC, start LIMIT 80
                 """, [.text(Self.json(strings: unspaced)), within.map { .integer($0) }, excluding.map { .integer($0) }])
             for (rank, row) in rows.enumerated() { hits.append((row.int(0), row.double(1), 1 / Double(60 + rank))) }
@@ -51,7 +51,7 @@ extension MeetingStore {
             guard seen.insert(key).inserted else { continue }
             var lines = try db.query("""
                 SELECT s.id, s.speaker, s.start, s.text, \(Self.speakerColumns) FROM segments s \(Self.speakerJoins)
-                WHERE s.meeting_id = ? AND s.start >= ? AND s.start <= ? ORDER BY s.start, s.id
+                WHERE s.meeting_id = ? AND s.start >= ? AND s.start <= ? AND \(Self.notEcho) ORDER BY s.start, s.id
                 """, [.integer(hit.meeting), .real(hit.t - windows.before), .real(hit.t + windows.after)]).map(Self.citable)
             guard !lines.isEmpty else { continue }
             // Cut to the budget: the line furthest from the hit goes first.

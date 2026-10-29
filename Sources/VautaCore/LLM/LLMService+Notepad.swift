@@ -8,7 +8,7 @@ extension MeetingStore {
     func citableSegments(_ meetingID: Int64, from: Double, to: Double?) throws -> [CitableSegment] {
         try db.query("""
             SELECT s.id, s.speaker, s.start, s.text, \(Self.speakerColumns) FROM segments s \(Self.speakerJoins)
-            WHERE s.meeting_id = ?1 AND s.start >= ?2 AND (?3 IS NULL OR s.start <= ?3) ORDER BY s.start, s.id
+            WHERE s.meeting_id = ?1 AND s.start >= ?2 AND (?3 IS NULL OR s.start <= ?3) AND \(Self.notEcho) ORDER BY s.start, s.id
             """, [.integer(meetingID), .real(from), to.map { .real($0) }]).map(Self.citable)
     }
 }

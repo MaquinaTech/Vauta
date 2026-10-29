@@ -83,7 +83,7 @@ public struct SpeakerEditor: Sendable {
             let undo = try await store.reassignSegment(segment, toSpeaker: speaker)
             return SpeakerEditOutcome(kind: .moveLine, steps: [.restore(undo)], entityID: nil)
         case .moveLineToNewSpeaker(let segment, let meeting):
-            guard let line = try await store.segments(of: meeting).first(where: { $0.id == segment }) else { throw MeetingStore.segmentGone }
+            guard let line = try await store.segments(of: meeting, echoes: true).first(where: { $0.id == segment }) else { throw MeetingStore.segmentGone }
             let (added, addUndo) = try await store.addSpeaker(meetingID: meeting, channel: line.channel)
             do {
                 let undo = try await store.reassignSegment(segment, toSpeaker: added.id)
@@ -93,7 +93,7 @@ public struct SpeakerEditor: Sendable {
                 throw error
             }
         case .splitFromHere(let segment, let meeting):
-            let segments = try await store.segments(of: meeting)
+            let segments = try await store.segments(of: meeting, echoes: true)
             let turn = SpeakerRoster.restOfTurn(from: segment, in: segments)
             guard let first = turn.first, let speakerID = first.speaker?.id, let speaker = try await store.speaker(speakerID) else {
                 throw MeetingStore.segmentGone

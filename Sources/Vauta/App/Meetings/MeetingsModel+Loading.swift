@@ -183,7 +183,7 @@ extension MeetingsModel {
             selectedID = meeting
         } else if let t {
             Task {
-                let segs = (try? await store.segments(of: meeting)) ?? []
+                let segs = (try? await store.segments(of: meeting, echoes: true)) ?? []
                 let target = segs.last { $0.start <= t + 0.5 }?.id ?? segs.first?.id
                 pendingHighlight = target
                 if selectedID == meeting { highlighted = target; pendingHighlight = nil }

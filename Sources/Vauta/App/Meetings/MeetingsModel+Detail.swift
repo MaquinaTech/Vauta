@@ -14,7 +14,7 @@ extension MeetingsModel {
     func loadDetail() async {
         guard let id = selectedID else { clearDetail(); return }
         do {
-            let segs = try await store.segments(of: id)
+            let segs = try await store.segments(of: id, echoes: true)
             let stored = try await store.translations(of: id)
             let marks = try await store.marks(id)
             let notes = try await store.notes(id)

@@ -80,7 +80,7 @@ extension MeetingStore {
             }
             let profile = LanguageProfile(locale: try meetingLocale(meetingID))
             let matcher = NameMatcher([(norm: norm, value: chosen)], profile: profile, gated: false)
-            for seg in try db.query("SELECT id, start, text FROM segments WHERE meeting_id = ?", [.integer(meetingID)]) {
+            for seg in try db.query("SELECT id, start, text FROM segments WHERE meeting_id = ? AND echo <> 1", [.integer(meetingID)]) {
                 let text = seg.string(2)
                 for m in matcher.matches(in: text, tokens: TextKeys.tokens(text, profile: profile), profile: profile) {
                     try run("""

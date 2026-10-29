@@ -108,7 +108,7 @@ extension MeetingStore {
 
         var occurrences: [Occurrence] = []
         var corrections: [String: Correction] = [:]
-        for seg in try db.query("SELECT id, start, text FROM segments WHERE meeting_id = ? ORDER BY start, id", [.integer(meetingID)]) {
+        for seg in try db.query("SELECT id, start, text FROM segments WHERE meeting_id = ? AND echo <> 1 ORDER BY start, id", [.integer(meetingID)]) {
             let text = seg.string(2)
             let tokens = TextKeys.tokens(text, profile: profile)
             let matches = matcher.matches(in: text, tokens: tokens, profile: profile)

@@ -175,7 +175,7 @@ extension MeetingStore {
                     SELECT COUNT(*) FROM segments s JOIN meeting_speakers sp ON sp.id = s.speaker_id
                     WHERE s.meeting_id = ?1 AND s.start BETWEEN ?2 AND ?3 AND sp.source = 'user'
                       AND sp.entity_id IN (SELECT id FROM entities WHERE id IN (SELECT value FROM json_each(?4)) OR merged_into IN (SELECT value FROM json_each(?4)))
-                      AND (s.speaker_confidence IS NULL OR s.speaker_confidence >= ?5) AND s.overlap = 0
+                      AND (s.speaker_confidence IS NULL OR s.speaker_confidence >= ?5) AND s.overlap = 0 AND \(Self.notEcho)
                     """, [.integer(r.meeting), .real(r.start), .real(r.end), .ids(entities), .real(SpeakerTag.lowConfidenceBelow)])[0].int(0)
                 if said > 0 { score[key, default: 0] += 0.08 }
             }
@@ -191,7 +191,7 @@ extension MeetingStore {
         guard let phrase = SemanticRanker.phrase(item) else { return nil }
         let rows = try db.query("""
             SELECT s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
-            WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) ORDER BY rank LIMIT 400
+            WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 400
             """, [.text(phrase), within.map { .integer($0) }, excluding.map { .integer($0) }])
         guard !rows.isEmpty else { return nil }
         var seen = Set<String>()
@@ -209,7 +209,7 @@ extension MeetingStore {
         let match = spaced.map { "\"\($0.replacingOccurrences(of: "\"", with: ""))\"*" }.joined(separator: " OR ")
         let rows = try db.query("""
             SELECT s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
-            WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?5 IS NULL OR s.meeting_id <> ?5)
+            WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?5 IS NULL OR s.meeting_id <> ?5) AND \(Self.notEcho)
               AND NOT EXISTS (SELECT 1 FROM chunks c WHERE c.meeting_id = s.meeting_id AND c.model = ?3 AND c.dims = ?4
                               AND c.start <= s.start AND c.end >= s.start)
             ORDER BY rank LIMIT 20
