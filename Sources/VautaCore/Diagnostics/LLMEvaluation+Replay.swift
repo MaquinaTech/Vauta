@@ -44,4 +44,14 @@ extension LLMEvaluation {
             }]
         if let d = try? JSONSerialization.data(withJSONObject: line, options: [.sortedKeys]) { appendLine(d, to: dir.appendingPathComponent("minutes.\(kind).jsonl")) }
     }
+
+    /// `<meeting>.<provider>.failed.json`: the error, the calls and the replies of a minutes run that failed, so the reply that could not be
+    /// used can be read (public transcripts only). A replay reads `<meeting>.<provider>.json`, never this file.
+    static func writeFailedRun(_ failure: MinutesEvaluation.RunFailure, name: String, kind: String, to dir: URL) throws {
+        struct FailedRun: Encodable { let error: String; let calls: [EvaluationCall]; let replies: [String] }
+        let enc = JSONEncoder()
+        enc.outputFormatting = [.prettyPrinted, .sortedKeys]
+        try enc.encode(FailedRun(error: failure.description, calls: failure.calls, replies: failure.replies))
+            .write(to: dir.appendingPathComponent("\(name).\(kind).failed.json"))
+    }
 }

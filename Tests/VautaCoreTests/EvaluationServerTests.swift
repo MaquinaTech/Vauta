@@ -128,6 +128,36 @@ struct EvaluationServerTests {
         #expect(log.all.filter { $0.hasPrefix("model server: ") }.count == 1, "the server is checked once for the whole run")
     }
 
+    /// A meeting whose minutes fail leaves its calls and replies in `<meeting>.<provider>.failed.json` (public transcripts), so the answer
+    /// that could not be used can be read; no result file is written for it.
+    @Test func aFailedMeetingLeavesItsReplies() async throws {
+        let unreadable = "The minutes, as asked: the decisions first."
+        let port = StubServer.register { received in
+            if received.url.path.hasSuffix("/models") { return .json(["object": "list", "data": [["id": "fast-model"], ["id": "deep-model"]]]) }
+            guard received.url.path.hasSuffix("/chat/completions") else { return nil }
+            return .text(ModelsFixtures.sse([ModelsFixtures.delta(unreadable, finish: "stop")]))
+        }
+        defer { StubServer.unregister(port) }
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-eval-failed-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let sets = root.appendingPathComponent("sets", isDirectory: true)
+        try FileManager.default.createDirectory(at: sets, withIntermediateDirectories: true)
+        let passages = Self.transcript.passages.map { ["id": $0.id, "text": $0.text, "start": $0.start ?? 0, "speaker": $0.speaker ?? ""] as [String: Any] }
+        try JSONSerialization.data(withJSONObject: ["passages": passages, "meeting": "m1", "language": "en"]).write(to: sets.appendingPathComponent("m1.json"))
+        var o = LLMEvaluation.Options(sets: sets, out: root.appendingPathComponent("out", isDirectory: true))
+        o.tasks = ["minutes"]
+        o.providers = ["server"]
+        o.server = serverModel(port: port)
+        try await LLMEvaluation.run(o, store: LanguageModelStore(applicationSupport: root), log: { _ in })
+        let trace = try JSONDecoder().decode(LLMEvaluation.Trace.self, from: Data(contentsOf: o.out.appendingPathComponent("traces.jsonl")))
+        let minutes = o.out.appendingPathComponent("minutes", isDirectory: true)
+        #expect(trace.error != nil && !FileManager.default.fileExists(atPath: minutes.appendingPathComponent("m1.server.json").path))
+        let failed = try #require(try JSONSerialization.jsonObject(with: Data(contentsOf: minutes.appendingPathComponent("m1.server.failed.json"))) as? [String: Any])
+        let replies = try #require(failed["replies"] as? [String])
+        #expect(!replies.isEmpty && replies.allSatisfy { $0 == unreadable })
+        #expect((failed["calls"] as? [Any])?.count == trace.calls.count && failed["error"] as? String == trace.error)
+    }
+
     @Test func eachAskReasoningValueIsARunOfTheServer() {
         var o = LLMEvaluation.Options(sets: URL(fileURLWithPath: "/nonexistent"), out: URL(fileURLWithPath: "/nonexistent"))
         o.providers = ["server", "apple"]
