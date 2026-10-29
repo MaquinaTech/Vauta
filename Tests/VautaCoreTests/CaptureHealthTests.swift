@@ -108,6 +108,52 @@ struct CaptureTapHelperTests {
         #expect(SystemAudioTap.correctedRate(measured: 1000, assumed: 0) == nil)
     }
 
+    /// The corrections the tap makes on a stream of buffers captured at `real` samples per second (`correctRate`: confirm, take the
+    /// new rate, reset the probe). Buffers whose capture time falls in `lost` never arrive.
+    private func corrections(declared: Double, real: Double, seconds: Double, lost: [ClosedRange<Double>] = [],
+                             frames: Int = 512) -> [(at: Double, rate: Double)] {
+        let probe = RateProbe()
+        var assumed = declared, made: [(at: Double, rate: Double)] = []
+        var t = 0.0
+        while t < seconds {
+            defer { t += Double(frames) / real }
+            guard !lost.contains(where: { $0.contains(t) }), let measured = probe.add(frames: frames, at: 5_000 + t),
+                  let corrected = probe.confirm(measured: measured, corrected: SystemAudioTap.correctedRate(measured: measured, assumed: assumed))
+            else { continue }
+            made.append((t, corrected))
+            assumed = corrected
+            probe.reset()
+        }
+        return made
+    }
+
+    @Test func theRateIsMeasuredOnTheCaptureTimes() {
+        let probe = RateProbe()
+        var rates: [Double] = []
+        for i in 0..<1_000 { if let r = probe.add(frames: 512, at: 50 + Double(i) * 512 / 48_000) { rates.append(r) } }
+        #expect(rates.count == 3 && rates.allSatisfy { abs($0 - 48_000) < 1 }, "\(rates)")
+        // A buffer captured earlier than the last one (the clock went back) starts a new window instead of closing one.
+        #expect(probe.add(frames: 512, at: 40) == nil && probe.add(frames: 512, at: 40 + 512 / 48_000) == nil)
+    }
+
+    /// The probe once timed its windows with the wall clock: a stall of 150 ms in a 3 s window read as 45,600 samples/s and the
+    /// tap switched 48 kHz to 44.1 kHz. Stalls that lose audio (one alone, or one in each of two windows in a row), the Mac
+    /// sleeping and longer gaps now leave the rate alone.
+    @Test func stallsAndGapsNeverCorrectTheRate() {
+        let lost: [ClosedRange<Double>] = [4.0...4.15, 7.0...7.4, 11.2...11.6, 19.0...21.0, 30.5...31.1, 40.0...40.3, 46.1...46.25]
+        #expect(corrections(declared: 48_000, real: 48_000, seconds: 60, lost: lost).isEmpty)
+        #expect(corrections(declared: 44_100, real: 44_100, seconds: 60, lost: lost, frames: 470).isEmpty)
+    }
+
+    @Test func aWrongRateIsCorrectedWithinTwoWindows() {
+        // Bluetooth HFP (16 or 24 kHz) and a 44.1 kHz device, all while the format says 48 kHz.
+        for (real, frames) in [(16_000.0, 160), (24_000.0, 256), (44_100.0, 512)] {
+            let made = corrections(declared: 48_000, real: real, seconds: 30, frames: frames)
+            #expect(made.count == 1 && made.first?.rate == real, "\(real): \(made)")
+            #expect((made.first?.at ?? .infinity) <= 2 * RateProbe.window + 0.1, "\(real): \(made)")
+        }
+    }
+
     @Test func tapStreamIsFoundAfterTheClockDeviceInputs() {
         // Single stream: always it.
         #expect(TapStream.index(channelCounts: [1], hasData: [true], preferred: 0, tapChannels: 1) == 0)
