@@ -48,7 +48,7 @@ eval/.venv/bin/python -I eval/scripts/check_doc_tables.py <run dir>             
 eval/.venv/bin/python -I eval/scripts/compare_runs.py --sets-dir <sets> --before <run dir> --after <run dir>                  # paired DER comparison of two runs (pooled, per-file change, bootstrap interval); --sets-dir eval/heldout/sets for the held-out groups, the main harness's $VAUTA_EVAL_WORK/sets for the tuning_set group
 eval/.venv/bin/python -I eval/scripts/overlap_shares.py <run dir> [<run dir> ...]   # share of each speaker's time that another speaker also covers (the voice-recognition gate)
 eval/.venv/bin/python -I eval/scripts/score_der.py --ref <rttm dir> --hyp <rttm dir> [--uem <uem dir>]   # score any diarizer
-eval/.venv/bin/python -I -m unittest discover -s eval/tests                                              # scorer tests
+eval/.venv/bin/python -I -m unittest discover -s eval/tests                                              # scorer tests, and those of tools/llm-eval/stats.py (that file alone needs no numpy)
 eval/.venv/bin/python -I eval/scripts/run_minutes.py --bin .build/release/Vauta --seconds 180 [--tag name]   # minutes for the 10 AMI windows (3-minute headline; --seconds 600 for the 10-minute table) (Apple's on-device model), then the citation checks below
 eval/.venv/bin/python -I eval/scripts/score_minutes.py --minutes m.json --transcript t.json                       # citation checks on minutes of a PUBLIC transcript (rubric: eval/rubric/)
 ```

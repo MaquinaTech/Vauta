@@ -271,7 +271,7 @@ struct WindowHardening: NSViewRepresentable {
     func updateNSView(_ nsView: NSView, context: Context) {}
 }
 
-/// The same defence for a sheet: its own window stays out of screen sharing and screenshots. A sheet is not a main window, so it is
+/// The same defence for a sheet: its own window asks to stay out of screen sharing (not guaranteed either). A sheet is not a main window, so it is
 /// not registered with `DockPresence`.
 private final class SheetHardeningView: NSView {
     override func viewDidMoveToWindow() {

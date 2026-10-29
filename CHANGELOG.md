@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `scripts/update.sh` stopped with `unbound variable` before verifying the release, in shells that read the `…` after a variable name as part of the name. If it stopped for you, run `git checkout main && git pull` once and run it again.
 - `scripts/update.sh` ended with `dir: unbound variable` and exit status 1 after a successful install, and left a temporary folder behind.
+- Checking the model server (Settings → Status, Test Connection, or installing the search or integrated model) no longer cancels minutes or an answer that are on their way.
+- A request to the model server that raced with a new server configuration could close the app. It now ends as cancelled.
+- Ask within one meeting, and a search in a meeting's materials or in one source, no longer miss that meeting's or those files' passages when the rest of the library has more than 400 closer passages on the same topic.
+- When a follow-up email draft is handed to the mail app through a `mailto:` link, the system log no longer receives the link (with the addresses, the subject and the body, marked private). It records only the number of recipients and the link's length.
+- The notepad's note in Settings → General and the documentation no longer say that Vauta's windows are always hidden from screen sharing: Vauta asks macOS to keep them out, which is not guaranteed. The documentation also corrects other claims the code no longer supports, among them the integrated model's download in SECURITY.md.
+- `Vauta minutes-file` (an evaluation command) measures the minutes the app actually sends to Apple's model, and its result file names the parts that ran.
 
 ## [0.9.3] - 2026-10-28
 

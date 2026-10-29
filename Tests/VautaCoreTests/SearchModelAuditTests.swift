@@ -61,7 +61,7 @@ struct SearchModelAuditTests {
     @Test func theDownloaderAndTheOtherSearchModelFilesNeverOpenAConnection() async throws {
         let problems = try await offPool { () -> [String] in
             try NetworkAuditSourceScanTests.sourceFiles().filter { $0.path.contains("/SearchModel/") || $0.path.hasPrefix("Sources/VautaMLX/") }
-                .flatMap { file in NetworkAuditSourceScanTests.violations(in: file.text).map { "\(file.path): \($0)" } }
+                .flatMap { file in NetworkAuditSourceScanTests.violations(in: file.text, at: file.path).map { "\(file.path): \($0)" } }
         }
         #expect(problems.isEmpty, "\(problems)")
     }

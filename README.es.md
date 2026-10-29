@@ -182,13 +182,15 @@ La primera vez que se abre la app, macOS pide la contraseña del Llavero para «
 
 **Permisos.** Durante la configuración inicial macOS pide el **micrófono** (tu voz), el **audio del sistema** (los demás participantes de la llamada) y, si activas esas funciones, **Calendario** (títulos y asistentes de las reuniones), **Recordatorios** (para enviarles las tareas) y notificaciones. Vauta también pide acceso a tu **red local** si lo apuntas a un servidor de modelos en otro ordenador. Puedes cambiar cada uno después en Ajustes del Sistema → Privacidad y seguridad.
 
-**Actualizar.** Descarga los cambios e instala de nuevo; Vauta se cierra con orden, se reemplaza y se vuelve a abrir:
+**Actualizar.** Ejecuta el script de actualización: instala la versión más reciente solo si su etiqueta está firmada con la clave del mantenedor, muestra las notas de la versión y pregunta antes. Vauta se cierra con orden, se reemplaza y se vuelve a abrir:
 
 ```sh
 cd Vauta
-git pull
-./scripts/install.sh
+./scripts/update.sh                         # con la identidad de firma local, en tu propio Terminal
+VAUTA_ALLOW_ADHOC=1 ./scripts/update.sh     # con la firma ad hoc
 ```
+
+Comprueba la clave con el `.github/allowed_signers` que ya tienes (y con la huella de [SECURITY.md](SECURITY.md#verifying-what-you-run), en inglés), no instala una versión más antigua que la instalada, ejecuta las pruebas y deja esta carpeta en la etiqueta de la versión (`git switch main` vuelve a la rama). Desde una copia de la 0.9.3 o anterior, ejecuta una vez `git checkout main && git pull` y después `./scripts/update.sh`: las versiones anteriores a la 0.9.3 no tienen el script, y el de la 0.9.3 puede detenerse con «unbound variable» cuando hay una versión más reciente. Esa descarga no la cubre la comprobación de la firma; [SECURITY.md](SECURITY.md#supported-versions) (en inglés) explica cómo comprobarla tú.
 
 **Desinstalar.** Cierra Vauta y borra `~/Applications/Vauta.app`. Tus reuniones están en el contenedor de la app, `~/Library/Containers/<bundle-id>/` (bundle ID por defecto `local.vauta.app`); borrar esa carpeta borra todas las reuniones, así que haz antes una copia si las quieres (**Ajustes → Privacidad y seguridad → Copia de seguridad…**). Después borra en Acceso a Llaveros los elementos cuyo servicio sea el bundle ID. Si usaste `setup-signing.sh`, también puedes borrar el llavero `~/Library/Keychains/vauta-signing.keychain-db`.
 

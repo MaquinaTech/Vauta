@@ -80,11 +80,13 @@ struct MinutesDigest {
 
     /// The digest as one delimited message of at most `tokens` tokens: first with everything, then with the open questions cut and then
     /// dropped, then without the lists of decisions and tasks, then without the topics, and finally with the summaries cut to what fits.
-    func message(tokens: Int) -> ChatMessage {
-        if !outcomes.isEmpty { return outcomeMessage(tokens: tokens) }
+    /// `summaries: false` leaves the blocks' summaries out (what is asked again after Apple's model declined the digest).
+    func message(tokens: Int, summaries: Bool = true) -> ChatMessage {
+        if !outcomes.isEmpty { return outcomeMessage(tokens: tokens, summaries: summaries) }
         func render(decisions: Bool, topics: Bool, open: (count: Int, characters: Int), summaryLimit: Int) -> String {
             let body = blocks.enumerated().map { i, block -> String in
-                var lines = ["Block \(i + 1):", "Summary: \(PromptText.defang(PromptText.clip(SingleLineText.flatten(block.summary), summaryLimit)))"]
+                var lines = ["Block \(i + 1):"]
+                if summaries { lines.append("Summary: \(PromptText.defang(PromptText.clip(SingleLineText.flatten(block.summary), summaryLimit)))") }
                 func list(_ label: String, _ items: [String], limit: Int, characters: Int = 120) {
                     let kept = items.prefix(limit).map { PromptText.defang(PromptText.clip(SingleLineText.flatten($0), characters)) }.filter { !$0.isEmpty }
                     if !kept.isEmpty { lines.append("\(label): " + kept.joined(separator: "; ")) }
@@ -108,6 +110,12 @@ struct MinutesDigest {
         for level in levels {
             let text = render(decisions: level.decisions, topics: level.topics, open: level.open, summaryLimit: level.summary)
             if PromptText.tokens(text) <= tokens { return .user(text) }
+        }
+        if !summaries {
+            // The first blocks' open questions, as many as fit.
+            var lines = render(decisions: false, topics: false, open: short, summaryLimit: 0).components(separatedBy: "\n").dropLast()
+            while lines.count > 1, PromptText.tokens(lines.joined(separator: "\n") + "\n>>>") > tokens { lines.removeLast() }
+            return .user(lines.joined(separator: "\n") + "\n>>>")
         }
         // Still too long (a meeting of hours): one line per block, the summaries cut until they fit, and as a last resort the last blocks go.
         func oneLine(_ count: Int, _ limit: Int) -> String {
@@ -136,6 +144,19 @@ struct MinutesDigest {
         return String(decoding: data, as: UTF8.self)
     }
 
+    /// The final answer without the model, for when it declined the digest twice: no title and no summary, the blocks' topics and
+    /// open questions in order (each once), and `combine` then adds the decisions, tasks and entities, checked as always.
+    var withoutModel: String {
+        func once(_ lists: [[String]], limit: Int) -> [String] {
+            var seen = Set<String>()
+            return Array(lists.joined().filter { !TextKeys.norm($0).isEmpty && seen.insert(TextKeys.norm($0)).inserted }.prefix(limit))
+        }
+        let object: [String: Any] = ["title": "", "summary": "", "topics": once(blocks.map(\.topics), limit: 8),
+                                     "open_questions": once(blocks.map(\.open), limit: 10)]
+        guard let data = try? JSONSerialization.data(withJSONObject: object) else { return #"{"title": "", "summary": ""}"# }
+        return String(decoding: data, as: UTF8.self)
+    }
+
     // MARK: Outcome first
 
     /// `text` cut to at most `limit` characters at the end of a word, so a summary never stops in the middle of one.
@@ -152,7 +173,7 @@ struct MinutesDigest {
     /// The digest that leads with the outcomes. Under budget the narrative goes first: the topics, the open questions, then the summaries
     /// of the earlier blocks before those of the last third, where a meeting settles its results; only then are the outcomes shortened
     /// (proposed first, then tasks, then the oldest).
-    private func outcomeMessage(tokens: Int) -> ChatMessage {
+    private func outcomeMessage(tokens: Int, summaries: Bool) -> ChatMessage {
         func header(_ lines: String) -> String { "<<<NOTES ON THE MEETING\n" + lines + "\n\nBackground, in order:\n" }
         func render(_ lines: String, topics: Bool, open: Bool, early: Int, late: Int) -> String {
             let lateFrom = blocks.count - max(1, blocks.count / 3)
@@ -170,9 +191,9 @@ struct MinutesDigest {
             }
             return header(lines) + body.joined(separator: "\n") + "\n>>>"
         }
-        let blockLevels: [(topics: Bool, open: Bool, early: Int, late: Int)] = [
+        let blockLevels: [(topics: Bool, open: Bool, early: Int, late: Int)] = summaries ? [
             (true, true, 300, 500), (false, true, 240, 450), (false, false, 160, 360), (false, false, 80, 260), (false, false, 0, 160), (false, false, 0, 0),
-        ]
+        ] : [(false, false, 0, 0)]
         // The outcomes, whole first and then shortened. Cut order: proposed, tasks, then the oldest of the rest.
         var variants: [[MinutesOutcome]] = [outcomes]
         let settled = outcomes.filter { $0.status != .proposed }

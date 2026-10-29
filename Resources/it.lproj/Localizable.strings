@@ -300,7 +300,7 @@
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "Una pagina breve sulla riunione che sta per iniziare: chi partecipa, cosa ha lasciato in sospeso l’ultima riunione, e riunioni, documenti e note correlati. Viene preparata su questo Mac. La scheda non modifica mai il tuo calendario, i promemoria o le note.";
 
 /* Settings → General, under the switch that opens the notepad when a recording starts */
-"A small floating window for short notes. It stays out of screen sharing and never takes the keyboard from your meeting app until you click it or use the shortcut." = "Una piccola finestra mobile per le note brevi. Non compare nella condivisione dello schermo e non toglie la tastiera all’app della riunione finché non ci clicchi o usi l’abbreviazione.";
+"A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "Una piccola finestra mobile per le note brevi. Non toglie la tastiera all’app della riunione finché non ci clicchi o usi l’abbreviazione. Vauta chiede a macOS di tenerla fuori dalla condivisione dello schermo, ma non è garantito.";
 
 /* Meeting page, Questions: a past meeting or document that one of the answer's citations pointed to was deleted since */
 "A source was removed" = "Una fonte è stata rimossa";

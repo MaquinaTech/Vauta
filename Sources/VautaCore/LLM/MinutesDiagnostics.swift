@@ -28,8 +28,13 @@ public struct MinutesDiagnostics: Sendable, Equatable, Codable {
     /// Share of the prompt that was already in the model's kept prefix (the meeting read while it was recorded); nil when no prefix was
     /// kept or the meeting went by blocks.
     public var prefixReuse: Double?
-    /// More than a quarter of the blocks are missing from the minutes.
-    public var isIncomplete: Bool { blocks > 0 && (blocksOmitted + blocksUnreadable) * 4 > blocks }
+    /// Counted when Apple's model declined the digest of a long meeting twice: the minutes have the items, topics and questions of the
+    /// blocks but no title or summary.
+    public static let withoutLanguageParts = "digest.declined"
+    /// More than a quarter of the blocks are missing from the minutes, or the minutes have no summary because the model declined it.
+    public var isIncomplete: Bool {
+        blocks > 0 && (blocksOmitted + blocksUnreadable) * 4 > blocks || counts[Self.withoutLanguageParts, default: 0] > 0
+    }
 
     public init(_ minutes: ValidatedMinutes) {
         proposed = minutes.proposed

@@ -26,7 +26,7 @@ enum LinkText {
     }
 
     /// The text an item is embedded from (recipe 1): its words only, cleaned, one line, 1,000 characters at most (the search model cuts the
-    /// sequence at 256 tokens itself). The owner and the due day are compared apart, never embedded.
+    /// sequence at 512 tokens itself, `SearchModelManifest.maxSequence`). The owner and the due day are compared apart, never embedded.
     static func embeddingText(_ text: String) -> String {
         TextSanitizer.oneLine(text, limit: 1_000)
     }

@@ -83,16 +83,7 @@ extension DocumentIndex {
         }
         if let queryVector, let space {
             let index = try vectorIndex(space: space)
-            let top = index.search(queryVector, k: allowed == nil ? 50 : 400)
-            if !top.isEmpty {
-                var ids = top.map(\.id)
-                if let allowed {
-                    let keep = Set(try db.query("SELECT id FROM passages WHERE id IN (SELECT value FROM json_each(?1)) AND file_id IN (SELECT value FROM json_each(?2))",
-                                                [.ids(ids), .ids(allowed)]).map { $0.int(0) })
-                    ids = ids.filter(keep.contains)
-                }
-                for (rank, id) in ids.prefix(50).enumerated() { add(id, rank: rank) }
-            }
+            for (rank, hit) in try vectorCandidates(index, queryVector, k: 50, allowed: allowed).enumerated() { add(hit.id, rank: rank) }
         }
         func order(_ scores: [Int64: Double]) -> [(key: Int64, value: Double)] {
             scores.sorted { $0.value == $1.value ? $0.key < $1.key : $0.value > $1.value }
@@ -178,6 +169,14 @@ extension DocumentIndex {
         let index = VectorIndex(dims: dims, ids: ids, scales: scales, buffer: buffer)
         vectorCache = (space, index)
         return index
+    }
+
+    /// The vector candidates of a search, best first: the index's top `k`, or with `allowed` (file ids) the top `k` of those files'
+    /// own passages, each scored (a top K of every source would leave them out when other files on the same topic fill it).
+    func vectorCandidates(_ index: VectorIndex, _ query: [Float], k: Int, allowed: [Int64]?) throws -> [(id: Int64, score: Float)] {
+        guard let allowed else { return index.search(query, k: k) }
+        let ids = try db.query("SELECT id FROM passages WHERE file_id IN (SELECT value FROM json_each(?))", [.ids(allowed)]).map { $0.int(0) }
+        return index.search(query, k: k, among: ids)
     }
 
     /// Passages that have no vector in `space`, to embed (the old vectors of another space are dropped by `dropVectors`).

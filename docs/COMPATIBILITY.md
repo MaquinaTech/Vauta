@@ -172,7 +172,8 @@ Nothing here needs meeting content: do not copy transcripts into the results.
    - **Speakers**: after a minute or so, the two voices show as different speakers (Speaker 1, Speaker 2) in the panel or
      the transcript, and they do not swap when they alternate.
    - **Captions**: press **⌃⌥T**; the captions panel appears over the call (also when the call is full screen), shows their
-     speech translated, does not take focus, and is not visible in a screen share.
+     speech translated and does not take focus. Share your screen and note whether the panel shows in the share: Vauta asks
+     macOS to keep it out, which is not guaranteed for every sharing app.
 6. Stress it: mute and unmute yourself, mute the other person, have them leave and rejoin, switch headphones or speakers during
    the call, and share a screen if the app allows. Check that Others keeps arriving and note what broke.
 7. **Capture alert.** While still in the call with the microphone held by the app, make Others silent for just over a minute:
@@ -241,4 +242,4 @@ Live Translation uses Apple's Translation framework, which is a different list f
 - The meeting language and the target must differ. By default the target is the first of your Mac's preferred languages that differs from the meeting's.
 - Each pair is downloaded once from Apple (the system asks for consent) and runs on this Mac afterwards. Vauta never downloads anything silently and cannot remove a language: use System Settings › General › Language & Region › Translation Languages.
 - macOS 26.4 and later offer a faster, smaller model family (low latency); Vauta uses it when it is installed and otherwise the high-fidelity family every macOS 26 has.
-- The captions panel appears over full-screen meeting apps in other Spaces. It is hidden from screen sharing. Verified here: the pipeline, the panel layout and the storage. The system download sheet and the panel over a full-screen call still need confirmation on real calls.
+- The captions panel appears over full-screen meeting apps in other Spaces. Vauta asks macOS to keep it out of screen sharing, which is not guaranteed for every sharing app. Verified here: the pipeline, the panel layout and the storage. The system download sheet and the panel over a full-screen call still need confirmation on real calls.

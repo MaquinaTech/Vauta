@@ -20,6 +20,45 @@ struct MinutesReleaseTests {
         #expect(!provider(context: 32_768, onDevice: false).releasedHarness)
     }
 
+    @Test func theMinutesChoicesAreTheReleaseOnesUnlessTheEvaluationForcesOne() async throws {
+        let apple = provider(context: 4_096, onDevice: true), integrated = provider(context: 65_536, onDevice: true, integrated: true)
+        let server = provider(context: 32_768, onDevice: false), bigOnDevice = provider(context: 16_384, onDevice: true)
+        #expect(MinutesRelease.choices(for: apple) == MinutesChoices(extraction: .ranked, summary: .legacy, harness: .legacy, questions: .shipped))
+        #expect(MinutesRelease.choices(for: integrated) == MinutesChoices(extraction: .shipped, summary: .shipped, harness: .shipped, questions: .legacy))
+        let old = MinutesChoices(extraction: .legacy, summary: .legacy, harness: .legacy, questions: .legacy)
+        #expect(MinutesRelease.choices(for: server) == old && MinutesRelease.choices(for: bigOnDevice) == old, "what the harness phase did not measure keeps the old minutes")
+        let f = try KnowledgeFixture()
+        let service = LLMService(store: f.store, providers: TestProviders(chat: ScriptedChat { _, _, _ in ScriptedChat.reply("{}") }, contextTokens: 4_096, onDevice: true))
+        for chat in [apple, integrated, server] { #expect(await service.minutesChoices(for: chat) == MinutesRelease.choices(for: chat)) }
+        await service.setMinutesExtraction(.legacy)
+        await service.setMinutesHarness(.shipped)
+        #expect(await service.minutesChoices(for: apple) == MinutesChoices(extraction: .legacy, summary: .legacy, harness: .legacy, questions: .shipped),
+                "a forced part replaces the release one; the request is the integrated model's only")
+        #expect(await service.minutesChoices(for: integrated).harness == .shipped)
+    }
+
+    /// `minutes-file` forces nothing: it measures what the app sends to the model, for each backend the evaluation can run.
+    @Test func theMinutesEvaluationRunsTheReleaseChoiceByDefault() async throws {
+        let transcript = try JSONDecoder().decode(MinutesEvaluation.Transcript.self, from: Data(BriefEvaluationTests.transcript([
+            "Okay, first the supplier change and the shell material.", "Ana, can you send the revised budget before Friday?", "Yes, I will send it by Friday.",
+            "Good. Let's meet again next week.", "That is all for today."]).utf8))
+        let reply = #"""
+            {"title": "Supplier change", "summary": "The team discussed the supplier change.", "topics": ["supplier"],
+             "decisions": [], "tasks": [{"text": "Send the revised budget", "owner": "Speaker 2", "owner_id": null, "due": null, "seg": 3, "quote": "I will send it by Friday"}],
+             "entities": [], "open_questions": []}
+            """#
+        for (kind, context, integrated) in [("apple", 4_096, false), ("integrated", 65_536, true)] {
+            let model = EvaluationModel.replay(kind: kind, replies: .single(reply, contextTokens: context))
+            let result = try await MinutesEvaluation.run(transcript, model: model, arms: integrated ? [.streamingLayout] : .shipped)
+            #expect(result.choices == MinutesEvaluation.Choices(MinutesRelease.choices(for: provider(context: context, onDevice: true, integrated: integrated))), "\(kind)")
+            if !integrated {
+                #expect(result.choices?.extraction == MinutesExtraction.ranked.names && result.choices?.summary == "legacy", "Apple's model: the ranked extraction and the summary it had")
+            }
+            let forced = try await MinutesEvaluation.run(transcript, model: model, arms: integrated ? [.streamingLayout] : .shipped, extraction: .legacy)
+            #expect(forced.choices?.extraction == "legacy" && forced.choices?.summary == result.choices?.summary, "an explicit part still wins (\(kind))")
+        }
+    }
+
     @Test func aServerWithASmallContextKeepsTheOldAskAndNotepadWhateverTheReleaseSays() async throws {
         let f = try KnowledgeFixture()
         let service = LLMService(store: f.store, providers: TestProviders(chat: ScriptedChat { _, _, _ in ScriptedChat.reply("{}") }, contextTokens: 8_192, onDevice: false))

@@ -6,8 +6,8 @@ import Foundation
 /// The speakers of a meeting: who said each segment, and the edits the user makes to that.
 ///
 /// Naming precedence: a name the user chose is ground truth and is never overwritten;
-/// otherwise "Speaker k" (a saved voice only suggests). Calendar attendees and names the model
-/// finds in the transcript are suggestions the UI offers; they are never stored as an assignment.
+/// otherwise "Speaker k" (a saved voice only suggests). Calendar attendees are suggestions the UI
+/// offers; they are never stored as an assignment. Nothing names a speaker from what the transcript says.
 /// Every mutation is one transaction, journaled like any other write.
 ///
 /// `segments.speaker` keeps its frozen 'me'/'others' values: a speaker belongs to one channel, and

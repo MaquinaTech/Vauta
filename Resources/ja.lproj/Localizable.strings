@@ -300,7 +300,7 @@
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "まもなく始まるミーティングの短いページです。参加者、前回のミーティングで未解決だったこと、関連するミーティング、書類、メモが含まれます。このMac上で作成されます。ブリーフィングがカレンダー、リマインダー、メモを変更することはありません。";
 
 /* Settings → General, under the switch that opens the notepad when a recording starts */
-"A small floating window for short notes. It stays out of screen sharing and never takes the keyboard from your meeting app until you click it or use the shortcut." = "短いメモを入力するための小さなフローティングウインドウです。画面共有には表示されず、クリックするかショートカットを使うまで、会議アプリからキーボードを奪いません。";
+"A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "短いメモを入力するための小さなフローティングウインドウです。クリックするかショートカットを使うまで、会議アプリからキーボードを奪いません。Vautaはこのウインドウを画面共有に含めないようmacOSに依頼しますが、保証されるわけではありません。";
 
 /* Meeting page, Questions: a past meeting or document that one of the answer's citations pointed to was deleted since */
 "A source was removed" = "出典が削除されました";

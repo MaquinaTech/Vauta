@@ -291,6 +291,23 @@ public enum MinutesEvaluation {
         public var callsBeforeMinutes: Int?
         /// The decisions Apple's "was it decided?" check dropped (public transcripts only).
         public var filteredDecisions: [String]?
+        /// The parts the minutes ran with: the release choice for the model unless the run forced one.
+        public var choices: Choices?
+    }
+
+    /// `MinutesExtraction.names` and the others' for one run: "prompts+evidence+owners+closing+due+ranking+shape", "legacy"…
+    public struct Choices: Sendable, Encodable, Equatable {
+        public let extraction: String
+        public let summary: String
+        public let harness: String
+        public let questions: String
+
+        init(_ choices: MinutesChoices) {
+            extraction = choices.extraction.names
+            summary = choices.summary.names
+            harness = choices.harness.names
+            questions = choices.questions.names
+        }
     }
 
     public enum Failure: Error, CustomStringConvertible {
@@ -329,10 +346,12 @@ public enum MinutesEvaluation {
     ///   - renumberFinal: the final labelling numbers the voices in reverse (the live clustering's number n becomes max + 1 - n).
     ///   - speakerTags: the speakers of the transcript are stored as speakers of the meeting (as after a real recording), not written
     ///     into the text of each line.
+    ///   - extraction, summary, harness, questions: nil (the default) runs what the app sends to this model, the release choice for it
+    ///     (`MinutesRelease.choices(for:)`); a value forces that part (`llm-eval --extraction` and the others). `Result.choices` says what ran.
     public static func run(_ transcript: Transcript, language: Locale = Locale(identifier: "en-US"), model: EvaluationModel = .apple,
                            arms: MinutesArms = .shipped, warm: Bool = false, speakerTags: Bool = true, renumberFinal: Bool = false,
-                           decidedFilter: Bool = false, extraction: MinutesExtraction = .shipped, summary: MinutesSummary = .shipped, harness: MinutesHarness = .shipped,
-                           questions: MinutesQuestions = .shipped, outputLocale: Locale? = nil) async throws -> Result {
+                           decidedFilter: Bool = false, extraction: MinutesExtraction? = nil, summary: MinutesSummary? = nil, harness: MinutesHarness? = nil,
+                           questions: MinutesQuestions? = nil, outputLocale: Locale? = nil) async throws -> Result {
         let providers = EvaluationProviders(model)
         if let why = providers.unavailable { throw model.kind == "server" ? Failure.serverUnavailable(why) : Failure.modelUnavailable(why) }
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-minutes-eval-\(UUID().uuidString)", isDirectory: true)
@@ -345,10 +364,10 @@ public enum MinutesEvaluation {
         let service = LLMService(store: store, providers: providers, searchDefaults: EvaluationDefaults.suite)
         await service.setMinutesArms(arms)
         await service.setDecidedFilter(decidedFilter)
-        await service.setMinutesExtraction(extraction)
-        await service.setMinutesSummary(summary)
-        await service.setMinutesHarness(harness)
-        await service.setMinutesQuestions(questions)
+        if let extraction { await service.setMinutesExtraction(extraction) }
+        if let summary { await service.setMinutesSummary(summary) }
+        if let harness { await service.setMinutesHarness(harness) }
+        if let questions { await service.setMinutesQuestions(questions) }
         var clock = 0.0
         var rowIDs: [Int64] = []
         var ordinals: [Int?] = []
@@ -418,6 +437,7 @@ public enum MinutesEvaluation {
                       diagnostics: diagnostics, lastReply: providers.chatModel.last, replies: providers.chatModel.replies,
                       warmSeconds: providers.chatModel.warmSeconds, callsBeforeMinutes: callsBeforeMinutes)
         result.filteredDecisions = await service.lastDecidedDrops
+        if case .success(let chat) = providers.chat() { result.choices = Choices(await service.minutesChoices(for: chat)) }
         return result
     }
 

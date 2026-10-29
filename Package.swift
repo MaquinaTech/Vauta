@@ -3,7 +3,8 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 //
 // Vauta — your meetings, locked in your Mac. One dependency: MLX (a pinned fork of mlx-swift, MIT) for the
-// optional on-device search model; everything else is Apple frameworks and the system SQLite.
+// optional on-device search model and the optional integrated language model (Gemma 4 E4B); everything else is
+// Apple frameworks and the system SQLite.
 import PackageDescription
 
 let package = Package(
@@ -20,7 +21,8 @@ let package = Package(
         .package(url: "https://github.com/MaquinaTech/mlx-swift.git", revision: "999f159e905affa3cc25bc1127a6cb489a5ffbb9"),
     ],
     targets: [
-        // The only target that may import MLX (a source-scan test enforces it): the GPU kernels and the text encoder.
+        // The only target that may import MLX (a source-scan test enforces it): the GPU kernels, the search model's text
+        // encoder and the integrated language model (`LLM/`: Gemma 4's text tower and its generator).
         .target(
             name: "VautaMLX",
             dependencies: [
@@ -53,7 +55,7 @@ let package = Package(
             dependencies: ["VautaCore", "VautaMLX"],
             exclude: ["Fixtures"]
         ),
-        // The few pieces of the app target that have logic worth a test (the PDF export).
+        // The pieces of the app target that have logic worth a test (view models, the notepad and Answers panels, the PDF export).
         .testTarget(
             name: "VautaAppTests",
             dependencies: ["Vauta", "VautaCore"]

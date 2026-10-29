@@ -5,9 +5,9 @@ import Foundation
 
 /// One speaker of one meeting (`meeting_speakers`).
 public struct MeetingSpeaker: Sendable, Identifiable, Hashable {
-    /// Who named the speaker. Precedence: user > profile > nobody ("Speaker k").
-    /// Calendar attendees and names the model finds in the transcript are suggestions
-    /// shown by the UI; they are never stored as an assignment.
+    /// Who named the speaker: the user, or nobody ("Speaker k"); a saved voice only suggests (`suggested`).
+    /// Calendar attendees are suggestions shown by the UI; they are never stored as an assignment.
+    /// Nothing names a speaker from what the transcript says.
     public enum Source: String, Sendable, CaseIterable {
         /// Found by the diarizer; not named.
         case auto

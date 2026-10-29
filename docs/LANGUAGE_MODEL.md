@@ -658,13 +658,15 @@ One meeting (`cdm200625_a`) was declined by Apple's guardrail in an earlier run 
 ### E. Latency guard for live answers
 
 A live answer (a question asked **while a meeting records**; `LLMService.recording`) on the integrated model has a cap. Questions asked
-at any other time (after the meeting, across the library, over documents) have the full schema and `budget.askOutput`, and no clock. The cap: `LLMService.liveAnswerTokens` = 640 tokens and `liveAnswerSeconds` = 40 seconds of
-decoding (the reading of the prompt does not count). The generator checks the clock at every step; when it runs out it ends the
+at any other time (after the meeting, across the library, over documents) have the full schema and `budget.askOutput`, and no clock. The cap: `LLMService.liveAnswerTokens` = 480 tokens and `liveAnswerSeconds` = 30 seconds of
+decoding (the reading of the prompt does not count). It was 640 tokens and 40 seconds when the cut answers below were counted; how many
+answers the current cap cuts is not measured here. Answers to questions Vauta hears in the meeting (the Live answers setting, `AutoAskRequest`)
+have their own, smaller cap: `gemmaTokens` = 320 tokens and `gemmaSeconds` = 15 seconds. The generator checks the clock at every step; when it runs out it ends the
 constrained value like a token limit does (the shortest valid ending, finish `length`), so the text is valid JSON and Ask does not ask
 again with a larger limit (it does for the other providers). The schema of a live answer is bounded (700 bytes of answer, three claims of
 300 bytes) so that a cut answer still has its claims. The kept prefix is as before (`reusePrefix` for a whole meeting). In the A/B 90% of
 the answers took 454 tokens or fewer (22 tokens/s, so 20 s) and the longest 1,849 tokens (62 s); with the cap nothing is decoded for more than
-640 tokens. The cap does **not** bound the reading of the prompt (prefill), so it is not a bound on the wall time of a question. A first value of 25 seconds closed 13 of 52 answers early on a Mac loaded by three model processes (10 tokens/s), so it was
+640 tokens then, 480 now. The cap does **not** bound the reading of the prompt (prefill), so it is not a bound on the wall time of a question. A first value of 25 seconds closed 13 of 52 answers early on a Mac loaded by three model processes (10 tokens/s), so it was
 raised: at the normal speed the token cap comes first, and the clock only matters when the Mac is slow. After that change 0 of 52
 answers were cut (`finish length`). Test: `theTimeLimitOfADecodeClosesTheValueLikeTheTokenLimit` (tiny model).
 
@@ -1407,6 +1409,8 @@ reply, so the old and new traces are comparable only when regenerated).
 
 **The app runs the new extraction on the integrated model only** (`MinutesRelease.extraction(integrated:)`: `.shipped` for the integrated model, `.legacy` for Apple's
 model and the model servers). Decided on 2026-10-20. Apple keeps the old extraction until the coming harness phase improves Apple's minutes and re-measures them; the servers keep it because they were not measured.
+*Since then:* the harness phase moved Apple's model to the ranked extraction (`.ranked`, the new extraction with the ranking and the lean block shape; see
+"Harness phase: what ships"). The integrated model keeps `.shipped` and the servers `.legacy`.
 The conditions the judge set were measured on the 15 test meetings (spent, above, so these are reported figures and not a held-out result):
 
 - *Citation-verification rate* (items that passed the quote, segment and entity checks over items checked, from the stored traces): Apple 0.571 old to 0.611 new (+0.041, 95% clustered bootstrap CI -0.035 to +0.115);
