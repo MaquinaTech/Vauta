@@ -7,7 +7,7 @@ import os
 import VautaCore
 
 /// Hands a follow-up email draft to the person's mail app. Vauta never sends anything and never connects to a mail server: the mail app
-/// does. The draft is never logged; the only log line says which route was taken, and anything about the draft is `.private`.
+/// does. The draft is never logged, not even as `.private`: a log line says which route was taken, with counts only (recipients, bytes).
 enum MailHandoffOpener {
     private static let log = Logger(subsystem: "local.vauta", category: "mail-handoff")
 
@@ -30,7 +30,9 @@ enum MailHandoffOpener {
         switch MailHandoff.plan(to: recipients, subject: subject, body: body) {
         case .mailto(let url):
             NSWorkspace.shared.open(url)
-            log.info("mailto opened: \(url.absoluteString, privacy: .private)")
+            // The URL holds the addresses, the subject and the body: only its length is logged.
+            let bytes = url.absoluteString.utf8.count
+            log.info("mailto opened, \(recipients.count, privacy: .public) recipients, \(bytes, privacy: .public) bytes")
             return .mailto
         case .copyAndOpen:
             ProtectedPasteboard.copy(body)
