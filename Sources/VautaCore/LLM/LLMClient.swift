@@ -116,7 +116,9 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     }
 
     /// New configuration (or none): closes open connections.
-    /// An invalid configuration counts as none.
+    /// An invalid configuration counts as none. The same configuration again (a status check and every settings reload apply
+    /// it before they ask) keeps the connections, so a request under way is not cancelled, unless a peer was refused: then the
+    /// session is replaced as for a new configuration, and the next request probes the server again.
     public func apply(_ config: LLMServerConfig?) {
         // The client does not know whether embeddings run on the server; an
         // empty embedding model only fails the embedding calls (`modelName`).
@@ -124,6 +126,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         let endpoints = (try? config?.validatedEndpoints(embeddingsOnServer: false, keepingLegacyNames: true)) ?? [:]
         let valid = primary != nil && !endpoints.isEmpty
         lock.withLock {
+            if (valid ? config : nil) == _config, _peerViolation == nil { return }
             _config = valid ? config : nil
             _primary = valid ? primary : nil
             _endpoints = valid ? endpoints : [:]
@@ -133,7 +136,8 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         }
     }
 
-    /// Closes connections (e.g. after the key changes).
+    /// Closes connections (a client made for one check, such as Test Connection, closes them when it is done). A new key does not
+    /// need it: the key is read for each request.
     public func reset() {
         lock.withLock {
             _session?.invalidateAndCancel()

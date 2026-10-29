@@ -13,20 +13,56 @@ import Synchronization
 final class AuditedSession: Sendable {
     private let session: URLSession
     private let log: NetworkActivityLog
-    /// Set when the session is invalidated. Starting a task on an invalidated session raises an Objective-C exception (which nothing
-    /// can catch), so a request that races with a delete, a cancel or a failure ends as cancelled instead.
-    private let invalidated = Mutex(false)
+    /// Starting a task on an invalidated session raises an Objective-C exception (which nothing can catch), so a request that races
+    /// with a delete, a cancel, a failure or a new configuration ends as cancelled instead: no task starts once `invalidateAndCancel`
+    /// was called, and the URL session itself is invalidated only when no request can still be creating its task.
+    private let state = Mutex(Lifecycle())
+
+    private struct Lifecycle {
+        /// `invalidateAndCancel` was called: no new task starts.
+        var invalidated = false
+        /// `bytes` and `data` calls past that check that are inside URLSession's own async call, which creates their task.
+        var starting = 0
+        /// The URL session was invalidated.
+        var closed = false
+    }
 
     init(configuration: URLSessionConfiguration, delegate: URLSessionDelegate? = nil, log: NetworkActivityLog = .shared) {
         session = URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
         self.log = log
     }
 
+    /// Cancels every task and lets no new one start. While a `bytes` or `data` call may still be creating its task, the tasks that
+    /// exist are cancelled now and the URL session is invalidated when the last of those calls returns. A task such a call creates
+    /// just after this is not in that list: it runs until its call returns (`bytes` at the response headers, `data` at the end of the
+    /// body), and is cancelled then, with the URL session.
     func invalidateAndCancel() {
-        invalidated.withLock { gone in
-            gone = true
-            session.invalidateAndCancel()
+        state.withLock { s in
+            s.invalidated = true
+            if s.starting == 0 { close(&s) } else { session.getAllTasks { tasks in tasks.forEach { $0.cancel() } } }
         }
+    }
+
+    private func close(_ s: inout Lifecycle) {
+        guard !s.closed else { return }
+        s.closed = true
+        session.invalidateAndCancel()
+    }
+
+    /// One of URLSession's async calls, which create their task inside: refused with `CancellationError` once the session is
+    /// invalidated, and counted until it returns (its task exists by then), so the URL session is not invalidated in between.
+    private func starting<T>(_ work: () async throws -> T) async throws -> T {
+        try state.withLock { s in
+            guard !s.invalidated else { throw CancellationError() }
+            s.starting += 1
+        }
+        defer {
+            state.withLock { s in
+                s.starting -= 1
+                if s.invalidated, s.starting == 0 { close(&s) }
+            }
+        }
+        return try await work()
     }
 
     /// Lists a request that the destination rules refused before it was sent (nothing went out).
@@ -40,7 +76,7 @@ final class AuditedSession: Sendable {
                delegate: (any URLSessionTaskDelegate)? = nil) async throws -> (AuditedBytes, URLResponse) {
         let call = await begin(request, purpose)
         do {
-            let (bytes, response) = try await session.bytes(for: request, delegate: delegate)
+            let (bytes, response) = try await starting { try await session.bytes(for: request, delegate: delegate) }
             let tracker = ActivityTracker(call: call, status: (response as? HTTPURLResponse)?.statusCode)
             return (AuditedBytes(base: bytes, tracker: tracker), response)
         } catch {
@@ -53,7 +89,7 @@ final class AuditedSession: Sendable {
     func data(for request: URLRequest, purpose: NetworkPurpose) async throws -> (Data, URLResponse) {
         let call = await begin(request, purpose)
         do {
-            let (data, response) = try await session.data(for: request)
+            let (data, response) = try await starting { try await session.data(for: request) }
             await call.finish(status: (response as? HTTPURLResponse)?.statusCode, error: nil, bytesReceived: data.count)
             return (data, response)
         } catch {
@@ -75,7 +111,7 @@ final class AuditedSession: Sendable {
             let response: HTTPURLResponse = try await withTaskCancellationHandler {
                 try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<HTTPURLResponse, Error>) in
                     // Checked and started under the lock `invalidateAndCancel` takes: a session is never invalidated in between.
-                    let task: URLSessionDataTask? = invalidated.withLock { gone in gone ? nil : session.dataTask(with: request) }
+                    let task: URLSessionDataTask? = state.withLock { s in s.invalidated ? nil : session.dataTask(with: request) }
                     guard let task else { continuation.resume(throwing: CancellationError()); return }
                     handler.start(task, continuation)
                 }
