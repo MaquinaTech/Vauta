@@ -20,10 +20,14 @@ extension LLMService {
 
         var system: ChatMessage { .system(VautaPrompts.system) }
 
+        /// A model server gets the schema as `response_format` on the requests without reasoning (the blocks, the merges, the closing
+        /// request): a grammar over the reasoning would constrain the reasoning too on the servers that apply it to the whole reply. The
+        /// profile decides whether it is sent at all (`ServerProfile.structuredOutput`).
         func options(maxTokens: Int, thinking: Bool, schema: OutputSchema? = nil, keepsPrefix: Bool = false, slot: KeptSlot = .meeting) -> ChatOptions {
-            ChatOptions(model: .deep, maxTokens: maxTokens, thinking: thinking && !chat.onDevice,
-                        reasoningEffort: thinking && !chat.onDevice ? "low" : nil, purpose: .minutes, outputSchema: schema,
-                        reusePrefix: keepsPrefix, priority: .minutes, slot: keepsPrefix ? slot : nil, onPrefill: prefill)
+            let format = schema.flatMap { s in !chat.onDevice && !thinking ? ResponseFormat.jsonSchema(name: "minutes", schema: s.serverJSONSchemaData()) : nil }
+            return ChatOptions(model: .deep, maxTokens: maxTokens, thinking: thinking && !chat.onDevice,
+                               reasoningEffort: thinking && !chat.onDevice ? "low" : nil, responseFormat: format, purpose: .minutes, outputSchema: schema,
+                               reusePrefix: keepsPrefix, priority: .minutes, slot: keepsPrefix ? slot : nil, onPrefill: prefill)
         }
     }
 
@@ -141,7 +145,7 @@ extension LLMService {
         var offeredEntities = Set<Int>(candidates.map { Int($0.id) })
         offeredEntities.insert(Int(me))
         let offered = OutputSchemas.Offered(segments: Set<Int>(segments.map { Int($0.id) }), entities: offeredEntities)
-        let job = MinutesJob(chat: chat, budget: budget, request: request,
+        let job = MinutesJob(chat: chat.withStructuredOutputFallback(), budget: budget, request: request,
                              entities: VautaPrompts.entitiesMessage(candidates, selfEntity: me),
                              progress: { n in Task { await self.progress(n) } }, offered: offered,
                              prefill: chat.integrated ? prefillReporter() : nil)

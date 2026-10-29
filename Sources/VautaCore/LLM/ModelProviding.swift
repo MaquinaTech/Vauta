@@ -89,7 +89,7 @@ enum ChatTask: Sendable { case live, main }
 
 /// The chat model to use now, with what the service needs to size requests.
 struct ChatProvider: Sendable {
-    let model: any ChatModel
+    var model: any ChatModel
     let contextTokens: Int
     /// Runs on this Mac (a single model; no fast/deep roles, no reasoning switch).
     let onDevice: Bool
@@ -104,6 +104,15 @@ struct ChatProvider: Sendable {
     var measuredSmallWindow: Bool { onDevice && !integrated && contextTokens < 12_000 }
     /// Whether the harness phase measured this backend (Apple's model or the integrated one).
     var releasedHarness: Bool { integrated || measuredSmallWindow }
+
+    /// A model server's provider whose model asks again without `response_format` when the server rejects it, and then sends none for
+    /// the rest of the job (`StructuredOutputFallback`); a model on this Mac is returned as it is.
+    func withStructuredOutputFallback() -> ChatProvider {
+        guard !onDevice else { return self }
+        var copy = self
+        copy.model = StructuredOutputFallback(model)
+        return copy
+    }
 }
 
 /// Where embeddings come from now.
