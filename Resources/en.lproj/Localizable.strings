@@ -1480,6 +1480,9 @@
 /* Alert title */
 "Couldn’t change the decision" = "Couldn’t change the decision";
 
+/* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
+"Couldn’t change the line" = "Couldn’t change the line";
+
 /* Alert title */
 "Couldn’t change the note" = "Couldn’t change the note";
 
@@ -2175,6 +2178,9 @@
 /* VoiceOver: what differs between a decision and the earlier one it may replace; the arguments are the earlier words and the new words */
 "Earlier: %@. Now: %@." = "Earlier: %@. Now: %@.";
 
+/* Transcript: under a line of the user's channel that repeats what the other participants said, because the microphone heard them from the speakers */
+"Echo of your speakers" = "Echo of your speakers";
+
 /* Undo menu item and menu command */
 "Edit Expansion" = "Edit Expansion";
 
@@ -2841,6 +2847,10 @@
 /* Speaker popover: question about a speaker whose voice resembles the user's own saved voice */
 "Is this you?" = "Is this you?";
 
+/* Edit menu: the action Undo takes back, saying a transcript line marked as an echo was the user's own
+   Transcript: button under a line marked as an echo of the speakers; the line becomes the user's own again */
+"It Was Me" = "It Was Me";
+
 /* Erase sheet, when old copies from the earlier-version migration exist; the argument is a file size */
 "It also deletes the old copies from an earlier version (%@)." = "It also deletes the old copies from an earlier version (%@).";
 
@@ -3236,6 +3246,9 @@
 
 /* Button in the question about marking a chain of tasks done; also the name of the Edit › Undo item that takes it back */
 "Mark as Done" = "Mark as Done";
+
+/* Edit menu: the action Undo takes back, marking a transcript line as an echo of the speakers again */
+"Mark as Echo" = "Mark as Echo";
 
 /* No comment provided by engineer. */
 "Mark as Informed" = "Mark as Informed";
@@ -6129,6 +6142,9 @@
 /* Microphone test error; argument is the system error */
 "The microphone couldn’t start: %@" = "The microphone couldn’t start: %@";
 
+/* Transcript: tooltip of the note under a line marked as an echo of the speakers */
+"The microphone heard the other participants from your speakers, so this line repeats what they said. It is kept here, but left out of the minutes, answers, owners, search and exports. Headphones avoid it." = "The microphone heard the other participants from your speakers, so this line repeats what they said. It is kept here, but left out of the minutes, answers, owners, search and exports. Headphones avoid it.";
+
 /* Setup last page: the microphone is not allowed */
 "The microphone isn’t allowed, so Vauta can’t record yet." = "The microphone isn’t allowed, so Vauta can’t record yet.";
 
@@ -6553,6 +6569,9 @@
 
 /* Speaker edit error: the chosen place leaves one part empty or outside the segment */
 "This line can’t be split there." = "This line can’t be split there.";
+
+/* Transcript: tooltip of the button that makes a line marked as an echo the user's own again */
+"This line is what you said: count it in answers, search and exports, and in the minutes the next time they are written" = "This line is what you said: count it in answers, search and exports, and in the minutes the next time they are written";
 
 /* Speaker edit error: the transcript segment was removed meanwhile */
 "This line no longer exists." = "This line no longer exists.";

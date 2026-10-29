@@ -1462,6 +1462,9 @@
 /* Alert title */
 "Couldn’t change the decision" = "Impossibile modificare la decisione";
 
+/* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
+"Couldn’t change the line" = "Impossibile modificare la riga";
+
 /* Alert title */
 "Couldn’t change the note" = "Impossibile modificare la nota";
 
@@ -2796,6 +2799,10 @@
 
 /* Speaker popover: question about a speaker whose voice resembles the user's own saved voice */
 "Is this you?" = "Sei tu?";
+
+/* Edit menu: the action Undo takes back, saying a transcript line marked as an echo was the user's own
+   Transcript: button under a line marked as an echo of the speakers; the line becomes the user's own again */
+"It Was Me" = "L’ho detto io";
 
 /* Erase sheet, when old copies from the earlier-version migration exist; the argument is a file size */
 "It also deletes the old copies from an earlier version (%@)." = "Cancella anche le vecchie copie di una versione precedente (%@).";
@@ -6055,6 +6062,9 @@
 /* Microphone test error; argument is the system error */
 "The microphone couldn’t start: %@" = "Impossibile avviare il microfono: %@";
 
+/* Transcript: tooltip of the note under a line marked as an echo of the speakers */
+"The microphone heard the other participants from your speakers, so this line repeats what they said. It is kept here, but left out of the minutes, answers, owners, search and exports. Headphones avoid it." = "Il microfono ha sentito gli altri partecipanti dai tuoi altoparlanti, quindi questa riga ripete ciò che hanno detto. Resta qui, ma viene esclusa da verbali, risposte, responsabili, ricerca ed esportazioni. Con le cuffie non succede.";
+
 /* Setup last page: the microphone is not allowed */
 "The microphone isn’t allowed, so Vauta can’t record yet." = "Il microfono non è consentito, quindi Vauta non può ancora registrare.";
 
@@ -6476,6 +6486,9 @@
 
 /* Speaker edit error: the chosen place leaves one part empty or outside the segment */
 "This line can’t be split there." = "Questa riga non può essere divisa qui.";
+
+/* Transcript: tooltip of the button that makes a line marked as an echo the user's own again */
+"This line is what you said: count it in answers, search and exports, and in the minutes the next time they are written" = "Questa riga è ciò che hai detto: conta per risposte, ricerca ed esportazioni, e per il verbale la prossima volta che viene scritto";
 
 /* Speaker edit error: the transcript segment was removed meanwhile */
 "This line no longer exists." = "Questa riga non esiste più.";
@@ -7931,7 +7944,13 @@
 "Different from %@?" = "Diversa da quella del %@?";
 "Dismissed links" = "Collegamenti scartati";
 "Earlier: %@. Now: %@." = "Prima: %1$@. Ora: %2$@.";
+
+/* Transcript: under a line of the user's channel that repeats what the other participants said, because the microphone heard them from the speakers */
+"Echo of your speakers" = "Eco dei tuoi altoparlanti";
 "Mark as Done" = "Segna come completata";
+
+/* Edit menu: the action Undo takes back, marking a transcript line as an echo of the speakers again */
+"Mark as Echo" = "Segna come eco";
 "Not Related" = "Non correlate";
 "Not the Same" = "Non è la stessa";
 "Open the earlier meeting at this item" = "Apri la riunione precedente su questo elemento";
