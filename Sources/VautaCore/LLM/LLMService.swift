@@ -172,6 +172,8 @@ public actor LLMService {
     /// Which parts of Ask's request and retrieval are on. `nil` runs the release choice for the backend (`AskHarnessRelease.harness(integrated:)`);
     /// `setAskHarness` forces a value (the evaluation compares the old and the new one).
     var askHarnessOverride: AskHarness?
+    /// Bounded reasoning in a model server's Ask after the meeting. `nil` runs the release choice (`AskReasoningRelease.serverAfterMeeting`).
+    var serverAskReasoningOverride: Bool?
     /// Which parts of the notepad expansion on the small window are on. `nil` runs the release choice (`NoteHarnessRelease.harness(integrated:)`);
     /// `setNoteHarness` forces a value (the evaluation compares the old and the new one).
     var noteHarnessOverride: NoteHarness?

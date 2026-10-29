@@ -65,6 +65,16 @@ public enum AskHarnessRelease {
     public static func harness(integrated: Bool) -> AskHarness { .legacy }
 }
 
+/// Bounded reasoning in Ask on a model server's main model (`reasoning_effort` "low", sent in the profile's dialect), only for a question
+/// asked outside a recording: never a live answer, an automatic answer or a small window (the reasoning's room would come out of the
+/// passages). Off until the server evaluation of Ask (`llm-eval --tasks live-answer --after-meeting --providers server --ask-reasoning
+/// on|off`) shows accuracy no lower than without it, with the time to the first token and the total time it adds.
+public enum AskReasoningRelease {
+    public static let serverAfterMeeting = false
+    /// The reasoning's room, added to the answer's output budget (the servers count reasoning tokens against `max_tokens`).
+    static let tokens = 2_000
+}
+
 extension LLMService {
     /// The harness an Ask request runs: the evaluation's choice, else the release choice for the backends the phase measured. A model server keeps
     /// the Ask it had, whatever the release says (`release` is for the tests).
