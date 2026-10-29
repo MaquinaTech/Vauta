@@ -35,7 +35,7 @@ struct EchoEvaluationTests {
         let first = echoes()
         #expect(first == echoes() && !first.isEmpty)
         #expect(first.allSatisfy { $0.channel == .me && $0.id >= 1_000_000_000 })
-        #expect(first[0].start == others[0].start + 0.4, "heard later")
+        #expect(abs(first[0].start - (others[0].start + 0.4)) <= EchoEvaluation.jitter, "heard later")
         // An echo that would fall on the participant's own speech is left out.
         var rng = EchoEvaluation.Generator(seed: 1)
         let own = [EchoDetection.Line(id: 99, channel: .me, start: 0, end: 60, text: "I am talking the whole time")]
@@ -50,13 +50,20 @@ struct EchoEvaluationTests {
         let log = Lines()
         try await LLMEvaluation.run(o, store: LanguageModelStore(applicationSupport: root), log: { log.append($0) })
         let rows = try String(contentsOf: o.out.appendingPathComponent("echo/sweep.tsv"), encoding: .utf8).split(separator: "\n")
-        #expect(rows.count == 1 + 4 * 4 * 3 * 3 && rows[0].hasPrefix("words\tpairs\tcovered\tmin_words\trecall"))
-        #expect(log.all.contains { $0.hasPrefix("echo: 1 meetings, 12 replays") }, "\(log.all)")
+        #expect(rows.count == 1 + 4 * 4 * 3 * 3 * 5 && rows[0].hasPrefix("words\tpairs\tcovered\tmin_words\tmax_lead\trecall"))
+        #expect(log.all.contains { $0.hasPrefix("echo: 1 meetings, 18 replays and 4 with the far side's echo") }, "\(log.all)")
         let release = try #require(log.all.first { $0.hasPrefix("echo: release ") })
         // Lines that never overlap the other participant: only the echoes can be marked, and most of them are.
-        #expect(release.contains("own marked 0 of 300"), "\(release)")
+        #expect(release.contains("own marked 0 of 450"), "\(release)")
         let recall = try #require(release.firstMatch(of: #/recall ([0-9.]+) /#).flatMap { Double($0.1) })
         #expect(recall > 0.7, "\(release)")
+        // The far side sends every line back 0.25 or 0.5 s later: without a limit on the lead most of them would be marked.
+        func farMarked(lead: String) throws -> Int {
+            let row = try #require(rows.map { $0.split(separator: "\t").map(String.init) }.first { $0.prefix(5) == ["0.6", "0.3", "0.6", "4", lead] })
+            return try #require(Int(row[11]))
+        }
+        let unlimited = try farMarked(lead: "inf"), limited = try farMarked(lead: "0.15")
+        #expect(unlimited > 50 && limited < unlimited / 2, "\(limited) of \(unlimited)")
     }
 }
 
