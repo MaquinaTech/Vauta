@@ -286,6 +286,9 @@ func readSecret(_ prompt: String) -> String? {
     return value.isEmpty ? nil : value
 }
 
+/// What `--ask-key` says when nothing was typed at its prompt: nothing is sent, so the server cannot answer "rejected the key".
+let noKeyTyped = "No key was typed, so nothing was sent. Copy the key, run the command again and paste it at the prompt (it is not shown)."
+
 func printError(_ message: String) {
     FileHandle.standardError.write(Data((message + "\n").utf8))
 }

@@ -266,6 +266,8 @@ func llmEval(_ invocation: CommandInvocation) async -> Int32 {
             let config = try JSONDecoder().decode(LLMServerConfig.self, from: Data(contentsOf: URL(fileURLWithPath: path)))
             _ = try config.validated(embeddingsOnServer: false)
             let key = invocation.has("--ask-key") ? readSecret("Server key (not shown): ") : nil
+            // An empty prompt (a paste that did not arrive) would send no key and read as a rejected one.
+            guard !invocation.has("--ask-key") || key != nil else { printError(noKeyTyped); return 1 }
             options.server = .server(config, bearer: { key })
         } catch { printError("--server: \(error)"); return 1 }
     }
