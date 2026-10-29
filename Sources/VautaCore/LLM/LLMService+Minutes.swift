@@ -356,17 +356,24 @@ extension LLMService {
         if chat.integrated, streaming { await noteKept(keptSlot, meetingID: meetingID) }
     }
 
-    /// A chat request whose answer, if cut off at the token limit, is asked
-    /// again once with a larger limit when the window has room for it.
+    /// A chat request whose answer, if cut off at the token limit, is asked again once. A request that reasoned (a model server) is
+    /// asked without reasoning at the same limit: the reasoning ran past the limit, and twice the limit only gives it room to run on.
+    /// Any other is asked with a larger limit when the window has room for it.
     private func complete(_ messages: [ChatMessage], _ options: ChatOptions, _ job: MinutesJob, meetingID: Int64) async throws -> ChatResult {
         let result = try await keeping(options.slot, meetingID: meetingID) { try await job.chat.model.chat(messages, options, onProgress: job.progress) }
-        guard result.isTruncated,
-              let raised = job.budget.raisedOutput(from: options.maxTokens, promptTokens: PromptText.tokens(messages)) else {
+        guard result.isTruncated else { return result }
+        var retry = options
+        if options.thinking {
+            retry.thinking = false
+            retry.reasoningEffort = nil
+            // Without reasoning the request may ask for its shape, as the blocks do.
+            retry.responseFormat = job.options(maxTokens: options.maxTokens, thinking: false, schema: options.outputSchema).responseFormat
+        } else if let raised = job.budget.raisedOutput(from: options.maxTokens, promptTokens: PromptText.tokens(messages)) {
+            retry.maxTokens = raised
+        } else {
             return result
         }
-        var larger = options
-        larger.maxTokens = raised
-        return try await keeping(larger.slot, meetingID: meetingID) { try await job.chat.model.chat(messages, larger, onProgress: job.progress) }
+        return try await keeping(retry.slot, meetingID: meetingID) { try await job.chat.model.chat(messages, retry, onProgress: job.progress) }
     }
 
     // MARK: Map-reduce

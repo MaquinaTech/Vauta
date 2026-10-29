@@ -38,9 +38,32 @@ struct ServiceMinutesTests {
         let chat = ScriptedChat { messages, _, call in
             call == 1 ? ScriptedChat.reply(#"{"title": "Kob"#, finish: .length) : ScriptedChat.reply(ScriptedChat.minutesJSON(messages))
         }
-        try await run(f, id, chat: chat)
+        let events = EventLog()
+        let service = LLMService(store: f.store, providers: TestProviders(chat: chat, onDevice: true))
+        await service.setJobEventHandler { events.append($0) }
+        await service.regenerateMinutes(id)
+        #expect(await eventually { events.events.contains { $0.meetingID == id && $0.kind == .minutes } })
+        #expect(events.events.last?.outcome == .succeeded)
+        await service.waitUntilQueueIdle()
         #expect(chat.calls.count == 2)
         #expect(chat.calls[1].options.maxTokens > chat.calls[0].options.maxTokens)
+        #expect(try await f.store.cardSource(id) == "llm")
+    }
+
+    /// A model server whose reasoning ran past the limit is asked once without reasoning, at the same limit: twice the limit would only
+    /// give the reasoning room to run on (a 9B model on a server reasoned 10,000 tokens, and then 20,000 more, before the blocks).
+    @Test func aServersCutReasoningIsAskedAgainWithoutReasoning() async throws {
+        let f = try KnowledgeFixture()
+        let id = try await f.meeting(["We reviewed the Kobaltix budget for the quarter", "Fine, we keep it"])
+        let chat = ScriptedChat { messages, options, _ in
+            options.thinking ? ScriptedChat.reply("", finish: .length) : ScriptedChat.reply(ScriptedChat.minutesJSON(messages))
+        }
+        try await run(f, id, chat: chat)
+        #expect(chat.calls.count == 2)
+        #expect(chat.calls[0].options.thinking && chat.calls[0].options.reasoningEffort != nil)
+        #expect(!chat.calls[1].options.thinking && chat.calls[1].options.reasoningEffort == nil)
+        #expect(chat.calls[1].options.maxTokens == chat.calls[0].options.maxTokens)
+        #expect(chat.calls[1].messages.map(\.content) == chat.calls[0].messages.map(\.content))
         #expect(try await f.store.cardSource(id) == "llm")
     }
 
