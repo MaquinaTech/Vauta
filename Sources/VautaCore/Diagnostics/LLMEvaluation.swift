@@ -19,6 +19,9 @@ public enum LLMEvaluation {
     public struct Options: Sendable {
         public var tasks: Set<String> = ["minutes"]
         public var providers: [String] = ["apple", "integrated"]
+        /// `--providers server`: the model server (`--server <config.json>`, the key typed with `--ask-key`). Its runs go through the
+        /// app's own client and rules; only the minutes task runs on it.
+        public var server: EvaluationModel?
         public var sets: URL
         public var questions: URL?
         public var out: URL
@@ -359,8 +362,12 @@ public enum LLMEvaluation {
         }
     }
 
-    static func model(_ kind: String, store: LanguageModelStore, greedy: Bool, engine: LanguageModelEngine) -> EvaluationModel {
-        kind == "apple" ? .apple : .integrated(store: store, greedy: greedy, engine: engine)
+    static func model(_ kind: String, store: LanguageModelStore, greedy: Bool, engine: LanguageModelEngine, server: EvaluationModel? = nil) -> EvaluationModel {
+        switch kind {
+        case "apple": .apple
+        case "server": server ?? EvaluationModel(name: "Model server", kind: "server") { (AppleChatModel(), 0, nil, "no --server configuration") }
+        default: .integrated(store: store, greedy: greedy, engine: engine)
+        }
     }
 
     /// Runs `body` with the measurements around it.
@@ -429,6 +436,7 @@ public enum LLMEvaluation {
             await engine.setKeepWarm(true)
             try await engine.load()
         }
+        if o.providers.contains("server") { try await checkServer(o.server, log: log) }
         let traces = o.out.appendingPathComponent("traces.jsonl")
         FileManager.default.createFile(atPath: traces.path, contents: nil)
         let handle = try FileHandle(forWritingTo: traces)
@@ -484,6 +492,22 @@ public enum LLMEvaluation {
             && (o.meetings == nil || o.meetings!.contains($0.deletingPathExtension().lastPathComponent)) }
     }
 
+    /// Before the first run on a model server, what `server-check` checks: it answers, it lists the configured chat models, and it loads
+    /// them with at least the configured context (a shorter one is only a warning: the server cuts the prompt, which the numbers show).
+    static func checkServer(_ server: EvaluationModel?, log: @Sendable (String) -> Void) async throws {
+        guard let server = server?.server else { throw MinutesEvaluation.Failure.serverUnavailable("no --server configuration") }
+        let listed = try await server.client.allModels(purpose: .connectionTest)
+        let wanted = [server.config.fastModel, server.config.deepModel].filter { !$0.isEmpty }
+        let missing = wanted.filter { !listed.contains($0) }
+        guard missing.isEmpty else { throw MinutesEvaluation.Failure.serverUnavailable("not listed by the server: \(missing.joined(separator: ", "))") }
+        if let inspected = try? await server.client.inspect() {
+            for short in inspected.models(wanted, loadedWithLessThan: server.config.contextTokens) {
+                log("warning: \(short.id) is loaded with a context of \(short.context) tokens, less than contextTokens (\(server.config.contextTokens))")
+            }
+        }
+        log("model server: \(server.config.baseURL), main \(server.config.deepModel), fast \(server.config.fastModel)")
+    }
+
     static func order(_ pair: Int, _ providers: [String]) -> [String] { pair % 2 == 0 ? providers : providers.reversed() }
 
     static func runMinutes(_ o: Options, store: LanguageModelStore, engine: LanguageModelEngine, write: (Trace) -> Void) async throws {
@@ -501,8 +525,8 @@ public enum LLMEvaluation {
                 let (waited, _) = await waitForQuiet(o)
                 let sequence = order(pair, o.providers)
                 for kind in sequence {
-                    let m = model(kind, store: store, greedy: o.greedy, engine: engine)
-                    let choices = o.minutesChoices(integrated: kind == "integrated")
+                    let m = model(kind, store: store, greedy: o.greedy, engine: engine, server: o.server)
+                    let choices = o.minutesChoices(provider: kind)
                     var result: MinutesEvaluation.Result?
                     let trace = await measure(task: "minutes", provider: kind, item: name, pair: pair, order: sequence[0] == o.providers[0] ? "AB" : "BA",
                                               model: m, waited: waited, options: o) {
@@ -543,10 +567,13 @@ public enum LLMEvaluation {
 }
 
 extension LLMEvaluation.Options {
-    /// The minutes choices a provider runs: the ones given, or with `release` the ones the app ships for that backend.
-    func minutesChoices(integrated: Bool) -> (extraction: MinutesExtraction, summary: MinutesSummary, harness: MinutesHarness, questions: MinutesQuestions) {
-        release ? (MinutesRelease.extraction(integrated: integrated), MinutesSummaryRelease.summary(integrated: integrated),
-                   MinutesHarnessRelease.harness(integrated: integrated), MinutesQuestionsRelease.questions(integrated: integrated))
-                : (extraction, summary, harness, openQuestions)
+    /// The minutes choices a provider runs: the ones given, or with `release` the ones the app ships for that backend (a model server
+    /// keeps the minutes it had: the harness phase measured Apple's model and the integrated one only, `ChatProvider.releasedHarness`).
+    func minutesChoices(provider: String) -> (extraction: MinutesExtraction, summary: MinutesSummary, harness: MinutesHarness, questions: MinutesQuestions) {
+        guard release else { return (extraction, summary, harness, openQuestions) }
+        if provider == "server" { return (.legacy, .legacy, .legacy, .legacy) }
+        let integrated = provider == "integrated"
+        return (MinutesRelease.extraction(integrated: integrated), MinutesSummaryRelease.summary(integrated: integrated),
+                MinutesHarnessRelease.harness(integrated: integrated), MinutesQuestionsRelease.questions(integrated: integrated))
     }
 }

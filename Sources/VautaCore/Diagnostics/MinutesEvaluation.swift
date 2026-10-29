@@ -131,11 +131,13 @@ extension RecordingChat: WarmableChatModel {
     func readingRate() async -> Double? { await (base as? WarmableChatModel)?.readingRate() }
 }
 
-/// The model an evaluation run uses: Apple's on-device model, or the integrated Gemma 4 from a throwaway install folder.
+/// The model an evaluation run uses: Apple's on-device model, the integrated Gemma 4 from a throwaway install folder, or a model server.
 public struct EvaluationModel: Sendable {
     public var name: String
     public var kind: String
     let make: @Sendable () -> (model: any ChatModel, contextTokens: Int, supports: (@Sendable (Locale) -> Bool)?, unavailable: String?)
+    /// The server and its client, for `kind == "server"`.
+    var server: (client: LLMClient, config: LLMServerConfig)?
 
     public static let apple = EvaluationModel(name: MinutesEvaluation.modelName, kind: "apple") {
         let apple = AppleChatModel()
@@ -153,10 +155,24 @@ public struct EvaluationModel: Sendable {
             return (model, IntegratedChatModel.contextWindow, { model.supports($0) }, nil)
         }
     }
+
+    /// A model server, from the same configuration file as `server-check` (`llm-eval --providers server --server <config.json>`). The
+    /// requests go through the app's `LLMClient`, with its address rules and Network Activity purposes, exactly as the app sends them;
+    /// `bearer` gives the key typed with `--ask-key` (nil for a server that needs none).
+    public static func server(_ config: LLMServerConfig, bearer: @escaping @Sendable () -> String?) -> EvaluationModel {
+        let client = LLMClient(config: config, bearer: bearer)
+        let profile = config.profile?.kind.rawValue ?? "legacy"
+        var model = EvaluationModel(name: "Model server (\(profile)): main \(config.deepModel), fast \(config.fastModel), context \(config.contextTokens)", kind: "server") {
+            (client, config.contextTokens, nil, client.isConfigured ? nil : "the server configuration is not valid")
+        }
+        model.server = (client, config)
+        return model
+    }
 }
 
-/// The chosen model only: no server, no Keychain. Embeddings are off unless the run names a search model (`llm-eval --search-model`),
-/// then they are that model, as with "Search by meaning on this Mac" chosen in Settings.
+/// The chosen model only, never the Keychain. Embeddings are off unless the run names a search model (`llm-eval --search-model`),
+/// then they are that model, as with "Search by meaning on this Mac" chosen in Settings. A model server is a server provider, as when
+/// it is chosen in Settings (no reasoning switch on this Mac's side, the server's own window).
 final class EvaluationProviders: ModelProviding, @unchecked Sendable {
     let chatModel: RecordingChat
     let contextTokens: Int
@@ -164,10 +180,12 @@ final class EvaluationProviders: ModelProviding, @unchecked Sendable {
     let unavailable: String?
     let integrated: Bool
     let searchModel: (any ChunkBudgeting)?
+    let server: (client: LLMClient, config: LLMServerConfig)?
 
     init(_ model: EvaluationModel, searchModel: (any ChunkBudgeting)? = nil) {
         self.searchModel = searchModel
         integrated = model.kind == "integrated"
+        server = model.kind == "server" ? model.server : nil
         let made = model.make()
         chatModel = RecordingChat(made.model)
         contextTokens = made.contextTokens
@@ -176,16 +194,17 @@ final class EvaluationProviders: ModelProviding, @unchecked Sendable {
     }
 
     func reload() -> ProviderIssue? { nil }
-    var settings: ModelProviderSettings { ModelProviderSettings(chat: .onDevice, embeddings: searchModel == nil ? .none : .onDeviceModel) }
+    var settings: ModelProviderSettings {
+        ModelProviderSettings(chat: server == nil ? .onDevice : .server, embeddings: searchModel == nil ? .none : .onDeviceModel)
+    }
     func chat() -> Result<ChatProvider, ProviderUnavailable> {
-        if unavailable != nil { return .failure(ProviderUnavailable(issue: .onDeviceModel(.unavailable))) }
-        return .success(ChatProvider(model: chatModel, contextTokens: contextTokens, onDevice: true, supports: supports, integrated: integrated))
+        if unavailable != nil { return .failure(ProviderUnavailable(issue: server == nil ? .onDeviceModel(.unavailable) : .serverNotConfigured)) }
+        return .success(ChatProvider(model: chatModel, contextTokens: contextTokens, onDevice: server == nil, supports: supports, integrated: integrated))
     }
     func embeddings() -> EmbeddingProvider {
         guard let searchModel else { return .disabled }
         return .available(model: { _ in searchModel }, expectedModel: { _ in GemmaEmbeddingModel.space.model })
     }
-    var server: (client: LLMClient, config: LLMServerConfig)? { nil }
     var refinementChat: (any ChatModel)? { nil }
 }
 
@@ -276,11 +295,13 @@ public enum MinutesEvaluation {
 
     public enum Failure: Error, CustomStringConvertible {
         case modelUnavailable(String)
+        case serverUnavailable(String)
         case jobFailed(String)
         case noAnswer
         public var description: String {
             switch self {
             case .modelUnavailable(let why): "Apple's on-device model is not available (\(why))."
+            case .serverUnavailable(let why): "The model server is not usable (\(why))."
             case .jobFailed(let message): "The minutes job failed: \(message)"
             case .noAnswer: "The model gave no answer."
             }
@@ -313,7 +334,7 @@ public enum MinutesEvaluation {
                            decidedFilter: Bool = false, extraction: MinutesExtraction = .shipped, summary: MinutesSummary = .shipped, harness: MinutesHarness = .shipped,
                            questions: MinutesQuestions = .shipped, outputLocale: Locale? = nil) async throws -> Result {
         let providers = EvaluationProviders(model)
-        if let why = providers.unavailable { throw Failure.modelUnavailable(why) }
+        if let why = providers.unavailable { throw model.kind == "server" ? Failure.serverUnavailable(why) : Failure.modelUnavailable(why) }
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-minutes-eval-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let store = try MeetingStore(directory: directory, keyStore: MemoryKeyStore())

@@ -103,8 +103,10 @@ private func throw_usage() { printError("usage: llm-install status|verify|adopt|
 /// number the voices the other way round than the live one; `--after-meeting` (with `--warm`, live-answer) asks the questions
 /// about the finished meeting, whose whole transcript was read while it recorded.
 /// Runs the app's minutes code and Ask with both providers interleaved item by item (ABAB) on PUBLIC transcripts, in a throwaway
-/// store; never the user's store, never a model server. See docs/LANGUAGE_MODEL.md. The integrated model comes from
-/// `VAUTA_LLM_MODEL_DIR`.
+/// store; never the user's store. See docs/LANGUAGE_MODEL.md. The integrated model comes from `VAUTA_LLM_MODEL_DIR`.
+/// `--providers server --server <config.json> [--ask-key]` (minutes only) adds a model server, from the same file as `server-check`: its
+/// requests go through the app's client, address rules and Network Activity purposes, and the key, if any, is typed without echo.
+/// Without `server` in `--providers` no model server is contacted.
 func llmEval(_ invocation: CommandInvocation) async -> Int32 {
     if invocation.has("--print-context") { print(await LLMEvaluation.contextLine()); return 0 }
     guard let sets = invocation.values["--sets"], let out = invocation.values["--out"] else { printError("usage: llm-eval --sets <dir> --out <dir> [--tasks minutes,live-answer] [--providers apple,integrated] [--questions <file>]"); return 1 }
@@ -246,7 +248,18 @@ func llmEval(_ invocation: CommandInvocation) async -> Int32 {
         }
         options.questionSources = sources
     }
-    guard Set(options.providers).isSubset(of: ["apple", "integrated"]) else { printError("providers: apple, integrated"); return 1 }
+    guard Set(options.providers).isSubset(of: ["apple", "integrated", "server"]) else { printError("providers: apple, integrated, server"); return 1 }
+    if options.providers.contains("server") {
+        // The same file as `server-check` and Settings › Models › Paste Configuration; the key is typed without echo, never an argument.
+        guard let path = invocation.values["--server"] else { printError("--providers server needs --server <config.json> (and --ask-key if the server needs a key)"); return 1 }
+        guard options.tasks == ["minutes"] else { printError("--providers server runs the minutes task only (--tasks minutes)"); return 1 }
+        do {
+            let config = try JSONDecoder().decode(LLMServerConfig.self, from: Data(contentsOf: URL(fileURLWithPath: path)))
+            _ = try config.validated(embeddingsOnServer: false)
+            let key = invocation.has("--ask-key") ? readSecret("Server key (not shown): ") : nil
+            options.server = .server(config, bearer: { key })
+        } catch { printError("--server: \(error)"); return 1 }
+    }
     do {
         try await LLMEvaluation.run(options, store: LanguageModelSelfTest.store()) { print($0) }
         return 0
