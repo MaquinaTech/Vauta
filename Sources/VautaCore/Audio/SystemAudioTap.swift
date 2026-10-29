@@ -273,15 +273,17 @@ final class SystemAudioTap: @unchecked Sendable {
                 return self.currentFormat
             }
             guard let format, let list = tapStream.list(from: inputData, channels: format.channelCount) else { return }
+            // When the input was captured: places the audio on the session's clock across rebuilds (no gap is lost), and times the rate.
+            let stamp = inputTime.pointee
+            let captured = stamp.mFlags.contains(.hostTimeValid) ? stamp.mHostTime : nil
             let bytesPerFrame = format.streamDescription.pointee.mBytesPerFrame
-            if bytesPerFrame > 0, let measured = probe.add(frames: Int(list.pointee.mBuffers.mDataByteSize / bytesPerFrame)) {
+            if bytesPerFrame > 0, let measured = probe.add(frames: Int(list.pointee.mBuffers.mDataByteSize / bytesPerFrame),
+                                                           at: HostTime.seconds(captured ?? mach_absolute_time())) {
                 self.controlQueue.async { self.correctRate(measured: measured) }
             }
             // Memory lent by Core Audio: valid only during this callback.
             guard let buffer = AVAudioPCMBuffer(pcmFormat: format, bufferListNoCopy: list, deallocator: nil) else { return }
-            // When the input was captured: places the audio on the session's clock across rebuilds (no gap is lost).
-            let stamp = inputTime.pointee
-            onBuffer(buffer, stamp.mFlags.contains(.hostTimeValid) ? stamp.mHostTime : nil)
+            onBuffer(buffer, captured)
         }, .systemAudioStartFailed)
         if streams.count > 1, let procID { TapStream.enableOnlyInputStream(streams.count - 1, of: streams.count, aggregateID, procID) }
         try check(AudioDeviceStart(aggregateID, procID), .systemAudioStartFailed)
@@ -387,7 +389,7 @@ final class SystemAudioTap: @unchecked Sendable {
 
     private func correctRate(measured: Double) {
         guard isRunning, let assumed = format,
-              let corrected = Self.correctedRate(measured: measured, assumed: assumed.sampleRate) else { return }
+              let corrected = probe.confirm(measured: measured, corrected: Self.correctedRate(measured: measured, assumed: assumed.sampleRate)) else { return }
         if let nominal = nominalRate() { rateOverride = (nominal, corrected) }
         var asbd = assumed.streamDescription.pointee
         asbd.mSampleRate = corrected

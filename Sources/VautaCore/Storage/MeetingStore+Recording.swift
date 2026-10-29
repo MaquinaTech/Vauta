@@ -91,9 +91,12 @@ extension MeetingStore {
         } catch {
             failure = error
         }
-        // Context mentions (deterministic, local). If this fails the meeting is
-        // saved anyway; it can be re-analyzed from the review screen.
-        if failure == nil, db.changes == 0 { _ = try? transaction { try analyzeInTransaction(id) } }
+        // The speakers' echo in the microphone, then context mentions (both deterministic, local; echoes first, so they
+        // name no one). If either fails the meeting is saved anyway; mentions can be re-analyzed from the review screen.
+        if failure == nil, kept {
+            if EchoRelease.marksAfterRecording { _ = try? transaction { try markEchoes(id) } }
+            _ = try? transaction { try analyzeInTransaction(id) }
+        }
         do { try await snapshot(compacting: false) } catch { failure = failure ?? error }
         if pendingCompaction && activeMeetingID == nil {
             do {

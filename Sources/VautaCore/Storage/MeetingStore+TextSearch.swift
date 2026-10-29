@@ -58,7 +58,7 @@ extension MeetingStore {
             JOIN segments s ON s.id = f.rowid
             JOIN meetings m ON m.id = s.meeting_id
             \(Self.speakerJoins)
-            WHERE segments_fts MATCH ?1 AND (?3 IS NULL OR s.meeting_id IN (SELECT value FROM json_each(?4)))
+            WHERE segments_fts MATCH ?1 AND (?3 IS NULL OR s.meeting_id IN (SELECT value FROM json_each(?4))) AND \(Self.notEcho)
             ORDER BY rank LIMIT ?2
             """, [.text(match), .integer(Int64(limit)), meetings == nil ? nil : .integer(1), .ids(meetings ?? [])]).map { row in
             SearchHit(meeting: Self.meeting(row, languageAt: 11),

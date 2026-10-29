@@ -274,6 +274,26 @@ struct KnowledgeContextTests {
         #expect(try await s.refs(person).filter { $0.meeting.id == m }.count == 2)
     }
 
+    /// A learned alias is how the transcriber misheard a name: the vocabulary asks for the name, never for the mishearing, whether the
+    /// entity is an attendee, a series default or a project.
+    @Test func theRecognitionVocabularyLeavesLearnedAliasesOut() async throws {
+        let f = try KnowledgeFixture()
+        let s = f.store!
+        let kob = try await s.saveEntity(EntityDraft(kind: .project, name: "Kobaltix"))
+        let m = try await f.meeting(["Luego hablamos con Cobaltis sobre el plan"])
+        let fix = try #require(try await s.suggestions(m).first { $0.surface == "Cobaltis" })
+        try await s.resolveSuggestion(fix.id, entity: kob)
+        let ana = try await s.saveEntity(EntityDraft(kind: .person, name: "Ana"))
+        let luis = try await s.saveEntity(EntityDraft(kind: .person, name: "Luis"))
+        try await s.addAlias("Anna", norm: TextKeys.norm("Anna"), to: ana, source: "learned")
+        try await s.addAlias("Luiz", norm: TextKeys.norm("Luiz"), to: luis, source: "learned")
+        try await s.run("INSERT INTO series(calendar_key, title_pattern, default_entities) VALUES ('weekly', 'Weekly', json_array(?))", [.integer(luis)])
+        let series = try #require(try await s.series().first?.id)
+        let vocabulary = try await s.recognitionVocabulary(attendees: [ana], seriesID: series)
+        #expect(["Ana", "Luis", "Kobaltix"].allSatisfy(vocabulary.contains), "\(vocabulary)")
+        #expect(!vocabulary.contains { ["Anna", "Luiz", "Cobaltis"].contains($0) }, "\(vocabulary)")
+    }
+
     @Test func errorsAreLocalized() {
         let errors: [KnowledgeError] = [.emptyName, .emptyTerm, .emptySeriesTitle, .emptyNote, .emptyDecision, .emptyTask,
                                         .relationNeedsTwoNodes, .suggestionGone, .entityGone, .emailInUse("a@b.c")]

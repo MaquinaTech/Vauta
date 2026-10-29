@@ -79,9 +79,13 @@ public final class MeetingCapture: @unchecked Sendable {
         }
         let diagnostic = onDiagnostic
         let health = HealthRelay(onChannelHealth)
+        let began = HostTime.now
+        func milliseconds() -> Int { Int((HostTime.now - began) * 1000) }
         do {
-            let micChannel = try await ChannelTranscriber(channel: .me, locale: locales.me, engine: engines[.me] ?? .speech)
-            let systemChannel = try await ChannelTranscriber(channel: .others, locale: locales.others, engine: engines[.others] ?? .speech)
+            // Both channels' analyzer formats at once.
+            async let me = ChannelTranscriber(channel: .me, locale: locales.me, engine: engines[.me] ?? .speech)
+            async let others = ChannelTranscriber(channel: .others, locale: locales.others, engine: engines[.others] ?? .speech)
+            let (micChannel, systemChannel) = try await (me, others)
             self.micChannel = micChannel
             self.systemChannel = systemChannel
             systemChannel.collectWordTimes(diarizer != nil)
@@ -94,7 +98,8 @@ public final class MeetingCapture: @unchecked Sendable {
                     health.report(.failed(CaptureError(.transcriptionStopped, detail: error.localizedDescription)),
                                   for: channel, from: .transcriber)
                 }
-                try await transcriber.start(onSegment: onSegment)
+                // Current before it starts: what the devices capture from now on waits for the analyzer instead of being lost.
+                transcriber.open(onSegment: onSegment)
             }
 
             // Microphone first: with Bluetooth headsets opening it switches the
@@ -112,6 +117,13 @@ public final class MeetingCapture: @unchecked Sendable {
             system.onDiagnostic = diagnostic
             system.onHealth = { health.report($0, for: .others, from: .device) }
             try system.start { systemPipe.push($0, hostTime: $1) }
+            diagnostic?("capture started after \(milliseconds()) ms")
+
+            // The analyzers prepare while the audio already flows into their queues.
+            async let meReady: Void = micChannel.start()
+            async let othersReady: Void = systemChannel.start()
+            _ = try await (meReady, othersReady)
+            diagnostic?("analyzers ready after \(milliseconds()) ms")
         } catch {
             // No analyzers or taps left open if something fails halfway.
             try? await stop()

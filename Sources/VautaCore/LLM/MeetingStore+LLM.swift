@@ -252,7 +252,7 @@ extension MeetingStore {
     /// Citable segments: in arrival order (`id`) for live notes (the prompt
     /// only grows at the end, which keeps the server's cache) or by time.
     public func citableSegments(_ meetingID: Int64, afterID: Int64 = 0, byArrival: Bool = false) throws -> [CitableSegment] {
-        try db.query("SELECT s.id, s.speaker, s.start, s.text, \(Self.speakerColumns) FROM segments s \(Self.speakerJoins) WHERE s.meeting_id = ? AND s.id > ? ORDER BY "
+        try db.query("SELECT s.id, s.speaker, s.start, s.text, \(Self.speakerColumns) FROM segments s \(Self.speakerJoins) WHERE s.meeting_id = ? AND s.id > ? AND \(Self.notEcho) ORDER BY "
                      + (byArrival ? "s.id" : "s.start, s.id"), [.integer(meetingID), .integer(afterID)]).map(Self.citable)
     }
 
