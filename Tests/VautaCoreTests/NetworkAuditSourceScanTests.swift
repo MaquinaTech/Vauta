@@ -99,6 +99,8 @@ struct NetworkAuditSourceScanTests {
         ("Sources/VautaCore/Diagnostics/LLMEvaluation+AskRetrieval.swift", "String(contentsOf:)", 1),
         // The configuration file of `server-check`, given as a path.
         ("Sources/Vauta/CLI+Doctor.swift", "Data(contentsOf:)", 1),
+        // The configuration file of `llm-eval --server`, given as a path.
+        ("Sources/Vauta/CLI+LanguageModel.swift", "Data(contentsOf:)", 1),
         // The certificate files chosen in a file panel (Settings › Models).
         ("Sources/Vauta/App/Settings/ModelsSettingsModel.swift", "Data(contentsOf:)", 2),
         // UI snapshots (a developer tool): a PDF it just wrote to the temporary folder.
