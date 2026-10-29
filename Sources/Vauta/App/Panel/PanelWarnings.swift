@@ -160,6 +160,7 @@ struct PanelWarnings: View {
         case "stop": model.lastStopReason = nil
         case "empty": model.nothingRecorded = false
         case "speakers": model.speakersUpdated = false
+        case "speakers-out": model.speakersTipDismissed = true
         default: model.clearWarnings()
         }
     }
@@ -287,6 +288,15 @@ struct PanelWarnings: View {
             // has really returned the alert is re-armed, and this banner is the warning until it fires again.
             if let w = model.silenceWarning, !othersExplained, !model.captureAlertCoversSilence {
                 out.append(Banner(id: "silence", messages: [Message(text: w.title, detail: w.detail)], fixes: [.stopAndSave]))
+            }
+            // The microphone hears the speakers: a tip, not a fault, and only while nothing about the audio is wrong.
+            if model.isRecording, model.speakersOn, !model.speakersTipDismissed, out.isEmpty {
+                out.append(Banner(id: "speakers-out",
+                                  messages: [Message(text: String(localized: "The meeting is playing through speakers",
+                                                                  comment: "Panel tip title while recording: the sound comes out of the Mac’s speakers, a display or AirPlay, not headphones"),
+                                                     detail: String(localized: "The microphone hears the other participants too. Vauta leaves their echo out of the minutes, and headphones avoid it.",
+                                                                    comment: "Panel tip under “The meeting is playing through speakers”"))],
+                                  style: .info, dismissible: true))
             }
         case .general:
             if let w = model.saveError { out.append(failureBanner(id: "save", w)) }

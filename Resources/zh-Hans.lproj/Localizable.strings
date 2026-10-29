@@ -7991,3 +7991,9 @@
 "Private" = "隐私";
 
 "Audio is never saved. No account, no analytics." = "音频绝不保存。无需账户，不收集分析数据。";
+
+/* Panel tip title while recording: the sound comes out of the Mac’s speakers, a display or AirPlay, not headphones */
+"The meeting is playing through speakers" = "会议声音正通过扬声器播放";
+
+/* Panel tip under “The meeting is playing through speakers” */
+"The microphone hears the other participants too. Vauta leaves their echo out of the minutes, and headphones avoid it." = "麦克风也会听到其他参与者的声音。Vauta 会把这些回声排除在会议纪要之外，使用耳机可避免这种情况。";

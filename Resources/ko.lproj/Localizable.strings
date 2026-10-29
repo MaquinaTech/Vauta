@@ -7991,3 +7991,9 @@
 "Private" = "개인정보 보호";
 
 "Audio is never saved. No account, no analytics." = "오디오는 저장되지 않습니다. 계정도 분석 데이터 수집도 없습니다.";
+
+/* Panel tip title while recording: the sound comes out of the Mac’s speakers, a display or AirPlay, not headphones */
+"The meeting is playing through speakers" = "회의 소리가 스피커로 나오고 있습니다";
+
+/* Panel tip under “The meeting is playing through speakers” */
+"The microphone hears the other participants too. Vauta leaves their echo out of the minutes, and headphones avoid it." = "마이크가 다른 참가자의 목소리도 듣고 있습니다. Vauta는 그 에코를 회의록에서 제외하며, 헤드폰을 사용하면 방지할 수 있습니다.";
