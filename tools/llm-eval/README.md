@@ -2,7 +2,9 @@
 
 `Vauta llm-eval` compares Apple's on-device model with the integrated Gemma 4 E4B on minutes and live answers (a hidden command;
 see docs/LANGUAGE_MODEL.md). This folder holds what runs around it. Nothing here reads a person's data: the sets are public or approved
-transcripts, the audio and transcripts are never committed, and the model server is never contacted.
+transcripts, the audio and transcripts are never committed, and a model server is contacted only when a run names it
+(`--providers server --server <config.json>`, minutes only; the key, if the server needs one, is typed with `--ask-key` and never
+stored). Its requests go through the app's own client and rules, so they show the same addresses, checks and purposes as the app's.
 
 | File | What it does |
 |---|---|

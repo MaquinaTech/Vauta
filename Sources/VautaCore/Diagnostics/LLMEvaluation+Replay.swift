@@ -21,7 +21,7 @@ extension LLMEvaluation {
                 guard let stored = FileManager.default.contents(atPath: from.appendingPathComponent("\(name).\(kind).json").path),
                       let replies = ReplayedReplies(resultFile: stored) else { continue }
                 let model = EvaluationModel.replay(kind: kind, replies: replies, liveFinal: o.replayLive)
-                let choices = o.minutesChoices(integrated: kind == "integrated")
+                let choices = o.minutesChoices(provider: kind)
                 let result = try await MinutesEvaluation.run(transcript, language: language, model: model, arms: o.arms, warm: false, extraction: choices.extraction, summary: choices.summary, harness: choices.harness, questions: choices.questions)
                 try writeMinutes(result, name: name, kind: kind, to: minutesDir)
                 print("replay \(name) \(kind) kept \(result.items.count) extraction \(choices.extraction.names)")

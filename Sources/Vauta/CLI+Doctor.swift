@@ -127,6 +127,7 @@ func serverCheck(configPath: String, askKey: Bool) async throws -> Int32 {
     // by meaning runs on the server.
     _ = try config.validated(embeddingsOnServer: !config.embeddingModel.isEmpty)
     let key = askKey ? readSecret("Server key (not shown): ") : nil
+    guard !askKey || key != nil else { printError(noKeyTyped); return 1 }
     let client = LLMClient(config: config, bearer: { key })
     let models = try await client.allModels(purpose: .connectionTest)
     print("Server: \(config.baseURL) · \(models.count) models: \(models.joined(separator: ", "))")
