@@ -179,6 +179,7 @@ extension LLMService {
             }
         }
         var result: ChatResult?
+        var declinedWhole = false
         let firstPassStarted = Date()
         if PromptText.tokens(messages) <= budget.minutesInput {
             do {
@@ -186,6 +187,9 @@ extension LLMService {
                 if !r.isTruncated { result = r }   // still cut off: summarize by blocks instead
             } catch LLMError.contextLengthExceeded {
                 // The estimate was optimistic: summarize by blocks instead.
+            } catch LLMError.refused {
+                // Apple's guardrails declined the whole meeting: by blocks, only the ones they decline are missing.
+                declinedWhole = true
             }
         }
         // Blocks of a long meeting whose extract was cut off and could not be split, or could not be read: their decisions and tasks are
@@ -193,13 +197,33 @@ extension LLMService {
         var blocksTotal = 0, blocksOmitted = 0
         var outcomesInDigest = 0, outcomesMs = 0
         var explained = ""
+        // Requests the model declined or that did not fit after all, and the way the minutes took around them. Counts only.
+        var fallbacks: [String: Int] = [:]
+        if declinedWhole { fallbacks["minutes.declined"] = 1 }
         if result == nil {
             let all = try await extracts(of: segments, job)
             let extracts = all.replies
             blocksOmitted = all.omitted
             blocksTotal = all.leaves
+            if all.declined > 0 { fallbacks["blocks.declined"] = all.declined }
+            if all.mergesDeclined > 0 { fallbacks["merge.declined"] = all.mergesDeclined }
             var finalOptions = options
-            if budget.isSmall {
+            var reduced: ChatResult?
+            if !budget.isSmall {
+                messages = [job.system, job.entities, VautaPrompts.extractsMessage(extracts), VautaPrompts.reduceInstruction(request)]
+                do {
+                    reduced = try await complete(messages, finalOptions, job, meetingID: meetingID)
+                } catch LLMError.contextLengthExceeded {
+                    // The extracts did not fit the server's real window after all: the digest needs far less of it.
+                    fallbacks["reduce.contextLength"] = 1
+                } catch LLMError.refused {
+                    fallbacks["reduce.declined"] = 1
+                }
+            }
+            var r: ChatResult
+            if let reduced {
+                r = reduced
+            } else {
                 var anchorPool: QuoteAnchor.Pool?
                 var found = MinutesDigest(extracts: extracts, cleanSummaries: summaryParts.contains(.outcomes), openObjects: !questionParts.isDisjoint(with: [.digest, .lines]) && !chat.integrated) { item in
                     // The quote is in the segment the item cites (the check the minutes' validation makes), or the item is a copy to replace.
@@ -232,10 +256,21 @@ extension LLMService {
                 if extraction.contains(.explain) { explained = "room \(room) tokens \(PromptText.tokens(messages[1].content))\n" + messages[1].content }
                 // Title, summary, topics and questions fit a few hundred tokens; the rest of the window is the prompt.
                 finalOptions = job.options(maxTokens: min(budget.minutesOutput, 900), thinking: true, schema: nil)
-            } else {
-                messages = [job.system, job.entities, VautaPrompts.extractsMessage(extracts), VautaPrompts.reduceInstruction(request)]
+                do {
+                    r = try await complete(messages, finalOptions, job, meetingID: meetingID)
+                } catch LLMError.refused {
+                    // Declined: once more without the blocks' summaries (the model's own wording, where whatever set the guardrails
+                    // off is most likely to be), and then the minutes go without a title and a summary rather than not at all.
+                    messages[1] = found.message(tokens: max(200, room), summaries: false)
+                    do {
+                        r = try await complete(messages, finalOptions, job, meetingID: meetingID)
+                        fallbacks["digest.withoutSummaries"] = 1
+                    } catch LLMError.refused {
+                        r = ChatResult(content: found.withoutModel, promptTokens: 0, cachedTokens: 0, completionTokens: 0, finishReason: .stop)
+                        fallbacks[MinutesDiagnostics.withoutLanguageParts] = 1
+                    }
+                }
             }
-            var r = try await complete(messages, finalOptions, job, meetingID: meetingID)
             if r.isTruncated {
                 // Title, summary, topics and questions are separate fields: what the model finished before the limit is kept (never
                 // completed). A cut inside the first field leaves nothing, and the job fails as it always did.
@@ -299,6 +334,7 @@ extension LLMService {
         }
         // Apple's model: a decision must have been decided (jokes, questions and proposals nobody accepted are dropped).
         if chat.onDevice, !chat.integrated, decidedFilter { minutes = try await keepDecided(minutes, segments: segments, chat: chat) }
+        minutes.counts.merge(fallbacks) { $1 }
         var diagnostics = MinutesDiagnostics(minutes)
         if result.promptTokens > 0, blocksTotal == 0 { diagnostics.prefixReuse = Double(result.cachedTokens) / Double(result.promptTokens) }
         diagnostics.blocks = blocksTotal
@@ -346,27 +382,25 @@ extension LLMService {
             blocks[blocks.count - 1].append(s)
             size += t
         }
-        var out: [String] = []
-        var omitted = 0, leaves = 0
+        var all = Extracted()
         let filled = blocks.filter { !$0.isEmpty }
         for (i, block) in filled.enumerated() {
             // A note belongs to the block that holds the segment spoken just before it (the first and last blocks take the ends).
             let low = i == 0 ? -Double.infinity : block[0].start
             let high = i == filled.count - 1 ? Double.infinity : filled[i + 1][0].start
             let notes = job.request.priorityNotes.filter { $0.t >= low && $0.t < high }
-            let one = try await extract(block, notes: notes, job, depth: 0)
-            out += one.replies
-            omitted += one.omitted
-            leaves += one.leaves
+            all.add(try await extract(block, notes: notes, job, depth: 0))
         }
+        // Every block declined: the meeting as a whole is what the model will not summarise, and the job says so.
+        if all.declined == all.leaves { throw LLMError.refused }
         var level = 0
         // A small window does not merge: the digest of the extracts is what the final request reads.
-        while out.count > 1, level < 4, !job.budget.isSmall, PromptText.tokens([job.system, job.entities, VautaPrompts.extractsMessage(out),
-                                                            VautaPrompts.reduceInstruction(job.request)]) > job.budget.minutesInput {
-            out = try await merge(out, job)
+        while all.replies.count > 1, level < 4, !job.budget.isSmall, PromptText.tokens([job.system, job.entities, VautaPrompts.extractsMessage(all.replies),
+                                                                     VautaPrompts.reduceInstruction(job.request)]) > job.budget.minutesInput {
+            all.replies = try await merge(all.replies, job, declined: &all.mergesDeclined)
             level += 1
         }
-        return Extracted(replies: out, omitted: omitted, leaves: leaves)
+        return all
     }
 
     /// The extracts of a meeting's blocks, and how many blocks left none (cut off at the smallest size, so nothing of them is in the minutes).
@@ -375,10 +409,21 @@ extension LLMService {
         var omitted = 0
         /// Blocks that were asked (after any splitting).
         var leaves = 0
+        /// Blocks the model declined (counted in `omitted` too), and merges it declined (their groups stay as they were).
+        var declined = 0
+        var mergesDeclined = 0
+
+        mutating func add(_ other: Extracted) {
+            replies += other.replies
+            omitted += other.omitted
+            leaves += other.leaves
+            declined += other.declined
+        }
     }
 
     /// One block's extract. A block whose answer is cut off or does not fit
-    /// is split in halves (up to three times).
+    /// is split in halves (up to three times). A block the model declines, or
+    /// one that still does not fit at the smallest size, is left out.
     private func extract(_ block: [CitableSegment], notes: [VautaPrompts.UserNoteHint], _ job: MinutesJob, depth: Int) async throws -> Extracted {
         let messages = [job.system, job.entities, VautaPrompts.transcriptMessage(block, title: "BLOCK"),
                         VautaPrompts.blockInstruction(job.request.language, notes: Array(notes.prefix(Self.notesPerBlock)), wording: job.request.wording)]
@@ -392,19 +437,25 @@ extension LLMService {
             return r.isTruncated ? Extracted(omitted: 1, leaves: 1) : Extracted(replies: [r.content], leaves: 1)
         } catch LLMError.contextLengthExceeded where canSplit {
             return try await split(block, notes: notes, job, depth: depth)
+        } catch LLMError.contextLengthExceeded {
+            // Still too long at the smallest size (one very long segment): left out, like a block that is cut off.
+            return Extracted(omitted: 1, leaves: 1)
+        } catch LLMError.refused {
+            // The model (Apple's guardrails) declined this stretch of the meeting: the rest of the minutes are still written.
+            return Extracted(omitted: 1, leaves: 1, declined: 1)
         }
     }
 
     private func split(_ block: [CitableSegment], notes: [VautaPrompts.UserNoteHint], _ job: MinutesJob, depth: Int) async throws -> Extracted {
         let half = block.count / 2
         let middle = block[half].start
-        let first = try await extract(Array(block[..<half]), notes: notes.filter { $0.t < middle }, job, depth: depth + 1)
-        let second = try await extract(Array(block[half...]), notes: notes.filter { $0.t >= middle }, job, depth: depth + 1)
-        return Extracted(replies: first.replies + second.replies, omitted: first.omitted + second.omitted, leaves: first.leaves + second.leaves)
+        var both = try await extract(Array(block[..<half]), notes: notes.filter { $0.t < middle }, job, depth: depth + 1)
+        both.add(try await extract(Array(block[half...]), notes: notes.filter { $0.t >= middle }, job, depth: depth + 1))
+        return both
     }
 
-    /// Merges consecutive extracts in groups that fit one request.
-    private func merge(_ extracts: [String], _ job: MinutesJob) async throws -> [String] {
+    /// Merges consecutive extracts in groups that fit one request. `declined` counts the merges the model declined.
+    private func merge(_ extracts: [String], _ job: MinutesJob, declined: inout Int) async throws -> [String] {
         let instruction = VautaPrompts.mergeInstruction(job.request.language)
         let room = max(job.budget.blockInput / 4,
                        job.budget.blockInput - PromptText.tokens([job.system, job.entities, instruction]) - 16)
@@ -419,13 +470,27 @@ extension LLMService {
         }
         var out: [String] = []
         for group in groups {
-            if group.count == 1 { out.append(group[0]); continue }
+            out += try await merged(group, instruction, job, declined: &declined)
+        }
+        return out
+    }
+
+    /// One group merged into one extract. A merge that is cut off or declined leaves its group as it was (the loop gives up after a few
+    /// rounds); one that does not fit after all is tried again in halves.
+    private func merged(_ group: [String], _ instruction: ChatMessage, _ job: MinutesJob, declined: inout Int) async throws -> [String] {
+        guard group.count > 1 else { return group }
+        do {
             let r = try await job.chat.model.chat([job.system, job.entities, VautaPrompts.extractsMessage(group), instruction],
                                                   job.options(maxTokens: job.budget.blockOutput, thinking: false, schema: OutputSchemas.minutesExtract(job.offered)),
                                                   onProgress: job.progress)
-            // A merge that was cut off is useless: its group stays as it was (the loop gives up after a few rounds).
-            if r.isTruncated { out += group } else { out.append(r.content) }
+            return r.isTruncated ? group : [r.content]
+        } catch LLMError.refused {
+            declined += 1
+            return group
+        } catch LLMError.contextLengthExceeded {
+            let half = group.count / 2
+            let first = try await merged(Array(group[..<half]), instruction, job, declined: &declined)
+            return try await first + merged(Array(group[half...]), instruction, job, declined: &declined)
         }
-        return out
     }
 }
