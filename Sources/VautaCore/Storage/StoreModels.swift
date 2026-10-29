@@ -61,6 +61,8 @@ extension MeetingStore {
         public let text: String
         /// Who said it; nil = no speaker data (the meeting predates speaker separation, or it was off).
         public let speaker: SpeakerTag?
+        /// A Me line marked as the speakers' echo (the other participants' words, picked up by the microphone).
+        public var isEcho = false
 
         public init(id: Int64, meetingID: Int64, channel: Channel, start: Double, end: Double, text: String, speaker: SpeakerTag? = nil) {
             self.id = id

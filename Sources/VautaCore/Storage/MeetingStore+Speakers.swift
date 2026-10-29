@@ -239,7 +239,7 @@ extension MeetingStore {
     func recomputeTalkTimeInTransaction(_ meetingID: Int64) throws {
         try run("""
             UPDATE meeting_speakers SET talk_seconds = coalesce(
-                (SELECT SUM(max(end - start, 0)) FROM segments WHERE speaker_id = meeting_speakers.id), 0)
+                (SELECT SUM(max(end - start, 0)) FROM segments WHERE speaker_id = meeting_speakers.id AND echo <> 1), 0)
             WHERE meeting_id = ?
             """, [.integer(meetingID)])
     }

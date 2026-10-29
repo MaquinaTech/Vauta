@@ -27,7 +27,7 @@ extension MeetingStore {
                        ROW_NUMBER() OVER (PARTITION BY s.meeting_id ORDER BY length(s.text) DESC, s.id) AS rn
                 FROM segments s JOIN meeting_speakers sp ON sp.id = s.speaker_id
                 WHERE sp.entity_id IN (SELECT id FROM entities WHERE id = ?1 OR merged_into = ?1)
-                  AND sp.source = 'user' AND s.overlap = 0
+                  AND sp.source = 'user' AND s.overlap = 0 AND \(Self.notEcho)
                   AND (s.speaker_confidence IS NULL OR s.speaker_confidence >= ?2)
                   AND (length(s.text) >= 24 OR (length(s.text) >= 8 AND s.text GLOB '*[\u{3040}-\u{30FF}\u{4E00}-\u{9FFF}\u{AC00}-\u{D7AF}]*'))
             )

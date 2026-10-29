@@ -355,14 +355,14 @@ extension MeetingStore {
             let match = spaced.map { "\"\($0.replacingOccurrences(of: "\"", with: ""))\"*" }.joined(separator: " OR ")
             keywordHits.append(try db.query("""
                 SELECT s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
-                WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) ORDER BY rank LIMIT 80
+                WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 80
                 """, [.text(match), within.map { .integer($0) }, excluding.map { .integer($0) }]))
         }
         if !unspaced.isEmpty {
             keywordHits.append(try db.query("""
                 SELECT meeting_id, start FROM (
                     SELECT s.meeting_id, s.start, (SELECT COUNT(*) FROM json_each(?1) WHERE instr(s.text, value) > 0) AS found
-                    FROM segments s WHERE (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3))
+                    FROM segments s WHERE (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho))
                 WHERE found > 0 ORDER BY found DESC, start LIMIT 80
                 """, [.text(Self.json(strings: unspaced)), within.map { .integer($0) }, excluding.map { .integer($0) }]))
         }
@@ -400,7 +400,7 @@ extension MeetingStore {
                     SELECT COUNT(*) FROM segments s JOIN meeting_speakers sp ON sp.id = s.speaker_id
                     WHERE s.meeting_id = ?1 AND s.start BETWEEN ?2 AND ?3 AND sp.source = 'user'
                       AND sp.entity_id IN (SELECT id FROM entities WHERE id IN (SELECT value FROM json_each(?4)) OR merged_into IN (SELECT value FROM json_each(?4)))
-                      AND (s.speaker_confidence IS NULL OR s.speaker_confidence >= ?5) AND s.overlap = 0
+                      AND (s.speaker_confidence IS NULL OR s.speaker_confidence >= ?5) AND s.overlap = 0 AND \(Self.notEcho)
                     """, [.integer(r.meeting), .real(r.start), .real(r.end), .ids(entities), .real(SpeakerTag.lowConfidenceBelow)])[0].int(0)
                 if said > 0 { add(key, rank: 0, weight: 1.5) }
             }
@@ -419,7 +419,7 @@ extension MeetingStore {
             if out.contains(where: { $0.meeting.id == r.meeting && $0.start < r.end && r.start < $0.end }) { continue }
             let segs = try db.query("""
                 SELECT s.id, s.speaker, s.start, s.text, \(Self.speakerColumns) FROM segments s \(Self.speakerJoins)
-                WHERE s.meeting_id = ? AND s.start >= ? AND s.start <= ? ORDER BY s.start, s.id
+                WHERE s.meeting_id = ? AND s.start >= ? AND s.start <= ? AND \(Self.notEcho) ORDER BY s.start, s.id
                 """, [.integer(r.meeting), .real(r.start - 0.5), .real(r.end)]).map(Self.citable)
             let size = segs.reduce(0) { $0 + $1.text.count + 24 }
             guard !segs.isEmpty, chars + size <= maxChars,

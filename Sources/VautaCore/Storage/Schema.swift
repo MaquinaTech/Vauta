@@ -473,6 +473,12 @@ enum Schema {
                 DELETE FROM item_links WHERE kind = 'decision' AND state = 'suggested' AND (src_id = old.id OR dst_id = old.id);
             END;
             """)),
+        // The speakers' sound picked up by the microphone: Me lines that are the other participants' words (`EchoDetection`, run
+        // when the recording ends). 0 = not marked; 1 = an echo: shown dimmed, left out of the minutes, answers, owners, search and
+        // exports, never deleted; 2 = the person said the line is theirs, so it is never marked again.
+        Migration(31, .sql("""
+            ALTER TABLE segments ADD COLUMN echo INTEGER NOT NULL DEFAULT 0 CHECK(echo IN (0, 1, 2));
+            """)),
     ]
 
     /// The schema version this build writes.

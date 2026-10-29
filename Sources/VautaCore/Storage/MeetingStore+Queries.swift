@@ -14,11 +14,17 @@ extension MeetingStore {
         try db.query("SELECT \(Self.meetingColumns) FROM meetings WHERE id = ?", [.integer(id)]).first.map { Self.meeting($0, languageAt: 4) }
     }
 
-    public func segments(of meetingID: Int64) throws -> [StoredSegment] {
+    /// The transcript of a meeting, by time. `echoes`: also the Me lines marked as the speakers' echo (`isEcho`), for the
+    /// transcript itself and the speaker tools; whatever reads it as what was said leaves them out.
+    public func segments(of meetingID: Int64, echoes: Bool = false) throws -> [StoredSegment] {
         try db.query("""
-            SELECT s.id, s.meeting_id, s.speaker, s.start, s.end, s.text, \(Self.speakerColumns)
-            FROM segments s \(Self.speakerJoins) WHERE s.meeting_id = ? ORDER BY s.start, s.id
-            """, [.integer(meetingID)]).map { Self.segment($0, speakerAt: 6) }
+            SELECT s.id, s.meeting_id, s.speaker, s.start, s.end, s.text, \(Self.speakerColumns), s.echo
+            FROM segments s \(Self.speakerJoins) WHERE s.meeting_id = ?\(echoes ? "" : " AND \(Self.notEcho)") ORDER BY s.start, s.id
+            """, [.integer(meetingID)]).map { row in
+            var segment = Self.segment(row, speakerAt: 6)
+            segment.isEcho = row.int(12) == 1
+            return segment
+        }
     }
 
     /// The stored translations of a meeting's segments, in segment order.

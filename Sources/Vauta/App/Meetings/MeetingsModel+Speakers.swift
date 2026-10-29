@@ -139,7 +139,7 @@ extension MeetingsModel {
         // Not awaited: the stale-chunk check hashes the whole transcript and the service may be busy with a job.
         if let llm { Task { await llm.speakersChanged(meetingID: id) } }
         do {
-            let segments = try await store.segments(of: id)
+            let segments = try await store.segments(of: id, echoes: true)
             let speakers = try await store.speakers(of: id)
             let off = try await store.speakersOff(meetingID: id)
             let kept = try await store.speakersWithKeptVoice(meetingID: id)

@@ -52,6 +52,7 @@ struct SchemaFreezeTests {
         Fingerprint(28, 119, "cc0f270e52b99a307c7253c4a327ac3ddb097d51e77752b4572049bc613563df", "7c03b8b57b4fd9936fe4e968f5c0c5589bad7a778f7f0e1bf778ac8734f79420"),
         Fingerprint(29, 119, "720a2bc93b234bddbb8879b94feef43122b278f5f374f28372208150937ae68b", "3dff9b531f9fe5a15713d6427581e37682967f57e52b377aad8bc427cc06891e"),
         Fingerprint(30, 129, "beaae1e57080e471df4116e5790239158de89883c2523da4f9cf5473b3db80b8", "34d8d011ddeda063fe6efe1bef626ceb2b7769d54538a8ccbf86721ae47c2e1e"),
+        Fingerprint(31, 129, "35825f6f40868ae5694534966fc38bfe4c9b5e90f017a03af80ba6cf127f5b41", "74deedefa09081ec1ae1e94eb085e59b03a84f2ae79500be762dc93d5331afb9"),
     ]
 
     struct Fingerprint: Equatable, CustomStringConvertible {
