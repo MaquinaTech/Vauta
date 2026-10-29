@@ -184,10 +184,12 @@ extension LLMService {
         }
         var result: ChatResult?
         var declinedWhole = false
+        // A request whose reasoning ran past the limit (asked again without it, `complete`).
+        var reasoningRanOut = false
         let firstPassStarted = Date()
         if PromptText.tokens(messages) <= budget.minutesInput {
             do {
-                let r = try await complete(messages, options, job, meetingID: meetingID)
+                let r = try await complete(messages, options, job, meetingID: meetingID, reasoningRanOut: &reasoningRanOut)
                 if !r.isTruncated { result = r }   // still cut off: summarize by blocks instead
             } catch LLMError.contextLengthExceeded {
                 // The estimate was optimistic: summarize by blocks instead.
@@ -216,7 +218,7 @@ extension LLMService {
             if !budget.isSmall {
                 messages = [job.system, job.entities, VautaPrompts.extractsMessage(extracts), VautaPrompts.reduceInstruction(request)]
                 do {
-                    reduced = try await complete(messages, finalOptions, job, meetingID: meetingID)
+                    reduced = try await complete(messages, finalOptions, job, meetingID: meetingID, reasoningRanOut: &reasoningRanOut)
                 } catch LLMError.contextLengthExceeded {
                     // The extracts did not fit the server's real window after all: the digest needs far less of it.
                     fallbacks["reduce.contextLength"] = 1
@@ -261,13 +263,13 @@ extension LLMService {
                 // Title, summary, topics and questions fit a few hundred tokens; the rest of the window is the prompt.
                 finalOptions = job.options(maxTokens: min(budget.minutesOutput, 900), thinking: true, schema: nil)
                 do {
-                    r = try await complete(messages, finalOptions, job, meetingID: meetingID)
+                    r = try await complete(messages, finalOptions, job, meetingID: meetingID, reasoningRanOut: &reasoningRanOut)
                 } catch LLMError.refused {
                     // Declined: once more without the blocks' summaries (the model's own wording, where whatever set the guardrails
                     // off is most likely to be), and then the minutes go without a title and a summary rather than not at all.
                     messages[1] = found.message(tokens: max(200, room), summaries: false)
                     do {
-                        r = try await complete(messages, finalOptions, job, meetingID: meetingID)
+                        r = try await complete(messages, finalOptions, job, meetingID: meetingID, reasoningRanOut: &reasoningRanOut)
                         fallbacks["digest.withoutSummaries"] = 1
                     } catch LLMError.refused {
                         r = ChatResult(content: found.withoutModel, promptTokens: 0, cachedTokens: 0, completionTokens: 0, finishReason: .stop)
@@ -297,7 +299,13 @@ extension LLMService {
                 messages.append(ChatMessage("assistant", String(result.content.prefix(4000))))
                 messages.append(VautaPrompts.repairInstruction())
             }
-            result = try await complete(messages, digest == nil ? options : job.options(maxTokens: min(budget.minutesOutput, 900), thinking: true), job, meetingID: meetingID)
+            var repair = digest == nil ? options : job.options(maxTokens: min(budget.minutesOutput, 900), thinking: true)
+            // The reasoning already ran past the limit: reasoning again over the same meeting would run as long, and be cut again.
+            if reasoningRanOut, repair.thinking {
+                repair = withoutReasoning(repair, job)
+                fallbacks["repair.withoutReasoning"] = 1
+            }
+            result = try await complete(messages, repair, job, meetingID: meetingID, reasoningRanOut: &reasoningRanOut)
             minutes = try validate(result.content)
         }
         // The second pass: the decisions and tasks of each stretch of the meeting, on the prefix the first pass left (integrated only).
@@ -359,21 +367,30 @@ extension LLMService {
     /// A chat request whose answer, if cut off at the token limit, is asked again once. A request that reasoned (a model server) is
     /// asked without reasoning at the same limit: the reasoning ran past the limit, and twice the limit only gives it room to run on.
     /// Any other is asked with a larger limit when the window has room for it.
-    private func complete(_ messages: [ChatMessage], _ options: ChatOptions, _ job: MinutesJob, meetingID: Int64) async throws -> ChatResult {
+    /// `reasoningRanOut` is set when the reasoning ran past the limit.
+    private func complete(_ messages: [ChatMessage], _ options: ChatOptions, _ job: MinutesJob, meetingID: Int64,
+                          reasoningRanOut: inout Bool) async throws -> ChatResult {
         let result = try await keeping(options.slot, meetingID: meetingID) { try await job.chat.model.chat(messages, options, onProgress: job.progress) }
         guard result.isTruncated else { return result }
         var retry = options
         if options.thinking {
-            retry.thinking = false
-            retry.reasoningEffort = nil
-            // Without reasoning the request may ask for its shape, as the blocks do.
-            retry.responseFormat = job.options(maxTokens: options.maxTokens, thinking: false, schema: options.outputSchema).responseFormat
+            retry = withoutReasoning(options, job)
+            reasoningRanOut = true
         } else if let raised = job.budget.raisedOutput(from: options.maxTokens, promptTokens: PromptText.tokens(messages)) {
             retry.maxTokens = raised
         } else {
             return result
         }
         return try await keeping(retry.slot, meetingID: meetingID) { try await job.chat.model.chat(messages, retry, onProgress: job.progress) }
+    }
+
+    /// The same request without reasoning, at the same limit; it may then ask for its shape, as the blocks do.
+    private func withoutReasoning(_ options: ChatOptions, _ job: MinutesJob) -> ChatOptions {
+        var out = options
+        out.thinking = false
+        out.reasoningEffort = nil
+        out.responseFormat = job.options(maxTokens: options.maxTokens, thinking: false, schema: options.outputSchema).responseFormat
+        return out
     }
 
     // MARK: Map-reduce

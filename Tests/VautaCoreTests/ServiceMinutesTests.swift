@@ -67,6 +67,22 @@ struct ServiceMinutesTests {
         #expect(try await f.store.cardSource(id) == "llm")
     }
 
+    /// The answer without reasoning can't be read either: the repair goes without reasoning too, since reasoning over the same
+    /// meeting again would run as long and be cut again (two DEV meetings spent a second 10,000 tokens there).
+    @Test func theRepairAfterCutReasoningDoesNotReasonAgain() async throws {
+        let f = try KnowledgeFixture()
+        let id = try await f.meeting(["We reviewed the Kobaltix budget for the quarter", "Fine, we keep it"])
+        let chat = ScriptedChat { messages, options, call in
+            if options.thinking { return ScriptedChat.reply("", finish: .length) }
+            return call == 2 ? ScriptedChat.reply("Here are the minutes of the meeting.") : ScriptedChat.reply(ScriptedChat.minutesJSON(messages))
+        }
+        try await run(f, id, chat: chat)
+        #expect(chat.calls.count == 3)
+        #expect(chat.calls.map(\.options.thinking) == [true, false, false])
+        #expect(chat.calls[2].messages.last?.content == VautaPrompts.repairInstruction().content)
+        #expect(try await f.store.cardSource(id) == "llm")
+    }
+
     @Test func aMeetingThatDoesNotFitIsSummarizedByBlocks() async throws {
         let f = try KnowledgeFixture()
         let id = try await f.meeting(["We reviewed the Kobaltix budget for the quarter", "Fine, we keep it", "Ana sends the numbers"])
