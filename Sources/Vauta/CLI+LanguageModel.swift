@@ -59,6 +59,8 @@ func llmInstall(_ invocation: CommandInvocation) async -> Int32 {
 
 private func throw_usage() { printError("usage: llm-install status|verify|adopt|download|import <files…>|delete (folder from VAUTA_LLM_MODEL_DIR)") }
 
+/// `llm-eval --tasks echo --sets <transcripts> --out <dir> [--seed n] [--max-items n]` (hidden, EVALUATION ONLY, no audio and no model):
+/// sweeps `EchoDetection`'s thresholds over simulated speaker echoes of public transcripts (`EchoEvaluation`) and writes `echo/sweep.tsv`.
 /// `llm-eval --tasks retrieval|retrieval-controls --sets <data dir> --out <dir> [--search-model <install dir>] [--retrieval-arms K,S,S3,T,Tref,S3T,S3Tref,S3MMR,S3leak,S3od]
 /// [--retrieval-sets w11,w11-stress,w10,cross] [--split dev|test] [--max-queries n] [--sweep 0.45,0.5,…] [--live-tau 0.70] [--no-embedding-cache] [--cold-model] [--controls miracl_es,mlqa_es_to_en,…]` (hidden, EVALUATION ONLY, no language
 /// model): runs the app's own retrieval over public evaluation sets (`--sets` is the data folder with `meetings/` and the question files) and writes where the gold segments are

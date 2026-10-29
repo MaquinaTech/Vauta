@@ -432,6 +432,11 @@ public enum LLMEvaluation {
             if o.tasks.contains("retrieval-controls") { try await RetrievalEvaluation.runControls(o, log: log) }
             return
         }
+        // The echo sweep needs no model either: simulated echoes through `EchoDetection`.
+        if o.tasks == ["echo"] {
+            try EchoEvaluation.run(o, log: log)
+            return
+        }
         let engine = LanguageModelEngine(store: store)
         if o.tasks == ["ask-retrieval"] {   // no model call: Apple's model object is only handed to the service
             try await runAskRetrieval(o, store: store, engine: engine)
