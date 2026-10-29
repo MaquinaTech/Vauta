@@ -16,6 +16,9 @@ The probe file (probe.py) adds the foreign CPU and GPU context of each run. Noth
 """
 import json, statistics as st, sys, collections, os
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import stats  # noqa: E402
+
 out = sys.argv[1]
 rows = [json.loads(l) for l in open(os.path.join(out, "traces.jsonl"))]
 probe = [json.loads(l) for l in open(sys.argv[2])] if len(sys.argv) > 2 else []
@@ -47,6 +50,14 @@ def ctx(r):
             "load1": round(st.mean(p["load"][0] for p in w), 1)}
 
 
+def wilson_text(k, n):
+    """The 95% Wilson interval of k of n, as "(95% lo-hi)"; empty for no trials."""
+    if not n:
+        return ""
+    lo, hi = stats.wilson(k, n)
+    return f"(95% {lo:.3f}-{hi:.3f})"
+
+
 def med(xs):
     xs = [x for x in xs if x is not None]
     return round(st.median(xs), 3) if xs else None
@@ -62,7 +73,7 @@ for task in sorted({r["task"] for r in rows}):
         pr = [r for r in rs if r["provider"] == prov and not r.get("error")]
         calls = [c for r in pr for c in r["calls"]]
         print(f"  {prov}: wall median {med([r['wallSeconds'] for r in pr])} s (p90 {sorted(r['wallSeconds'] for r in pr)[int(0.9 * (len(pr) - 1))] if pr else None}); "
-              f"calls {len(calls)}, JSON valid {sum(c['jsonValid'] for c in calls)}/{len(calls)}, truncated {sum(c['finishReason'] == 'length' for c in calls)}, "
+              f"calls {len(calls)}, JSON valid {sum(c['jsonValid'] for c in calls)}/{len(calls)} {wilson_text(sum(c['jsonValid'] for c in calls), len(calls))}, truncated {sum(c['finishReason'] == 'length' for c in calls)}, "
               f"first token median {med([c['timeToFirstTokenSeconds'] for c in calls])} s; own CPU {med([r['ownProcess']['userSeconds'] + r['ownProcess']['systemSeconds'] for r in pr])} s, "
               f"own energy {med([r['ownProcess']['energyJoules'] for r in pr])} J; peak footprint {med([r['peakFootprintMB'] for r in pr])} MB; prompt tokens median {med([sum(c['promptTokens'] for c in r['calls']) for r in pr])}")
         eng = [c.get("engineFirstTokenSeconds") for c in calls]

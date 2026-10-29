@@ -102,6 +102,9 @@ jobs:
       - name: Check the dependencies (only the pinned mlx-swift fork and swift-numerics)
         run: scripts/check-dependencies.sh
 
+      - name: Test the statistics of the evaluation gates (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_stats.py'
+
       - name: Check shell scripts
         run: |
           for f in scripts/*.sh; do bash -n "$f"; done

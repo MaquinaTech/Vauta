@@ -14,7 +14,10 @@ Precision and recall are against `label.kind == information`. A card is a true c
 is so_far, past_meeting or document; every other shown card counts as a false card. Latency is the simulated seconds from the end of
 the question to the card. Nothing here judges the answers' text: that is the blind judge's (rubric/LIVE_ANSWER_RUBRIC.md adapted).
 """
-import argparse, collections, json, statistics as st, sys
+import argparse, collections, json, os, statistics as st, sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import stats  # noqa: E402
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--sentences", required=True)
@@ -52,9 +55,13 @@ if a.labels:
     out["labelled"] = len(labels)
 
 def prf(tp, fp, fn):
+    """Precision and recall with their 95% Wilson intervals (sentences are not independent across a meeting: for a gate, use the
+    meeting-cluster bootstrap of stats.py instead)."""
     p = tp / (tp + fp) if tp + fp else None
     r = tp / (tp + fn) if tp + fn else None
-    return {"tp": tp, "fp": fp, "fn": fn, "precision": None if p is None else round(p, 3), "recall": None if r is None else round(r, 3)}
+    interval = lambda k, n: [round(x, 3) for x in stats.wilson(k, n)] if n else None
+    return {"tp": tp, "fp": fp, "fn": fn, "precision": None if p is None else round(p, 3), "recall": None if r is None else round(r, 3),
+            "precision_ci": interval(tp, tp + fp), "recall_ci": interval(tp, tp + fn)}
 
 if labels and a.split:
     # Rates are per hour of the meetings of that split only.
