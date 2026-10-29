@@ -535,11 +535,15 @@ public enum LLMEvaluation {
                     let (kind, choices) = o.minutesRun(label)
                     let m = model(kind, store: store, greedy: o.greedy, engine: engine, server: o.server)
                     var result: MinutesEvaluation.Result?
+                    var failed: MinutesEvaluation.RunFailure?
                     let trace = await measure(task: "minutes", provider: label, item: name, pair: pair, order: sequence[0] == labels[0] ? "AB" : "BA",
                                               model: m, waited: waited, options: o) {
-                        let r = try await MinutesEvaluation.run(transcript, language: language, model: m, arms: o.arms, warm: o.warm && kind == "integrated", renumberFinal: o.renumberFinal,
-                                                         decidedFilter: o.decidedFilter, extraction: choices.extraction, summary: choices.summary, harness: choices.harness,
-                                                         questions: choices.questions, outputLocale: o.outputLanguage.map { Locale(identifier: $0) })
+                        let r: MinutesEvaluation.Result
+                        do {
+                            r = try await MinutesEvaluation.run(transcript, language: language, model: m, arms: o.arms, warm: o.warm && kind == "integrated", renumberFinal: o.renumberFinal,
+                                                            decidedFilter: o.decidedFilter, extraction: choices.extraction, summary: choices.summary, harness: choices.harness,
+                                                            questions: choices.questions, outputLocale: o.outputLanguage.map { Locale(identifier: $0) })
+                        } catch let failure as MinutesEvaluation.RunFailure { failed = failure; throw failure }
                         result = r
                         var detail = ["proposed": "\(r.proposed)", "kept": "\(r.items.count)", "dropped": "\(r.dropped)",
                                       "arms": o.arms.names(extraction: choices.extraction), "extraction": choices.extraction.names, "summary": choices.summary.names, "harness": choices.harness.names, "openQuestions": choices.questions.names, "release": "\(o.release)", "warm": "\(o.warm && kind == "integrated")",
@@ -561,6 +565,7 @@ public enum LLMEvaluation {
                         try? enc.encode(result).write(to: minutesDir.appendingPathComponent("\(name).\(label).json"))
                         try? Self.writeMinutes(result, name: name, kind: label, to: minutesDir)
                     }
+                    if let failed { try? Self.writeFailedRun(failed, name: name, kind: label, to: minutesDir) }
                     write(trace)
                 }
                 pair += 1

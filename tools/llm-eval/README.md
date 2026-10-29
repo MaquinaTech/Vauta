@@ -25,7 +25,7 @@ stored). Its requests go through the app's own client and rules, so they show th
 | `--guard none\|g1\|g2\|g1+g2` | Which guards of a live answer are on: the three-way `found` (G1) and the check of the quoted lines against the moment of the question (G2). |
 | `--warm` (or `--replay-realtime`) | Replays each meeting as a recording: the integrated model reads the transcript as the segments arrive (a reading every ~600 characters, the way the app does), and the minutes or the question read only what came after. The traces carry `warmSeconds` and the prefix reuse. |
 
-The minutes run stores the speakers of the transcript as speakers of the meeting (as after a real recording) instead of writing "Speaker 3 (remote):" in front of each line, so owners can be measured. Each call in `traces.jsonl` has a `breakdown` (`tokenizeSeconds`, `slotWaitSeconds`, `gateWaitSeconds`, `newPrefillTokens`, `prefillChunks`, `prefillSeconds`) next to the time to the first token.
+The minutes run stores the speakers of the transcript as speakers of the meeting (as after a real recording) instead of writing "Speaker 3 (remote):" in front of each line, so owners can be measured. Each call in `traces.jsonl` has a `breakdown` (`tokenizeSeconds`, `slotWaitSeconds`, `gateWaitSeconds`, `newPrefillTokens`, `prefillChunks`, `prefillSeconds`) next to the time to the first token. A meeting whose minutes fail writes no result file; its calls, error and replies go to `minutes/<meeting>.<provider>.failed.json` instead, so the answer that could not be read can be looked at (the sets are public transcripts).
 
 ## Live answers to questions heard in the meeting
 

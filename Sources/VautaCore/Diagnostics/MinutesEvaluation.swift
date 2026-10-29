@@ -329,6 +329,8 @@ public enum MinutesEvaluation {
     public struct RunFailure: Error, CustomStringConvertible, CallsCarrying {
         public let failure: Failure
         public let calls: [EvaluationCall]
+        /// The replies it got, in order (the sets are public transcripts), to see which step's answer could not be used.
+        public var replies: [String] = []
         public var description: String { failure.description }
     }
 
@@ -411,7 +413,9 @@ public enum MinutesEvaluation {
         await service.setJobEventHandler { event in if event.kind == .minutes { finished.set(event.outcome) } }
         await service.regenerateMinutes(meeting)
         let outcome = await finished.wait()
-        if case .failed(let message) = outcome { throw RunFailure(failure: .jobFailed(message), calls: providers.chatModel.records) }
+        if case .failed(let message) = outcome {
+            throw RunFailure(failure: .jobFailed(message), calls: providers.chatModel.records, replies: providers.chatModel.replies)
+        }
         if outcome == .cancelled { throw Failure.noAnswer }
 
         var items: [Item] = []
