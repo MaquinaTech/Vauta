@@ -20,8 +20,12 @@ public enum LLMEvaluation {
         public var tasks: Set<String> = ["minutes"]
         public var providers: [String] = ["apple", "integrated"]
         /// `--providers server`: the model server (`--server <config.json>`, the key typed with `--ask-key`). Its runs go through the
-        /// app's own client and rules; only the minutes task runs on it.
+        /// app's own client and rules; the minutes and live-answer tasks run on it.
         public var server: EvaluationModel?
+        /// `--ask-reasoning on|off|on,off` (live-answer on a model server, after the meeting): Ask on the server's main model reasons
+        /// (bounded) or not; with both, each question is asked both ways under `server.reasoning` and `server.plain`. Empty = the release
+        /// choice (`AskReasoningRelease.serverAfterMeeting`).
+        public var askReasoning: [Bool] = []
         public var sets: URL
         public var questions: URL?
         public var out: URL

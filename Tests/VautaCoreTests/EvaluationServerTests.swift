@@ -5,8 +5,8 @@ import Foundation
 import Testing
 @testable import VautaCore
 
-/// `llm-eval --providers server`: the minutes of a public transcript on a model server, through the app's own client (a stub server
-/// here: no socket is opened).
+/// `llm-eval --providers server`: the minutes of a public transcript, and Ask's answers about it, on a model server, through the app's
+/// own client (a stub server here: no socket is opened).
 @Suite("Evaluation: the model server path")
 struct EvaluationServerTests {
     typealias Reply = StubServer.Reply
@@ -126,6 +126,49 @@ struct EvaluationServerTests {
             #expect(FileManager.default.fileExists(atPath: o.out.appendingPathComponent("minutes/\(file)").path), "\(file)")
         }
         #expect(log.all.filter { $0.hasPrefix("model server: ") }.count == 1, "the server is checked once for the whole run")
+    }
+
+    @Test func eachAskReasoningValueIsARunOfTheServer() {
+        var o = LLMEvaluation.Options(sets: URL(fileURLWithPath: "/nonexistent"), out: URL(fileURLWithPath: "/nonexistent"))
+        o.providers = ["server", "apple"]
+        #expect(o.answerRuns.map(\.label) == ["server", "apple"] && o.answerRuns.allSatisfy { $0.reasoning == nil }, "without it, the release choice")
+        o.askReasoning = [false]
+        #expect(o.answerRuns.map(\.label) == ["server", "apple"] && o.answerRuns[0].reasoning == false && o.answerRuns[1].reasoning == nil)
+        o.askReasoning = [true, false]
+        #expect(o.answerRuns.map(\.label) == ["server.reasoning", "server.plain", "apple"])
+        #expect(o.answerRuns.map(\.kind) == ["server", "server", "apple"] && o.answerRuns.map(\.reasoning) == [true, false, nil])
+    }
+
+    @Test func askAfterTheMeetingRunsWithAndWithoutReasoningInOneRun() async throws {
+        let port = StubServer.register { received in
+            if received.url.path.hasSuffix("/models") { return .json(["object": "list", "data": [["id": "fast-model"], ["id": "deep-model"]]]) }
+            guard received.url.path.hasSuffix("/chat/completions") else { return nil }
+            return .text(ModelsFixtures.sse([ModelsFixtures.delta(AskFoundTests.found(Self.messages(received)), finish: "stop")]))
+        }
+        defer { StubServer.unregister(port) }
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-eval-ask-reasoning-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let sets = root.appendingPathComponent("sets", isDirectory: true)
+        try FileManager.default.createDirectory(at: sets, withIntermediateDirectories: true)
+        let passages = Self.transcript.passages.map { ["id": $0.id, "text": $0.text, "start": $0.start ?? 0, "speaker": $0.speaker ?? ""] as [String: Any] }
+        try JSONSerialization.data(withJSONObject: ["passages": passages, "meeting": "m1", "language": "en"]).write(to: sets.appendingPathComponent("m1.json"))
+        let questions = root.appendingPathComponent("questions.jsonl")
+        try Data(#"{"qid": "q1", "meeting": "m1", "t_seg": 6, "question": "What happened with item 2?"}"#.utf8).write(to: questions)
+        var o = LLMEvaluation.Options(sets: sets, out: root.appendingPathComponent("out", isDirectory: true))
+        o.tasks = ["live-answer"]
+        o.providers = ["server"]
+        o.questions = questions
+        o.afterMeeting = true
+        o.askReasoning = [true, false]
+        o.server = serverModel(port: port)
+        try await LLMEvaluation.run(o, store: LanguageModelStore(applicationSupport: root), log: { _ in })
+        let lines = try String(contentsOf: o.out.appendingPathComponent("traces.jsonl"), encoding: .utf8).split(separator: "\n")
+        let traces = try lines.map { try JSONDecoder().decode(LLMEvaluation.Trace.self, from: Data($0.utf8)) }
+        #expect(traces.map(\.provider) == ["server.reasoning", "server.plain"])
+        #expect(traces.map { $0.detail["askReasoning"] } == ["on", "off"] && traces.allSatisfy { $0.error == nil })
+        let chats = StubServer.requests(port).compactMap { $0.url.path.hasSuffix("/chat/completions") ? $0.json : nil }
+        #expect(chats.filter { $0["enable_thinking"] as? Bool == true && $0["reasoning_effort"] as? String == "low" }.count == 1)
+        #expect(chats.filter { $0["enable_thinking"] as? Bool == false }.count == 1)
     }
 
     @Test func theServerIsCheckedBeforeTheFirstRun() async throws {
