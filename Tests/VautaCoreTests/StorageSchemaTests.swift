@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
-import CryptoKit
 import Foundation
 import Testing
 @testable import VautaCore
@@ -16,20 +15,7 @@ struct StorageSchemaTests {
         #expect(Schema.currentVersion == 30)
     }
 
-    /// Published migrations are frozen: the schema they build up to version 7
-    /// must stay byte-identical to the one Acta 0.1.0 created (fingerprint of
-    /// `sqlite_schema` computed from the 0.1.0 SQL). This is also what makes
-    /// the v7 fixtures in these tests equivalent to real 0.1.0 stores.
-    @Test func publishedMigrationsMatchTheReleasedSchema() throws {
-        let db = try SQLiteDatabase(image: nil, size: 0)
-        try Schema.migrate(db, upTo: 7)
-        let rows = try db.query("SELECT type, name, tbl_name, ifnull(sql, '') FROM sqlite_schema ORDER BY type, name")
-        let dump = rows.map { row in (0..<4).map { row.string($0) }.joined(separator: "|") }.joined(separator: "\n")
-        let digest = SHA256.hash(data: Data(dump.utf8)).map { String(format: "%02x", $0) }.joined()
-        #expect(rows.count == 82)
-        #expect(digest == "915f7c68ba7445434dbcb987e5500fee322d4f47d71975632ff0538cdd47fcfd",
-                "a published migration (1–7) was edited; add a new migration instead")
-    }
+    // Published migrations are frozen in `SchemaFreezeTests` (the v7 fixtures here rely on it).
 
     @Test func freshDatabaseGetsTheCurrentSchema() throws {
         let db = try SQLiteDatabase(image: nil, size: 0)
