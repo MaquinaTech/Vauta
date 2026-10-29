@@ -33,15 +33,19 @@ public enum EchoDetection {
         }
     }
 
+    /// The release thresholds come from `llm-eval --tasks echo` on the 24 public DEV meetings (564 replays, 107,805 simulated echo
+    /// lines, 42,480 of the participants' own lines): 90.9 % of the echo lines' words found, 0.31 % of the own lines (0.11 % of
+    /// their words) marked. The earlier guess (3 words, pairs 0.4) found 92.9 % but marked 0.64 % of the own lines.
     public struct Settings: Sendable, Equatable {
         /// How much later the microphone may hear the remote voice than the system audio carries it, in seconds.
         public var maxDelay = 0.5
         /// Words that carry meaning (stopwords left out) a Me line needs before it can be an echo.
-        public var minWords = 3
+        public var minWords = 4
         /// Share of the Me line's words, and of its pairs of consecutive words, found in the Others lines it overlaps.
         public var words = 0.6
-        public var pairs = 0.4
-        /// Share of the Me line's time within the Others lines it overlaps (each one extended by `maxDelay`).
+        public var pairs = 0.3
+        /// Share of the Me line's time within the Others lines it overlaps (each one extended by `maxDelay`). The sweep found
+        /// little difference between 0.5 and 0.8 on simulated echoes, whose timing is exact; real ones are cut less exactly.
         public var covered = 0.6
 
         public init() {}
@@ -49,20 +53,35 @@ public enum EchoDetection {
 
     /// The ids of the Me lines that are echoes, in the order of `lines`.
     public static func echoes(_ lines: [Line], locale: String, settings: Settings = Settings()) -> [Int64] {
+        evidence(lines, locale: locale, maxDelay: settings.maxDelay).filter { $0.isEcho(settings) }.map(\.id)
+    }
+
+    /// What decides whether a Me line is an echo, measured once (the evaluation sweeps the thresholds over it).
+    struct Evidence: Sendable, Equatable {
+        let id: Int64
+        let words: Int
+        let wordShare: Double
+        let pairShare: Double
+        let covered: Double
+
+        func isEcho(_ s: Settings) -> Bool {
+            words >= s.minWords && wordShare >= s.words && pairShare >= s.pairs && covered >= s.covered
+        }
+    }
+
+    /// The evidence of every Me line that overlaps an Others line, in the order of `lines`.
+    static func evidence(_ lines: [Line], locale: String, maxDelay: Double) -> [Evidence] {
         let profile = LanguageProfile(identifier: locale)
         let others = lines.filter { $0.channel == .others }.map { Said($0, locale: locale, profile: profile) }
         guard !others.isEmpty else { return [] }
-        var out: [Int64] = []
+        var out: [Evidence] = []
         for line in lines where line.channel == .me {
-            let me = Said(line, locale: locale, profile: profile)
-            guard me.words.count >= settings.minWords else { continue }
-            let heard = others.filter { $0.line.start <= line.end && $0.line.end + settings.maxDelay >= line.start }
+            let heard = others.filter { $0.line.start <= line.end && $0.line.end + maxDelay >= line.start }
             guard !heard.isEmpty else { continue }
+            let me = Said(line, locale: locale, profile: profile)
             let words = Set(heard.flatMap(\.words)), pairs = Set(heard.flatMap(\.pairs))
-            guard share(me.words, in: words) >= settings.words, share(me.pairs, in: pairs) >= settings.pairs,
-                  coverage(of: line, by: heard.map { ($0.line.start, $0.line.end + settings.maxDelay) }) >= settings.covered
-            else { continue }
-            out.append(line.id)
+            out.append(Evidence(id: line.id, words: me.words.count, wordShare: share(me.words, in: words), pairShare: share(me.pairs, in: pairs),
+                                covered: coverage(of: line, by: heard.map { ($0.line.start, $0.line.end + maxDelay) })))
         }
         return out
     }
