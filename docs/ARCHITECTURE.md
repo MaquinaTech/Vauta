@@ -282,7 +282,11 @@ this Mac (EmbeddingGemma 2 in `VautaMLX`), or are off (Ask then uses keyword sea
 - `ContextBudget` sizes every prompt from the model's real context window. Small windows (under 12K tokens, such as
   the on-device model) get map-reduce minutes in blocks; their final request reads a digest of the blocks and writes only the
   title, summary, topics and open questions, and Swift carries the decisions, tasks and mentions over from the extracts
-  (`MinutesDigest`).
+  (`MinutesDigest`). A request the model declines (Apple's guardrails) or that does not fit the server's real window does not
+  fail the minutes: a meeting declined whole goes by blocks, a declined block is left out, a merge keeps its group (or is
+  tried in halves when it does not fit), a reduce that does not fit goes by the digest, and a declined digest is asked once
+  more without the blocks' summaries; if that is declined too, the minutes keep the checked items, topics and questions with
+  no title or summary. Only a meeting whose every block is declined fails. `MinutesDiagnostics` counts each of these.
 - The minutes, live notes and answers are JSON. `VautaPrompts` validates them: every decision, task and claim must cite
   real segment IDs, or it is dropped. What reaches the store is what Swift verified. An answer starts with `found`: `true`
   with at least one claim, or `false`, an explicit refusal; a found answer whose claims all fail the check is unverified, not
