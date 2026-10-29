@@ -169,6 +169,9 @@ extension MeetingStore {
 
     /// Vocabulary for the transcriber (≤ 100 phrases of 1–2 words, by
     /// priority): attendees, series entities and pinned glossary terms.
+    /// Learned aliases are left out: they are how the transcriber misheard a
+    /// name, and asking it for them would bias it toward the wrong spelling
+    /// (they still match the name in the transcript).
     public func recognitionVocabulary(attendees: [Int64], seriesID: Int64? = nil) throws -> [String] {
         var out: [String] = []
         var seen = Set<String>()
@@ -178,18 +181,20 @@ extension MeetingStore {
             if seen.insert(TextKeys.norm(s)).inserted { out.append(s) }
         }
         if !attendees.isEmpty {
-            for r in try db.query("SELECT alias FROM aliases WHERE entity_id IN (SELECT value FROM json_each(?)) ORDER BY weight DESC", [.ids(attendees)]) { add(r.string(0)) }
+            for r in try db.query("""
+                SELECT alias FROM aliases WHERE entity_id IN (SELECT value FROM json_each(?)) AND source != 'learned' ORDER BY weight DESC
+                """, [.ids(attendees)]) { add(r.string(0)) }
         }
         if let seriesID {
             for r in try db.query("""
                 SELECT a.alias FROM series s, json_each(s.default_entities) j JOIN aliases a ON a.entity_id = j.value
-                WHERE s.id = ? ORDER BY a.weight DESC
+                WHERE s.id = ? AND a.source != 'learned' ORDER BY a.weight DESC
                 """, [.integer(seriesID)]) { add(r.string(0)) }
         }
         for r in try db.query("SELECT term FROM glossary WHERE pinned = 1 ORDER BY term") { add(r.string(0)) }
         for r in try db.query("""
             SELECT a.alias FROM aliases a JOIN entities e ON e.id = a.entity_id
-            WHERE e.kind IN ('project','client','system') AND e.merged_into IS NULL ORDER BY e.last_seen DESC
+            WHERE e.kind IN ('project','client','system') AND e.merged_into IS NULL AND a.source != 'learned' ORDER BY e.last_seen DESC
             """) { add(r.string(0)) }
         return out
     }
