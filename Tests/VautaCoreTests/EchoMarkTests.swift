@@ -23,19 +23,11 @@ struct EchoMarkTests {
         return (id, others, echo, reply)
     }
 
-    @Test func theReleaseDoesNotMarkYet() async throws {
-        #expect(!EchoRelease.marksAfterRecording)
-        let f = try KnowledgeFixture()
-        let m = try await meeting(f)
-        #expect(try await f.store.echoes(of: m.id).isEmpty)
-    }
-
     @Test func anEchoIsKeptButLeftOutOfWhatWasSaid() async throws {
         let f = try KnowledgeFixture()
         let s = f.store!
         let m = try await meeting(f)
-        #expect(try await s.markEchoes(m.id) == 1)
-        #expect(try await s.echoes(of: m.id) == [m.echo])
+        #expect(try await s.echoes(of: m.id) == [m.echo], "marked when the recording ended")
 
         // The transcript shows it, marked; the rest leaves it out.
         let all = try await s.segments(of: m.id, echoes: true)
@@ -52,7 +44,6 @@ struct EchoMarkTests {
         let f = try KnowledgeFixture()
         let s = f.store!
         let m = try await meeting(f)
-        try await s.markEchoes(m.id)
         try await s.setEcho(m.echo, false)
         #expect(try await s.echoes(of: m.id).isEmpty)
         #expect(try await s.citableSegments(m.id).map(\.id) == [m.others, m.echo, m.reply])
@@ -73,11 +64,11 @@ struct EchoMarkTests {
                                                    SegmentSpeakerAssignment(segmentID: m.reply, channel: .me, ordinal: 1),
                                                    SegmentSpeakerAssignment(segmentID: m.others, channel: .others, ordinal: 1)])
         func myTalk() async throws -> Double { try #require(try await s.speakers(of: m.id).first { $0.channel == .me }).talkSeconds }
-        #expect(abs(try await myTalk() - 7.9) < 0.01)
-        try await s.markEchoes(m.id)
         #expect(abs(try await myTalk() - 4) < 0.01, "only the reply")
         try await s.setEcho(m.echo, false)
         #expect(abs(try await myTalk() - 7.9) < 0.01)
+        try await s.setEcho(m.echo, true)
+        #expect(abs(try await myTalk() - 4) < 0.01)
     }
 
     @Test func aMeetingWithoutTheOtherChannelHasNoEchoes() async throws {

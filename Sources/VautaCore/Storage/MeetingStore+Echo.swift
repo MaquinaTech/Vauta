@@ -3,12 +3,6 @@
 
 import Foundation
 
-/// Whether a finished recording's echoes are marked (`EchoDetection`). Off until the transcript shows them dimmed and the person
-/// can take a mark back.
-public enum EchoRelease {
-    public static let marksAfterRecording = false
-}
-
 /// The speakers' sound picked up by the microphone (`segments.echo`): Me lines that are the other participants' words, marked when
 /// a recording ends. An echo is kept and shown dimmed, but everything that reads the transcript as what was said leaves it out:
 /// the minutes, live notes and notes, answers and search, owners, mentions, quotes, follow-ups and exports. The person can say a
