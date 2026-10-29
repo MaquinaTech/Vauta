@@ -46,17 +46,9 @@ extension DocumentIndex {
         let index = try vectorIndex(space: space)
         var cosine: [Int64: Double] = [:]
         var vectorScores: [Float] = []
-        let top = index.search(queryVector, k: allowed == nil ? 50 : 400)
-        var ids = top.map(\.id)
-        if let allowed, !ids.isEmpty {
-            let keep = Set(try db.query("SELECT id FROM passages WHERE id IN (SELECT value FROM json_each(?1)) AND file_id IN (SELECT value FROM json_each(?2))",
-                                        [.ids(ids), .ids(allowed)]).map { $0.int(0) })
-            ids = ids.filter(keep.contains)
-        }
-        let scoreOf = Dictionary(uniqueKeysWithValues: top.map { ($0.id, $0.score) })
-        for id in ids.prefix(50) {
-            cosine[id] = Double(scoreOf[id] ?? 0)
-            vectorScores.append(scoreOf[id] ?? 0)
+        for hit in try vectorCandidates(index, queryVector, k: 50, allowed: allowed) {
+            cosine[hit.id] = Double(hit.score)
+            vectorScores.append(hit.score)
         }
         // Exact items.
         let codes = SemanticRanker.codes(in: question)

@@ -193,6 +193,15 @@ extension MeetingStore {
         return index
     }
 
+    /// The vector candidates of a search, best first: the index's top `k`, or with `within` the top `k` of that meeting's own chunks,
+    /// each scored (a top K of the whole library would leave them out when other meetings on the same topic fill it).
+    func vectorCandidates(_ index: VectorIndex, _ query: [Float], k: Int, within: Int64?, space: EmbeddingSpace) throws -> [(id: Int64, score: Float)] {
+        guard let within else { return index.search(query, k: k) }
+        let ids = try db.query("SELECT id FROM chunks WHERE meeting_id = ? AND model = ? AND dims = ?",
+                               [.integer(within), .text(space.model), .integer(Int64(space.dimensions))]).map { $0.int(0) }
+        return index.search(query, k: k, among: ids)
+    }
+
     // MARK: Hybrid search
 
     /// Context entities named in a text (unambiguous exact aliases, deterministic).
@@ -324,11 +333,11 @@ extension MeetingStore {
         // Vectors.
         if mode != .keyword, let queryVector, let space {
             let index = try vectorIndex(space: space)
-            let top = index.search(queryVector, k: within == nil ? 50 : 400)
+            let top = try vectorCandidates(index, queryVector, k: 50, within: within, space: space)
             if !top.isEmpty {
                 let rows = try db.query("SELECT id, meeting_id, start, end FROM chunks WHERE id IN (SELECT value FROM json_each(?))", [.ids(top.map(\.id))])
                 let byID = Dictionary(uniqueKeysWithValues: rows.map { ($0.int(0), ($0.int(1), $0.double(2), $0.double(3))) })
-                for (rank, hit) in top.filter({ h in (within == nil || byID[h.id]?.0 == within) && (excluding == nil || byID[h.id]?.0 != excluding) }).prefix(50).enumerated() {
+                for (rank, hit) in top.filter({ h in excluding == nil || byID[h.id]?.0 != excluding }).enumerated() {
                     guard let (m, s, e) = byID[hit.id] else { continue }
                     let key = "c\(hit.id)"
                     ranges[key] = (m, s, e)

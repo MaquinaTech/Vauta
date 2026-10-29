@@ -101,11 +101,11 @@ extension MeetingStore {
         var placeholder: Set<String> = []
         // Vector candidates, best first.
         var vectorScores: [Float] = []
-        let top = index.search(queryVector, k: within == nil ? 50 : 400)
+        let top = try vectorCandidates(index, queryVector, k: 50, within: within, space: space)
         if !top.isEmpty {
             let rows = try db.query("SELECT id, meeting_id, start, end FROM chunks WHERE id IN (SELECT value FROM json_each(?))", [.ids(top.map(\.id))])
             let byID = Dictionary(uniqueKeysWithValues: rows.map { ($0.int(0), ($0.int(1), $0.double(2), $0.double(3))) })
-            for hit in top.filter({ h in (within == nil || byID[h.id]?.0 == within) && (excluding == nil || byID[h.id]?.0 != excluding) }).prefix(50) {
+            for hit in top.filter({ h in excluding == nil || byID[h.id]?.0 != excluding }) {
                 guard let (m, s, e) = byID[hit.id] else { continue }
                 let key = "c\(hit.id)"
                 ranges[key] = (m, s, e)
