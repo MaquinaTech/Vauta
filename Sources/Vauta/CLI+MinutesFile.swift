@@ -6,8 +6,9 @@ import VautaCore
 
 /// `minutes-file <transcript.json> --out <minutes.json>`: EVALUATION ONLY. Writes the minutes of a public transcript
 /// (the AMI words of `eval/`) with Apple's on-device model and the app's own minutes code, and saves the items with
-/// their citations to the one file named with `--out`. It uses a throwaway store in a temporary folder: never the user's
-/// store, never a model server, no audio. Run it on public transcripts only, never on a real meeting.
+/// their citations to the one file named with `--out`. It forces no part of the minutes, so it measures what the app sends to
+/// Apple's model (the release choice; the file's `choices` says which). It uses a throwaway store in a temporary folder: never
+/// the user's store, never a model server, no audio. Run it on public transcripts only, never on a real meeting.
 func minutesFile(_ invocation: CommandInvocation) async throws -> Int32 {
     guard let path = invocation.positional.first, let out = invocation.values["--out"] else { throw Usage() }
     guard let data = FileManager.default.contents(atPath: path),

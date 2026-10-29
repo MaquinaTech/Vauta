@@ -14,6 +14,14 @@ extension LLMService {
     func setMinutesHarness(_ harness: MinutesHarness) { minutesHarnessOverride = harness }
     func setMinutesQuestions(_ questions: MinutesQuestions) { minutesQuestionsOverride = questions }
 
+    /// What the minutes run on `chat`: each part the evaluation forced, else the release choice for the backend (`MinutesRelease.choices(for:)`).
+    /// Only the integrated model reads the request (`MinutesHarness`), whatever is forced.
+    func minutesChoices(for chat: ChatProvider) -> MinutesChoices {
+        let release = MinutesRelease.choices(for: chat)
+        return MinutesChoices(extraction: minutesExtractionOverride ?? release.extraction, summary: minutesSummaryOverride ?? release.summary,
+                              harness: chat.integrated ? minutesHarnessOverride ?? release.harness : .legacy, questions: minutesQuestionsOverride ?? release.questions)
+    }
+
     /// Hard cap of the integrated model's closing request: the larger of this and 30% of the first pass.
     static let closingFloor = 20.0
     static let closingShare = 0.3

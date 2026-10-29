@@ -123,12 +123,14 @@ extension LLMService {
             userNotes: Array(marks.prefix(budget.isSmall ? 10 : 30)),
             liveNotes: Array(liveHints.suffix(budget.isSmall ? 10 : 30)),
             priorityNotes: Self.priorityHints(noteRows, budget: budget), timeZone: meetingZone, recall: false, delta: delta)
-        // The integrated model's request: the items before the summary, the summary rule, the recall wording and the sampling.
-        let harness = chat.integrated ? minutesHarnessOverride ?? MinutesHarnessRelease.harness(integrated: true) : MinutesHarness.legacy
+        // The release choice for the backend, or what the evaluation forced. The integrated model's request: the items before the summary,
+        // the summary rule, the recall wording and the sampling.
+        let choices = minutesChoices(for: chat)
+        let harness = choices.harness
         request.recall = chat.integrated && (arms.contains(.recallPrompt) || harness.contains(.recall))
-        let extraction = minutesExtractionOverride ?? (chat.releasedHarness ? MinutesRelease.extraction(integrated: chat.integrated) : .legacy)
-        let questionParts = minutesQuestionsOverride ?? (chat.releasedHarness ? MinutesQuestionsRelease.questions(integrated: chat.integrated) : .legacy)
-        let summaryParts = minutesSummaryOverride ?? (chat.releasedHarness ? MinutesSummaryRelease.summary(integrated: chat.integrated) : .legacy)
+        let extraction = choices.extraction
+        let questionParts = choices.questions
+        let summaryParts = choices.summary
         request.wording = .init(definitions: extraction.contains(.prompts), hasMeLines: segments.contains { $0.channel == .me }, integrated: chat.integrated,
                                 capped: !extraction.contains(.uncapped), blockDefinitions: extraction.contains(.blockPrompts),
                                 outcomeSummary: summaryParts.contains(.wording),
