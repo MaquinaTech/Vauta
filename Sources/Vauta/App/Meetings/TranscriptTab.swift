@@ -234,7 +234,12 @@ struct TranscriptTab: View {
             TranscriptTime(text: time, width: cols.time, help: "Highlight this passage") { model.highlight(segment) }
             SpeakerLabel(model: model, segment: segment, width: cols.speaker)
             VStack(alignment: .leading, spacing: 2) {
+                // Not by color alone: an echo is dimmed and says what it is, with the way to take the mark back.
                 ProtectedText(matched(segment.text))
+                    .foregroundStyle(segment.isEcho ? .secondary : .primary)
+                if segment.isEcho {
+                    EchoNote { Task { await model.setEcho(segment, false) } }
+                }
                 if let translation {
                     FilledText(text: translation, selectable: !copyProtection)
                 }
@@ -248,13 +253,17 @@ struct TranscriptTab: View {
         .onTapGesture { if copyProtection { model.highlight(segment) } }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(SpeakerLabel.spoken(segment, time: time))
-        .accessibilityValue(Text(verbatim: SpeakerLabel.spokenNotes(segment, translation: translation)))
+        .accessibilityValue(Text(verbatim: [segment.isEcho ? EchoNote.title : nil, SpeakerLabel.spokenNotes(segment, translation: translation)]
+            .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")))
         .accessibilityAddTraits(isHighlighted ? [.isButton, .isSelected] : .isButton)
         .accessibilityAction { model.highlight(segment) }
         .accessibilityActions {
             // Only a line with stored speaker data has options; the others would offer an action that does nothing.
             if segment.speaker?.id != nil {
                 Button("Speaker options") { model.speakerPopover = .line(segment.id) }
+            }
+            if segment.isEcho {
+                Button(EchoNote.restore) { Task { await model.setEcho(segment, false) } }
             }
         }
         .accessibilityHint(Text("Highlights the passage to cite it"))

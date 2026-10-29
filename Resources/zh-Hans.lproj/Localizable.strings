@@ -1462,6 +1462,9 @@
 /* Alert title */
 "Couldn’t change the decision" = "无法更改决定";
 
+/* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
+"Couldn’t change the line" = "无法更改此行";
+
 /* Alert title */
 "Couldn’t change the note" = "无法更改笔记";
 
@@ -2796,6 +2799,10 @@
 
 /* Speaker popover: question about a speaker whose voice resembles the user's own saved voice */
 "Is this you?" = "这是你吗？";
+
+/* Edit menu: the action Undo takes back, saying a transcript line marked as an echo was the user's own
+   Transcript: button under a line marked as an echo of the speakers; the line becomes the user's own again */
+"It Was Me" = "是我说的";
 
 /* Erase sheet, when old copies from the earlier-version migration exist; the argument is a file size */
 "It also deletes the old copies from an earlier version (%@)." = "还会删除 旧版本留下的副本（%@）。";
@@ -6055,6 +6062,9 @@
 /* Microphone test error; argument is the system error */
 "The microphone couldn’t start: %@" = "麦克风无法启动：%@";
 
+/* Transcript: tooltip of the note under a line marked as an echo of the speakers */
+"The microphone heard the other participants from your speakers, so this line repeats what they said. It is kept here, but left out of the minutes, answers, owners, search and exports. Headphones avoid it." = "麦克风从你的扬声器中听到了其他参与者的声音，因此这一行重复了他们说的话。它会保留在这里，但不会计入会议纪要、回答、负责人、搜索和导出。使用耳机可避免这种情况。";
+
 /* Setup last page: the microphone is not allowed */
 "The microphone isn’t allowed, so Vauta can’t record yet." = "麦克风未获允许，因此 Vauta 暂时无法录音。";
 
@@ -6476,6 +6486,9 @@
 
 /* Speaker edit error: the chosen place leaves one part empty or outside the segment */
 "This line can’t be split there." = "无法在此处拆分该行。";
+
+/* Transcript: tooltip of the button that makes a line marked as an echo the user's own again */
+"This line is what you said: count it in answers, search and exports, and in the minutes the next time they are written" = "这一行是你说的话：将计入回答、搜索和导出，并在下次生成会议纪要时计入";
 
 /* Speaker edit error: the transcript segment was removed meanwhile */
 "This line no longer exists." = "此行已不存在。";
@@ -7931,7 +7944,13 @@
 "Different from %@?" = "与%@的不同吗？";
 "Dismissed links" = "已舍弃的链接";
 "Earlier: %@. Now: %@." = "之前：%1$@。现在：%2$@。";
+
+/* Transcript: under a line of the user's channel that repeats what the other participants said, because the microphone heard them from the speakers */
+"Echo of your speakers" = "扬声器回声";
 "Mark as Done" = "标记为已完成";
+
+/* Edit menu: the action Undo takes back, marking a transcript line as an echo of the speakers again */
+"Mark as Echo" = "标记为回声";
 "Not Related" = "不相关";
 "Not the Same" = "不是同一个";
 "Open the earlier meeting at this item" = "打开此项对应的之前的会议";
