@@ -31,6 +31,21 @@ struct AnalyzerRecoveryTests {
 
     // MARK: Transcriber
 
+    /// The devices start before the analyzers are ready: what they capture meanwhile waits in the session's queue, none of it
+    /// is dropped, and the session that starts is the one that holds it.
+    @Test func audioFedBeforeTheAnalyzerStartsWaitsForIt() async throws {
+        let rig = Rig(retry: AnalyzerRetryPolicy())
+        rig.transcriber.open { _ in }
+        for _ in 0..<3 { rig.feed() }
+        let session = try #require(rig.factory.session(0))
+        #expect(session.frames == [0, 1_600, 3_200] && rig.events.health.isEmpty, "queued, not dropped")
+        try await rig.transcriber.start()
+        rig.feed()
+        #expect(rig.factory.count == 1 && session.frames == [0, 1_600, 3_200, 4_800])
+        try await rig.transcriber.finish()
+        #expect(session.finishes == [false], "finalized with what it queued")
+    }
+
     @Test func aFailedAnalyzerIsRebuiltAndKeepsThePosition() async throws {
         let rig = Rig(retry: AnalyzerRetryPolicy(maxAttempts: 2, delays: [0]))
         try await rig.transcriber.start { _ in }

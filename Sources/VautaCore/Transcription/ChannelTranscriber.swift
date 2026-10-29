@@ -124,13 +124,28 @@ final class ChannelTranscriber: @unchecked Sendable {
         }
     }
 
-    /// Keep the word times of final results (for splitting segments at speaker changes). Set before `start`.
+    /// Keep the word times of final results (for splitting segments at speaker changes). Set before `open`.
     func collectWordTimes(_ collect: Bool) { lock.withLock { collectsWords = collect } }
 
+    /// Makes the first session current, with its queue, before it starts: the devices can start at once, and what they capture
+    /// waits in the queue (up to `maxPendingSeconds`) while the analyzer prepares instead of being lost. `start()` starts it.
+    func open(onSegment: @escaping @Sendable (Segment) -> Void) {
+        lock.withLock {
+            self.onSegment = onSegment
+            if session == nil { _ = installSession() }
+        }
+    }
+
     func start(onSegment: @escaping @Sendable (Segment) -> Void) async throws {
-        lock.withLock { self.onSegment = onSegment }
+        open(onSegment: onSegment)
+        try await start()
+    }
+
+    /// Starts the session `open` made current.
+    func start() async throws {
+        let (session, onSegment) = lock.withLock { (self.session ?? installSession(), self.onSegment) }
         do {
-            try await startSession()
+            try await run(session, onSegment: onSegment)
         } catch {
             // A session that never started is cancelled when finishing, never finalized.
             lock.withLock { failed = true }
@@ -178,19 +193,26 @@ final class ChannelTranscriber: @unchecked Sendable {
 
     // MARK: Sessions
 
-    /// Makes a new session current and starts it. It is current before it starts, so audio queues meanwhile and a
-    /// failure right after the start is not missed.
-    private func startSession() async throws {
-        let (session, onSegment) = lock.withLock { () -> (any AnalyzerSession, (@Sendable (Segment) -> Void)?) in
-            let session = makeSession(collectsWords)
-            self.session = session
-            sessionStarted = ProcessInfo.processInfo.systemUptime
-            return (session, self.onSegment)
-        }
+    /// A new session, made current. Call it under the lock.
+    private func installSession() -> any AnalyzerSession {
+        let session = makeSession(collectsWords)
+        self.session = session
+        sessionStarted = ProcessInfo.processInfo.systemUptime
+        return session
+    }
+
+    private func run(_ session: any AnalyzerSession, onSegment: (@Sendable (Segment) -> Void)?) async throws {
         try await session.start(onSegment: onSegment ?? { _ in }) { [weak self, weak session] error in
             guard let self, let session else { return }
             self.sessionFailed(session, error)
         }
+    }
+
+    /// Makes a new session current and starts it. It is current before it starts, so audio queues meanwhile and a
+    /// failure right after the start is not missed.
+    private func startSession() async throws {
+        let (session, onSegment) = lock.withLock { (installSession(), self.onSegment) }
+        try await run(session, onSegment: onSegment)
     }
 
     private enum Decision { case ignore, retry(after: Double, attempt: Int), giveUp }
