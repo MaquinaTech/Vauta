@@ -388,11 +388,13 @@ of their unlocked segments, else by exact ordinal.
 The speakers' echo (schema 31; `EchoDetection.swift`, `MeetingStore+Echo.swift`). With speakers instead of headphones the
 microphone hears the other participants, and the Me transcriber writes their words again. `segments.echo` marks those Me
 lines (1) when the recording ends, from the finished transcript of both channels: most of the line's words and word pairs
-are in the Others lines it overlaps, allowing 0.5 s of delay, and it has three words that carry meaning. An echo is kept
-and shown, but whatever reads the transcript as what was said leaves it out (`notEcho`): citable segments (minutes, notes,
-answers, owners), search and its chunks, mentions, quotes, talk time, follow-ups and exports. `segments(of:echoes:)` gives
-it to the transcript and the speaker tools only. The person can say a line is theirs (2), and it is never marked again.
-Marking is off in the release (`EchoRelease`) until the transcript shows it.
+are in the Others lines it overlaps, allowing 0.5 s of delay; it does not start or end before the Others line that starts
+or ends with the same words (the far side's echo of the user comes back after the user); and it has four words that carry
+meaning. The thresholds come from `llm-eval --tasks echo`, simulated echoes on the public DEV meetings. An echo is kept and
+shown dimmed, but whatever reads the transcript as what was said leaves it out (`notEcho`): citable segments (minutes,
+notes, answers, owners), search and its chunks, mentions, quotes, talk time, follow-ups and exports.
+`segments(of:echoes:)` gives it to the transcript and the speaker tools only. The person can say a line is theirs (2), and
+it is never marked again.
 
 Splitting a segment keeps the left part's ID, inserts the right part, moves the citations whose surface or time lies in
 the right text and updates the full-text index by hand. The user's split (refused while the meeting records) locks both
