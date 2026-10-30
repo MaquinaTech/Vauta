@@ -133,6 +133,10 @@ extension RecorderModel {
                 AccessibilityNotification.Announcement(String(localized: "Recording started", comment: "VoiceOver announcement")).post()
                 startTicker()
                 startAutosave()
+                speakersTipDismissed = false
+                outputWatcher = OutputRouteWatcher { [weak self] route in
+                    MainActor.assumeIsolated { self?.speakersOn = route == .speakers }
+                }
                 livePoints = []; liveDecisions = []; liveTasks = []; liveNotesError = nil
                 lastLiveNotes = .now
                 charsSinceLiveNotes = 0
@@ -164,6 +168,8 @@ extension RecorderModel {
         ticker?.cancel()
         ticker = nil
         autosave?.cancel()
+        outputWatcher = nil
+        speakersOn = false
         stopTask = Task {
             await finishSession()
             stopTask = nil

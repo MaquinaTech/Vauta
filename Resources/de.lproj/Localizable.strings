@@ -7991,3 +7991,9 @@
 "Private" = "Privat";
 
 "Audio is never saved. No account, no analytics." = "Audio wird nie gespeichert. Kein Konto, keine Analysedaten.";
+
+/* Panel tip title while recording: the sound comes out of the Mac’s speakers, a display or AirPlay, not headphones */
+"The meeting is playing through speakers" = "Das Meeting läuft über Lautsprecher";
+
+/* Panel tip under “The meeting is playing through speakers” */
+"The microphone hears the other participants too. Vauta leaves their echo out of the minutes, and headphones avoid it." = "Das Mikrofon hört auch die anderen Teilnehmenden. Vauta lässt ihr Echo aus den Protokollen heraus, und mit Kopfhörern passiert das nicht.";

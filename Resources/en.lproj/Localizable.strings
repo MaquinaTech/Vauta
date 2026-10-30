@@ -6127,6 +6127,9 @@
 /* No comment provided by engineer. */
 "The meeting is already in %@, so there is nothing to translate yet." = "The meeting is already in %@, so there is nothing to translate yet.";
 
+/* Panel tip title while recording: the sound comes out of the Mac’s speakers, a display or AirPlay, not headphones */
+"The meeting is playing through speakers" = "The meeting is playing through speakers";
+
 /* Alert text when quitting from the panel during a recording */
 "The meeting so far is saved." = "The meeting so far is saved.";
 
@@ -6144,6 +6147,9 @@
 
 /* Transcript: tooltip of the note under a line marked as an echo of the speakers */
 "The microphone heard the other participants from your speakers, so this line repeats what they said. It is kept here, but left out of the minutes, answers, owners, search and exports. Headphones avoid it." = "The microphone heard the other participants from your speakers, so this line repeats what they said. It is kept here, but left out of the minutes, answers, owners, search and exports. Headphones avoid it.";
+
+/* Panel tip under “The meeting is playing through speakers” */
+"The microphone hears the other participants too. Vauta leaves their echo out of the minutes, and headphones avoid it." = "The microphone hears the other participants too. Vauta leaves their echo out of the minutes, and headphones avoid it.";
 
 /* Setup last page: the microphone is not allowed */
 "The microphone isn’t allowed, so Vauta can’t record yet." = "The microphone isn’t allowed, so Vauta can’t record yet.";

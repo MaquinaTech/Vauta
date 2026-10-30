@@ -93,6 +93,11 @@ final class RecorderModel {
     /// panel keeps the ordinary silence banner and the menu-bar warning out of it. Mirrors `silenceDetector`, which is not
     /// observed, so the views update when it flips.
     var captureAlertCoversSilence = false
+    /// While recording, the sound comes out of speakers the microphone hears (`OutputRoute`): the panel suggests headphones.
+    var speakersOn = false
+    /// The headphones tip was dismissed for this recording.
+    var speakersTipDismissed = false
+    @ObservationIgnored var outputWatcher: OutputRouteWatcher?
     /// What to do about a store that did not open, shown under the cause in the panel (nil while it is open).
     var storeOpenRecovery: String?
     /// The store did not open because the disk is full: the panel offers to open Storage next to Try Again.
