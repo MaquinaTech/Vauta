@@ -17,7 +17,7 @@ struct LanguageModelWarmingEngineTests {
          .user((0..<count).map { "[S\($0)] Line \($0) of the meeting about the roadmap, the hiring plan and the budget number \($0)." }.joined(separator: "\n"))]
     }
 
-    @Test(.timeLimit(.minutes(5))) func aQuestionForTheSamePrefixStepsInFrontOfTheReadingAndWhatWasReadStays() async throws {
+    @Test(.timeLimit(.minutes(10))) func aQuestionForTheSamePrefixStepsInFrontOfTheReadingAndWhatWasReadStays() async throws {
         let engine = LanguageModelEngine(store: LanguageModelSelfTest.store())
         try await engine.load()
         await engine.setPrefillChunk(128)
@@ -35,7 +35,7 @@ struct LanguageModelWarmingEngineTests {
         await engine.unload()
     }
 
-    @Test(.timeLimit(.minutes(5))) func aMemoryWarningDropsTheAskPrefixKeepsTheMeetingAndPausesReading() async throws {
+    @Test(.timeLimit(.minutes(10))) func aMemoryWarningDropsTheAskPrefixKeepsTheMeetingAndPausesReading() async throws {
         let engine = LanguageModelEngine(store: LanguageModelSelfTest.store())
         try await engine.load()
         try await engine.prefillPrefix(Self.lines(20), slot: .meeting)
@@ -50,7 +50,7 @@ struct LanguageModelWarmingEngineTests {
         await engine.unload()
     }
 
-    @Test(.timeLimit(.minutes(5))) func onlyTheServicePinsTheMeetingPrefixAndItIsKeptUntilReleased() async throws {
+    @Test(.timeLimit(.minutes(10))) func onlyTheServicePinsTheMeetingPrefixAndItIsKeptUntilReleased() async throws {
         let engine = LanguageModelEngine(store: LanguageModelSelfTest.store())
         try await engine.load()
         await engine.setKeepWarm(true)

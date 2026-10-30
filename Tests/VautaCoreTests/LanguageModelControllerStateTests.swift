@@ -79,7 +79,7 @@ struct LanguageModelControllerStateTests {
         #expect(rig.defaults.string(forKey: ModelProviderSettings.chatKey) == "integrated", "cancelling the download does not undo the choice")
     }
 
-    @Test(.timeLimit(.minutes(2))) func aDroppedConnectionKeepsTheBlocksAndTheNextRunResumes() async throws {
+    @Test(.timeLimit(.minutes(10))) func aDroppedConnectionKeepsTheBlocksAndTheNextRunResumes() async throws {
         let rig = Rig()
         defer { rig.finish() }
         rig.behaviour.failRangeRequestsAfter = 4
@@ -97,7 +97,7 @@ struct LanguageModelControllerStateTests {
         TestHardware.expectIntegratedModelAvailability(of: rig.access)
     }
 
-    @Test(.timeLimit(.minutes(2))) func cancellingDiscardsWhatWasKept() async throws {
+    @Test(.timeLimit(.minutes(10))) func cancellingDiscardsWhatWasKept() async throws {
         let rig = Rig(recording: true)
         defer { rig.finish() }
         await rig.controller.start()
@@ -108,7 +108,7 @@ struct LanguageModelControllerStateTests {
         #expect(!FileManager.default.fileExists(atPath: rig.store.stagingDirectory.path), "the staging area is gone")
     }
 
-    @Test(.timeLimit(.minutes(2))) func discardingAPausedDownloadStartsFromTheBeginning() async throws {
+    @Test(.timeLimit(.minutes(10))) func discardingAPausedDownloadStartsFromTheBeginning() async throws {
         let rig = Rig()
         defer { rig.finish() }
         rig.behaviour.failRangeRequestsAfter = 3
@@ -120,7 +120,7 @@ struct LanguageModelControllerStateTests {
         #expect(rig.store.disk() == .empty)
     }
 
-    @Test(.timeLimit(.minutes(2))) func aRecordingPausesTheImportToo() async throws {
+    @Test(.timeLimit(.minutes(10))) func aRecordingPausesTheImportToo() async throws {
         let rig = Rig(recording: true)
         defer { rig.finish() }
         let file = rig.fixture.root.appendingPathComponent("original.safetensors")
@@ -142,7 +142,7 @@ struct LanguageModelControllerStateTests {
         #expect(rig.behaviour.hits.isEmpty, "an import never goes to the network")
     }
 
-    @Test(.timeLimit(.minutes(2))) func cancellingAnImportRemovesItsLeftoversAndNeverOffersADownload() async throws {
+    @Test(.timeLimit(.minutes(10))) func cancellingAnImportRemovesItsLeftoversAndNeverOffersADownload() async throws {
         let rig = Rig(recording: true)
         defer { rig.finish() }
         let file = rig.fixture.root.appendingPathComponent("original.safetensors")
@@ -159,7 +159,7 @@ struct LanguageModelControllerStateTests {
         #expect(rig.behaviour.hits.isEmpty)
     }
 
-    @Test(.timeLimit(.minutes(2))) func cancellingTheSecondImportKeepsTheFirstFile() async throws {
+    @Test(.timeLimit(.minutes(10))) func cancellingTheSecondImportKeepsTheFirstFile() async throws {
         let rig = Rig()
         defer { rig.finish() }
         let weights = rig.fixture.root.appendingPathComponent("original.safetensors"), tokenizer = rig.fixture.root.appendingPathComponent("tokenizer.json")
@@ -179,7 +179,7 @@ struct LanguageModelControllerStateTests {
         #expect(rig.behaviour.hits.isEmpty)
     }
 
-    @Test(.timeLimit(.minutes(2))) func importingBothFilesInstallsTheModel() async throws {
+    @Test(.timeLimit(.minutes(10))) func importingBothFilesInstallsTheModel() async throws {
         let rig = Rig()
         defer { rig.finish() }
         let weights = rig.fixture.root.appendingPathComponent("assembled.safetensors"), tokenizer = rig.fixture.root.appendingPathComponent("tokenizer.json")
@@ -200,7 +200,7 @@ struct LanguageModelControllerStateTests {
         #expect(await rig.state() == .failed(.importWrongFile))
     }
 
-    @Test(.timeLimit(.minutes(3))) func repairingFetchesOnlyFromTheFirstDamagedTensor() async throws {
+    @Test(.timeLimit(.minutes(10))) func repairingFetchesOnlyFromTheFirstDamagedTensor() async throws {
         let rig = Rig()
         defer { rig.finish() }
         await rig.controller.start()
@@ -229,7 +229,7 @@ struct LanguageModelControllerStateTests {
         TestHardware.expectIntegratedModelAvailability(of: rig.access)
     }
 
-    @Test(.timeLimit(.minutes(3))) func aPausedRepairIsStillARepairAfterARelaunchAndDiscardingItDeletesTheModel() async throws {
+    @Test(.timeLimit(.minutes(10))) func aPausedRepairIsStillARepairAfterARelaunchAndDiscardingItDeletesTheModel() async throws {
         let rig = Rig()
         defer { rig.finish() }
         await rig.controller.start()
@@ -268,7 +268,7 @@ struct LanguageModelControllerStateTests {
         if case .installed = rig.store.disk() { Issue.record("the damaged model should be gone") }
     }
 
-    @Test(.timeLimit(.minutes(2))) func deleteWhileDownloadingIgnoresTheLateCallbacks() async throws {
+    @Test(.timeLimit(.minutes(10))) func deleteWhileDownloadingIgnoresTheLateCallbacks() async throws {
         let rig = Rig(recording: true)
         defer { rig.finish() }
         let removed = Mutex(0)

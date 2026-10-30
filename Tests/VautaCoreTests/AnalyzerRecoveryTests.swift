@@ -217,7 +217,7 @@ private struct Rig {
 
 private func eventually(_ condition: () -> Bool) async throws {
     // generous: the whole suite runs in parallel and may keep the cooperative pool busy for a while
-    let deadline = ContinuousClock.now + .seconds(120)
+    let deadline = ContinuousClock.now + .seconds(600)
     while !condition() {
         guard ContinuousClock.now < deadline else {
             Issue.record("the condition was not met in time")

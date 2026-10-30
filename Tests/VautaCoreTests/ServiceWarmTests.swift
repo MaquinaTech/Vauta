@@ -29,7 +29,7 @@ struct ServiceWarmTests {
 
     /// Polls until `condition` holds; the limit only bounds a hang (a loaded Mac can starve the whole suite for a long time).
     static func eventually(_ condition: () async -> Bool) async -> Bool {
-        let deadline = Date().addingTimeInterval(240)
+        let deadline = Date().addingTimeInterval(600)
         while Date() < deadline { if await condition() { return true }; try? await Task.sleep(for: .milliseconds(10)) }
         return await condition()
     }

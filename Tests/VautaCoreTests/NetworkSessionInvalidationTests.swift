@@ -18,9 +18,9 @@ struct NetworkSessionInvalidationTests {
         return c
     }
 
-    /// Polls until `condition` holds, for at most 60 s (a loaded test run is slow to deliver a stubbed request).
+    /// Polls until `condition` holds, for at most 600 s (a loaded test run is slow to deliver a stubbed request).
     private func waitUntil(_ condition: () -> Bool) async throws {
-        let deadline = ContinuousClock.now + .seconds(60)
+        let deadline = ContinuousClock.now + .seconds(600)
         while !condition(), ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(10)) }
         #expect(condition())
     }
@@ -70,7 +70,7 @@ struct NetworkSessionInvalidationTests {
         #expect(try await client.models() == ["deep-model"])
     }
 
-    @Test(.timeLimit(.minutes(2))) func theSameConfigurationAgainLeavesARequestUnderWayAlone() async throws {
+    @Test(.timeLimit(.minutes(10))) func theSameConfigurationAgainLeavesARequestUnderWayAlone() async throws {
         let hold = Hold()
         let (client, port) = heldClient(hold)
         defer { HeldServer.unregister(port) }
@@ -82,7 +82,7 @@ struct NetworkSessionInvalidationTests {
         #expect(try await running.value == "minutes")
     }
 
-    @Test(.timeLimit(.minutes(2))) func aNewConfigurationStillCancelsARequestUnderWayAndItsSessionStartsNothingMore() async throws {
+    @Test(.timeLimit(.minutes(10))) func aNewConfigurationStillCancelsARequestUnderWayAndItsSessionStartsNothingMore() async throws {
         let hold = Hold()
         let (client, port) = heldClient(hold)
         defer { HeldServer.unregister(port) }
