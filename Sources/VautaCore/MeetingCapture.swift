@@ -41,6 +41,11 @@ public final class MeetingCapture: @unchecked Sendable {
     private let levels = LevelMeter()
     private let origin = SessionOrigin()
     private let coupling = EchoCoupling()
+    private let stageLock = NSLock()
+    private var stage = StartStage.models
+
+    /// How far `start` got: what a start that does not finish is waiting for (`stalledStartError`).
+    enum StartStage: Sendable, Equatable { case models, microphonePermission, microphone, systemAudio, analyzers, started }
 
     /// Diagnostic messages (audio formats, device changes). No content.
     public var onDiagnostic: (@Sendable (String) -> Void)?
@@ -71,10 +76,12 @@ public final class MeetingCapture: @unchecked Sendable {
     /// transcriber, which then also keeps word times for splitting segments. It never delays transcription.
     public func start(locales: ChannelLocales, engines: [Channel: TranscriptionEngine] = [:], diarizer: Diarizer? = nil,
                       onSegment: @escaping @Sendable (Segment) -> Void) async throws {
+        reached(.models)
         for channel in Channel.allCases {
             try await SpeechAssets.requireInstalled(locales[channel], engine: (engines[channel] ?? .speech).kind)
         }
         SpeechLanguageUsage().noteUsed(Channel.allCases.map { locales[$0].identifier(.bcp47) })
+        reached(.microphonePermission)
         guard await AVCaptureDevice.requestAccess(for: .audio) else {
             throw CaptureError(.microphonePermissionDenied)
         }
@@ -109,6 +116,7 @@ public final class MeetingCapture: @unchecked Sendable {
             self.micPipe = micPipe
             mic.onDiagnostic = diagnostic
             mic.onHealth = { health.report($0, for: .me, from: .device) }
+            reached(.microphone)
             try mic.start { micPipe.push($0, hostTime: $1) }
             let micFormat = mic.format
             diagnostic?("microphone: \(Int(micFormat.sampleRate)) Hz, \(micFormat.channelCount) channel(s)")
@@ -117,18 +125,38 @@ public final class MeetingCapture: @unchecked Sendable {
             self.systemPipe = systemPipe
             system.onDiagnostic = diagnostic
             system.onHealth = { health.report($0, for: .others, from: .device) }
+            reached(.systemAudio)
             try system.start { systemPipe.push($0, hostTime: $1) }
             diagnostic?("capture started after \(milliseconds()) ms")
 
             // The analyzers prepare while the audio already flows into their queues.
+            reached(.analyzers)
             async let meReady: Void = micChannel.start()
             async let othersReady: Void = systemChannel.start()
             _ = try await (meReady, othersReady)
+            reached(.started)
             diagnostic?("analyzers ready after \(milliseconds()) ms")
         } catch {
             // No analyzers or taps left open if something fails halfway.
             try? await stop()
             throw error
+        }
+    }
+
+    private func reached(_ next: StartStage) { stageLock.withLock { stage = next } }
+
+    /// What a `start` that has not finished waits for, as the error the panel shows, with the Settings pane that fixes it: the
+    /// system audio its permission (macOS asks for it again after an update re-signs an ad-hoc build), the microphone its
+    /// permission or its device, the analyzers the speech model.
+    public func stalledStartError() -> CaptureError { Self.stalledStartError(at: stageLock.withLock { stage }) }
+
+    static func stalledStartError(at stage: StartStage) -> CaptureError {
+        let detail = "the start did not finish"
+        return switch stage {
+        case .microphonePermission: CaptureError(.microphonePermissionDenied, detail: detail)
+        case .microphone: CaptureError(.microphoneStartFailed, detail: detail)
+        case .systemAudio: CaptureError(.systemAudioStartFailed, detail: detail)
+        case .models, .analyzers, .started: CaptureError(.transcriptionStopped, detail: detail)
         }
     }
 

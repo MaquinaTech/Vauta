@@ -29,6 +29,7 @@ Developer tools:
 ### Fixed
 
 - A recording no longer fails to start for a speech model that Settings shows as installed, with no way to download it. After an update re-signs an ad-hoc build, macOS still lists the model as installed, but Vauta can no longer use it. Settings, the first-run setup, `Vauta languages` and `Vauta doctor` now count a model as installed only when Vauta can use it, so they offer the download the recording needs.
+- A recording that stays on "Starting…" can be given up with the record button. After a minute it says what it waits for, with the Settings pane that fixes it, and quitting no longer waits for it. It waited without end on a step macOS held: after an update re-signs an ad-hoc build, macOS asks again for system audio, in a dialog that can sit behind other windows.
 - The first seconds of a recording are no longer lost while the speech analyzers start. The microphone and the system audio start first, and their audio waits for the analyzers.
 - A stall or a gap in the system audio no longer "corrects" its sample rate when the rate was right. The rate is measured on the capture times, and a correction needs two windows that agree.
 - Custom vocabulary no longer asks the recognizer for the misspellings Vauta learned from accepted corrections. Vauta still recognizes them as the name.

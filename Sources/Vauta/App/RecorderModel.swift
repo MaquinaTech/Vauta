@@ -343,6 +343,9 @@ final class RecorderModel {
     @ObservationIgnored var autosave: Task<Void, Never>?
     @ObservationIgnored var stopTask: Task<Void, Never>?
     @ObservationIgnored var stopRequested = false
+    /// The capture's start was given up while it was still waiting on macOS (`GiveUp`): it is stopped when it ends, never by
+    /// the abort, which would wait on the same call.
+    @ObservationIgnored var captureLeftStarting = false
     /// Something from this session didn't reach the store: the panel isn't cleared at stop.
     @ObservationIgnored var sessionLostData = false
     /// Monotonic clock: a clock change doesn't move the stop. nil = never heard.

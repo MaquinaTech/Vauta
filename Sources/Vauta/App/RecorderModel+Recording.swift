@@ -10,9 +10,14 @@ import SwiftUI
 extension RecorderModel {
     // MARK: Recording
 
-    /// Decides by the capture, not by the phase: never leaves an orphan capture.
+    /// Decides by the capture, not by the phase: never leaves an orphan capture. While a start is under way it gives the start
+    /// up: it can wait on macOS for long (a permission dialog behind other windows), and nothing else would end it.
     func toggle() {
-        if phase == .starting || phase == .stopping || phase == .opening { return }
+        if phase == .starting {
+            stopRequested = true
+            return
+        }
+        if phase == .stopping || phase == .opening { return }
         if capture != nil { stop() } else { start() }
     }
 
@@ -120,7 +125,7 @@ extension RecorderModel {
                     kind == .dictation ? .dictation(vocabulary: vocabulary) : .speech
                 }
                 diarizer = preferences.separateSpeakers ? makeDiarizer(meetingID: id) : nil
-                try await capture.start(locale: plan.language.locale, engines: engines, diarizer: diarizer) { input.yield($0) }
+                try await startCapture(capture, locale: plan.language.locale, engines: engines, input: input)
                 try checkStopRequested()
                 startedAt = now
                 liveTranslation.recordingStarted(language: plan.language.locale)
@@ -248,6 +253,25 @@ extension RecorderModel {
         if stopRequested { throw StopRequested() }
     }
 
+    /// How long a start may wait on macOS (a permission dialog, a device) before the panel says what it waits for.
+    static let startDeadline: Duration = .seconds(60)
+
+    /// Starts the capture, unless the person gives up first (the record button while it starts, quitting) or it is still
+    /// waiting at `startDeadline`: then it says which step waits, and the capture is stopped whenever that step ends.
+    private func startCapture(_ capture: MeetingCapture, locale: Locale, engines: [Channel: TranscriptionEngine],
+                              input: AsyncStream<Segment>.Continuation) async throws {
+        let diarizer = diarizer
+        do {
+            try await GiveUp.run(deadline: Self.startDeadline, abandoned: { [weak self] in await MainActor.run { self?.stopRequested ?? true } },
+                                 late: { result in if case .success = result { try? await capture.stop() } }) {
+                try await capture.start(locale: locale, engines: engines, diarizer: diarizer) { input.yield($0) }
+            }
+        } catch let reason as GiveUp.Reason {
+            captureLeftStarting = true
+            throw reason == .abandoned ? StopRequested() : capture.stalledStartError()
+        }
+    }
+
     private func resetPanelForNewRecording() {
         segments = []
         segmentRowIDs = [:]
@@ -271,6 +295,7 @@ extension RecorderModel {
         missingModel = nil
         showTranscript = false
         stopRequested = false
+        captureLeftStarting = false
         sessionLostData = false
         clearConsentPrompt()
         pendingAutoStopAt = nil

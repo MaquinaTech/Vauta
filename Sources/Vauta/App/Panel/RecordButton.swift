@@ -53,7 +53,7 @@ struct RecordButton: View {
             }
             // While Vauta is busy the name says what is going on, not an action that would do nothing.
             .accessibilityLabel(model.isBusy || restoringNow ? Text(verbatim: statusText) : model.isRecording ? Text("Stop Recording") : Text("Start Recording"))
-            .accessibilityRemoveTraits(model.isBusy || restoringNow ? .isButton : [])
+            .accessibilityRemoveTraits((model.isBusy && model.phase != .starting) || restoringNow ? .isButton : [])
             .accessibilityValue(Text(verbatim: accessibilityValue))
             // The shortcut is only advertised while it works: another app may hold it.
             .accessibilityHint(Text(verbatim: accessibilityHint))
@@ -92,6 +92,11 @@ struct RecordButton: View {
 
     /// A press while busy changes nothing and says so (the alert sound and, for VoiceOver, the state in words).
     private func pressed() {
+        // While it starts, the button gives the start up (it can wait on a permission dialog that is out of sight).
+        guard model.phase != .starting else {
+            model.toggle()
+            return
+        }
         guard model.isBusy || (model.isReplacingData && !model.isRecording) else {
             model.toggle()
             return
@@ -165,6 +170,8 @@ struct RecordButton: View {
 
     /// Why the button is secondary while the fix comes first; otherwise the shortcut, when it works.
     private var accessibilityHint: String {
+        // While it starts, pressing gives the start up.
+        if model.phase == .starting { return String(localized: "Cancel", comment: "Alert button") }
         if blocked, !model.isBusy {
             if case .failed(let message) = model.phase { return message }
             if let reason = PanelUnavailable.reason(for: model) { return reason }
