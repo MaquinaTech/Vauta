@@ -1277,7 +1277,9 @@ exhaustive, so precision measured against it is a floor (see "Adjudication").
   languages, English and Spanish measured). It reads the clause of the cited segment that carries the item and the lines around it (the previous
   one and up to three after it, stopping at a 90 s gap). It **drops** what is not an item: a recap of earlier minutes (a cue such as "last
   meeting" up to two clauses before, or past-tense "we decided" in the first 15% of the meeting), a rating without an agreement, meeting
-  procedure ("go to the next slide", "I'll start off"), reported speech, something already done, text read out with no vote, a fragment (fewer
+  procedure ("go to the next slide", "I'll start off"), reported speech ("Speaker 4 noted that…", "Speaker 3 explained the design"; an item
+  that opens with the label and then commits, "Speaker 5 to build the dictionary", is the speaker's own, and a label's number is never a
+  figure the cited words must hold), something already done, text read out with no vote, a fragment (fewer
   than two words) and a repeat (content words, same segment or within two, across kinds; the task stays if it has an actor cue). It **keeps
   but marks `unconfirmed`** ("to be confirmed", out of the default email) a task nobody committed to (no "I'll", no request that was answered or
   addressed to somebody by name, no role charged), a hedged item, an unanswered question, and a decision with no agreement cue in the segment or

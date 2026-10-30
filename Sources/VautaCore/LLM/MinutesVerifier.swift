@@ -12,6 +12,13 @@ import Foundation
 public enum MinutesVerifier {
     // MARK: Figures
 
+    /// `text` without the transcript's speaker labels ("Speaker 5", "Me 2"): a model asked for the owner as the label writes items with it
+    /// ("Speaker 5 to build the dictionary"), and the number of a label is not a figure the cited words must hold. "Me" only as the label
+    /// writes it: "send me 2 copies" keeps its figure.
+    static func removingSpeakerLabels(_ text: String) -> String {
+        text.replacing(/\b(?:[Ss]peaker|Me)\s+\d+\b/, with: "")
+    }
+
     /// The numbers written with digits in `text`, as comparable keys: separators and spaces are dropped, so
     /// "1,500", "1.500" and "1 500" are all "1500". Full-width digits count as digits.
     static func figures(in text: String) -> [String] {
@@ -90,7 +97,7 @@ public enum MinutesVerifier {
     /// words are cut out of the item first (`removingDate`), so another number that happens to equal the day, month
     /// or year of the date still has to be in the segment.
     public static func figuresAreInSegment(item: String, segment: String, due: Date? = nil, timeZone: TimeZone = .current) -> Bool {
-        let text = due.map { removingDate($0, from: item, timeZone: timeZone) } ?? item
+        let text = removingSpeakerLabels(due.map { removingDate($0, from: item, timeZone: timeZone) } ?? item)
         // Han numerals count too ("五十家供应商"), so a wrong figure written in kanji is caught as well; the ones that
         // write the due date itself ("十月十五日") are left to the date check.
         let dateNumbers = due.map { dateNumbers(of: $0, timeZone: timeZone) } ?? []
