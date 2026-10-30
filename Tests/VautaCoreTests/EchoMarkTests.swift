@@ -125,4 +125,57 @@ struct EchoMarkTests {
         try await s.endMeeting(id, at: .now + 60)
         #expect(try await s.markEchoes(id) == 0)
     }
+
+    // MARK: Meetings recorded before
+
+    /// Migration 33 lists the finished meetings of a store from before echoes were marked. Not a meeting still open (the crash
+    /// recovery adds it), one whose transcript is gone, or one with a line already marked or said to be the person's.
+    @Test func migration33ListsTheMeetingsRecordedBefore() throws {
+        let db = try SQLiteDatabase(image: nil, size: 0)
+        try Schema.migrate(db, upTo: 32)
+        try db.query("INSERT INTO meetings(id, started_at, ended_at) VALUES (1, 0, 60), (2, 100, 160), (3, 200, NULL), (4, 300, 360), (5, 400, 460)")
+        try db.query("UPDATE meetings SET raw_purged_at = 500 WHERE id = 4")
+        try db.query("INSERT INTO segments(meeting_id, speaker, start, end, text, echo) VALUES (1, 'Yo', 0, 2, 'hola', 0), (2, 'Yo', 0, 2, 'hola', 2)")
+        try Schema.migrate(db, upTo: 33)
+        #expect(try db.query("SELECT meeting_id FROM echo_pending ORDER BY meeting_id").map { $0.int(0) } == [1, 5])
+        #expect(throws: Never.self) { try BackupSchemaGuard.validate(db) }
+        try db.query("DELETE FROM meetings WHERE id = 1")
+        #expect(try db.query("SELECT meeting_id FROM echo_pending").map { $0.int(0) } == [5], "a deleted meeting leaves the list")
+    }
+
+    @Test func theMeetingsRecordedBeforeAreCheckedOnce() async throws {
+        let fx = StoreFixture()
+        try fx.writeLegacyStore(schema: 32) { db in
+            // Recent: older meetings go with the retention when the store opens.
+            let now = Date.now.timeIntervalSince1970
+            try db.query("INSERT INTO meetings(id, started_at, ended_at, locale) VALUES (1, ?, ?, 'en-US')", [.real(now - 3600), .real(now)])
+            try db.query("INSERT INTO segments(id, meeting_id, speaker, start, end, text) VALUES (1, 1, 'Otros', 10, 14, ?), (2, 1, 'Yo', 10.3, 14.2, ?), (3, 1, 'Yo', 15, 19, ?)",
+                         [.text(Self.said), .text(Self.said.lowercased()), .text(Self.reply)])
+        }
+        var store: MeetingStore? = try fx.open(recover: true)
+        #expect(try await store!.echoes(of: 1).isEmpty, "opening the store marks nothing yet")
+        #expect(try await store!.markPendingEchoes() == 1)
+        #expect(try await store!.echoes(of: 1) == [2])
+        #expect(try await store!.markPendingEchoes() == 0, "once")
+        try await store!.saveIfNeeded()
+        store = nil
+        store = try fx.open(recover: true)
+        #expect(try await store!.echoes(of: 1) == [2])
+        #expect(try await store!.rowCount("echo_pending") == 0)
+    }
+
+    /// A recording that crashed never reached `endMeeting`: its echoes are marked at the next launch with the earlier meetings'.
+    @Test func aMeetingACrashLeftOpenIsCheckedAtTheNextLaunch() async throws {
+        let fx = StoreFixture()
+        var store: MeetingStore? = try fx.open()
+        try await store!.flush()
+        let id = try await store!.startMeeting(at: .now, locale: Locale(identifier: "en-US"))
+        try await store!.append(Segment(channel: .others, start: 10, end: 14, text: Self.said, isFinal: true), to: id)
+        let echo = try await store!.append(Segment(channel: .me, start: 10.3, end: 14.2, text: Self.said.lowercased(), isFinal: true), to: id)
+        try await store!.saveIfNeeded()
+        store = nil   // like kill -9: no endMeeting
+        store = try fx.open(recover: true)
+        #expect(try await store!.markPendingEchoes() == 1)
+        #expect(try await store!.echoes(of: id) == [echo])
+    }
 }

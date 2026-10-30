@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- **The speakers' echo.** With speakers instead of headphones the microphone hears the other participants, and Vauta wrote their words again as yours, so the minutes gave you their words and their tasks. Every finished recording now marks those lines. They stay in the transcript, dimmed, with **It Was Me** to take a mark back (it can be undone), and they are left out of the minutes, notes, answers, owners, search, talk time and exports. A line the person says is theirs is never marked again. A recording in which the microphone never heard the others (headphones) marks nothing. Meetings recorded earlier are not marked.
+- **The speakers' echo.** With speakers instead of headphones the microphone hears the other participants, and Vauta wrote their words again as yours, so the minutes gave you their words and their tasks. Every finished recording now marks those lines. They stay in the transcript, dimmed, with **It Was Me** to take a mark back (it can be undone), and they are left out of the minutes, notes, answers, owners, search, talk time and exports. A line the person says is theirs is never marked again. A recording in which the microphone never heard the others (headphones) marks nothing. Meetings recorded earlier, and a recording a crash left open, are checked once at the next launch, in the background. Their minutes are not rewritten: **Regenerate** writes them without the echo.
 - While recording, the panel suggests headphones when the meeting plays through speakers: the Mac's own, a display, AirPlay, or any output the microphone is heard to pick up, such as Bluetooth or USB speakers. **Dismiss** hides it for the recording.
 
 Developer tools:
