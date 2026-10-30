@@ -34,6 +34,7 @@ struct AskView: View {
                 // The question stays as asked while the answer is written: the highlights belong to it.
                 .disabled(model.busy)
                 if let period = model.offeredTimeScope { timeScopeToggle(period) }
+                if let found = model.offeredPlace { placeToggle(found) }
                 if let mode = recorder.searchModel.askMode { searchModeLabel(mode) }
                 // While it works, the progress and Stop take the row of the scope and the Ask button, so no
                 // empty band sits between the question and what is happening.

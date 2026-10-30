@@ -5629,6 +5629,18 @@
 /* Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year */
 "Nothing in the meetings from %@ matched, so all meetings were searched." = "%@ のミーティングには該当する内容がなかったため、すべてのミーティングを検索しました。";
 
+/* Ask: shown under the answer when no passage of the meetings the question names by their place (the last three meetings) matched */
+"Nothing in those meetings matched, so all meetings were searched." = "それらのミーティングには該当する内容がなかったため、すべてのミーティングを検索しました。";
+
+/* Ask: help on the toggle of the meetings the question names by their place, when it is off */
+"Click to search only the meetings the question names." = "クリックすると、質問が指すミーティングだけを検索します。";
+
+/* Ask: help on the toggle of the meetings the question names by their place, when it is on */
+"Only the meetings the question names are searched. Click to search all meetings." = "質問が指すミーティングだけを検索します。クリックするとすべてのミーティングを検索します。";
+
+/* Ask: a toggle under the question that limits the search to the one meeting the question names by its place (the last meeting, the first meeting with someone); the arguments are its title and its date */
+"Only “%@” (%@)" = "「%@」(%@)のみ";
+
 /* Button that stops finding an answer */
 "Stop" = "停止";
 

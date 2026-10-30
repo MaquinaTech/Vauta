@@ -477,6 +477,20 @@
 			<string>每种语言只需从 Apple 下载一次。之后转录在这台 Mac 上运行，音频不会离开这台 Mac。macOS 允许 Vauta 最多保留 %lld 种语言：下载其他语言会释放你最久未使用的语言。</string>
 		</dict>
 	</dict>
+	<key>Only %lld meetings (%@)</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>仅限 %1$#@meetings@(%2$@)</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld 个会议</string>
+		</dict>
+	</dict>
 	<key>Other possible items, %lld items</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

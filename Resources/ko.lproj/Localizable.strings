@@ -5629,6 +5629,18 @@
 /* Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year */
 "Nothing in the meetings from %@ matched, so all meetings were searched." = "%@ 회의에서 일치하는 내용이 없어 모든 회의에서 검색했습니다.";
 
+/* Ask: shown under the answer when no passage of the meetings the question names by their place (the last three meetings) matched */
+"Nothing in those meetings matched, so all meetings were searched." = "해당 회의에서 일치하는 내용이 없어 모든 회의에서 검색했습니다.";
+
+/* Ask: help on the toggle of the meetings the question names by their place, when it is off */
+"Click to search only the meetings the question names." = "질문이 가리키는 회의에서만 검색하려면 클릭하세요.";
+
+/* Ask: help on the toggle of the meetings the question names by their place, when it is on */
+"Only the meetings the question names are searched. Click to search all meetings." = "질문이 가리키는 회의에서만 검색합니다. 모든 회의에서 검색하려면 클릭하세요.";
+
+/* Ask: a toggle under the question that limits the search to the one meeting the question names by its place (the last meeting, the first meeting with someone); the arguments are its title and its date */
+"Only “%@” (%@)" = "“%@”(%@)만";
+
 /* Button that stops finding an answer */
 "Stop" = "중지";
 

@@ -5629,6 +5629,18 @@
 /* Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year */
 "Nothing in the meetings from %@ matched, so all meetings were searched." = "Nada nas reuniões do período %@ correspondeu, então a busca foi feita em todas.";
 
+/* Ask: shown under the answer when no passage of the meetings the question names by their place (the last three meetings) matched */
+"Nothing in those meetings matched, so all meetings were searched." = "Nada nessas reuniões correspondeu, então a busca foi feita em todas.";
+
+/* Ask: help on the toggle of the meetings the question names by their place, when it is off */
+"Click to search only the meetings the question names." = "Clique para buscar só nas reuniões que a pergunta menciona.";
+
+/* Ask: help on the toggle of the meetings the question names by their place, when it is on */
+"Only the meetings the question names are searched. Click to search all meetings." = "A busca considera só as reuniões que a pergunta menciona. Clique para buscar em todas as reuniões.";
+
+/* Ask: a toggle under the question that limits the search to the one meeting the question names by its place (the last meeting, the first meeting with someone); the arguments are its title and its date */
+"Only “%@” (%@)" = "Apenas “%@” (%@)";
+
 /* Button that stops finding an answer */
 "Stop" = "Parar";
 
