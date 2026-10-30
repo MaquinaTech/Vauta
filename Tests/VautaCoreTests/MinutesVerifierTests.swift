@@ -36,6 +36,16 @@ struct MinutesVerifierTests {
         #expect(MinutesVerifier.figuresAreInSegment(item: "Budget 300", segment: "予算は三百万円です"))
     }
 
+    /// The number of a transcript label is not a figure: "Speaker 5 to build the dictionary" cites words that never say "5".
+    @Test func aSpeakerLabelIsNotAFigure() {
+        #expect(MinutesVerifier.figuresAreInSegment(item: "Speaker 5 to build the frequency dictionary", segment: "I'll build the frequency dictionary"))
+        #expect(MinutesVerifier.figuresAreInSegment(item: "Speaker 4 and Speaker 5 to meet on Wednesday", segment: "let's meet on Wednesday"))
+        #expect(MinutesVerifier.figuresAreInSegment(item: "Me 2 books the room", segment: "I'll book the room"))
+        // The figures next to a label are still checked, and "me" in a sentence is not a label.
+        #expect(!MinutesVerifier.figuresAreInSegment(item: "Speaker 5 to send 40 slides", segment: "I'll send the slides"))
+        #expect(!MinutesVerifier.figuresAreInSegment(item: "Send me 2 copies", segment: "send me the copies"))
+    }
+
     @Test func hanNumeralsAreComparedNotSkipped() {
         #expect(MinutesVerifier.figuresAreInSegment(item: "联系50家客户", segment: "我们联系五十家客户"))
         #expect(!MinutesVerifier.figuresAreInSegment(item: "联系50家客户", segment: "我们一起联系五家客户"), "一起 is a word, 五 is 5")

@@ -307,12 +307,34 @@ enum ItemEvidence {
         QuoteKey.make(text, language: language).count < 2
     }
 
-    /// "Speaker 4 noted that…", "X said…": reported speech, not an item.
+    /// "Speaker 4 noted that…", "Speaker 4 explained the design", "X said…": reported speech, not an item. "Speaker 4 will send the deck" and
+    /// "Speaker 4 and Speaker 5 to meet on Wednesday" are the speakers' own items: a model asked for the owner as the transcript's label
+    /// writes them that way (on a model server, 108 of 169 proposed tasks of the development meetings began with the label).
     static func isReported(_ text: String) -> Bool {
         let norm = TextKeys.norm(text)
-        if norm.hasPrefix("speaker ") && norm.dropFirst(8).first?.isNumber == true { return true }
+        if let verb = wordAfterLabels(norm), reportingVerbs.contains(verb) { return true }
         return DateWords.contains(String(norm.prefix(60)), ["noted that", "mentioned that", "said that", "pointed out that", "explained that", "reported that", "dijo que", "menciono que", "comento que", "senalo que"])
     }
+
+    /// The word after the transcript labels an item opens with ("speaker 4", "speaker 4 and speaker 5"); nil when it opens with none.
+    static func wordAfterLabels(_ norm: String) -> String? {
+        let words = norm.split(separator: " ").map(String.init)
+        var i = 0
+        while i + 1 < words.count, words[i] == "speaker", words[i + 1].allSatisfy(\.isNumber) {
+            i += 2
+            if i + 1 < words.count, words[i] == "and" || words[i] == "y", words[i + 1] == "speaker" { i += 1 }
+        }
+        return i > 0 && i < words.count ? words[i] : nil
+    }
+
+    /// What a speaker did with words: telling, not deciding or committing. Not "asked" ("Speaker 2 asked Speaker 3 to send it" is a
+    /// request), "suggested" or "proposed" (a proposal the decision checks judge).
+    static let reportingVerbs: Set<String> = [
+        "noted", "mentioned", "said", "says", "explained", "explains", "described", "presented", "presents", "talked", "discussed", "shared",
+        "stated", "commented", "expressed", "raised", "reported", "observed", "noticed", "recalled", "argued", "thinks", "thought", "felt",
+        "feels", "believes", "wondered", "pointed", "dijo", "comento", "explico", "menciono", "senalo", "presento", "hablo", "conto", "expuso",
+        "indico", "opino", "cree", "piensa",
+    ]
 }
 
 extension ItemCues {
