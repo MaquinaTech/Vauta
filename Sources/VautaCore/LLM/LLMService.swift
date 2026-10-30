@@ -159,6 +159,8 @@ public actor LLMService {
     /// Which parts of the extraction of decisions, tasks and owners are on (the evaluation compares the old and the new one).
     /// `nil` runs the release choice for the backend (`MinutesRelease.extraction(integrated:)`); `setMinutesExtraction` forces a value.
     var minutesExtractionOverride: MinutesExtraction?
+    /// Whether the minutes on a model server reason first, after how often their reasoning ran past the limit.
+    var minutesReasoning = MinutesReasoningMemory()
     /// Which parts of the outcome-first summary are on. `nil` runs the release choice for the backend (`MinutesSummaryRelease.summary(integrated:)`);
     /// `setMinutesSummary` forces a value (the evaluation compares the old and the new one).
     var minutesSummaryOverride: MinutesSummary?

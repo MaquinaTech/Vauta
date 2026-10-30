@@ -83,6 +83,45 @@ struct ServiceMinutesTests {
         #expect(try await f.store.cardSource(id) == "llm")
     }
 
+    /// A server whose reasoning ran past the limit in two minutes runs in a row writes the next ones without it: those minutes came
+    /// from the request without reasoning anyway, after the whole reasoning was spent.
+    @Test func aServerWhoseReasoningKeepsRunningOutWritesTheNextMinutesWithoutIt() async throws {
+        let f = try KnowledgeFixture()
+        let id = try await f.meeting(["We reviewed the Kobaltix budget for the quarter", "Fine, we keep it"])
+        let chat = ScriptedChat { messages, options, _ in
+            options.thinking ? ScriptedChat.reply("", finish: .length) : ScriptedChat.reply(ScriptedChat.minutesJSON(messages))
+        }
+        let service = LLMService(store: f.store, providers: TestProviders(chat: chat))
+        let events = EventLog()
+        await service.setJobEventHandler { events.append($0) }
+        for run in 1...3 {
+            await service.regenerateMinutes(id)
+            #expect(await eventually { events.events.filter { $0.meetingID == id && $0.kind == .minutes }.count == run })
+            await service.waitUntilQueueIdle()
+        }
+        #expect(events.events.allSatisfy { $0.outcome == .succeeded })
+        #expect(chat.calls.map(\.options.thinking) == [true, false, true, false, false], "the third run asks once, without reasoning")
+        #expect(await service.minutesReasoning.skipsLeft == MinutesReasoningMemory.skippedRuns - 1)
+    }
+
+    @Test func theReasoningMemorySkipsAfterTwoCutsAndTriesAgain() {
+        var m = MinutesReasoningMemory()
+        m.reasoned(ranOut: true)
+        #expect(m.reasons, "one cut is not enough")
+        m.reasoned(ranOut: false)
+        m.reasoned(ranOut: true)
+        #expect(m.reasons, "a reasoning that finished resets the count")
+        m.reasoned(ranOut: true)
+        #expect(!m.reasons)
+        for _ in 1...MinutesReasoningMemory.skippedRuns { #expect(!m.reasons); m.skipped() }
+        #expect(m.reasons, "then it reasons again")
+        m.reasoned(ranOut: true)
+        #expect(!m.reasons, "and one more cut skips again")
+        m = MinutesReasoningMemory()
+        m.skipped()
+        #expect(m == MinutesReasoningMemory(), "nothing to skip")
+    }
+
     @Test func aMeetingThatDoesNotFitIsSummarizedByBlocks() async throws {
         let f = try KnowledgeFixture()
         let id = try await f.meeting(["We reviewed the Kobaltix budget for the quarter", "Fine, we keep it", "Ana sends the numbers"])
