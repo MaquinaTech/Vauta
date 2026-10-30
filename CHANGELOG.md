@@ -51,6 +51,7 @@ Developer tools:
 - Minutes no longer fail when Apple's model declines part of a meeting, or a part does not fit the model's window. A meeting declined as a whole is written by blocks; a declined block is left out and counted, a declined merge keeps its group, a final request that does not fit goes by the digest, and a digest declined twice keeps the checked decisions, tasks, topics and questions without a title or summary. Only a meeting whose every block is declined fails, and it says the model declined.
 - On a model server, minutes whose reasoning runs past the length limit are asked once more without reasoning, at the same limit, instead of with twice the limit. With Qwen3.5-9B on an MLX server the closing request's reasoning ran to the 10,000-token limit and then to about 20,000 (some 30 minutes in all), and the minutes failed.
 - `Vauta server-check --ask-key` stops and says so when nothing was typed at the key prompt, instead of sending the requests without a key and reporting that the server rejected it.
+- With the search model, **By meaning** in the meetings list and a meeting's related documents no longer show a passage only because it holds a code or a rare name from the search, or because it has no vector yet. They now keep a passage only when its meaning is close enough, as the brief already did. Exact matches stay in the keyword results.
 
 ## [0.9.3] - 2026-10-28
 

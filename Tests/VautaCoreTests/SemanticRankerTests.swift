@@ -129,4 +129,12 @@ struct SemanticRankerTests {
         #expect(SemanticRanker.mode(space: gemma, coverage: coverage(100, 100), reachedBefore: true, scopeCovered: false) == .keyword)
         #expect(SemanticRanker.mode(space: server, coverage: coverage(0, 0), reachedBefore: false, scopeCovered: false) == .rrf)
     }
+
+    @Test func onlyAPassagesOwnCosineMakesItRelated() {
+        let floor = Double(SemanticRanker.relatedFloor)
+        // In ranking order: 1 and 2 are boosted by a code or a name, 3 holds a placeholder score, 4 to 6 are close by meaning.
+        let passages: [(id: Int, cosine: Double?)] = [(1, floor - 0.2), (2, floor - 0.01), (3, nil), (4, floor), (5, floor + 0.1), (6, floor + 0.05)]
+        #expect(SemanticRanker.related(passages, cosine: { $0.cosine }, limit: 2).map(\.id) == [4, 5])
+        #expect(SemanticRanker.related(passages, cosine: { $0.cosine }, limit: 5).map(\.id) == [4, 5, 6], "in the order given")
+    }
 }

@@ -206,6 +206,13 @@ public enum SemanticRanker {
         return Double(vectorScores[min(rank, vectorScores.count - 1)])
     }
 
+    /// The passages related to a text by meaning, in their order, at most `limit`: those whose own cosine reaches `relatedFloor`.
+    /// The boosts of exact codes and names order them but never let one in (the keyword results already show exact matches), and
+    /// a passage that holds a placeholder score (no vector yet) has no cosine.
+    public static func related<P>(_ passages: [P], cosine: (P) -> Double?, limit: Int) -> [P] {
+        Array(passages.filter { (cosine($0) ?? 0) >= Double(relatedFloor) }.prefix(limit))
+    }
+
     /// Highest score first; ties by key, so the order is deterministic.
     public static func order<K: Comparable & Hashable>(_ scores: [K: Double]) -> [(key: K, score: Double)] {
         scores.sorted { $0.value == $1.value ? $0.key < $1.key : $0.value > $1.value }.map { ($0.key, $0.value) }
