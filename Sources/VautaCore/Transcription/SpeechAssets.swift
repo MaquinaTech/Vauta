@@ -38,20 +38,22 @@ public enum SpeechAssets {
         try await SpeechLanguages.install(locale, engine: .speech, progress: progress)
     }
 
-    static func module(_ locale: Locale, _ engine: SpeechEngineKind) -> any SpeechModule {
+    /// `confidence` also asks for each word's confidence: only the evaluation of public audio does (`transcribeFileScored`).
+    static func module(_ locale: Locale, _ engine: SpeechEngineKind, confidence: Bool = false) -> any SpeechModule {
         switch engine {
-        case .speech: speechModule(locale)
-        case .dictation: dictationModule(locale)
+        case .speech: speechModule(locale, confidence: confidence)
+        case .dictation: dictationModule(locale, confidence: confidence)
         }
     }
 
-    static func speechModule(_ locale: Locale) -> SpeechTranscriber {
-        SpeechTranscriber(locale: locale, transcriptionOptions: [], reportingOptions: [.volatileResults], attributeOptions: [.audioTimeRange])
+    static func speechModule(_ locale: Locale, confidence: Bool = false) -> SpeechTranscriber {
+        SpeechTranscriber(locale: locale, transcriptionOptions: [], reportingOptions: [.volatileResults],
+                          attributeOptions: confidence ? [.audioTimeRange, .transcriptionConfidence] : [.audioTimeRange])
     }
 
-    static func dictationModule(_ locale: Locale) -> DictationTranscriber {
-        DictationTranscriber(locale: locale, contentHints: [], transcriptionOptions: [.punctuation],
-                             reportingOptions: [.volatileResults], attributeOptions: [.audioTimeRange])
+    static func dictationModule(_ locale: Locale, confidence: Bool = false) -> DictationTranscriber {
+        DictationTranscriber(locale: locale, contentHints: [], transcriptionOptions: [.punctuation], reportingOptions: [.volatileResults],
+                             attributeOptions: confidence ? [.audioTimeRange, .transcriptionConfidence] : [.audioTimeRange])
     }
 
     // MARK: Dictation (custom vocabulary, or languages SpeechTranscriber lacks)
