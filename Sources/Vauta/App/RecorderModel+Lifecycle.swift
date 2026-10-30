@@ -58,7 +58,9 @@ extension RecorderModel {
         // The recording never began (the panel says the start was cancelled or failed): what was transcribed while the
         // capture was starting is not kept. Only a start still in progress; a running recording is never discarded.
         let discardCaptured = phase == .starting
-        try? await capture?.stop()
+        // A start given up while it still waits on macOS is stopped when that call returns (`startCapture`): stopping it here
+        // would wait on the same call.
+        if !captureLeftStarting { try? await capture?.stop() }
         segmentInput?.finish()
         await consumer?.value
         segmentInput = nil
