@@ -106,14 +106,27 @@ public enum SpeechLanguages {
     /// Used when none of the user's preferred languages is supported.
     public static let fallbackIdentifier = "en-US"
 
-    /// Supported and installed locales of both engines.
+    /// Supported and installed locales of both engines. A model counts as installed only when this app can use it, by the
+    /// check a recording makes before it starts (`SpeechAssets.requireInstalled`). The system can list a model as installed
+    /// that this app can't use: an ad-hoc build loses its reservations when an update signs it again. Settings then offered
+    /// no download while the recording didn't start for want of that model.
     public static func catalog() async -> SpeechLanguageCatalog {
         async let speech = SpeechTranscriber.supportedLocales
         async let dictation = DictationTranscriber.supportedLocales
         async let installedSpeech = SpeechTranscriber.installedLocales
         async let installedDictation = DictationTranscriber.installedLocales
-        return await SpeechLanguageCatalog(speech: SpeechTranscriber.isAvailable ? speech : [], dictation: dictation,
-                                           installedSpeech: installedSpeech, installedDictation: installedDictation)
+        let (speechLocales, dictationLocales) = await (speech, dictation)
+        return SpeechLanguageCatalog(speech: SpeechTranscriber.isAvailable ? speechLocales : [], dictation: dictationLocales,
+                                     installedSpeech: await usable(await installedSpeech, .speech),
+                                     installedDictation: await usable(await installedDictation, .dictation))
+    }
+
+    /// The installed locales whose model `ready` says this app can use now.
+    static func usable(_ locales: [Locale], _ engine: SpeechEngineKind,
+                       ready: (Locale, SpeechEngineKind) async -> Bool = { await SpeechAssets.status($0, engine: $1) == .installed }) async -> [Locale] {
+        var out: [Locale] = []
+        for locale in locales where await ready(locale, engine) { out.append(locale) }
+        return out
     }
 
     /// The default transcription language for this user (BCP-47).
