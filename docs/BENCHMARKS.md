@@ -21,7 +21,7 @@ are never committed. This is the only place the README takes accuracy figures fr
 | Same, **19 held-out English recordings** (8 AMI dev meetings, 11 VoxConverse files; settings not chosen on them, though their figures were seen during the sweeps) | **9.5 %** (15.8 % with no collar); 10.8 % before the change | 54.9 % / 52.9 % (AMI / VoxConverse) if all speech were one speaker |
 | Same, 12 **synthetic** Spanish conversations of 2 to 6 speakers | **7.2 %** (12.3 % with no collar); 9.4 % before | 58.5 %. Synthetic, easier than real meetings: [Spanish](#spanish) |
 | Same, 24 call-impaired files (noise, packet loss, narrowband, AGC) | **16.3 %** (22.6 % with no collar); 16.8 % before | 54.6 % |
-| Speaker count (speakers with at least 10 s of speech), tuning set / held-out English | exact in 9 of 18, within one in 18 / exact in 9 of 19, within one in 18; on held-out English the count is now slightly too high (+0.58 on average); on the tuning set's AMI files the extra speaker is the participant left out of the mix, heard as cross-talk ([Results](#results)) | |
+| Speaker count (speakers with at least 10 s of speech), tuning set / held-out English | exact in 9 of 18, within one in 18 / exact in 9 of 19, within one in 18; on held-out English the count is now slightly too high (+0.58 on average); on the AMI files of both sets the extra speaker is the participant left out of the mix, heard as cross-talk ([Results](#results)) | |
 | Speed of speaker separation | about 158 times faster than real time (25,288 s of audio in 160 s) | |
 | Word error rate (WER), AMI, close-talk headset, reference turns only | **10.8 %** (6,537 words, 10 meetings x 10 min); **11.7 %** on 8 other meetings (4,777 words) | |
 | WER, AMI, simulated remote mix of 3 speakers (Opus-coded), reference turns only | **20.3 %** (8,664 words) / **16.4 %** on 8 other meetings (7,083 words); 1,096 of the 1,757 errors in the first set are deletions | |
@@ -144,8 +144,10 @@ The extra speaker on AMI is a real voice, not a split one. `eval/scripts/left_ou
 participant `build_sets.py` left out of the mix ("me"): 78 % to 97 % of its time falls where only that participant speaks. The
 remote headsets hear that voice faintly across the room, and the reference of the remote side does not have it. Without it the
 count is exact in 9 of the 10 files (mean signed error -0.10). The tenth, TS3003a, finds the left-out participant and two of
-the three remote speakers. A real call's Others channel carries the user's voice only when the far side sends it back. The
-held-out AMI set is built the same way and has not been checked yet.
+the three remote speakers. The held-out AMI set, built the same way and rerun the same day (DER as published, 11.5 % in
+the no-bleed region), says the same. All 8 files have that participant as a separated speaker, with 79 % to 94 % of its time.
+Without it, the count is exact in 7 of the 8 files (mean signed error -0.12 instead of +0.75); ES2011a then finds two of
+its three remote speakers. A real call's Others channel carries the user's voice only when the far side sends it back.
 
 **What this says.** On English meeting audio, the app labels the right speaker for most speech, and most of the remaining error is
 missed speech (the diarizer does not call some quiet or short speech speech) rather than mixing people up (confusion 1.9 to
