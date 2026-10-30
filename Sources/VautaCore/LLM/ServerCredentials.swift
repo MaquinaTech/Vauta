@@ -27,6 +27,17 @@ public enum ServerCredentials {
         return legacy
     }
 
+    /// The key for this run of the app: read from the Keychain once, then kept in memory and never written anywhere else.
+    /// While an item's access list doesn't name this build (an ad-hoc build after an update), each read asks macOS for
+    /// access, and "Allow", unlike "Always Allow", asks again on the next one: reading the key for every request put up a
+    /// dialog per request, several at a time. A read that fails (locked Keychain, access refused) is not kept, so the next
+    /// request asks again. `saveBearer` replaces what is kept; a key deleted in Keychain Access is sent until Vauta quits.
+    public static func sessionBearer(service: String = VautaIdentity.keychainService) throws -> String? {
+        try session.key(for: service) { try readBearer(service: $0) }
+    }
+
+    static let session = SessionKeys()
+
     /// Saves the key; nil or empty deletes it (both accounts, so a stale 0.1.x
     /// item cannot come back through the migration).
     public static func saveBearer(_ token: String?, service: String = VautaIdentity.keychainService) throws {
@@ -34,11 +45,20 @@ public enum ServerCredentials {
         guard !clean.isEmpty else {
             delete(bearerAccount, service: service)
             delete(legacyBearerAccount, service: service)
+            // Even if a delete failed: a key the person removed is not sent again.
+            session.replace(nil, for: service)
             return
         }
         guard LLMClient.isValidToken(clean) else { throw LLMError.invalidStoredToken }
-        try write(clean, account: bearerAccount, service: service)
+        do {
+            try write(clean, account: bearerAccount, service: service)
+        } catch {
+            // The Keychain holds the old key or the new one: the next request reads it again.
+            session.forget(service)
+            throw error
+        }
         delete(legacyBearerAccount, service: service)
+        session.replace(clean, for: service)
     }
 
     // MARK: Keychain items
@@ -65,5 +85,30 @@ public enum ServerCredentials {
         } catch {
             throw LLMError.keychainUnavailable
         }
+    }
+}
+
+/// The keys read in this run, by Keychain service (nil = no key). Requests that ask while the first read is under way
+/// wait for it instead of reading again: each read could put up its own dialog. An NSLock, not an unfair lock, because
+/// it is held while macOS waits for the person to answer.
+final class SessionKeys: @unchecked Sendable {
+    private let lock = NSLock()
+    private var keys: [String: String?] = [:]
+
+    func key(for service: String, read: (String) throws -> String?) rethrows -> String? {
+        lock.lock()
+        defer { lock.unlock() }
+        if let kept = keys[service] { return kept }
+        let key = try read(service)
+        keys.updateValue(key, forKey: service)
+        return key
+    }
+
+    func replace(_ key: String?, for service: String) {
+        lock.withLock { _ = keys.updateValue(key, forKey: service) }
+    }
+
+    func forget(_ service: String) {
+        lock.withLock { _ = keys.removeValue(forKey: service) }
     }
 }

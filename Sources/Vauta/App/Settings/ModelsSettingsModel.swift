@@ -241,7 +241,7 @@ final class ModelsSettingsModel {
         let sameServer = draft.sharesDestination(with: recorder.serverConfig)
         let client = LLMClient(config: draft.probeConfig) {
             if !typedKey.isEmpty { return typedKey }
-            return sameServer ? try ServerCredentials.readBearer() : nil
+            return sameServer ? try ServerCredentials.sessionBearer() : nil
         }
         defer { client.reset() }
         do {

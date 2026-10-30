@@ -292,7 +292,7 @@ model server you configured. The rules are enforced in code (`LLMServerConfig`, 
 | No proxies, no redirects | HTTP, HTTPS, SOCKS, PAC and proxy auto-discovery are disabled; redirects are refused |
 | Fixed destinations | URLs are built only from the configured base URL (plus a few read-only identification paths of the chosen server type on the same origin) and checked again on every response |
 | No state | Ephemeral session: no cache, cookies or credential storage. Response sizes are capped |
-| The key | Read from the Keychain for each request, printable ASCII only, never logged. "Test Connection" sends the saved key only to the exact saved destination and trust settings. The key and the configuration are saved as a new Keychain item each time (any item already there is deleted first), so they never take on an access list another app set |
+| The key | Read from the Keychain once per launch and then kept in memory only, so an access prompt is not repeated for every request. Saving or removing it in Settings replaces it at once; one deleted in Keychain Access is still sent until Vauta quits. Printable ASCII only, never logged. "Test Connection" sends the saved key only to the exact saved destination and trust settings. The key and the configuration are saved as a new Keychain item each time (any item already there is deleted first), so they never take on an access list another app set |
 
 **Discovery** ("Find Servers") uses a separate session that only reaches `http://127.0.0.1` on ports 1234, 11434, 8080,
 8000 and 1337, with short timeouts, no proxies and no redirects. It runs when you click the button, and, while the
