@@ -101,6 +101,7 @@ The pre-meeting brief does not use the search model to rank: on its blind evalua
 | Complete coverage, or at most 50 items or 2% missing after it was reached once | **Gemma ranks**; BM25 only boosts exact matches |
 | A big backlog after that | BM25 until it is under the threshold |
 | Inside one meeting or a document filter | Gemma only if that scope is fully covered |
+| A filter of the meetings list (a person, a series, the last days) | The rows above, with the coverage of the filtered meetings |
 | A model server's embeddings | RRF of BM25 and vectors (k = 60), unchanged |
 
 Gemma ranking: the candidates are the vector top 50 (400 inside a scope) plus up to 40 exact-match rows per item; the score is

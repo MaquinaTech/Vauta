@@ -322,7 +322,7 @@ extension MeetingStore {
 
     /// The moments of a meeting that notes matching the words of a question cite. Ask ranks the passages around them
     /// higher, because the user flagged them. Only times and meetings come back, never the note text.
-    func noteCitedMoments(terms: [String], within: Int64?) throws -> [(meeting: Int64, t: Double)] {
+    func noteCitedMoments(terms: [String], scope: [Int64]?) throws -> [(meeting: Int64, t: Double)] {
         let spaced = terms.filter { !$0.contains(where: TextKeys.isNoSpaceScript) }
         let unspaced = terms.filter { $0.contains(where: TextKeys.isNoSpaceScript) }
         var noteIDs: [Int64] = []
@@ -331,22 +331,22 @@ extension MeetingStore {
             // The meeting filter is part of the search: the limit then keeps the best matches of this meeting, not of the library.
             noteIDs += try db.query("""
                 SELECT rowid FROM knowledge_fts WHERE knowledge_fts MATCH ?1 AND rowid % 8 IN (3, 6)
-                AND (?2 IS NULL OR rowid / 8 IN (SELECT id FROM notes WHERE meeting_id = ?2)) ORDER BY rank LIMIT 40
-                """, [.text(match), within.map { .integer($0) }]).map { $0.int(0) / 8 }
+                AND (?2 IS NULL OR rowid / 8 IN (SELECT id FROM notes WHERE meeting_id IN (SELECT value FROM json_each(?2)))) ORDER BY rank LIMIT 40
+                """, [.text(match), scope.map { .ids($0) }]).map { $0.int(0) / 8 }
         }
         if !unspaced.isEmpty {
             noteIDs += try db.query("""
                 SELECT n.id FROM notes n LEFT JOIN note_expansions e ON e.note_id = n.id
-                WHERE (?2 IS NULL OR n.meeting_id = ?2)
+                WHERE (?2 IS NULL OR n.meeting_id IN (SELECT value FROM json_each(?2)))
                 AND EXISTS (SELECT 1 FROM json_each(?1) WHERE instr(n.text, value) > 0 OR instr(coalesce(e.plain, ''), value) > 0) LIMIT 40
-                """, [.text(Self.json(strings: unspaced)), within.map { .integer($0) }]).map { $0.int(0) }
+                """, [.text(Self.json(strings: unspaced)), scope.map { .ids($0) }]).map { $0.int(0) }
         }
         guard !noteIDs.isEmpty else { return [] }
         var out: [(Int64, Double)] = []
         for row in try db.query("""
             SELECT meeting_id, sentences FROM note_expansions WHERE state = 'done' AND note_id IN (SELECT value FROM json_each(?1))
-            AND (?2 IS NULL OR meeting_id = ?2)
-            """, [.ids(noteIDs), within.map { .integer($0) }]) {
+            AND (?2 IS NULL OR meeting_id IN (SELECT value FROM json_each(?2)))
+            """, [.ids(noteIDs), scope.map { .ids($0) }]) {
             for sentence in Self.decodeSentences(row.optionalString(1)) { for cite in sentence.cites { out.append((row.int(0), cite.t)) } }
         }
         return out

@@ -44,14 +44,21 @@ extension LLMService {
     ///
     /// `heardLive`: the ranking for a question heard in the meeting being recorded. That meeting ranks by keywords whatever chunks the typed
     /// questions stored (they stop at the last typed question, and the measured live path is keywords with a translated question).
-    func meetingRankingMode(space: EmbeddingSpace?, within: Int64?, heardLive: Bool = false) async -> SemanticRanker.Mode {
+    ///
+    /// `meetings`: a filter of the meetings list. Those meetings' own coverage decides, with the same tolerance once the library was
+    /// complete (a meeting recorded minutes ago still ranks by keywords inside it).
+    func meetingRankingMode(space: EmbeddingSpace?, within: Int64?, meetings: [Int64]? = nil, heardLive: Bool = false) async -> SemanticRanker.Mode {
         guard let space else { return .keyword }
         guard SemanticRanker.isSearchModelSpace(space.model) else { return .rrf }
         if heardLive, let within, recording, liveSessionMeeting == within { return .keyword }
         if let within { return SemanticRanker.mode(space: space, coverage: .init(covered: 0, total: 0), reachedBefore: false,
                                                    scopeCovered: (try? await store.isCovered(within, space: space)) ?? false) }
-        let coverage = (try? await store.vectorCoverage(space: space)) ?? .init(covered: 0, total: 0)
         let key = Self.reachedKey(space, "meetings")
+        if let meetings {
+            let coverage = (try? await store.vectorCoverage(space: space, meetings: meetings)) ?? .init(covered: 0, total: 0)
+            return SemanticRanker.mode(space: space, coverage: coverage, reachedBefore: searchDefaults.bool(forKey: key))
+        }
+        let coverage = (try? await store.vectorCoverage(space: space)) ?? .init(covered: 0, total: 0)
         if coverage.isComplete, coverage.total > 0 { searchDefaults.set(true, forKey: key) }
         return SemanticRanker.mode(space: space, coverage: coverage, reachedBefore: searchDefaults.bool(forKey: key))
     }
@@ -163,16 +170,19 @@ extension LLMService {
 
     /// The best passages of the meetings and of the documents for `text`, by meaning (`SemanticRanker.related`: no cosine below
     /// `SemanticRanker.relatedFloor`). nil when the search model is not ranking (not installed, still indexing, or the question
-    /// could not be embedded). Twice the passages are asked for, so the ones the floor drops leave room for others.
-    public func meaningMatches(for text: String, meetingLimit: Int = 5, documentLimit: Int = 5) async -> MeaningMatches? {
+    /// could not be embedded). Twice the passages are asked for, so the ones the floor drops leave room for others. `scope`: only those
+    /// meetings (the meetings list's filter), and then no documents.
+    public func meaningMatches(for text: String, meetingLimit: Int = 5, documentLimit: Int = 5, in scope: [Int64]? = nil) async -> MeaningMatches? {
         guard let query = await meaningQuery(text) else { return nil }
         let locale = Locale(identifier: OutputLanguage.detect(text, fallback: OutputLanguage(Locale.current)).identifier)
-        let meetingMode = await meetingRankingMode(space: query.space, within: nil)
-        let documentMode = await documentRankingMode(space: query.space, filter: nil)
+        let meetingMode = await meetingRankingMode(space: query.space, within: nil, meetings: scope)
+        // A filter narrows the search to some meetings: no documents, as in the keyword results.
+        let documentMode = scope == nil ? await documentRankingMode(space: query.space, filter: nil) : .keyword
         guard meetingMode == .semantic || documentMode == .semantic else { return nil }
         var meetings: [RetrievedPassage] = []
         if meetingMode == .semantic {
-            let found = (try? await store.retrieve(text, queryVector: query.vector, space: query.space, limit: 2 * meetingLimit, locale: locale, mode: .semantic)) ?? []
+            let found = (try? await store.retrieve(text, queryVector: query.vector, meetings: scope, space: query.space, limit: 2 * meetingLimit,
+                                                   locale: locale, mode: .semantic)) ?? []
             meetings = SemanticRanker.related(found, cosine: \.cosine, limit: meetingLimit)
         }
         var documentPassages: [DocumentPassage] = []

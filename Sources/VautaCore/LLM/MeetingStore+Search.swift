@@ -193,12 +193,12 @@ extension MeetingStore {
         return index
     }
 
-    /// The vector candidates of a search, best first: the index's top `k`, or with `within` the top `k` of that meeting's own chunks,
-    /// each scored (a top K of the whole library would leave them out when other meetings on the same topic fill it).
-    func vectorCandidates(_ index: VectorIndex, _ query: [Float], k: Int, within: Int64?, space: EmbeddingSpace) throws -> [(id: Int64, score: Float)] {
-        guard let within else { return index.search(query, k: k) }
-        let ids = try db.query("SELECT id FROM chunks WHERE meeting_id = ? AND model = ? AND dims = ?",
-                               [.integer(within), .text(space.model), .integer(Int64(space.dimensions))]).map { $0.int(0) }
+    /// The vector candidates of a search, best first: the index's top `k`, or with a `scope` the top `k` of those meetings' own
+    /// chunks, each scored (a top K of the whole library would leave them out when other meetings on the same topic fill it).
+    func vectorCandidates(_ index: VectorIndex, _ query: [Float], k: Int, scope: [Int64]?, space: EmbeddingSpace) throws -> [(id: Int64, score: Float)] {
+        guard let scope else { return index.search(query, k: k) }
+        let ids = try db.query("SELECT id FROM chunks WHERE meeting_id IN (SELECT value FROM json_each(?)) AND model = ? AND dims = ?",
+                               [.ids(scope), .text(space.model), .integer(Int64(space.dimensions))]).map { $0.int(0) }
         return index.search(query, k: k, among: ids)
     }
 
@@ -313,15 +313,20 @@ extension MeetingStore {
     ///
     /// `excluding`: no passage of that meeting (the live answers look in the past meetings while one is recorded: the recording's own
     /// lines would otherwise take the places). It is applied where candidates are found, so the limit counts only other meetings.
-    public func retrieve(_ question: String, queryVector: [Float]?, within: Int64? = nil, excluding: Int64? = nil, space: EmbeddingSpace? = nil,
-                         limit: Int = 8, maxChars: Int = 18_000, locale: Locale? = nil,
+    ///
+    /// `meetings`: only those meetings (the meetings list's filter), applied the same way; with `within`, that meeting if the filter
+    /// has it. Their vectors are scored exactly, as one meeting's are.
+    public func retrieve(_ question: String, queryVector: [Float]?, within: Int64? = nil, excluding: Int64? = nil, meetings: [Int64]? = nil,
+                         space: EmbeddingSpace? = nil, limit: Int = 8, maxChars: Int = 18_000, locale: Locale? = nil,
                          mode: SemanticRanker.Mode = .rrf, windows: AskWindows? = nil) throws -> [RetrievedPassage] {
+        let scope = Self.scope(within: within, meetings: meetings)
+        if scope?.isEmpty == true { return [] }
         // The small window's keyword search (`AskHarness.windows`): short windows around the hits. A ranking by meaning keeps the chunks.
         if let windows, mode == .keyword || queryVector == nil {
-            return try retrieveWindows(question, within: within, excluding: excluding, locale: locale, maxChars: maxChars, windows: windows)
+            return try retrieveWindows(question, scope: scope, excluding: excluding, locale: locale, maxChars: maxChars, windows: windows)
         }
         if mode == .semantic, let queryVector, let space {
-            return try retrieveSemantic(question, queryVector: queryVector, within: within, excluding: excluding, space: space, limit: limit,
+            return try retrieveSemantic(question, queryVector: queryVector, scope: scope, excluding: excluding, space: space, limit: limit,
                                         maxChars: maxChars, locale: locale)
         }
         typealias Key = String
@@ -333,7 +338,7 @@ extension MeetingStore {
         // Vectors.
         if mode != .keyword, let queryVector, let space {
             let index = try vectorIndex(space: space)
-            let top = try vectorCandidates(index, queryVector, k: 50, within: within, space: space)
+            let top = try vectorCandidates(index, queryVector, k: 50, scope: scope, space: space)
             if !top.isEmpty {
                 let rows = try db.query("SELECT id, meeting_id, start, end FROM chunks WHERE id IN (SELECT value FROM json_each(?))", [.ids(top.map(\.id))])
                 let byID = Dictionary(uniqueKeysWithValues: rows.map { ($0.int(0), ($0.int(1), $0.double(2), $0.double(3))) })
@@ -355,16 +360,16 @@ extension MeetingStore {
             let match = spaced.map { "\"\($0.replacingOccurrences(of: "\"", with: ""))\"*" }.joined(separator: " OR ")
             keywordHits.append(try db.query("""
                 SELECT s.id, s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
-                WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 80
-                """, [.text(match), within.map { .integer($0) }, excluding.map { .integer($0) }]))
+                WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id IN (SELECT value FROM json_each(?2))) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 80
+                """, [.text(match), scope.map { .ids($0) }, excluding.map { .integer($0) }]))
         }
         if !unspaced.isEmpty {
             keywordHits.append(try db.query("""
                 SELECT id, meeting_id, start FROM (
                     SELECT s.id, s.meeting_id, s.start, (SELECT COUNT(*) FROM json_each(?1) WHERE instr(s.text, value) > 0) AS found
-                    FROM segments s WHERE (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho))
+                    FROM segments s WHERE (?2 IS NULL OR s.meeting_id IN (SELECT value FROM json_each(?2))) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho))
                 WHERE found > 0 ORDER BY found DESC, start LIMIT 80
-                """, [.text(Self.json(strings: unspaced)), within.map { .integer($0) }, excluding.map { .integer($0) }]))
+                """, [.text(Self.json(strings: unspaced)), scope.map { .ids($0) }, excluding.map { .integer($0) }]))
         }
         // A moment goes to the first chunk that holds it, of any space, else to its time bucket.
         func place(_ m: Int64, _ t: Double, in chunk: ChunkSpan?, rank: Int, weight: Double = 1) {
@@ -378,7 +383,7 @@ extension MeetingStore {
             for (rank, h) in hits.enumerated() { place(h.int(1), h.double(2), in: holding[h.int(0)]?.first, rank: rank) }
         }
         // Moments the user flagged: the segments cited by a note (or its expansion) that matches the question rank higher.
-        for (rank, moment) in try noteCitedMoments(terms: terms, within: within).prefix(40).enumerated() {
+        for (rank, moment) in try noteCitedMoments(terms: terms, scope: scope).prefix(40).enumerated() {
             place(moment.meeting, moment.t, in: try chunks(holding: moment.t, in: moment.meeting, space: nil).first, rank: rank, weight: 1.5)
         }
         // Graph: passages that name the people or projects of the question, and (for "What did Ana say about X") passages where a
@@ -391,6 +396,13 @@ extension MeetingStore {
             }
         }
         return try assemble(Array(score), ranges: ranges, limit: limit, maxChars: maxChars)
+    }
+
+    /// The meetings a search may use (nil: all): `within` alone, the `meetings` of a filter, or both (that meeting if the filter has it).
+    static func scope(within: Int64?, meetings: [Int64]?) -> [Int64]? {
+        guard let within else { return meetings }
+        guard let meetings else { return [within] }
+        return meetings.contains(within) ? [within] : []
     }
 
     /// The best passages, without overlaps and within the budget. `ranked` is (key, score) in any order.

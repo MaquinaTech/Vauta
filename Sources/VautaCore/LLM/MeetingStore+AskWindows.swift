@@ -9,7 +9,7 @@ extension MeetingStore {
     /// behind it, cut to `maxCharacters`. Its score is the rank of the hits it holds, raised by the share of the question's ideas
     /// (a word, or the other spellings of a number) that appear in it. The best `count` windows that do not overlap are returned,
     /// within `maxChars` of text. Keywords only: a corpus that ranks by meaning keeps the chunks.
-    func retrieveWindows(_ question: String, within: Int64?, excluding: Int64?, locale: Locale?, maxChars: Int, windows: AskWindows) throws -> [RetrievedPassage] {
+    func retrieveWindows(_ question: String, scope: [Int64]?, excluding: Int64?, locale: Locale?, maxChars: Int, windows: AskWindows) throws -> [RetrievedPassage] {
         let profile = locale.map(LanguageProfile.init(locale:)) ?? LanguageProfile.detecting(question)
         let terms = Self.queryTerms(question, profile: profile)
         let groups = AskHarness.termGroups(terms)
@@ -24,20 +24,20 @@ extension MeetingStore {
             let match = spaced.map { "\"\($0.replacingOccurrences(of: "\"", with: ""))\"*" }.joined(separator: " OR ")
             let rows = try db.query("""
                 SELECT s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
-                WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 80
-                """, [.text(match), within.map { .integer($0) }, excluding.map { .integer($0) }])
+                WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id IN (SELECT value FROM json_each(?2))) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 80
+                """, [.text(match), scope.map { .ids($0) }, excluding.map { .integer($0) }])
             for (rank, row) in rows.enumerated() { hits.append((row.int(0), row.double(1), 1 / Double(60 + rank))) }
         }
         if !unspaced.isEmpty {
             let rows = try db.query("""
                 SELECT meeting_id, start FROM (
                     SELECT s.meeting_id, s.start, (SELECT COUNT(*) FROM json_each(?1) WHERE instr(s.text, value) > 0) AS found
-                    FROM segments s WHERE (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho))
+                    FROM segments s WHERE (?2 IS NULL OR s.meeting_id IN (SELECT value FROM json_each(?2))) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho))
                 WHERE found > 0 ORDER BY found DESC, start LIMIT 80
-                """, [.text(Self.json(strings: unspaced)), within.map { .integer($0) }, excluding.map { .integer($0) }])
+                """, [.text(Self.json(strings: unspaced)), scope.map { .ids($0) }, excluding.map { .integer($0) }])
             for (rank, row) in rows.enumerated() { hits.append((row.int(0), row.double(1), 1 / Double(60 + rank))) }
         }
-        for (rank, moment) in try noteCitedMoments(terms: terms, within: within).prefix(40).enumerated() where moment.meeting != excluding {
+        for (rank, moment) in try noteCitedMoments(terms: terms, scope: scope).prefix(40).enumerated() where moment.meeting != excluding {
             hits.append((moment.meeting, moment.t, 1.5 / Double(60 + rank)))
         }
         guard !hits.isEmpty else { return [] }

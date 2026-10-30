@@ -122,6 +122,32 @@ struct ServiceSearchModelTests {
         #expect(await service.meetingRankingMode(space: nil, within: nil) == .keyword)
     }
 
+    @Test func aFilterRanksByItsOwnMeetingsAndLooksOnlyInThem() async throws {
+        let f = try KnowledgeFixture()
+        let (service, _, _) = make(f, embedder: BudgetedEmbedder(limit: 500))
+        let a = try await f.meeting(["The launch plan and the release rollout."], locale: "en")
+        let b = try await f.meeting(["Another release rollout review."], locale: "en")
+        let c = try await f.meeting(["The release rollout slipped a week."], locale: "en")
+        let space = ConceptEmbedder.space
+        for id in [a, b] {
+            let plan = try await f.store.chunkPlan(id)
+            try await f.store.replaceChunks(id, plan.map { c in
+                let q = VectorIndex.quantize(ConceptEmbedder.vector(c.text))!
+                return (start: c.start, end: c.end, q: q.q, scale: q.scale, key: MeetingStore.textKey(c.text))
+            }, space: space)
+        }
+        // The library is still indexing (c has no vectors), but a filter of indexed meetings ranks by meaning.
+        #expect(await service.meetingRankingMode(space: space, within: nil) == .keyword)
+        #expect(try await f.store.vectorCoverage(space: space, meetings: [a, c]) == .init(covered: 1, total: 2))
+        #expect(await service.meetingRankingMode(space: space, within: nil, meetings: [a, b]) == .semantic)
+        #expect(await service.meetingRankingMode(space: space, within: nil, meetings: [a, c]) == .keyword)
+        #expect(await service.meetingRankingMode(space: space, within: nil, meetings: []) == .keyword, "nothing to rank")
+        #expect(await service.meaningMatches(for: "release rollout") == nil, "the whole library still ranks by keywords")
+        let found = try #require(await service.meaningMatches(for: "release rollout", in: [b]))
+        #expect(found.meetings.map(\.meeting.id) == [b])
+        #expect(found.documents.isEmpty)
+    }
+
     @Test func oneMeetingWhoseEmbeddingJobFailedForGoodDoesNotKeepAskOnKeywords() async throws {
         let f = try KnowledgeFixture()
         let (service, _, _) = make(f, embedder: BudgetedEmbedder(limit: 500))
