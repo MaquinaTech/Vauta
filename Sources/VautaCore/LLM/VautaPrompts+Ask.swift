@@ -248,16 +248,24 @@ extension VautaPrompts {
             }
             let matchingDocs = citedDocs.filter { quote.count >= 8 && TextKeys.norm(body(of: $0)).contains(quote) }
             var verified = !matching.isEmpty
+            if verified {
+                // The quote alone is not enough: the claim's figures must be in the segments that hold it too, with digits or in
+                // words ("ninety one percent" for 91 %), as for the minutes. A claim of "50.000" over a segment that says "5.000" is
+                // not verified.
+                let backing = matching.compactMap { sent[$0]?.text ?? pool?.segment($0)?.text }.joined(separator: "\n")
+                let spoken = Array(Set(matching.compactMap { languages[$0] ?? language }))
+                verified = MinutesVerifier.figuresAreInSegment(item: withoutCodes(text, codes), segment: backing, spokenIn: spoken)
+            }
             if !matchingDocs.isEmpty, !verified {
-                // Only a document backs it: the figures of the claim must be in the passage too.
-                verified = MinutesVerifier.figuresAreInSegment(item: text, segment: matchingDocs.map(body(of:)).joined(separator: "\n"))
+                // A document backs it: the figures of the claim must be in the passage too.
+                verified = MinutesVerifier.figuresAreInSegment(item: withoutCodes(text, codes), segment: matchingDocs.map(body(of:)).joined(separator: "\n"))
             }
             // What backs a verified claim is shown; what was merely cited alongside it is not. An unverified claim shows what it cited.
             let shownDocs = (matchingDocs.isEmpty ? (verified ? [] : citedDocs) : matchingDocs).map { DocumentCitation($0, quote: a.quote) }
             let shownSegments = matching.isEmpty ? (verified ? [] : cited) : matching
             claims.append(.init(id: "claim-\(claims.count)", text: text, citations: shownSegments, verified: verified,
                                 documents: Array(NSOrderedSet(array: shownDocs)) as? [DocumentCitation] ?? shownDocs,
-                                reanchoredFrom: anchoredFrom))
+                                reanchoredFrom: anchoredFrom, figureMissing: !verified && !(matching.isEmpty && matchingDocs.isEmpty)))
         }
         let sentence = MinutesText.cleanProse(PromptText.clip(raw.answer ?? "", 2000), codes: codes, language: answerLanguage ?? language)
         let hasCitedClaim = claims.contains { !$0.citations.isEmpty || !$0.documents.isEmpty }
@@ -290,6 +298,11 @@ extension VautaPrompts {
         let whole = MinutesText.cleanProse(raw.answer ?? "", codes: codes, language: answerLanguage ?? language)
         let cutShort = keepCutAnswer && (cut > 0 || AnswerText.endsMidSentence(whole, capBytes: answerCapBytes))
         return VerifiedAnswer(answer: text, claims: claims, found: true, cutShort: cutShort, droppedClaims: dropped)
+    }
+
+    /// A claim's text without the citation codes it names ("said in segment S73"): their numbers are not figures.
+    static func withoutCodes(_ text: String, _ codes: Set<String>) -> String {
+        text.replacing(/\b[SD]\d+\b/) { match in codes.contains(String(match.output)) ? "" : String(match.output) }
     }
 
     /// A passage without its context line (the title and heading path): a quote must come from the text itself.

@@ -96,7 +96,11 @@ public enum MinutesVerifier {
     /// Every figure of the item that is not part of its due date is written in the segment. The due date's own
     /// words are cut out of the item first (`removingDate`), so another number that happens to equal the day, month
     /// or year of the date still has to be in the segment.
-    public static func figuresAreInSegment(item: String, segment: String, due: Date? = nil, timeZone: TimeZone = .current) -> Bool {
+    ///
+    /// `spokenIn`: the segment's languages, for a figure the segment says in words ("ninety one" for 91, `isSpelled`); empty, only
+    /// digits and Han numerals count.
+    public static func figuresAreInSegment(item: String, segment: String, due: Date? = nil, timeZone: TimeZone = .current,
+                                           spokenIn languages: [String] = []) -> Bool {
         let text = removingSpeakerLabels(due.map { removingDate($0, from: item, timeZone: timeZone) } ?? item)
         // Han numerals count too ("五十家供应商"), so a wrong figure written in kanji is caught as well; the ones that
         // write the due date itself ("十月十五日") are left to the date check.
@@ -106,7 +110,10 @@ public enum MinutesVerifier {
         // The segment's own date words are cut out the same way, so "the 12th" cannot vouch for "12 laptops".
         let spoken = due.map { removingDate($0, from: segment, timeZone: timeZone) } ?? segment
         let have = Set(figures(in: spoken)).union(hanFigures(in: segment))
-        return wanted.allSatisfy { have.contains($0) }
+        let missing = wanted.filter { !have.contains($0) }
+        guard !missing.isEmpty, !languages.isEmpty else { return missing.isEmpty }
+        let words = spelledWords(spoken)
+        return missing.allSatisfy { isSpelled($0, in: words, languages: languages) }
     }
 
     /// A "next" word sits right next to the weekday ("next friday", "viernes que viene"), not just anywhere in the segment.

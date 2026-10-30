@@ -36,6 +36,24 @@ struct MinutesVerifierTests {
         #expect(MinutesVerifier.figuresAreInSegment(item: "Budget 300", segment: "予算は三百万円です"))
     }
 
+    /// With the segment's languages, a whole number may be written in words there, as Foundation spells it.
+    @Test(arguments: [("en", "we got to ninety-one percent", "91 %"), ("en", "so it's still stuck with thirteen", "13 euros"),
+                      ("es", "el artículo 30, el inciso nueve", "artículo 30, inciso 9"), ("es", "a las seis de la mañana", "a las 6"),
+                      ("de", "es waren einundzwanzig Teilnehmer", "21 Teilnehmer"), ("it", "il novantuno per cento", "91 %"),
+                      ("fr", "quatre-vingt-onze pour cent", "91 %"), ("pt-BR", "noventa e um por cento", "91 %"),
+                      ("es", "costará mil quinientos euros", "1.500 euros")])
+    func aFigureSaidInWordsIsInTheSegment(language: String, segment: String, item: String) {
+        #expect(MinutesVerifier.figuresAreInSegment(item: item, segment: segment, spokenIn: [language]), "\(language): \(segment)")
+        #expect(!MinutesVerifier.figuresAreInSegment(item: item, segment: segment), "without the language, digits only")
+    }
+
+    @Test func wordsAreOnlyLookedForAsWholeWordsAndWholeNumbers() {
+        #expect(!MinutesVerifier.figuresAreInSegment(item: "6 sessions", segment: "the seismic review", spokenIn: ["es"]), "seis inside a word")
+        #expect(!MinutesVerifier.figuresAreInSegment(item: "12.50 euros", segment: "twelve fifty euros", spokenIn: ["en"]), "a decimal is not looked for")
+        #expect(!MinutesVerifier.figuresAreInSegment(item: "007", segment: "zero zero seven", spokenIn: ["en"]))
+        #expect(!MinutesVerifier.figuresAreInSegment(item: "Send 40 slides", segment: "send the fourteen slides", spokenIn: ["en"]))
+    }
+
     /// The number of a transcript label is not a figure: "Speaker 5 to build the dictionary" cites words that never say "5".
     @Test func aSpeakerLabelIsNotAFigure() {
         #expect(MinutesVerifier.figuresAreInSegment(item: "Speaker 5 to build the frequency dictionary", segment: "I'll build the frequency dictionary"))

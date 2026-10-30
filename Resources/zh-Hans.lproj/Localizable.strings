@@ -3952,6 +3952,9 @@
 /* No comment provided by engineer. */
 "Not verified: the quote doesn’t appear as such" = "未验证：转录文本中未找到这段原文";
 
+/* Ask: help on a claim whose quote was found, while a number it states is not in the quoted words */
+"Not verified: the quote is there, but a figure in this sentence isn’t" = "未验证：原文存在，但这句话中的某个数字不在其中";
+
 /* Ask: badge at the top of the answer to a question about something that has not happened yet in the meeting */
 "Not yet" = "尚未";
 

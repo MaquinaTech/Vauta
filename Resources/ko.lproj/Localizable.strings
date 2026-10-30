@@ -3952,6 +3952,9 @@
 /* No comment provided by engineer. */
 "Not verified: the quote doesn’t appear as such" = "확인되지 않음: 인용문이 그대로 나타나지 않음";
 
+/* Ask: help on a claim whose quote was found, while a number it states is not in the quoted words */
+"Not verified: the quote is there, but a figure in this sentence isn’t" = "확인되지 않음: 인용문은 있지만 이 문장의 숫자는 없음";
+
 /* Ask: badge at the top of the answer to a question about something that has not happened yet in the meeting */
 "Not yet" = "아직 아님";
 
