@@ -5614,6 +5614,21 @@
 /* Ask: shown while the documents are still being indexed; the arguments are the files read and the files to read */
 "Still indexing your documents (%lld of %lld). Answers use what’s indexed so far." = "Seus documentos ainda estão sendo indexados (%lld de %lld). As respostas usam o que já foi indexado.";
 
+/* Ask: a toggle under the question that limits the search to the meetings of the time the question names; the argument is a date, a range of dates, a month, a quarter or a year */
+"Only meetings from %@" = "Apenas reuniões: %@";
+
+/* Ask: help on the time toggle when it is on */
+"Only the meetings held then are searched. Click to search all meetings." = "A busca considera só as reuniões desse período. Clique para buscar em todas as reuniões.";
+
+/* Ask: help on the time toggle when it is off */
+"Click to search only the meetings held then." = "Clique para buscar só nas reuniões desse período.";
+
+/* Ask: shown under the answer when the question names a time with no meetings; the argument is a date, a range of dates, a month, a quarter or a year */
+"No meetings from %@, so all meetings were searched." = "Não há reuniões no período %@, então a busca foi feita em todas.";
+
+/* Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year */
+"Nothing in the meetings from %@ matched, so all meetings were searched." = "Nada nas reuniões do período %@ correspondeu, então a busca foi feita em todas.";
+
 /* Button that stops finding an answer */
 "Stop" = "Parar";
 

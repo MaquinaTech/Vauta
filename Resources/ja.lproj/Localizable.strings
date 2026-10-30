@@ -5614,6 +5614,21 @@
 /* Ask: shown while the documents are still being indexed; the arguments are the files read and the files to read */
 "Still indexing your documents (%lld of %lld). Answers use what’s indexed so far." = "書類のインデックスを作成中です（%lld／%lld件）。回答には、これまでにインデックスされた内容が使われます。";
 
+/* Ask: a toggle under the question that limits the search to the meetings of the time the question names; the argument is a date, a range of dates, a month, a quarter or a year */
+"Only meetings from %@" = "%@ のミーティングのみ";
+
+/* Ask: help on the time toggle when it is on */
+"Only the meetings held then are searched. Click to search all meetings." = "この期間のミーティングだけを検索します。クリックするとすべてのミーティングを検索します。";
+
+/* Ask: help on the time toggle when it is off */
+"Click to search only the meetings held then." = "クリックすると、この期間のミーティングだけを検索します。";
+
+/* Ask: shown under the answer when the question names a time with no meetings; the argument is a date, a range of dates, a month, a quarter or a year */
+"No meetings from %@, so all meetings were searched." = "%@ のミーティングがないため、すべてのミーティングを検索しました。";
+
+/* Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year */
+"Nothing in the meetings from %@ matched, so all meetings were searched." = "%@ のミーティングには該当する内容がなかったため、すべてのミーティングを検索しました。";
+
 /* Button that stops finding an answer */
 "Stop" = "停止";
 

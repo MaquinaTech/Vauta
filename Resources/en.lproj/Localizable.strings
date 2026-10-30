@@ -1290,6 +1290,9 @@
 /* No comment provided by engineer. */
 "Click a time or use ↑↓ to highlight a passage." = "Click a time or use ↑↓ to highlight a passage.";
 
+/* Ask: help on the time toggle when it is off */
+"Click to search only the meetings held then." = "Click to search only the meetings held then.";
+
 /* Model guide: what the last button does; the argument is the title of the button below */
 "Click “%@”. Vauta tests the server, saves it and uses it for minutes." = "Click “%@”. Vauta tests the server, saves it and uses it for minutes.";
 
@@ -3749,6 +3752,9 @@
 /* Meetings, Upcoming: no meeting with a brief in the next 12 hours */
 "No meetings coming up" = "No meetings coming up";
 
+/* Ask: shown under the answer when the question names a time with no meetings; the argument is a date, a range of dates, a month, a quarter or a year */
+"No meetings from %@, so all meetings were searched." = "No meetings from %@, so all meetings were searched.";
+
 /* Meetings: nothing matches the active filters together */
 "No meetings match all these filters." = "No meetings match all these filters.";
 
@@ -4048,6 +4054,9 @@
 /* Panel alert: what to check; the argument is the channel name (Others) */
 "Nothing has come through on “%@” for a minute. Check that the meeting app isn’t muted, that its sound plays through this Mac, and that Vauta is allowed to record system audio." = "Nothing has come through on “%@” for a minute. Check that the meeting app isn’t muted, that its sound plays through this Mac, and that Vauta is allowed to record system audio.";
 
+/* Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year */
+"Nothing in the meetings from %@ matched, so all meetings were searched." = "Nothing in the meetings from %@ matched, so all meetings were searched.";
+
 /* Help of the mark on a task owner; also the note in the task editor */
 "Nothing in the passage the model cited confirms this owner." = "Nothing in the passage the model cited confirms this owner.";
 
@@ -4150,6 +4159,9 @@
 /* Documents: why a file was skipped; a cloud service keeps it online and the Mac holds only a placeholder */
 "Online only, not downloaded" = "Online only, not downloaded";
 
+/* Ask: a toggle under the question that limits the search to the meetings of the time the question names; the argument is a date, a range of dates, a month, a quarter or a year */
+"Only meetings from %@" = "Only meetings from %@";
+
 /* Ask: badge at the top of an answer whose quoted moments are in the transcript but only touch the topic */
 "Only related" = "Only related";
 
@@ -4167,6 +4179,9 @@
 
 /* Documents: a long file whose first pages, rows or text were indexed */
 "Only the first part was indexed" = "Only the first part was indexed";
+
+/* Ask: help on the time toggle when it is on */
+"Only the meetings held then are searched. Click to search all meetings." = "Only the meetings held then are searched. Click to search all meetings.";
 
 /* Settings → Translation: privacy note about the model server */
 "Only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. Nothing is sent anywhere else." = "Only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. Nothing is sent anywhere else.";

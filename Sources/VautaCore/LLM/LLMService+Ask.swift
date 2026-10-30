@@ -14,11 +14,14 @@ extension LLMService {
         public let sentDocuments: [String: DocumentPassage]
         /// Meeting of each segment a citation was moved to (`QuoteAnchor`), when it is not one of the meetings of `passages`.
         public let anchoredMeetings: [Int64: Int64]
+        /// Nothing in the meetings the question was limited to (`meetings`) matched, so all of them were searched.
+        public let widenedScope: Bool
 
         public init(answer: VerifiedAnswer, passages: [RetrievedPassage], sent: [Int64: CitableSegment],
                     documentPassages: [DocumentPassage] = [], sentDocuments: [String: DocumentPassage] = [:],
-                    anchoredMeetings: [Int64: Int64] = [:]) {
+                    anchoredMeetings: [Int64: Int64] = [:], widenedScope: Bool = false) {
             self.anchoredMeetings = anchoredMeetings
+            self.widenedScope = widenedScope
             self.answer = answer
             self.passages = passages
             self.sent = sent
@@ -49,9 +52,12 @@ extension LLMService {
     /// Cancelling the calling task stops it promptly, also while it waits
     /// for another request to finish.
     ///
+    /// `meetings`: across the library, only these meetings (the time the question names, `AskTimeScope`); when none of their
+    /// passages matches, all meetings are searched and the result says so (`widenedScope`). Documents are searched as before.
+    ///
     /// `auto`: the question was heard in the meeting being recorded (live answers, see `AutoAskRequest`): the same path with the bounds
     /// of that mode.
-    public func ask(_ question: String, meetingID: Int64?, scope: KnowledgeScope = .everywhere, auto: AutoAskRequest? = nil,
+    public func ask(_ question: String, meetingID: Int64?, meetings: [Int64]? = nil, scope: KnowledgeScope = .everywhere, auto: AutoAskRequest? = nil,
                     onProgress: (@Sendable (Int) -> Void)? = nil) async throws -> AskResult {
         // A person's own question takes the lane before any answer to a question heard: that one is cancelled and closed as superseded.
         if auto == nil { supersedeAutoAnswer() }
@@ -144,6 +150,7 @@ extension LLMService {
         var documentPassages: [DocumentPassage] = []
         var sentDocuments: [String: DocumentPassage] = [:]
         var wholeMeeting = false
+        var widened = false
         func tail(_ last: ChatMessage) -> [ChatMessage] { wholeMeeting ? [last] : (passageRules.map { [$0, last] } ?? [last]) }
         // What had been said when the question was asked (the whole meeting for a finished one): the quotes of the answer are looked
         // for here when the model cited the wrong segment.
@@ -237,7 +244,8 @@ extension LLMService {
             let locale = Locale(identifier: language.identifier)
             // Only the search model's own space: a model server's embeddings never came from the on-demand path.
             let onDevice = query.map { SemanticRanker.isSearchModelSpace($0.space.model) } ?? false
-            let meetingMode = liveNotEmbedded && onDevice ? SemanticRanker.Mode.keyword : await meetingRankingMode(space: query?.space, within: meetingID)
+            let limited = meetingID == nil && auto == nil ? meetings : nil
+            var meetingMode = liveNotEmbedded && onDevice ? SemanticRanker.Mode.keyword : await meetingRankingMode(space: query?.space, within: meetingID, meetings: limited)
             let documentMode = await documentRankingMode(space: query?.space, filter: materials)
             // E4: a corpus that ranks by meaning is searched with the question as asked; one that ranks by keywords, with the question
             // translated into the transcripts' language when it is installed on this Mac.
@@ -247,10 +255,16 @@ extension LLMService {
                 try Task.checkCancellation()
             }
             var found = useMeetings && auto == nil
-                ? try await store.retrieve(keywordQuery.text, queryVector: query?.vector, within: meetingID, space: query?.space,
+                ? try await store.retrieve(keywordQuery.text, queryVector: query?.vector, within: meetingID, meetings: limited, space: query?.space,
                                            limit: passageLimit, maxChars: passageCharacters, locale: keywordQuery.locale,
                                            mode: meetingMode, windows: windowed ? .standard : nil)
                 : []
+            if useMeetings, found.isEmpty, limited != nil {
+                widened = true
+                meetingMode = liveNotEmbedded && onDevice ? .keyword : await meetingRankingMode(space: query?.space, within: nil)
+                found = try await store.retrieve(keywordQuery.text, queryVector: query?.vector, space: query?.space, limit: passageLimit,
+                                                 maxChars: passageCharacters, locale: keywordQuery.locale, mode: meetingMode, windows: windowed ? .standard : nil)
+            }
             if let auto {
                 found = auto.passages(limit: passageLimit)
                 // The evidence check leaves out the question's own line and the two before it (a question matches itself); the answer
@@ -326,7 +340,8 @@ extension LLMService {
         // The question's own lines were read for context but may not be cited (a question's premise is not a fact).
         if let auto { for id in auto.uncitable { sent[id] = nil } }
         guard !sent.isEmpty || !sentDocuments.isEmpty else {
-            return AskResult(answer: VerifiedAnswer(answer: Self.notFoundText(scope: scope, documents: useDocuments), claims: [], found: false), passages: [], sent: [:])
+            return AskResult(answer: VerifiedAnswer(answer: Self.notFoundText(scope: scope, documents: useDocuments), claims: [], found: false), passages: [], sent: [:],
+                             widenedScope: widened)
         }
         messages += tail(instruction)
         let offered = OutputSchemas.Offered(segments: Set(sent.keys.map { Int($0) }), documents: Set(sentDocuments.keys.compactMap { Int($0.dropFirst()) }))
@@ -484,7 +499,7 @@ extension LLMService {
             answer = VerifiedAnswer(answer: Self.notFoundText(scope: scope, documents: useDocuments), claims: [], found: false)
         }
         return AskResult(answer: answer, passages: passages, sent: sent, documentPassages: documentPassages, sentDocuments: sentDocuments,
-                         anchoredMeetings: anchoredMeetings)
+                         anchoredMeetings: anchoredMeetings, widenedScope: widened)
     }
 
     /// The segments a quote may be moved to: the ones visible when the question was asked (one meeting), or the meetings of the
