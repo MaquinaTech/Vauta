@@ -96,6 +96,8 @@ struct SemanticDocumentSearchTests {
         let hits = try await fx.index.search("kitten nap", queryVector: ConceptEmbedder.vector("kitten nap"), space: ConceptEmbedder.space, limit: 3,
                                              locale: en, mode: .semantic)
         #expect(hits.map(\.fileName).contains("fresh.txt"), "a new document stays findable while its vector is pending")
+        #expect(hits.first { $0.fileName == "fresh.txt" }?.cosine == nil, "its placeholder score is not a cosine")
+        #expect(!SemanticRanker.related(hits, cosine: \.cosine, limit: 3).contains { $0.fileName == "fresh.txt" }, "so it is never related by meaning")
         let coverage = try await fx.index.vectorCoverage(space: ConceptEmbedder.space)
         #expect(coverage.total == 2 && coverage.covered == 1 && coverage.missing == 1)
     }
@@ -186,6 +188,8 @@ struct SemanticMeetingSearchTests {
         let found = try await fx.store.retrieve("zebra migration", queryVector: ConceptEmbedder.vector("zebra migration"), space: ConceptEmbedder.space,
                                                 limit: 3, locale: Locale(identifier: "en"), mode: .semantic)
         #expect(found.contains { $0.meeting.id == fresh })
+        #expect(found.first { $0.meeting.id == fresh }?.cosine == nil, "its placeholder score is not a cosine")
+        #expect(!SemanticRanker.related(found, cosine: \.cosine, limit: 3).contains { $0.meeting.id == fresh })
         let coverage = try await fx.store.vectorCoverage(space: ConceptEmbedder.space)
         #expect(coverage == .init(covered: 1, total: 2))
         #expect(try await fx.store.isCovered(old, space: ConceptEmbedder.space))

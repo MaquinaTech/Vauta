@@ -161,8 +161,9 @@ extension LLMService {
         return query
     }
 
-    /// The best passages of the meetings and of the documents for `text`, by meaning, none below `SemanticRanker.relatedFloor`. nil
-    /// when the search model is not ranking (not installed, still indexing, or the question could not be embedded).
+    /// The best passages of the meetings and of the documents for `text`, by meaning (`SemanticRanker.related`: no cosine below
+    /// `SemanticRanker.relatedFloor`). nil when the search model is not ranking (not installed, still indexing, or the question
+    /// could not be embedded). Twice the passages are asked for, so the ones the floor drops leave room for others.
     public func meaningMatches(for text: String, meetingLimit: Int = 5, documentLimit: Int = 5) async -> MeaningMatches? {
         guard let query = await meaningQuery(text) else { return nil }
         let locale = Locale(identifier: OutputLanguage.detect(text, fallback: OutputLanguage(Locale.current)).identifier)
@@ -171,25 +172,25 @@ extension LLMService {
         guard meetingMode == .semantic || documentMode == .semantic else { return nil }
         var meetings: [RetrievedPassage] = []
         if meetingMode == .semantic {
-            meetings = ((try? await store.retrieve(text, queryVector: query.vector, space: query.space, limit: meetingLimit, locale: locale, mode: .semantic)) ?? [])
-                .filter { $0.score >= Double(SemanticRanker.relatedFloor) }
+            let found = (try? await store.retrieve(text, queryVector: query.vector, space: query.space, limit: 2 * meetingLimit, locale: locale, mode: .semantic)) ?? []
+            meetings = SemanticRanker.related(found, cosine: \.cosine, limit: meetingLimit)
         }
         var documentPassages: [DocumentPassage] = []
         if documentMode == .semantic, let documents {
-            documentPassages = ((try? await documents.search(text, queryVector: query.vector, space: query.space, limit: documentLimit, locale: locale, mode: .semantic)) ?? [])
-                .filter { $0.score >= Double(SemanticRanker.relatedFloor) }
+            let found = (try? await documents.search(text, queryVector: query.vector, space: query.space, limit: 2 * documentLimit, locale: locale, mode: .semantic)) ?? []
+            documentPassages = SemanticRanker.related(found, cosine: \.cosine, limit: documentLimit)
         }
         return MeaningMatches(meetings: meetings, documents: documentPassages)
     }
 
-    /// Passages of the person's documents that go with `words` (the topics and decisions of a meeting), by meaning. nil when the
-    /// search model is not ranking documents: the caller then uses keywords.
+    /// Passages of the person's documents that go with `words` (the topics and decisions of a meeting), by meaning
+    /// (`SemanticRanker.related`). nil when the search model is not ranking documents: the caller then uses keywords.
     public func relatedDocuments(for words: String, limit: Int = 3) async -> [DocumentPassage]? {
         guard let documents, let query = await meaningQuery(words),
               await documentRankingMode(space: query.space, filter: nil) == .semantic else { return nil }
         let locale = Locale(identifier: OutputLanguage.detect(words, fallback: OutputLanguage(Locale.current)).identifier)
-        let found = try? await documents.search(words, queryVector: query.vector, space: query.space, limit: limit, locale: locale, mode: .semantic)
-        return found?.filter { $0.score >= Double(SemanticRanker.relatedFloor) }
+        let found = try? await documents.search(words, queryVector: query.vector, space: query.space, limit: 2 * limit, locale: locale, mode: .semantic)
+        return found.map { SemanticRanker.related($0, cosine: \.cosine, limit: limit) }
     }
 
     /// Up to `limit` other meetings whose best passage is close to `words` (cosine of at least `minimumScore`, `SemanticRanker.relatedFloor` by default). Only with the search
