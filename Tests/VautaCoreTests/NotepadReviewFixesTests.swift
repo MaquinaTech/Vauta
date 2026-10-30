@@ -88,7 +88,7 @@ struct NotepadReviewFixesTests {
         try await fx.store.saveExpansion(noteID: note, pass: .closing,
                                          outcome: .sentences([sentence("Shipment.", seg: segs[20].id, t: segs[20].start, quote: "about the zzorchard shipment")]),
                                          sourceKey: TextKeys.norm("zzorchard"))
-        #expect(try await fx.store.noteCitedMoments(terms: ["zzorchard"], within: mine).map(\.t) == [segs[20].start])
+        #expect(try await fx.store.noteCitedMoments(terms: ["zzorchard"], scope: [mine]).map(\.t) == [segs[20].start])
     }
 
     // MARK: Journal

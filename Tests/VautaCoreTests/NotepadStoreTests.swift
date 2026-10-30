@@ -221,8 +221,8 @@ struct NotepadStoreTests {
         try await fx.store.saveExpansion(noteID: note, pass: .closing,
                                          outcome: .sentences([sentence("Shipment moves.", seg: segs[25].id, t: segs[25].start, quote: "about the zzorchard shipment")]),
                                          sourceKey: TextKeys.norm("zzorchard shipment"))
-        #expect(try await fx.store.noteCitedMoments(terms: ["zzorchard"], within: id).map(\.t) == [segs[25].start])
-        #expect(try await fx.store.noteCitedMoments(terms: ["zzorchard"], within: id + 1).isEmpty)
+        #expect(try await fx.store.noteCitedMoments(terms: ["zzorchard"], scope: [id]).map(\.t) == [segs[25].start])
+        #expect(try await fx.store.noteCitedMoments(terms: ["zzorchard"], scope: [id + 1]).isEmpty)
         let boosted = try await fx.store.retrieve("zzorchard", queryVector: nil, within: id, limit: 1, maxChars: 4_000)
         #expect(boosted.first?.segments.contains { $0.id == segs[25].id } == true, "the moment the user flagged ranks first")
     }

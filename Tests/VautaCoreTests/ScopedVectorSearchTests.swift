@@ -55,6 +55,28 @@ struct ScopedVectorSearchTests {
         #expect(crowdedFound == expected, "3,000 closer chunks of other meetings change nothing inside this one")
     }
 
+    @Test(arguments: [SemanticRanker.Mode.semantic, .rrf, .keyword])
+    func aFiltersMeetingsAreFoundWhateverTheRestOfTheLibraryHolds(mode: SemanticRanker.Mode) async throws {
+        let alone = try KnowledgeFixture(), crowded = try KnowledgeFixture()
+        let a = try await target(alone), b = try await target(crowded)
+        // A second meeting in the filter, with nothing on the question.
+        let cats = try await alone.meeting(["The cats slept all day."], locale: "en")
+        let crowdedCats = try await crowded.meeting(["The cats slept all day."], locale: "en")
+        try await decoys(crowded)
+        func found(_ fx: KnowledgeFixture, _ meetings: [Int64], within: Int64? = nil) async throws -> [String] {
+            let passages = try await fx.store.retrieve(Self.question, queryVector: ConceptEmbedder.vector(Self.question), within: within,
+                                                       meetings: meetings, space: ConceptEmbedder.space, limit: 5, locale: en, mode: mode)
+            #expect(passages.allSatisfy { meetings.contains($0.meeting.id) })
+            return passages.map { "\($0.start)-\($0.end) \($0.score) \($0.cosine.map { "\($0)" } ?? "-")" }
+        }
+        let expected = try await found(alone, [a, cats])
+        #expect(!expected.isEmpty)
+        #expect(try await found(crowded, [b, crowdedCats]) == expected, "3,000 closer chunks outside the filter change nothing inside it")
+        #expect(try await found(alone, [a, cats], within: a) == expected, "one meeting of the filter")
+        #expect(try await found(alone, [cats], within: a).isEmpty, "a meeting the filter leaves out gives nothing")
+        #expect(try await found(alone, []).isEmpty)
+    }
+
     @Test(arguments: [SemanticRanker.Mode.semantic, .rrf])
     func aSourcesOwnPassagesAreFoundWhateverTheOtherSourcesHold(mode: SemanticRanker.Mode) async throws {
         let alone = try IndexFixture(), crowded = try IndexFixture()

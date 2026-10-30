@@ -14,11 +14,11 @@ extension MeetingsModel {
         return text.split(whereSeparator: \.isWhitespace).count >= 2 || text.count >= 4
     }
 
-    /// After the keyword results: looks by meaning (after 300 ms) and adds the passages those results do not show. Skipped when a
-    /// filter narrows the search to some meetings.
+    /// After the keyword results: looks by meaning (after 300 ms) and adds the passages those results do not show. A filter narrows it
+    /// to the filtered meetings, without documents, as it does the keyword results.
     func scheduleMeaningSearch(_ text: String) {
         meaningTask?.cancel()
-        guard filteredIDs == nil, Self.isMeaningful(text), let llm else {
+        guard Self.isMeaningful(text), let llm else {
             meaningMeetingHits = []
             meaningDocumentHits = []
             return
@@ -29,9 +29,9 @@ extension MeetingsModel {
             try? await Task.sleep(for: .milliseconds(300))
             guard !Task.isCancelled else { return }
             // Asks for 5 more than the keyword results already show, so that up to 5 remain after those are left out.
-            let (shownMeetings, shownDocs) = await MainActor.run { (self?.hits.count ?? 0, self?.documentHits.count ?? 0) }
-            let found = await llm.meaningMatches(for: text, meetingLimit: 5 + shownMeetings, documentLimit: 5 + shownDocs)
-            guard !Task.isCancelled, let self, self.query == text else { return }
+            let (shownMeetings, shownDocs, scope) = await MainActor.run { (self?.hits.count ?? 0, self?.documentHits.count ?? 0, self?.filteredIDs) }
+            let found = await llm.meaningMatches(for: text, meetingLimit: 5 + shownMeetings, documentLimit: 5 + shownDocs, in: scope)
+            guard !Task.isCancelled, let self, self.query == text, self.filteredIDs == scope else { return }
             let shownSegments = Set(self.hits.map(\.segment.id))
             let shownDocuments = Set(self.documentHits.map(\.id))
             self.meaningMeetingHits = Array((found?.meetings ?? []).filter { passage in !passage.segments.contains { shownSegments.contains($0.id) } }.prefix(5))

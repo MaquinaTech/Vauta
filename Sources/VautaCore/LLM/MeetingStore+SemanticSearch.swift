@@ -5,25 +5,31 @@ import Foundation
 
 /// Ask's retrieval when the search model ranks (`SemanticRanker.Mode.semantic`).
 extension MeetingStore {
-    /// Meetings that could be embedded (ended, with a transcript) and how many have all their chunks in `space`.
+    /// Meetings that could be embedded (ended, with a transcript) and how many have all their chunks in `space`; with `meetings`,
+    /// only those (a filter of the meetings list).
     /// "Covered" does not check the chunk text against speaker names (that check is per meeting and the embedding job does it).
-    public func vectorCoverage(space: EmbeddingSpace) throws -> SemanticRanker.Coverage {
+    public func vectorCoverage(space: EmbeddingSpace, meetings: [Int64]? = nil) throws -> SemanticRanker.Coverage {
         // A meeting whose embedding job ran out of attempts (`failed`) and has no vectors is left out of the count, like the chunks
         // the model cannot read: it would only fail again, and one such meeting must not keep Ask on keywords for good. Changing
         // the settings or regenerating forgets the failed job, so it counts (and is tried) again.
+        let params: [SQLiteValue?] = [.text(space.model), .integer(Int64(space.dimensions)), meetings.map { .ids($0) }]
         let total = try db.query("""
             SELECT COUNT(*) FROM meetings WHERE ended_at IS NOT NULL AND raw_purged_at IS NULL
+              AND (?3 IS NULL OR id IN (SELECT value FROM json_each(?3)))
               AND EXISTS (SELECT 1 FROM segments WHERE meeting_id = meetings.id)
               AND NOT (\(Self.embedFailedAndNotCovered))
-            """, [.text(space.model), .integer(Int64(space.dimensions))])[0].int(0)
+            """, params)[0].int(0)
         let covered = try db.query("""
             SELECT COUNT(*) FROM meetings WHERE ended_at IS NOT NULL AND raw_purged_at IS NULL
+              AND (?3 IS NULL OR id IN (SELECT value FROM json_each(?3)))
               AND EXISTS (SELECT 1 FROM segments WHERE meeting_id = meetings.id)
               AND EXISTS (SELECT 1 FROM chunks c WHERE c.meeting_id = meetings.id AND c.model = ?1 AND c.dims = ?2)
               AND NOT EXISTS (SELECT 1 FROM chunks c WHERE c.meeting_id = meetings.id AND (c.model <> ?1 OR c.dims <> ?2))
-            """, [.text(space.model), .integer(Int64(space.dimensions))])[0].int(0)
-        let skipped = try db.query("SELECT COUNT(*) FROM chunks WHERE model = ? AND dims = ? AND scale <= 0",
-                                   [.text(space.model), .integer(Int64(space.dimensions))])[0].int(0)
+            """, params)[0].int(0)
+        let skipped = try db.query("""
+            SELECT COUNT(*) FROM chunks WHERE model = ?1 AND dims = ?2 AND scale <= 0
+              AND (?3 IS NULL OR meeting_id IN (SELECT value FROM json_each(?3)))
+            """, params)[0].int(0)
         return SemanticRanker.Coverage(covered: Int(covered), total: Int(total), skipped: Int(skipped))
     }
 
@@ -70,7 +76,7 @@ extension MeetingStore {
     /// +0.30 for a passage with every code of the question, +0.15 times the share of its rare names, and on the cosine scale the
     /// signals Ask already had (a named entity, a speaker the person named, a noted moment). The candidates are the vector top-K
     /// and the passages with an exact match, so a bare code is found even when the model does not put it in its top K.
-    func retrieveSemantic(_ question: String, queryVector: [Float], within: Int64?, excluding: Int64? = nil, space: EmbeddingSpace, limit: Int,
+    func retrieveSemantic(_ question: String, queryVector: [Float], scope: [Int64]?, excluding: Int64? = nil, space: EmbeddingSpace, limit: Int,
                           maxChars: Int, locale: Locale?) throws -> [RetrievedPassage] {
         let profile = locale.map(LanguageProfile.init(locale:)) ?? LanguageProfile.detecting(question)
         let index = try vectorIndex(space: space)
@@ -81,7 +87,7 @@ extension MeetingStore {
         var placeholder: Set<String> = []
         // Vector candidates, best first.
         var vectorScores: [Float] = []
-        let top = try vectorCandidates(index, queryVector, k: 50, within: within, space: space)
+        let top = try vectorCandidates(index, queryVector, k: 50, scope: scope, space: space)
         if !top.isEmpty {
             let rows = try db.query("SELECT id, meeting_id, start, end FROM chunks WHERE id IN (SELECT value FROM json_each(?))", [.ids(top.map(\.id))])
             let byID = Dictionary(uniqueKeysWithValues: rows.map { ($0.int(0), ($0.int(1), $0.double(2), $0.double(3))) })
@@ -95,7 +101,7 @@ extension MeetingStore {
         }
         // Exact items.
         let codes = SemanticRanker.codes(in: question)
-        let codeHits = try codes.compactMap { item in try ftsMatches(item, within: within, excluding: excluding, space: space).map { (item, $0) } }
+        let codeHits = try codes.compactMap { item in try ftsMatches(item, scope: scope, excluding: excluding, space: space).map { (item, $0) } }
         let names = SemanticRanker.nameCandidates(in: question, excluding: codes)
         // The size of the transcript says when a name is rare: it is counted only for a question with a name.
         let rows = names.isEmpty ? 0 : (try? db.query("SELECT COUNT(*) FROM segments")[0].int(0)).map(Int.init) ?? 0
@@ -104,7 +110,7 @@ extension MeetingStore {
             guard let phrase = SemanticRanker.phrase(name) else { continue }
             let df = try db.query("SELECT COUNT(*) FROM (SELECT 1 FROM segments_fts WHERE segments_fts MATCH ? LIMIT ?)",
                                   [.text(phrase), .integer(Int64(SemanticRanker.rareLimit(rows: rows) + 1))])[0].int(0)
-            guard df >= 1, df <= SemanticRanker.rareLimit(rows: rows), let found = try ftsMatches(name, within: within, excluding: excluding, space: space) else { continue }
+            guard df >= 1, df <= SemanticRanker.rareLimit(rows: rows), let found = try ftsMatches(name, scope: scope, excluding: excluding, space: space) else { continue }
             nameHits.append((name, found))
         }
         func keys(_ located: [Located]) -> Set<String> { Set(located.map(\.key)) }
@@ -132,7 +138,7 @@ extension MeetingStore {
         }
         // Meetings recorded minutes ago have no vector yet: their best keyword matches join with a rank-aligned score.
         let terms = Self.queryTerms(question, profile: profile)
-        if let behind = try keywordBuckets(terms, within: within, excluding: excluding, space: space) {
+        if let behind = try keywordBuckets(terms, scope: scope, excluding: excluding, space: space) {
             for (rank, l) in behind.enumerated() where ranges[l.key] == nil {
                 ranges[l.key] = (l.meeting, l.start, l.end)
                 cosine[l.key] = SemanticRanker.pseudoScore(rank: rank, vectorScores: vectorScores)
@@ -154,19 +160,19 @@ extension MeetingStore {
                 if signal.said { score[key, default: 0] += 0.08 }
             }
         }
-        for moment in try noteCitedMoments(terms: terms, within: within).prefix(40) where moment.meeting != excluding {
+        for moment in try noteCitedMoments(terms: terms, scope: scope).prefix(40) where moment.meeting != excluding {
             for l in try locate(moment.t, in: moment.meeting, space: space) where ranges[l.key] != nil { score[l.key, default: 0] += 0.04 }
         }
         return try assemble(Array(score), ranges: ranges, limit: limit, maxChars: maxChars, cosine: cosine.filter { !placeholder.contains($0.key) })
     }
 
     /// The passages that contain an item as a phrase (at most 400 rows by keyword rank), nil when none does.
-    private func ftsMatches(_ item: String, within: Int64?, excluding: Int64?, space: EmbeddingSpace) throws -> [Located]? {
+    private func ftsMatches(_ item: String, scope: [Int64]?, excluding: Int64?, space: EmbeddingSpace) throws -> [Located]? {
         guard let phrase = SemanticRanker.phrase(item) else { return nil }
         let rows = try db.query("""
             SELECT s.id, s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
-            WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 400
-            """, [.text(phrase), within.map { .integer($0) }, excluding.map { .integer($0) }])
+            WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id IN (SELECT value FROM json_each(?2))) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 400
+            """, [.text(phrase), scope.map { .ids($0) }, excluding.map { .integer($0) }])
         guard !rows.isEmpty else { return nil }
         let holding = try chunksHolding(rows.map { $0.int(0) }, space: space)
         var seen = Set<String>()
@@ -180,17 +186,17 @@ extension MeetingStore {
     }
 
     /// The best keyword matches that fall where no chunk exists yet (a meeting not embedded yet), best first.
-    private func keywordBuckets(_ terms: [String], within: Int64?, excluding: Int64?, space: EmbeddingSpace) throws -> [Located]? {
+    private func keywordBuckets(_ terms: [String], scope: [Int64]?, excluding: Int64?, space: EmbeddingSpace) throws -> [Located]? {
         let spaced = terms.filter { !$0.contains(where: TextKeys.isNoSpaceScript) }
         guard !spaced.isEmpty else { return nil }
         let match = spaced.map { "\"\($0.replacingOccurrences(of: "\"", with: ""))\"*" }.joined(separator: " OR ")
         let rows = try db.query("""
             SELECT s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
-            WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?5 IS NULL OR s.meeting_id <> ?5) AND \(Self.notEcho)
+            WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id IN (SELECT value FROM json_each(?2))) AND (?5 IS NULL OR s.meeting_id <> ?5) AND \(Self.notEcho)
               AND NOT EXISTS (SELECT 1 FROM chunks c WHERE c.meeting_id = s.meeting_id AND c.model = ?3 AND c.dims = ?4
                               AND c.start <= s.start AND c.end >= s.start)
             ORDER BY rank LIMIT 20
-            """, [.text(match), within.map { .integer($0) }, .text(space.model), .integer(Int64(space.dimensions)), excluding.map { .integer($0) }])
+            """, [.text(match), scope.map { .ids($0) }, .text(space.model), .integer(Int64(space.dimensions)), excluding.map { .integer($0) }])
         // No chunk of the space holds these segments: each goes to its time bucket.
         var seen = Set<String>()
         var out: [Located] = []
