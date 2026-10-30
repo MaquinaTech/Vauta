@@ -56,6 +56,21 @@ struct KnowledgeItemsTests {
         #expect(try await s.searchKnowledge("presupuesto", limit: 5).count == 5)
     }
 
+    @Test func knowledgeSearchFindsJapaneseAndChineseWordsInsideASentence() async throws {
+        let f = try KnowledgeFixture()
+        let s = f.store!
+        let a = try await f.meeting(["一"], at: .now - 86_400), b = try await f.meeting(["二"])
+        let old = try await s.addDecision(a, text: "旧预算已经作废")
+        let task = try await s.addTask(b, text: "来週までに予算の確認をする")
+        let decision = try await s.addDecision(b, text: "我们决定把预算提高百分之十")
+        let ja = try #require(try await s.searchKnowledge("予算の確認").first)
+        #expect(ja.kind == .task && ja.refID == task)
+        #expect(SearchHighlight.runs(in: ja.snippet).filter(\.isMatch).map(\.text) == ["予算の確認"])
+        #expect(try await s.searchKnowledge("预算").map(\.refID) == [decision, old], "newest meetings first")
+        #expect(try await s.searchKnowledge("预算", in: [a]).map(\.refID) == [old])
+        #expect(try await s.searchKnowledge("预算 百分之二十").isEmpty)
+    }
+
     private func minutes(_ segs: [MeetingStore.StoredSegment], decisions: [String], tasks: [(String, Int)],
                       openQuestions: [String] = []) -> ValidatedMinutes {
         var minutes = ValidatedMinutes()
