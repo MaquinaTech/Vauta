@@ -34,8 +34,9 @@ let usage = """
                                           Download the speech model of a language from Apple (once)
       install-dictation-assets [--locale <id>]
                                           Download the dictation model of a language (custom vocabulary)
-      transcribe-file <audio> [--locale <id>] [--vocab "a,b"] [--show-text [--i-understand]]
-                                          Transcribe an audio file (needs no permissions)
+      transcribe-file <audio> [--locale <id>] [--vocab "a,b"] [--show-text [--i-understand] [--out <words.jsonl>]]
+                                          Transcribe an audio file (needs no permissions); --out also writes every final
+                                          word with its time and the recognizer's confidence (evaluation, PUBLIC audio)
       store-stats                         Size and counts of the existing store (read-only)
       speaker-models                      Verify (SHA-256) and load the bundled speaker-separation models
       diarize <audio> [--rttm <out>] [--threshold <n>] [--live-agreement]
@@ -110,10 +111,20 @@ func runCLI(_ arguments: [String]) async -> Int32 {
             let vocabulary = invocation.vocabulary
             let locale = try await speechLocale(invocation, engine: vocabulary.isEmpty ? nil : .dictation)
             let showText = try textOutputAllowed(invocation)
+            // The words with the recognizer's confidence, for the evaluation of public audio: text, so only with --show-text.
+            let wordsOut = invocation.values["--out"]
+            if wordsOut != nil, !showText { throw Usage() }
             let t0 = Date()
-            let finals = try await transcribeFile(URL(fileURLWithPath: path), locale: locale, vocabulary: vocabulary).filter(\.isFinal)
+            let result = try await transcribeFileScored(URL(fileURLWithPath: path), locale: locale, vocabulary: vocabulary, confidence: wordsOut != nil)
+            let finals = result.segments.filter(\.isFinal)
             if showText {
                 for s in finals { printError("[\(ElapsedTime.clock(Int(s.start)))] \(s.text)") }
+            }
+            if let wordsOut {
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .sortedKeys
+                let lines = try result.words.map { String(decoding: try encoder.encode($0), as: UTF8.self) }
+                try (lines.joined(separator: "\n") + "\n").write(toFile: wordsOut, atomically: true, encoding: .utf8)
             }
             print(String(format: "%d segments · %d characters · %.2f s",
                          finals.count, finals.reduce(0) { $0 + $1.text.count }, Date().timeIntervalSince(t0)))

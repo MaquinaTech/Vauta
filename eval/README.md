@@ -43,7 +43,7 @@ or step by step (each script says what it does at the top):
 eval/.venv/bin/python -I eval/scripts/fetch.py [--only ami|vox|ann|refs] [--jobs 4]
 eval/.venv/bin/python -I eval/scripts/build_sets.py
 eval/.venv/bin/python -I eval/scripts/run_diarization.py --bin .build/release/Vauta [--tag name] [--threshold 0.70]
-eval/.venv/bin/python -I eval/scripts/run_wer.py --bin .build/release/Vauta [--locale en-US]
+eval/.venv/bin/python -I eval/scripts/run_wer.py --bin .build/release/Vauta [--locale en-US] [--confidence]   # --confidence: one more masked pass with each word's confidence (WER and time against the plain pass, reliability bins, ECE, Brier, AUROC)
 eval/.venv/bin/python -I eval/scripts/check_doc_tables.py <run dir>                                               # the per-file tables of docs/BENCHMARKS.md equal the run's (run it after editing them)
 eval/.venv/bin/python -I eval/scripts/compare_runs.py --sets-dir <sets> --before <run dir> --after <run dir>                  # paired DER comparison of two runs (pooled, per-file change, bootstrap interval); --sets-dir eval/heldout/sets for the held-out groups, the main harness's $VAUTA_EVAL_WORK/sets for the tuning_set group
 eval/.venv/bin/python -I eval/scripts/overlap_shares.py <run dir> [<run dir> ...]   # share of each speaker's time that another speaker also covers (the voice-recognition gate)
@@ -55,7 +55,9 @@ eval/.venv/bin/python -I eval/scripts/score_minutes.py --minutes m.json --transc
 
 `Vauta diarize` and `Vauta transcribe-file` are offline evaluation commands: they read one file, never contact a network
 and never write audio. `run_wer.py` uses `transcribe-file --show-text --i-understand` on a **public** corpus; never do
-that with a real meeting (see [AGENTS.md](../AGENTS.md)).
+that with a real meeting (see [AGENTS.md](../AGENTS.md)). The same goes for `--out <words.jsonl>`, which writes every
+recognised word with its time and confidence and is accepted only with `--show-text`; `run_wer.py --confidence` deletes
+each file once it is scored.
 
 Results land in `$VAUTA_EVAL_WORK/runs/<tag>/`: the RTTMs, `timings_*.json`, `der_*.md`, `summary.json`, `wer.json`, `wer.md`.
 

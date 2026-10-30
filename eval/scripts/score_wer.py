@@ -73,6 +73,69 @@ def align(ref, hyp):
     return s, d, ins, n
 
 
+def hyp_correct(ref, hyp):
+    """For each hypothesis word (a list), whether an optimal Levenshtein alignment matches it to an equal reference word.
+    Ties prefer a match, then a substitution, a deletion and an insertion, walking back from the end."""
+    n, m = len(ref), len(hyp)
+    cost = [list(range(m + 1))] + [[i] + [0] * m for i in range(1, n + 1)]
+    for i in range(1, n + 1):
+        prev, row, r = cost[i - 1], cost[i], ref[i - 1]
+        for j in range(1, m + 1):
+            row[j] = min(prev[j - 1] + (r != hyp[j - 1]), prev[j] + 1, row[j - 1] + 1)
+    ok = [False] * m
+    i, j = n, m
+    while i > 0 and j > 0:
+        c = cost[i][j]
+        if ref[i - 1] == hyp[j - 1] and c == cost[i - 1][j - 1]:
+            ok[j - 1] = True
+            i, j = i - 1, j - 1
+        elif c == cost[i - 1][j - 1] + 1:
+            i, j = i - 1, j - 1
+        elif c == cost[i - 1][j] + 1:
+            i -= 1
+        else:
+            j -= 1
+    return ok
+
+
+def scored_tokens(words):
+    """[(text, confidence)] of recognised words -> [(normalised token, confidence)]: a word that normalises to several
+    tokens ("25%") gives each its confidence, one that normalises to none (a filler) is dropped."""
+    return [(t, c) for w, c in words for t in normalize(w).split()]
+
+
+def reliability(pairs, bins=10):
+    """How well confidences predict that a word is right. `pairs` = [(confidence 0..1, correct)].
+    ECE: the gap between mean confidence and accuracy, averaged over equal-width bins weighted by their words.
+    Brier: mean squared gap per word. AUROC: the chance that a right word is scored above a wrong one (0.5 = no signal)."""
+    n = len(pairs)
+    if n == 0:
+        return dict(words=0)
+    table = []
+    for b in range(bins):
+        lo, hi = b / bins, (b + 1) / bins
+        inside = [(c, ok) for c, ok in pairs if lo <= c < hi or (b == bins - 1 and c == 1.0)]
+        if inside:
+            table.append(dict(lo=lo, hi=hi, words=len(inside), confidence=sum(c for c, _ in inside) / len(inside),
+                              accuracy=sum(ok for _, ok in inside) / len(inside)))
+    ece = sum(row["words"] / n * abs(row["confidence"] - row["accuracy"]) for row in table)
+    brier = sum((c - ok) ** 2 for c, ok in pairs) / n
+    # AUROC by ranks (ties count half).
+    ranked = sorted(pairs, key=lambda p: p[0])
+    rank_sum, i = 0.0, 0
+    while i < n:
+        j = i
+        while j < n and ranked[j][0] == ranked[i][0]:
+            j += 1
+        mean_rank = (i + 1 + j) / 2
+        rank_sum += mean_rank * sum(ok for _, ok in ranked[i:j])
+        i = j
+    right = sum(ok for _, ok in pairs)
+    wrong = n - right
+    auroc = (rank_sum - right * (right + 1) / 2) / (right * wrong) if right and wrong else None
+    return dict(words=n, accuracy=right / n, mean_confidence=sum(c for c, _ in pairs) / n, ece=ece, brier=brier, auroc=auroc, bins=table)
+
+
 def wer(ref_text, hyp_text):
     r, h = normalize(ref_text).split(), normalize(hyp_text).split()
     s, d, i, n = align(r, h)
