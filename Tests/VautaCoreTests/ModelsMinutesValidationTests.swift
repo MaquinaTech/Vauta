@@ -48,6 +48,16 @@ struct ModelsMinutesValidationTests {
         #expect(minutes.mentions.map(\.segment) == [10] && minutes.dropped == 7)
     }
 
+    /// A model asked for a list of strings may write each open question as an object, in the shape of its decisions or with the
+    /// list's name as the key: the question is read from it. An object without one is skipped.
+    @Test func openQuestionsWrittenAsObjectsAreRead() throws {
+        let raw = try ModelOutput.decodeObject(VautaPrompts.RawMinutes.self, from: """
+            {"title": "t", "open_questions": ["Who signs?", {"text": "What does the shell cost?", "seg": 11, "quote": "x"},
+             {"question": "¿Quién define las dietas?"}, {"mention": "How to show the results", "seg": 4}, {"seg": 3}, 7]}
+            """)
+        #expect(raw.openQuestions == ["Who signs?", "What does the shell cost?", "¿Quién define las dietas?", "How to show the results"])
+    }
+
     @Test func nonJSONIsRejected() {
         #expect((try? VautaPrompts.validateMinutes("Lo siento, no puedo.", segments: segments, candidates: candidates, selfEntity: nil)) == nil)
     }

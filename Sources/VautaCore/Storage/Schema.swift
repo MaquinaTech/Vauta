@@ -479,6 +479,13 @@ enum Schema {
         Migration(31, .sql("""
             ALTER TABLE segments ADD COLUMN echo INTEGER NOT NULL DEFAULT 0 CHECK(echo IN (0, 1, 2));
             """)),
+        // How tight a speaker's voice cluster is: the mean cosine of its window embeddings to their centroid (`SpeakerCentroid.spread`),
+        // written by the diarization that found the speaker. One number, not a voice: it cannot be matched with anybody. Low means the
+        // cluster probably holds two voices, so its lines do not back a task owner on their own (`SpeakerTag.mixesVoices`). NULL for
+        // the speakers written before, the user's microphone, and speakers the user added.
+        Migration(32, .sql("""
+            ALTER TABLE meeting_speakers ADD COLUMN voice_spread REAL CHECK(voice_spread IS NULL OR voice_spread BETWEEN -1 AND 1);
+            """)),
     ]
 
     /// The schema version this build writes.

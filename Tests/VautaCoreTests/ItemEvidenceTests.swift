@@ -95,6 +95,20 @@ struct ItemEvidenceTests {
         #expect(out.drops["decision.reported"] == 1 && out.drops["task.done"] == 1)
     }
 
+    /// A model asked for the owner as the transcript's label writes the item with it: that is the speaker's item, not a retelling.
+    @Test func anItemThatOpensWithTheSpeakersLabelIsNotReportedSpeech() {
+        for text in ["Speaker 5 to build a hash table frequency dictionary", "Speaker 2 will send the deck to the board",
+                     "Speaker 4 and Speaker 5 to meet on Wednesday afternoon", "Speaker 4 proposed storing the density per topic",
+                     "Speaker 2 asked Speaker 3 to send the numbers", "Speaker 3 y Speaker 1 revisan el presupuesto"] {
+            #expect(!ItemEvidence.isReported(text), "\(text)")
+        }
+        for text in ["Speaker 4 noted that the budget is final", "Speaker 3 explained the remote control design",
+                     "Speaker 2 and Speaker 4 discussed the colours", "Speaker 1 comentó el calendario", "Ana said that it works"] {
+            #expect(ItemEvidence.isReported(text), "\(text)")
+        }
+        #expect(ItemEvidence.wordAfterLabels("speaker 4") == nil && ItemEvidence.wordAfterLabels("send the deck") == nil)
+    }
+
     @Test func textReadAloudNeedsAVote() {
         let reading = Self.meeting(["Visto el expediente y considerando el artículo cuarto de la ordenanza vigente.", "Pasamos al siguiente asunto."])
         let m = Self.minutes(decisions: [Self.decision("Modificar el artículo cuarto de la ordenanza", seg: 21, quote: "considerando el artículo cuarto de la ordenanza vigente")])

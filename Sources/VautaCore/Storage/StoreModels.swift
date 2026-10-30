@@ -126,12 +126,15 @@ extension MeetingStore {
     }
 
     /// The speaker of a segment `s`, to append to a select list over `segments s` (with `speakerJoins`).
-    /// Six columns; `speakerTag(_:at:)` maps them. Only a speaker the user named
+    /// Seven columns; `speakerTag(_:at:)` maps them. Only a speaker the user named
     /// is shown with a name.
     static let speakerColumns = """
         sp.id, sp.ordinal, CASE WHEN sp.source = 'user' THEN e.name END,
-        e.id IS (SELECT v FROM store_meta WHERE k = 'self_entity'), s.speaker_confidence, s.overlap
+        e.id IS (SELECT v FROM store_meta WHERE k = 'self_entity'), s.speaker_confidence, s.overlap, sp.voice_spread
         """
+
+    /// Columns `speakerColumns` adds to a select list.
+    static let speakerColumnCount = 7
 
     static let speakerJoins = """
         LEFT JOIN meeting_speakers sp ON sp.id = s.speaker_id
@@ -144,6 +147,7 @@ extension MeetingStore {
         return SpeakerTag(id: row.int(index), ordinal: Int(row.int(index + 1)),
                           name: row.optionalString(index + 2).map { displayName($0, isSelf: row.int(index + 3) != 0) },
                           confidence: row.optionalDouble(index + 4), overlap: row.int(index + 5) != 0,
-                          isSelf: row.optionalString(index + 2) != nil && row.int(index + 3) != 0)
+                          isSelf: row.optionalString(index + 2) != nil && row.int(index + 3) != 0,
+                          mixesVoices: row.optionalDouble(index + 6).map { $0 < Double(VoiceProfileThresholds.minimumSpread) } ?? false)
     }
 }

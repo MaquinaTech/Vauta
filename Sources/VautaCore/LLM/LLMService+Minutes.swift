@@ -161,7 +161,9 @@ extension LLMService {
         }
 
         let atLeast = request.wording.expected.map { (decisions: max(1, $0.decisions - 1), tasks: max(0, $0.tasks - 1)) } ?? (0, 0)
-        var options = job.options(maxTokens: budget.minutesOutput, thinking: true, schema: OutputSchemas.minutes(job.offered, itemsFirst: harness.contains(.itemsFirst), atLeast: atLeast),
+        // A model server whose reasoning keeps running past the limit writes these minutes without it (`MinutesReasoningMemory`).
+        let reasons = chat.onDevice || minutesReasoning.reasons
+        var options = job.options(maxTokens: budget.minutesOutput, thinking: reasons, schema: OutputSchemas.minutes(job.offered, itemsFirst: harness.contains(.itemsFirst), atLeast: atLeast),
                                   keepsPrefix: streaming, slot: keptSlot)
         options.temperature = harness.temperature
         var messages = streaming
@@ -186,6 +188,13 @@ extension LLMService {
         var declinedWhole = false
         // A request whose reasoning ran past the limit (asked again without it, `complete`).
         var reasoningRanOut = false
+        var written = false
+        defer {
+            if !chat.onDevice {
+                if !reasons { if written { minutesReasoning.skipped() } }
+                else if reasoningRanOut || written { minutesReasoning.reasoned(ranOut: reasoningRanOut) }
+            }
+        }
         let firstPassStarted = Date()
         if PromptText.tokens(messages) <= budget.minutesInput {
             do {
@@ -261,7 +270,7 @@ extension LLMService {
                 messages = [job.system, found.message(tokens: max(200, room)), digestInstruction]
                 if extraction.contains(.explain) { explained = "room \(room) tokens \(PromptText.tokens(messages[1].content))\n" + messages[1].content }
                 // Title, summary, topics and questions fit a few hundred tokens; the rest of the window is the prompt.
-                finalOptions = job.options(maxTokens: min(budget.minutesOutput, 900), thinking: true, schema: nil)
+                finalOptions = job.options(maxTokens: min(budget.minutesOutput, 900), thinking: reasons, schema: nil)
                 do {
                     r = try await complete(messages, finalOptions, job, meetingID: meetingID, reasoningRanOut: &reasoningRanOut)
                 } catch LLMError.refused {
@@ -299,7 +308,7 @@ extension LLMService {
                 messages.append(ChatMessage("assistant", String(result.content.prefix(4000))))
                 messages.append(VautaPrompts.repairInstruction())
             }
-            var repair = digest == nil ? options : job.options(maxTokens: min(budget.minutesOutput, 900), thinking: true)
+            var repair = digest == nil ? options : job.options(maxTokens: min(budget.minutesOutput, 900), thinking: reasons)
             // The reasoning already ran past the limit: reasoning again over the same meeting would run as long, and be cut again.
             if reasoningRanOut, repair.thinking {
                 repair = withoutReasoning(repair, job)
@@ -324,6 +333,7 @@ extension LLMService {
             }
         }
         if wordingKeptForFit { minutes.counts["prompt.oldWordingForFit"] = 1 }
+        if !reasons { fallbacks["minutes.reasoningSkipped"] = 1 }
         if summaryParts.contains(.checks) {
             minutes = SummaryChecks.apply(minutes, segments: segments, meetingDate: meeting.startedAt, timeZone: meetingZone, proseLanguage: meeting.minutesLocale.identifier,
                                          settled: digest?.outcomes.map(\.text) ?? [], maxSentences: chat.integrated ? nil : SummaryChecks.maxSentences,
@@ -358,6 +368,7 @@ extension LLMService {
         minutes.topics = TopicMerge.withUserNotes(minutes.topics, notes: TopicMerge.promotable(noteRows))
         try Task.checkCancellation()
         let pointing = try await store.applyMinutes(minutes, to: meetingID)
+        written = true
         // The minutes are written: the meeting's prefix goes back to the normal idle rules.
         await releaseWarm(meetingID)
         await linksAfterMinutes(meetingID, laterMeetings: pointing)

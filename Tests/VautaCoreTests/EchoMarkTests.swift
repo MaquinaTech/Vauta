@@ -83,6 +83,40 @@ struct EchoMarkTests {
         #expect(try await s.echoes(of: id).isEmpty)
     }
 
+    /// The minutes never see an echo, so no task comes from one: a citation of the echo is dropped like a made-up line, and "Me"
+    /// on the other side's own line is no owner. Both extractions.
+    @Test func noTaskGoesToTheUserFromAnEcho() async throws {
+        for extraction in [MinutesExtraction.legacy, .shipped] {
+            let f = try KnowledgeFixture()
+            let s = f.store!
+            let id = try await s.startMeeting(at: .now, locale: Locale(identifier: "en-US"))
+            let commitment = "I'll send the contract to legal on Friday"
+            let others = try await s.append(Segment(channel: .others, start: 10, end: 14, text: commitment, isFinal: true), to: id)
+            let echo = try await s.append(Segment(channel: .me, start: 10.3, end: 14.2, text: commitment.lowercased(), isFinal: true), to: id)
+            try await s.append(Segment(channel: .me, start: 15, end: 19, text: Self.reply, isFinal: true), to: id)
+            try await s.endMeeting(id, at: .now + 60)
+            #expect(try await s.echoes(of: id) == [echo])
+            let json = """
+                {"title": "Contract", "summary": "The contract goes to legal.", "topics": [], "decisions": [], "entities": [], "open_questions": [],
+                 "tasks": [{"text": "Send the contract to legal", "owner": "Me", "seg": \(echo), "quote": "send the contract to legal"},
+                           {"text": "Get the contract to legal by Friday", "owner": "Me", "seg": \(others), "quote": "send the contract to legal on Friday"}]}
+                """
+            let chat = ScriptedChat { _, _, _ in ScriptedChat.reply(json) }
+            let service = LLMService(store: s, providers: TestProviders(chat: chat))
+            await service.setMinutesExtraction(extraction)
+            let events = EventLog()
+            await service.setJobEventHandler { events.append($0) }
+            await service.regenerateMinutes(id)
+            #expect(await eventually { events.events.contains { $0.meetingID == id && $0.kind == .minutes } })
+            await service.waitUntilQueueIdle()
+            #expect(!chat.calls.isEmpty && chat.calls.allSatisfy { !$0.text.contains(commitment.lowercased()) }, "the prompt never holds the echo")
+            let tasks = try await s.tasks(id)
+            let me = try await s.selfEntity()
+            #expect(tasks.map(\.segmentID) == [others], "\(extraction): the task cited on the echo is dropped")
+            #expect(tasks.allSatisfy { $0.ownerID != me }, "\(extraction): nobody's task goes to the user")
+        }
+    }
+
     @Test func aMeetingWithoutTheOtherChannelHasNoEchoes() async throws {
         let f = try KnowledgeFixture()
         let s = f.store!

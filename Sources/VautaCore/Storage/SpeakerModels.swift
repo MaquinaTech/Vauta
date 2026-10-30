@@ -92,13 +92,17 @@ public struct SpeakerDraft: Sendable, Hashable {
     /// `.auto` or `.suggested`. A user assignment is made with `assignSpeaker`, never here.
     public var source: MeetingSpeaker.Source
     public var confidence: Double?
+    /// How tight the speaker's voice cluster is (`SpeakerCentroid.spread`); nil when the diarization measured none.
+    public var voiceSpread: Float?
 
-    public init(channel: Channel, ordinal: Int, entityID: Int64? = nil, source: MeetingSpeaker.Source = .auto, confidence: Double? = nil) {
+    public init(channel: Channel, ordinal: Int, entityID: Int64? = nil, source: MeetingSpeaker.Source = .auto, confidence: Double? = nil,
+                voiceSpread: Float? = nil) {
         self.channel = channel
         self.ordinal = ordinal
         self.entityID = entityID
         self.source = source
         self.confidence = confidence
+        self.voiceSpread = voiceSpread
     }
 }
 
@@ -157,7 +161,7 @@ public struct VoiceProfileEmbedding: Sendable, Hashable, CustomStringConvertible
 public struct SpeakerUndo: Sendable {
     struct SpeakerRow: Sendable {
         var id: Int64, meetingID: Int64, channel: String, ordinal: Int64
-        var entityID: Int64?, source: String, confidence: Double?
+        var entityID: Int64?, source: String, confidence: Double?, voiceSpread: Double?
     }
     struct SegmentState: Sendable {
         var id: Int64, meetingID: Int64, speakerID: Int64?, confidence: Double?, overlap: Int64, locked: Int64

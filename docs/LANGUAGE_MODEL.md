@@ -1277,7 +1277,9 @@ exhaustive, so precision measured against it is a floor (see "Adjudication").
   languages, English and Spanish measured). It reads the clause of the cited segment that carries the item and the lines around it (the previous
   one and up to three after it, stopping at a 90 s gap). It **drops** what is not an item: a recap of earlier minutes (a cue such as "last
   meeting" up to two clauses before, or past-tense "we decided" in the first 15% of the meeting), a rating without an agreement, meeting
-  procedure ("go to the next slide", "I'll start off"), reported speech, something already done, text read out with no vote, a fragment (fewer
+  procedure ("go to the next slide", "I'll start off"), reported speech ("Speaker 4 noted that…", "Speaker 3 explained the design"; an item
+  that opens with the label and then commits, "Speaker 5 to build the dictionary", is the speaker's own, and a label's number is never a
+  figure the cited words must hold), something already done, text read out with no vote, a fragment (fewer
   than two words) and a repeat (content words, same segment or within two, across kinds; the task stays if it has an actor cue). It **keeps
   but marks `unconfirmed`** ("to be confirmed", out of the default email) a task nobody committed to (no "I'll", no request that was answered or
   addressed to somebody by name, no role charged), a hedged item, an unanswered question, and a decision with no agreement cue in the segment or
@@ -1288,7 +1290,8 @@ exhaustive, so precision measured against it is a floor (see "Adjudication").
   answered by another speaker who commits (certain) or only says "yes" (kept, **marked "owner not confirmed"**); a call for volunteers answered by
   somebody who commits; a role or third party ("the Industrial Designer will…", "que el ejecutivo…") or a group ("we should…"): nobody; anything else:
   the model's person only if the words name them, otherwise nobody (marked uncertain when the model named someone). The asker is never the owner;
-  a doubtful label (low score, crosstalk) never gives a task; "Me" on a line that is not the user's is no proposal. Self-commitment is read inside the clause
+  a doubtful label (low score, crosstalk) never gives a task, and an owner given by a speaker whose cluster holds two voices (a spread below
+  0.60) is kept, marked; "Me" on a line that is not the user's is no proposal. Self-commitment is read inside the clause
   (a "?" or a "not" elsewhere in the turn no longer cancels it), and "I will need your snippets" is a request, not a commitment.
 - **Closing pass**: one more request over the last 12% of the meeting or the last 6 minutes, whichever is longer, started at the beginning of the
   speaker turn and cut from the front to the room. Integrated model: the existing second-pass request on that one window, on the kept prefix
@@ -1673,6 +1676,14 @@ Deterministic part alone on the same stored Apple replies: 104 to 76 questions, 
 **Not met.** Real share Apple 0.45 (0.25); Gemma's questions on a settled point to zero (7 to 6: the decision that settles them is mostly not among the few the model kept, so a check against kept decisions cannot see it); the match to gold open questions did not drop (10 to 12 of 47, within noise).
 
 **Still open.** (1) Fewer open questions may look emptier; the cap and the digest rule trade recall for a list of about two per meeting. (2) The blind comparison is done (see "Harness phase: what ships"): `MinutesQuestionsRelease` is on for Apple's model and held for the integrated one; the cap and the digest rule stay out. (3) The real-share metric is lexical; the blind judge of the sealed meetings (see "Harness phase: what ships") graded the lists by hand reading of the cited lines, and the integrated model's open questions were held.
+
+**Open questions written as objects (2026-10-30).** The minutes ask for `open_questions` as a list of strings. A model server without
+structured output (qwen3.5-9b on MLXServer) wrote most of them as objects instead, in the shape of its decisions (`{"text", "seg",
+"quote"}`) or under `question` or `mention`; the reader skipped every one, so the server's minutes had almost none (legacy kept 4 of the
+194 it proposed on the 24 DEV meetings, the new extraction 1 of 115). `OpenQuestionText` reads the question from such an object (`text`,
+`question`, `mention`, `texto`, `pregunta`); the checks above then judge it as any other. The stored replies of that run, replayed with no
+model: legacy 0.2 to 4.4 questions per meeting, gold open points found 4 of 123 to 44 of 123 (real share 0.38); the new extraction 0.0 to
+2.0 per meeting, 0 of 104 to 23 of 104 (real share 0.42). Apple on the same meetings finds 17 of 123 (real share 0.23).
 
 
 ## Live notes: empty shapes, copies, repeats, the owner "Me" and a reply that is repaired (phase "harness", H7)

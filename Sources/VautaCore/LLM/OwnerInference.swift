@@ -48,18 +48,22 @@ struct Voice: Equatable {
     var speaker: Int64?
     /// The label deserves trust: not below `SpeakerTag.lowConfidenceBelow`, not crosstalk.
     var confident: Bool
+    /// The speaker's cluster probably holds a second voice (`SpeakerTag.mayBeAnotherVoice`): an owner this voice gives is marked.
+    var mixed = false
 }
 
 extension SpeakerDirectory {
     func voice(of segment: CitableSegment, selfEntity: Int64?) -> Voice? {
         let row = speakerRow(of: segment.speaker)
         if VautaPrompts.lineIsTheUsers(segment, directory: self, selfEntity: selfEntity ?? -1) {
-            return Voice(key: "user", entity: selfEntity, speaker: row?.id ?? segment.speaker?.id, confident: true)
+            return Voice(key: "user", entity: selfEntity, speaker: row?.id ?? segment.speaker?.id, confident: true,
+                         mixed: segment.speaker?.mayBeAnotherVoice ?? false)
         }
         guard let tag = segment.speaker, let id = tag.id else { return nil }
         let person = self.person(of: tag)
         let entity = person?.entity
-        return Voice(key: entity.map { "e\($0)" } ?? "s\(id)", entity: entity, speaker: row?.id ?? id, confident: !tag.isLowConfidence && !tag.overlap)
+        return Voice(key: entity.map { "e\($0)" } ?? "s\(id)", entity: entity, speaker: row?.id ?? id, confident: !tag.isLowConfidence && !tag.overlap,
+                     mixed: tag.mayBeAnotherVoice)
     }
 }
 
@@ -96,9 +100,10 @@ enum OwnerInference {
         let followers = order.following(segment.id)
         /// What an answer must be about to count as the answer: the item and the clause that holds the request.
         let about = ItemCues.contentWords(itemText + " " + clause, language: language)
+        // An owner given by who spoke is marked when that speaker's cluster holds two voices.
         func result(_ v: Voice, rule: String, uncertain: Bool = false) -> Result {
-            if let entity = v.entity { return Result(owner: entity, ownerSpeaker: nil, uncertain: uncertain, rule: rule) }
-            return Result(owner: nil, ownerSpeaker: v.speaker, uncertain: uncertain, rule: rule)
+            if let entity = v.entity { return Result(owner: entity, ownerSpeaker: nil, uncertain: uncertain || v.mixed, rule: rule) }
+            return Result(owner: nil, ownerSpeaker: v.speaker, uncertain: uncertain || v.mixed, rule: rule)
         }
         func withheld(_ rule: String = "withheld") -> Result { Result(owner: nil, ownerSpeaker: nil, uncertain: hint.proposed, rule: rule) }
 

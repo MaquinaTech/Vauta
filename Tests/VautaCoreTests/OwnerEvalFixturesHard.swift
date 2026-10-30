@@ -10,10 +10,14 @@ import Foundation
 extension OwnerEvalCase {
     static let hardCases: [OwnerEvalCase] = [englishConfidentMislabel, spanishConfidentMislabel, japaneseRequestAndCommitment]
 
-    /// Bruno's commitment is labeled Ana at 0.85: the code cannot know, and the owner is wrong and unmarked.
+    /// The spread of a cluster that took a second voice: below `VoiceProfileThresholds.minimumSpread`.
+    static let mixedSpread: Float = 0.52
+
+    /// Bruno's commitment is labeled Ana at 0.85. The line cannot tell, but Ana's cluster holds Bruno's voice and its spread
+    /// shows it: the owner is wrong and marked, and so is the owner of Ana's own line.
     static let englishConfidentMislabel = OwnerEvalCase(
         id: "en confidently wrong label", locale: "en-US", people: ["Ana", "Bruno"],
-        speakers: [me, remote("Ana"), remote("Bruno")],
+        speakers: [me, remote("Ana", voiceSpread: mixedSpread), remote("Bruno")],
         lines: [
             Line(1, 0.95, "Let's close the vendor contract today."),
             Line(2, 0.85, "I'll send the contract to legal.", labeled: 1),
@@ -37,7 +41,7 @@ extension OwnerEvalCase {
 
     static let spanishConfidentMislabel = OwnerEvalCase(
         id: "es confidently wrong label", locale: "es-ES", people: ["Lucía", "Mateo"],
-        speakers: [me, remote("Lucía"), remote("Mateo")],
+        speakers: [me, remote("Lucía", voiceSpread: mixedSpread), remote("Mateo")],
         lines: [
             Line(1, 0.94, "Tenemos que cerrar el contrato con el proveedor."),
             Line(2, 0.88, "Yo me encargo del contrato con el proveedor.", labeled: 1),

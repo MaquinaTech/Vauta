@@ -22,6 +22,7 @@ Developer tools:
 
 ### Changed
 
+- A task owner given by a speaker whose voice probably mixes two people is marked **owner not confirmed**. Speaker separation can put two similar voices, or one person's line, in another person's speaker, and the minutes then gave that person the other's task with nothing to say so. Vauta now keeps how tight each speaker's voice is (one number, not the voice), and the owners that a loose speaker's lines give stay, marked. A line you moved to a speaker yourself is not marked. Meetings whose speakers were separated earlier are not marked.
 - With a model server whose structured output is "JSON schema" or "JSON object" (Settings → Models → Advanced), the minutes' block extracts, merges and closing request and the live notes ask for their shape in `response_format`, as Ask already did. The requests with reasoning on send none. A server that answers 400, 415 or 422 to it is asked once more without it.
 
 ### Fixed
@@ -30,6 +31,9 @@ Developer tools:
 - A stall or a gap in the system audio no longer "corrects" its sample rate when the rate was right. The rate is measured on the capture times, and a correction needs two windows that agree.
 - Custom vocabulary no longer asks the recognizer for the misspellings Vauta learned from accepted corrections. Vauta still recognizes them as the name.
 - On a model server, once the reasoning of the minutes has run past the length limit, the one repair of an answer that can't be read no longer reasons again. Two DEV meetings spent another 10,000 tokens, some ten minutes each, there.
+- On a model server whose reasoning keeps running past the length limit, the minutes no longer spend it every time. After two minutes in a row whose reasoning ran out, the next five are written without it, then Vauta tries again. With qwen3.5-9b on MLXServer, 49 of the 51 reasoning requests of the 24 DEV meetings ran out, some ten minutes each and 70 % of the run's time, and those minutes came from the request without reasoning anyway.
+- A task the model writes with the speaker's label ("Speaker 5 to build the dictionary") is no longer "to be confirmed" because the label's number is not in the quoted words, and the new extraction no longer drops it as reported speech. On a model server (qwen3.5-9b, the 21 DEV meetings, replayed) the reference's firm tasks and decisions found among the confirmed items rose from 29 % to 44 %, while the confirmed items that match the reference went from 57 % to 54 % (within the noise). Apple's model rarely writes items that way: 2 of 24 meetings changed.
+- On a model server without structured output, the minutes had almost no open questions: the model wrote them as objects, the way it writes decisions, and Vauta skipped them. They are read now, and the usual checks judge them. On the 24 DEV meetings (qwen3.5-9b, replayed) the open points of the reference found in the minutes rose from 4 of 123 to 44 of 123.
 - `scripts/update.sh` stopped with `unbound variable` before verifying the release, in shells that read the `…` after a variable name as part of the name. If it stopped for you, run `git checkout main && git pull` once and run it again.
 - `scripts/update.sh` ended with `dir: unbound variable` and exit status 1 after a successful install, and left a temporary folder behind.
 - Checking the model server (Settings → Status, Test Connection, or installing the search or integrated model) no longer cancels minutes or an answer that are on their way.
