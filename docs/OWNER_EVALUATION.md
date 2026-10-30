@@ -23,8 +23,8 @@ three times through the real minutes pipeline (prompt, validation, owner rules, 
 - **With speakers.** Every line carries its speaker label (`Ana (remote)`, `Speaker 2 (remote)`, `Me 2 (in the room)`,
   a `?` after a label the diarizer is unsure about), and the owner rules and checks below are active.
 
-The owner check of the minutes (an owner who is not the user on their own channel, not a confidently labeled speaker and
-not named in the words is marked "not confirmed") runs in every arm, with or without speaker data.
+The owner check of the minutes (an owner who is not the user on their own channel, not a confidently labeled speaker of
+one voice and not named in the words is marked "not confirmed") runs in every arm, with or without speaker data.
 
 ## What it is not
 
@@ -45,7 +45,7 @@ consented meetings, and that is a separate, later evaluation.
 | Me / Others (recorded answers that ignore the prompt) | 25/56 | 15 wrong | 16 | 15 (14 of them wrong) |
 | Me / Others, careful (unsure = no owner) | 26/56 | 1 wrong | 29 | 0 |
 | With speakers, recorded answers as written | 47/56 | not applicable | not applicable | not applicable |
-| With speakers, after the rules of Swift | 48/56 | 5 wrong | 3 | 3 (all 3 wrong) |
+| With speakers, after the rules of Swift | 48/56 | 5 wrong | 3 | 7 (5 of them wrong) |
 
 Effect of the rules of Swift on the speakers arm, line by line: **+3 fixed, -2 withheld**, net +1; 2 more wrong
 owners became "no owner".
@@ -63,16 +63,29 @@ owners became "no owner".
   is unsure about never gives a task to anyone), not because the evaluation shows a gain. The other wrong owner that
   became "no owner" comes from a different rule (a person the meeting does not have).
 
-The 5 wrong owners with speakers: **3 are marked** in the interface (two are the model's owner against a confident
-speaker's commitment, one is an owner the transcript does not support), and **2 are confidently wrong labels**: in two
+The 5 wrong owners with speakers are **all marked** in the interface. Two are the model's owner against a confident
+speaker's commitment, one is an owner the transcript does not support, and **2 are confidently wrong labels**: in two
 meetings (English and Spanish) the diarizer attributes a commitment to the wrong person with a confidence of 0.85 and
-0.88, above the threshold. The model follows the label it is shown, Swift trusts a confident label, and the owner is
-wrong and not marked. Without speakers the model leaves those two tasks open, so on those lines the speakers arm is
-worse than the baseline.
+0.88, above the threshold. The model follows the label it is shown, and the line itself cannot tell. What tells is the
+speaker: the cluster that took the second person's line holds two voices, and its spread (the mean cosine of its window
+embeddings to their centroid, 0.52 in these fixtures) is below `VoiceProfileThresholds.minimumSpread` (0.60). A label of
+such a speaker keeps the owner it gives and marks it "not confirmed" (`SpeakerTag.mixesVoices`, schema 32); a doubtful
+label gives no owner at all. The same rule marks the 2 right owners of those two speakers' own commitments, so 7 owners
+are marked, 5 of them wrong. Without speakers the model leaves those two tasks open, so on those lines the speakers arm
+still names the wrong person, marked.
+
+**What the fixtures assume.** That the spread shows the mixture. On real audio the spread gate was calibrated for
+matching saved voices (with the other two gates it removes most of the mixed clusters there; [ARCHITECTURE.md](ARCHITECTURE.md)),
+before the diarization change of 2026-10-11, and it was not measured as a signal for owners. A cluster that took one short
+line of another voice may keep a high spread, and its wrong owner stays unmarked. A small cluster that the clustering
+folded into a larger one is not flagged by this rule; that is the clustering's own fix (not folding a distinct voice).
 
 A change of 2026-10-14 moved one number of the first arm: the owner "Me" now needs a line of the user's own voice behind the task (rule
 `task.ownerMeUnbacked`), so one recorded "Me" owner on a line nobody in the room spoke became "no owner" (16 wrong to 15, 15
 without an owner to 16). The speakers arm and the careful arm did not move.
+
+A change of 2026-10-30 marked owners given by a speaker whose voices spread out (above): in the speakers arm the marked owners
+went from 3 (all wrong) to 7 (5 wrong), and in the extraction below from 1 (0 wrong) to 5 (2 wrong). No owner changed.
 
 ## The extraction of the development phase (owner from the transcript)
 
@@ -86,10 +99,10 @@ the first table above is the old one and is unchanged.
 | Arm | Owner correct | Wrong person | No owner | Owners marked "not confirmed" | Gold tasks marked "to be confirmed" |
 |---|---|---|---|---|---|
 | Me / Others (recorded answers that ignore the prompt) | 26/56 | 1 wrong | 29 | 2 (0 of them wrong) | 1 of 56 |
-| With speakers | 51/56 | 2 wrong | 3 | 1 (0 of them wrong) | 1 of 56 |
+| With speakers | 51/56 | 2 wrong | 3 | 5 (2 of them wrong) | 1 of 56 |
 
 With speakers: against the old rules **48/56 → 51/56** correct and **5 → 2 wrong**; against the model's recorded answer the rules
-changed 8 owners: 6 fixed, 2 withheld, none broken. On the Me / Others arm the 15 wrong owners the recorded answers had became 1 (an unnamed second voice
+changed 8 owners: 6 fixed, 2 withheld, none broken. The 2 wrong owners are the two confidently wrong labels above, marked. On the Me / Others arm the 15 wrong owners the recorded answers had became 1 (an unnamed second voice
 on the user's microphone is still the user's channel). The one gold task marked "to be confirmed" is "We should also run the customer
 survey": a group suggestion with nobody charged, which is the intended reading. Verification still catches 4/4 planted errors.
 The fixtures are invented, the cues were tuned on them (a regression check, not an accuracy figure for real speech), and they were written before the rules: before the last round of cues, 17 of the 56 gold tasks were marked, mostly

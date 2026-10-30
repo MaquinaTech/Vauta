@@ -26,6 +26,11 @@ extension SpeakerTag {
     /// prompt, the chunks and the owner rules treat it the same way.
     public var isDoubtful: Bool { isLowConfidence || overlap }
 
+    /// The line may be somebody else's, whose voice the diarizer put in this speaker (`mixesVoices`). The owner rules keep the
+    /// owner such a line gives but mark it "not confirmed"; a doubtful label gives none. A line the user moved by hand has no
+    /// score: it is their word.
+    public var mayBeAnotherVoice: Bool { mixesVoices && confidence != nil }
+
     /// Where the voice comes from, for VoiceOver: "remote" for the other participants, "in the room" for a
     /// second voice on the user's own microphone, nothing for the user.
     public func role(channel: Channel) -> String? {

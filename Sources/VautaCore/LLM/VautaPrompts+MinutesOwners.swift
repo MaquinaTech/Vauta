@@ -57,7 +57,7 @@ extension VautaPrompts {
                                             byID: c.byID, meetingPeople: c.meetingPeople)
         if proposed == nil, let ownerSpeaker {
             let row = c.directory.speakerRow(of: seg.speaker)
-            let confident = seg.speaker.map { !$0.isLowConfidence && !$0.overlap } ?? false
+            let confident = seg.speaker.map { !$0.isLowConfidence && !$0.overlap && !$0.mayBeAnotherVoice } ?? false
             verdict = OwnerVerdict(owner: nil, uncertain: !(row?.id == ownerSpeaker && confident), deterministic: false)
         }
         return (verdict, ownerSpeaker)

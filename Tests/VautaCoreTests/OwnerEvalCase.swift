@@ -16,6 +16,8 @@ struct OwnerEvalCase {
         let channel: Channel
         /// The person the user named; nil = "Speaker k" or "Me 2".
         let person: String?
+        /// The spread of the speaker's voice cluster as the diarizer measured it; nil = not measured (as before schema 32).
+        var voiceSpread: Float?
     }
 
     struct Line {
@@ -78,6 +80,6 @@ struct OwnerEvalCase {
 
 extension OwnerEvalCase {
     static let me = Speaker(channel: .me, person: nil)
-    static func remote(_ person: String?) -> Speaker { Speaker(channel: .others, person: person) }
+    static func remote(_ person: String?, voiceSpread: Float? = nil) -> Speaker { Speaker(channel: .others, person: person, voiceSpread: voiceSpread) }
     static let roomVoice = Speaker(channel: .me, person: nil)
 }

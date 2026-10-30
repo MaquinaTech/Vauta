@@ -105,7 +105,7 @@ struct OwnerAccuracyEvalTests {
 
         func ordinal(_ speaker: Int) -> Int { item.speakers[...speaker].filter { $0.channel == item.speakers[speaker].channel }.count }
         if withSpeakers {
-            let drafts = item.speakers.indices.map { SpeakerDraft(channel: item.speakers[$0].channel, ordinal: ordinal($0)) }
+            let drafts = item.speakers.indices.map { SpeakerDraft(channel: item.speakers[$0].channel, ordinal: ordinal($0), voiceSpread: item.speakers[$0].voiceSpread) }
             let assignments = item.lines.enumerated().map { index, line in
                 let label = line.labeled ?? line.speaker
                 return SegmentSpeakerAssignment(segmentID: segmentIDs[index], channel: item.speakers[label].channel,
@@ -220,12 +220,13 @@ struct OwnerAccuracyEvalTests {
                                   plantedCaught: 4, planted: 4, falseAlarms: 0, faithful: 56))
         #expect(conservative == Score(tasks: 56, correct: 26, wrong: 1, unassigned: 29, marked: 0, rawCorrect: 26,
                                       plantedCaught: 4, planted: 4, falseAlarms: 0, faithful: 56))
-        #expect(speakers == Score(tasks: 56, correct: 48, wrong: 5, unassigned: 3, marked: 3, rawCorrect: 47,
+        // Every wrong owner is marked: the two confidently wrong labels belong to speakers whose cluster holds two voices.
+        #expect(speakers == Score(tasks: 56, correct: 48, wrong: 5, unassigned: 3, marked: 7, rawCorrect: 47,
                                   fixedByRules: 3, withheldByRules: 2, brokenByRules: 0, preventedByRules: 2,
-                                  doubtfulLines: 3, doubtfulWithheld: 2, doubtfulPrevented: 1, wrongMarked: 3,
+                                  doubtfulLines: 3, doubtfulWithheld: 2, doubtfulPrevented: 1, wrongMarked: 5,
                                   plantedCaught: 4, planted: 4, falseAlarms: 0, faithful: 56))
         if let page = Self.page {
-            for number in ["25/56", "26/56", "48/56", "47/56", "15 wrong", "1 wrong", "5 wrong", "+3 fixed", "-2 withheld", "3 lines", "4/4"] { #expect(page.contains(number), "\(number) is in the page") }
+            for number in ["25/56", "26/56", "48/56", "47/56", "15 wrong", "1 wrong", "5 wrong", "+3 fixed", "-2 withheld", "3 lines", "4/4", "7 (5 of them wrong)"] { #expect(page.contains(number), "\(number) is in the page") }
         }
     }
 
@@ -245,10 +246,10 @@ struct OwnerAccuracyEvalTests {
         #expect(speakers.plantedCaught == speakers.planted)
         // The numbers published in docs/OWNER_EVALUATION.md ("The extraction of the development phase (owner from the transcript)"): a change that moves them must update the page.
         #expect(baseline.correct == 26 && baseline.wrong == 1 && baseline.unassigned == 29 && baseline.marked == 2 && baseline.wrongMarked == 0 && baseline.falseAlarms == 1)
-        #expect(speakers.correct == 51 && speakers.wrong == 2 && speakers.unassigned == 3 && speakers.marked == 1 && speakers.wrongMarked == 0)
+        #expect(speakers.correct == 51 && speakers.wrong == 2 && speakers.unassigned == 3 && speakers.marked == 5 && speakers.wrongMarked == 2)
         #expect(speakers.fixedByRules == 6 && speakers.withheldByRules == 2 && speakers.brokenByRules == 0 && speakers.falseAlarms == 1 && speakers.planted == 4)
         if let page = Self.page {
-            for number in ["51/56", "26/56", "2 wrong", "1 of 56", "6 fixed", "4/4"] { #expect(page.contains(number), "\(number) is in the page") }
+            for number in ["51/56", "26/56", "2 wrong", "1 of 56", "6 fixed", "4/4", "5 (2 of them wrong)"] { #expect(page.contains(number), "\(number) is in the page") }
         }
     }
 

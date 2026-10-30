@@ -107,12 +107,14 @@ extension MeetingStore {
         }
         let plan = recognizeVoices ? try planVoices(for: diarization, ordinals: ordinals, meetingID: meetingID, ownVoice: ownVoice) : VoicePlan()
         let matchByOrdinal = Dictionary(plan.matches.compactMap { speaker, match in ordinals[speaker].map { ($0, match) } }, uniquingKeysWith: { first, _ in first })
+        let spreadByOrdinal = Dictionary(diarization.centroids.compactMap { c in ordinals[c.speaker].map { ($0, c.spread) } }, uniquingKeysWith: { first, _ in first })
         var drafts = ordinals.values.sorted().map { ordinal in
             let values = confidences[ordinal] ?? []
             let match = matchByOrdinal[ordinal]
             return SpeakerDraft(channel: .others, ordinal: ordinal, entityID: match?.entityID,
                                 source: match == nil ? .auto : .suggested,
-                                confidence: values.isEmpty ? nil : values.reduce(0, +) / Double(values.count))
+                                confidence: values.isEmpty ? nil : values.reduce(0, +) / Double(values.count),
+                                voiceSpread: spreadByOrdinal[ordinal])
         }
         let mine = stored.filter { $0.channel == .me }
         if !mine.isEmpty {
