@@ -134,8 +134,10 @@ extension RecorderModel {
                 startTicker()
                 startAutosave()
                 speakersTipDismissed = false
+                speakersHeard = false
+                lastEchoCheck = nil
                 outputWatcher = OutputRouteWatcher { [weak self] route in
-                    MainActor.assumeIsolated { self?.speakersOn = route == .speakers }
+                    MainActor.assumeIsolated { self?.outputRoute = route }
                 }
                 livePoints = []; liveDecisions = []; liveTasks = []; liveNotesError = nil
                 lastLiveNotes = .now
@@ -169,7 +171,8 @@ extension RecorderModel {
         ticker = nil
         autosave?.cancel()
         outputWatcher = nil
-        speakersOn = false
+        outputRoute = .unknown
+        speakersHeard = false
         stopTask = Task {
             await finishSession()
             stopTask = nil

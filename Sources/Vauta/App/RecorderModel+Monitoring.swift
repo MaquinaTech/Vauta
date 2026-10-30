@@ -68,6 +68,12 @@ extension RecorderModel {
         let warning = othersSilent ? silenceMessage : nil
         if warning != silenceWarning { silenceWarning = warning }
         updateCaptureAlert(now: mono)
+        // Whether the microphone hears the others, every few seconds: a few milliseconds per 10 s of audio.
+        if lastEchoCheck.map({ mono - $0 >= .seconds(5) }) ?? true {
+            lastEchoCheck = mono
+            let heard = capture.speakerEcho().heardLately
+            if heard != speakersHeard { speakersHeard = heard }
+        }
         if phase == .recording && quiet(since: lastOthersHeard, for: autoStopAfterSilence)
             && quiet(since: lastMeHeard, for: Self.autoStopMeQuiet) {
             autoStop(.silence(minutes: autoStopMinutes))

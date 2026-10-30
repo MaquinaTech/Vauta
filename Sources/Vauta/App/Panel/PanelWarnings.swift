@@ -290,7 +290,7 @@ struct PanelWarnings: View {
                 out.append(Banner(id: "silence", messages: [Message(text: w.title, detail: w.detail)], fixes: [.stopAndSave]))
             }
             // The microphone hears the speakers: a tip, not a fault, and only while nothing about the audio is wrong.
-            if model.isRecording, model.speakersOn, !model.speakersTipDismissed, out.isEmpty {
+            if model.suggestsHeadphones, out.isEmpty {
                 out.append(Banner(id: "speakers-out",
                                   messages: [Message(text: String(localized: "The meeting is playing through speakers",
                                                                   comment: "Panel tip title while recording: the sound comes out of the Mac’s speakers, a display or AirPlay, not headphones"),

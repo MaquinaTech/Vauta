@@ -71,6 +71,18 @@ struct EchoMarkTests {
         #expect(abs(try await myTalk() - 4) < 0.01)
     }
 
+    /// Over headphones the microphone was measured never to hear the others (`SpeakerEcho.neverHeard`): a line that says the same
+    /// at the same time is the user's.
+    @Test func overHeadphonesNothingIsMarked() async throws {
+        let f = try KnowledgeFixture()
+        let s = f.store!
+        let id = try await s.startMeeting(at: .now, locale: Locale(identifier: "en-US"))
+        try await s.append(Segment(channel: .others, start: 10, end: 14, text: Self.said, isFinal: true), to: id)
+        try await s.append(Segment(channel: .me, start: 10.3, end: 14.2, text: Self.said.lowercased(), isFinal: true), to: id)
+        try await s.endMeeting(id, at: .now + 60, marksEchoes: false)
+        #expect(try await s.echoes(of: id).isEmpty)
+    }
+
     @Test func aMeetingWithoutTheOtherChannelHasNoEchoes() async throws {
         let f = try KnowledgeFixture()
         let s = f.store!

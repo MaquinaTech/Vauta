@@ -98,3 +98,23 @@ func meanSquare(_ buffer: AVAudioPCMBuffer, scratch: inout [Float]) -> Float {
     }
     return 0
 }
+
+/// The mean energy of each `frame` samples of a mono Int16 or Float32 buffer (the last may be shorter), with vDSP.
+func frameMeanSquares(_ buffer: AVAudioPCMBuffer, frame: Int, scratch: inout [Float]) -> [Float] {
+    let n = Int(buffer.frameLength)
+    guard n > 0, frame > 0 else { return [] }
+    func measure(_ samples: UnsafePointer<Float>, scale: Float) -> [Float] {
+        stride(from: 0, to: n, by: frame).map { start in
+            var ms: Float = 0
+            vDSP_measqv(samples + start, 1, &ms, vDSP_Length(min(frame, n - start)))
+            return ms * scale
+        }
+    }
+    if let samples = buffer.int16ChannelData?[0] {
+        if scratch.count < n { scratch = [Float](repeating: 0, count: n) }
+        vDSP_vflt16(samples, 1, &scratch, 1, vDSP_Length(n))
+        return scratch.withUnsafeBufferPointer { measure($0.baseAddress!, scale: 1 / (32767 * 32767)) }
+    }
+    if let samples = buffer.floatChannelData?[0] { return measure(samples, scale: 1) }
+    return []
+}
