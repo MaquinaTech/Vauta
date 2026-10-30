@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 """Word error rate of the app's offline transcription on AMI, against AMI's manual word transcripts.
 
-  python3 -I eval/scripts/run_wer.py [--bin .build/release/Vauta] [--locale en-US] [--tag <name>] [--pad 0.25]
+  python3 -I eval/scripts/run_wer.py [--bin .build/release/Vauta] [--locale en-US] [--tag <name>] [--pad 0.25] [--confidence]
 
 For each AMI meeting in pins.json, the first `wer_seconds` of two conditions are transcribed with
 `Vauta transcribe-file <wav> --show-text --i-understand` (the text comes on stderr; AMI is a public corpus, this is
@@ -20,8 +20,13 @@ the remote headsets, a neighbour in a headset). A recogniser rightly transcribes
 insertions. To measure recognition rather than that artifact, the audio is muted outside the scored speakers' reference
 turns (plus `--pad` seconds each side) before it is transcribed, using the AMI reference segmentation. The figure without
 masking (`wer_unmasked`) is reported next to it. Neither is a real-call figure.
+Word confidence (`--confidence`). The app does not ask the recogniser for each word's confidence. This arm transcribes the
+masked clip once more with it (`transcribe-file --out <words.jsonl>`), and reports that pass's WER and time against the
+plain masked pass (asking must not change the words, and must cost little), then how well the confidence predicts that a
+word is right: each recognised word is aligned with the reference (score_wer.hyp_correct), and the reliability bins, the
+ECE, the Brier score and the AUROC are computed (score_wer.reliability). A word with no confidence is left out.
 Needs the speech model of the locale installed for the binary (`Vauta install-speech-assets --locale en-US`).
-Output: $VAUTA_EVAL_WORK/runs/<tag>/wer.json and wer.md. Transcripts are not kept.
+Output: $VAUTA_EVAL_WORK/runs/<tag>/wer.json and wer.md. Transcripts and word files are not kept.
 """
 import argparse
 import json
@@ -56,10 +61,11 @@ def reference_words(zf, letters, meeting, seconds):
     return " ".join(w[2] for w in sorted(words))
 
 
-def transcribe(binary, wav, locale):
-    """-> [(start seconds, text)] of the final segments."""
-    p = subprocess.run([binary, "transcribe-file", wav, "--locale", locale, "--show-text", "--i-understand"],
-                       capture_output=True, text=True)
+def transcribe(binary, wav, locale, words=None):
+    """-> [(start seconds, text)] of the final segments. With `words` (a path), the recogniser is also asked for each
+    word's confidence and writes them there as JSON lines."""
+    p = subprocess.run([binary, "transcribe-file", wav, "--locale", locale, "--show-text", "--i-understand"]
+                       + (["--out", words] if words else []), capture_output=True, text=True)
     if p.returncode != 0:
         raise SystemExit(f"transcribe-file failed on {wav}: {p.stderr[-300:]}")
     out = []
@@ -98,6 +104,9 @@ def main():
     ap.add_argument("--locale", default="en-US")
     ap.add_argument("--tag", default=time.strftime("%Y%m%d-%H%M%S"))
     ap.add_argument("--pad", type=float, default=0.25, help="seconds kept around each reference turn when masking")
+    ap.add_argument("--confidence", action="store_true",
+                    help="one more masked pass with the recogniser's word confidence: its WER and time against the plain pass, "
+                         "and how well the confidence predicts a right word (reliability bins, ECE, Brier, AUROC)")
     a = ap.parse_args()
     seconds = PINS["wer_seconds"]
     info = json.load(open(os.path.join(SETS, AMI_SET, "info.json")))
@@ -112,9 +121,10 @@ def main():
     tmp = os.path.join(RUNS, a.tag, "tmp")
     os.makedirs(tmp, exist_ok=True)
     conds = ("headset", "others")
-    modes = ("masked", "unmasked")
+    modes = ("masked", "unmasked") + (("confidence",) if a.confidence else ())
     rows = []
-    totals = {c: {g: dict(sub=0, dele=0, ins=0, words=0) for g in modes} | dict(wall=0.0, audio=0.0) for c in conds}
+    totals = {c: {g: dict(sub=0, dele=0, ins=0, words=0) for g in modes} | dict(wall=0.0, audio=0.0, wall_masked=0.0, wall_confidence=0.0) for c in conds}
+    scored = {c: [] for c in conds}
     for m in PINS["wer_meetings"]:
         meta = info[f"{m}_others"]
         rttm = f"{SRC}/ami-setup/only_words/rttms/{split[m]}/{m}.rttm"
@@ -126,22 +136,35 @@ def main():
             x, sr = read_wav(src)
             x = x[:seconds * SR]
             regions = speech_regions(rttm, set(speakers))
-            res, wall = {}, 0.0
-            for mode in modes:
+            res, wall, walls = {}, 0.0, {}
+            # Every other file runs the confidence pass first, so warm caches do not favour one side of the time ratio.
+            order = ("confidence", "masked", "unmasked") if a.confidence and len(rows) % 2 else modes
+            for mode in order:
                 clip = os.path.join(tmp, f"{m}_{cond}_{mode}.wav")
-                write_wav(clip, mask_outside(x, regions, a.pad) if mode == "masked" else x)
+                write_wav(clip, x if mode == "unmasked" else mask_outside(x, regions, a.pad))
+                words = os.path.join(tmp, f"{m}_{cond}.words.jsonl") if mode == "confidence" else None
                 t0 = time.time()
-                text = " ".join(t for _, t in transcribe(a.bin, clip, a.locale))
-                wall += time.time() - t0
+                text = " ".join(t for _, t in transcribe(a.bin, clip, a.locale, words=words))
+                walls[mode] = time.time() - t0
                 os.remove(clip)
                 res[mode] = sw.wer(ref, text)
+                if words:
+                    said = [json.loads(line) for line in open(words) if line.strip()]
+                    os.remove(words)
+                    tokens = sw.scored_tokens([(w["text"], w.get("confidence")) for w in said])
+                    right = sw.hyp_correct(sw.normalize(ref).split(), [t for t, _ in tokens])
+                    scored[cond] += [(c, ok) for (_, c), ok in zip(tokens, right) if c is not None]
+            wall = walls["masked"] + walls["unmasked"]
             audio = len(x) / SR
-            rows.append(dict(meeting=m, condition=cond, audio_s=audio, wall_s=round(wall, 1), masked=res["masked"], unmasked=res["unmasked"]))
+            rows.append(dict(meeting=m, condition=cond, audio_s=audio, wall_s=round(wall, 1), masked=res["masked"], unmasked=res["unmasked"])
+                        | ({"confidence": res["confidence"], "wall_s_confidence": round(walls["confidence"], 1)} if a.confidence else {}))
             t = totals[cond]
             for g, r in res.items():
                 for k in ("sub", "dele", "ins", "words"):
                     t[g][k] += r[k]
             t["wall"] += wall
+            t["wall_masked"] += walls["masked"]
+            t["wall_confidence"] += walls.get("confidence", 0.0)
             t["audio"] += audio
             g = res["masked"]
             log(f"{m} {cond}: WER {g['wer']:.1f}% ({g['sub']} S, {g['dele']} D, {g['ins']} I of {g['words']} words); "
@@ -152,6 +175,11 @@ def main():
         return 100.0 * (t["sub"] + t["dele"] + t["ins"]) / t["words"]
     summary = {c: dict(wer=pct(t["masked"]), wer_unmasked=pct(t["unmasked"]), **t["masked"], audio_s=t["audio"] / 1, wall_s_per_pass=round(t["wall"] / 2, 1))
                for c, t in totals.items()}
+    if a.confidence:
+        for c, t in totals.items():
+            summary[c]["confidence"] = dict(wer=pct(t["confidence"]), wall_s=round(t["wall_confidence"], 1), wall_s_masked=round(t["wall_masked"], 1),
+                                            time_ratio=t["wall_confidence"] / t["wall_masked"] if t["wall_masked"] else None,
+                                            **sw.reliability(scored[c]))
     json.dump(dict(locale=a.locale, window_s=seconds, pad_s=a.pad, files=rows, summary=summary),
               open(os.path.join(RUNS, a.tag, "wer.json"), "w"), indent=1)
     lines = ["| meeting | condition | ref words | S | D | I | WER % (oracle-masked) | WER % (unmasked) |", "|---|---|---|---|---|---|---|---|"]
@@ -160,6 +188,22 @@ def main():
         lines.append(f"| {r['meeting']} | {r['condition']} | {g['words']} | {g['sub']} | {g['dele']} | {g['ins']} | {g['wer']:.1f} | {r['unmasked']['wer']:.1f} |")
     for c, s in summary.items():
         lines.append(f"| **all {len(PINS['wer_meetings'])}** | **{c}** | {s['words']} | {s['sub']} | {s['dele']} | {s['ins']} | **{s['wer']:.1f}** | {s['wer_unmasked']:.1f} |")
+    if a.confidence:
+        lines += ["", "Word confidence (oracle-masked audio, a second pass that asks the recogniser for it):", "",
+                  "| condition | WER % plain | WER % with confidence | time ratio | scored words | accuracy | mean confidence | ECE | Brier | AUROC |",
+                  "|---|---|---|---|---|---|---|---|---|---|"]
+        for c, s in summary.items():
+            k = s["confidence"]
+            if not k.get("words"):
+                lines.append(f"| {c} | {s['wer']:.1f} | {k['wer']:.1f} | {k['time_ratio'] or 0:.3f} | 0 | | | | | |")
+                continue
+            auroc = f"{k['auroc']:.3f}" if k["auroc"] is not None else "n/a"
+            lines.append(f"| {c} | {s['wer']:.1f} | {k['wer']:.1f} | {k['time_ratio'] or 0:.3f} | {k['words']} | {k['accuracy']:.3f} | "
+                         f"{k['mean_confidence']:.3f} | {k['ece']:.3f} | {k['brier']:.3f} | {auroc} |")
+        for c, s in summary.items():
+            if s["confidence"].get("bins"):
+                lines += ["", f"Reliability, {c}:", "", "| confidence | words | mean confidence | accuracy |", "|---|---|---|---|"]
+                lines += [f"| {b['lo']:.1f}–{b['hi']:.1f} | {b['words']} | {b['confidence']:.3f} | {b['accuracy']:.3f} |" for b in s["confidence"]["bins"]]
     text = "\n".join(lines)
     open(os.path.join(RUNS, a.tag, "wer.md"), "w").write(text + "\n")
     print(text)

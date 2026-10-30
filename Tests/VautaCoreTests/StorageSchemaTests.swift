@@ -12,7 +12,7 @@ struct StorageSchemaTests {
         #expect(versions.first == 1)
         #expect(versions == Array(1...SchemaVersion(versions.count)))
         #expect(Schema.currentVersion == versions.last)
-        #expect(Schema.currentVersion == 32)
+        #expect(Schema.currentVersion == 33)
     }
 
     // Published migrations are frozen in `SchemaFreezeTests` (the v7 fixtures here rely on it).

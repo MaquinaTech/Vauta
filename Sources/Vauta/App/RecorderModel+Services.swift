@@ -29,6 +29,9 @@ extension RecorderModel {
             // Speakers of a recording that crashed are finalized before anything else reads its transcript.
             await SpeakerFinalizer.recoverInterrupted(in: store, enabled: preferences.separateSpeakers,
                                                        recognizeVoices: preferences.recognizesVoices)
+            // Then the echoes of the meetings recorded before they were marked, and of one a crash left open: once, before the
+            // minutes, answers or links read them.
+            if ((try? await store.markPendingEchoes()) ?? 0) > 0 { await history?.reloadIfShowing() }
             await maintainVoices()
             // The search model's files are looked at (no network) before the service reads its providers.
             await SearchModelController.shared.start()

@@ -23,4 +23,32 @@ enum SpeechWordTimes {
         }
         return out
     }
+
+    /// Every run with a time range and some text, with the recognizer's confidence when it was asked for it
+    /// (`.transcriptionConfidence`). For the evaluation of public audio (`transcribeFileScored`).
+    static func words(in text: AttributedString) -> [RecognizedWord] {
+        text.runs.compactMap { run in
+            guard let range = run.audioTimeRange, range.start.isNumeric, range.end.isNumeric, range.end.seconds >= range.start.seconds else { return nil }
+            let word = String(text[run.range].characters).trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !word.isEmpty else { return nil }
+            return RecognizedWord(text: word, start: range.start.seconds, end: range.end.seconds,
+                                  confidence: run.transcriptionConfidence.flatMap { $0.isFinite ? min(1, max(0, $0)) : nil })
+        }
+    }
+}
+
+/// A word (or phrase) of a final result with its time and the recognizer's confidence (0...1, nil when not asked for or not
+/// given). Evaluation only: the app does not ask the recognizer for confidence, and nothing stores it.
+public struct RecognizedWord: Sendable, Equatable, Codable {
+    public var text: String
+    public var start: Double
+    public var end: Double
+    public var confidence: Double?
+
+    public init(text: String, start: Double, end: Double, confidence: Double?) {
+        self.text = text
+        self.start = start
+        self.end = end
+        self.confidence = confidence
+    }
 }

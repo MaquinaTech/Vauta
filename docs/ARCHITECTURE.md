@@ -399,6 +399,13 @@ notes, answers, owners), search and its chunks, mentions, quotes, talk time, fol
 `segments(of:echoes:)` gives it to the transcript and the speaker tools only. The person can say a line is theirs (2), and
 it is never marked again.
 
+`echo_pending` (schema 33) lists the meetings never checked: those recorded before schema 31 and, added by the crash
+recovery when the store opens, one a crash left open (it never reached `endMeeting`). At launch, after the crashed
+recording's speakers and before the language model service starts, `markPendingEchoes` checks them newest first, one
+per transaction so the store keeps answering, analyzes again the ones with echoes, so their mentions leave the echo out,
+and takes each off the list. Their minutes are not rewritten. With no coupling measured for them, a meeting recorded
+over headphones can get a line marked (0.30 % of the own lines in the sweep), which the person can take back.
+
 While recording, `EchoCoupling` (`Capture/`) measures whether the microphone hears the Others channel at all, from the
 loudness of both channels by 10 ms (no samples kept), fed by the channel pipes and measured off the audio threads. In each
 10 s window in which the others speak, it correlates the two loudnesses during the others' turns at lags of −0.1 to 0.6 s.
