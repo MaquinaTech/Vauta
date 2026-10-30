@@ -245,6 +245,27 @@ struct ActionsServiceTests {
         #expect(await t.service.remove(actionID: row.id, confirmedEdited: true) == .removed)
     }
 
+    @Test func aSaveThatEndsSecondsAfterTheIntentIsNotAnEdit() async throws {
+        let t = try await Setup.make(["Send the revised budget to finance", "Book the supplier visit"])
+        let tasks = try await t.tasks()
+        // A busy Mac: the item is saved half a minute after the ledger recorded the intent.
+        t.writer.setClock { Date().addingTimeInterval(30) }
+        guard case .added(let quiet) = await t.service.addReminder(task: tasks[0], draft: t.draft(tasks[0])),
+              case .added(let edited) = await t.service.addReminder(task: tasks[1], draft: t.draft(tasks[1])) else { Issue.record("not added"); return }
+        #expect(await t.service.removalPreview(actionID: quiet.id)?.edited == false)
+        #expect(await t.service.remove(actionID: quiet.id) == .removed)
+        t.writer.editExternally(try #require(edited.itemID), title: "Book the supplier visit (edited)")
+        #expect(await t.service.remove(actionID: edited.id) == .editedElsewhere, "an edit after the late save still asks")
+    }
+
+    @Test func anItemCreatedLongAfterTheIntentCountsFromTheIntent() async throws {
+        let t = try await Setup.make()
+        let task = try #require(try await t.tasks().first)
+        t.writer.setClock { Date().addingTimeInterval(ActionService.adoptionWindow + 600) }
+        guard case .added(let row) = await t.service.addReminder(task: task, draft: t.draft(task)) else { Issue.record("not added"); return }
+        #expect(await t.service.remove(actionID: row.id) == .editedElsewhere, "not the save of this intent: the person is asked")
+    }
+
     @Test func undoOfABatchRemovesEachRowAndOnlyThose() async throws {
         let t = try await Setup.make(["Send the revised budget to finance", "Book the supplier visit"])
         let tasks = try await t.tasks()
