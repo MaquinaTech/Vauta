@@ -58,6 +58,17 @@ struct EchoDetectionTests {
         #expect(echoes([others(1, 5, 8, "The budget is forty thousand euros"), me(2, 8.9, 11.5, "The budget is forty thousand euros?")]).isEmpty)
     }
 
+    /// A participant on speakers whose call app doesn't cancel the echo sends the user's voice back into Others: there the Others
+    /// line is the echo, and it starts after the user's.
+    @Test func theFarSideSendingTheUserBackIsTheUsers() {
+        let said = "We should move the launch to the second week of March"
+        #expect(echoes([me(1, 10, 14, said), others(2, 10.35, 14.4, said)]).isEmpty)
+        // Even right after the other person stopped talking.
+        #expect(echoes([others(1, 7, 9.8, "So what do you suggest for the launch"), me(2, 10, 14, said), others(3, 10.35, 14.4, said)]).isEmpty)
+        // An echo the transcriber starts a little early is still an echo.
+        #expect(echoes([others(1, 10, 14, said), me(2, 9.9, 14.1, said)]) == [2])
+    }
+
     @Test func speakingOverTheOtherPersonIsTheUsers() {
         #expect(echoes([others(1, 0, 6, "We will order two hundred units for the pilot in April"),
                         me(2, 2, 7, "I think April is too early for the pilot order")]).isEmpty)
