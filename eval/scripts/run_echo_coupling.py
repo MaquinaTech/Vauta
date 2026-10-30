@@ -14,7 +14,7 @@ headsets, level-normalised, Opus coded). The Me file is, by condition:
   room        me's raw headset. The participants sat in one room, so the headset hears the others faintly, like a microphone
               hearing speakers turned low: the hardest case to hear (expected: heard, never "never heard").
   speakers    me's raw headset with the Others mix added 20 dB lower and 150 ms later: speakers at a usual level (expected:
-              heard, at about 0.15 s).
+              heard; the delay is 0.15 s, or about 0 where the room's cross-talk is the stronger).
   headphones  me's raw headset of the next meeting in pins.json, whose room never heard this Others mix (expected: never heard).
 
 Output: $VAUTA_EVAL_WORK/runs/<tag>/echo_coupling.json and echo_coupling.md. The files built for the command are temporary and
@@ -37,7 +37,7 @@ from common import EVAL, PINS, RUNS, SETS, SR, SRC, log, read_wav, write_wav  # 
 
 AMI_SET = PINS.get("ami_set", "ami_others")
 DEFAULT_BIN = os.path.join(os.path.dirname(EVAL), ".build", "release", "Vauta")
-LINE = re.compile(r"windows (\d+) · heard (\d+) · delay (-|[\d.]+ s) · never heard (true|false) · heard lately (true|false)")
+LINE = re.compile(r"windows (\d+) · heard (\d+) · delay (-|-?[\d.]+ s) · never heard (true|false) · heard lately (true|false)")
 CONDITIONS = ("room", "speakers", "headphones")
 SPEAKERS_GAIN, SPEAKERS_DELAY = 0.1, 0.15
 
