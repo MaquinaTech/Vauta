@@ -109,6 +109,40 @@ struct StorageStoreTests {
         #expect(try await store.search("bonjour", in: [id]).count == 1)
     }
 
+    /// The FTS index keeps a run of Japanese or Chinese text as one token, so a word in the middle of a sentence is
+    /// found by substring.
+    @Test func searchFindsJapaneseAndChineseWordsInsideASentence() async throws {
+        let fx = StoreFixture()
+        let store = try fx.open()
+        let older = try await store.startMeeting(at: .now - 86_400)
+        try await store.append(segment(.me, 2, "旧预算已经作废"), to: older)
+        try await store.endMeeting(older, at: .now - 86_000)
+        let id = try await store.startMeeting(at: .now)
+        try await store.append(segment(.others, 1, "来週の会議で予算の確認をします"), to: id)
+        try await store.append(segment(.me, 4, "我们今天讨论了预算和Kobaltix的合同"), to: id)
+        try await store.append(segment(.me, 8, "The budget for Kobaltix is final"), to: id)
+        try await store.endMeeting(id, at: .now)
+
+        let ja = try #require(try await store.search("予算の確認").first)
+        #expect(ja.segment.start == 1)
+        #expect(SearchHighlight.runs(in: ja.snippet).filter(\.isMatch).map(\.text) == ["予算の確認"])
+        #expect(try await store.search("预算").map(\.segment.meetingID) == [id, older], "newest meetings first")
+        #expect(try await store.search("预算 kobaltix").map(\.segment.start) == [4], "a Latin name inside the run counts too")
+        #expect(try await store.search("合同 budget").isEmpty, "every word has to be there")
+        #expect(try await store.search("预算", in: [older]).map(\.segment.meetingID) == [older])
+        #expect(try await store.search("\") OR 1=1 -- 预算").isEmpty, "input is never SQL or FTS5 syntax")
+        #expect(try await store.search("kobaltix").map(\.segment.start) == [8], "Latin-only queries still use the index")
+    }
+
+    @Test func substringSnippetsCutAroundTheFirstMatch() {
+        let (s, e) = (SearchHighlight.start, SearchHighlight.end)
+        let text = String(repeating: "あ", count: 40) + "予算" + String(repeating: "い", count: 10) + "予算" + String(repeating: "う", count: 80)
+        let snippet = SearchHighlight.snippet(text, marking: ["予算"], before: 4, after: 16)
+        #expect(snippet == "…ああああ\(s)予算\(e)いいいいいいいいいい\(s)予算\(e)うううう…")
+        #expect(SearchHighlight.snippet("Ana dijo hola", marking: ["ANA"]) == "\(s)Ana\(e) dijo hola", "case-insensitive, no cut")
+        #expect(SearchHighlight.snippet("sin nada", marking: ["予算"], before: 2, after: 3) == "sin…")
+    }
+
     @Test func startMeetingRefusesASecondActiveMeeting() async throws {
         let fx = StoreFixture()
         let store = try fx.open()

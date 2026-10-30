@@ -417,17 +417,16 @@ extension MeetingStore {
 
     /// Decisions, tasks, notes, entity notes and meeting summaries
     /// (accent-insensitive, by prefix). As in `search`, input is never parsed
-    /// as FTS5 syntax. `meetings` limits the search to those meetings (in SQL,
-    /// so a scoped search returns up to `limit` hits of its own).
+    /// as FTS5 syntax, and a query in a script written without spaces is matched
+    /// by substring (`SearchWords`), newest meetings first. `meetings` limits the
+    /// search to those meetings (in SQL, so a scoped search returns up to `limit` hits of its own).
     public func searchKnowledge(_ text: String, in meetings: [Int64]? = nil, limit: Int = 50) throws -> [KnowledgeHit] {
-        var words = text.split { !$0.isLetter && !$0.isNumber }
-        if words.contains(where: { $0.count > 1 }) { words.removeAll { $0.count < 2 } }
-        guard !words.isEmpty else { return [] }
-        let match = words.map { "\"\($0)\"*" }.joined(separator: " ")
+        guard let query = SearchWords(text) else { return [] }
+        let substring = query.bySubstring
         return try db.query("""
             SELECT rowid, snip, meeting, t FROM (
-                SELECT f.rowid AS rowid, f.rank AS rank,
-                       \(SearchHighlight.snippetSQL("knowledge_fts")) AS snip,
+                SELECT f.rowid AS rowid, \(substring ? "0" : "f.rank") AS rank,
+                       \(substring ? "f.text" : SearchHighlight.snippetSQL("knowledge_fts")) AS snip,
                        CASE f.rowid % 8 WHEN 1 THEN (SELECT meeting_id FROM decisions WHERE id = f.rowid / 8)
                                         WHEN 2 THEN (SELECT meeting_id FROM tasks WHERE id = f.rowid / 8)
                                         WHEN 3 THEN (SELECT meeting_id FROM notes WHERE id = f.rowid / 8)
@@ -439,13 +438,14 @@ extension MeetingStore {
                                         WHEN 3 THEN (SELECT t FROM notes WHERE id = f.rowid / 8)
                                         WHEN 6 THEN (SELECT t FROM notes WHERE id = f.rowid / 8)
                                         WHEN 7 THEN (SELECT t FROM detected_questions WHERE id = f.rowid / 8) END AS t
-                FROM knowledge_fts f WHERE knowledge_fts MATCH ?1)
+                FROM knowledge_fts f WHERE \(substring ? SearchWords.containsAll("f.text", param: 1) : "knowledge_fts MATCH ?1"))
             WHERE ?3 IS NULL OR meeting IN (SELECT value FROM json_each(?3))
-            ORDER BY rank LIMIT ?2
-            """, [.text(match), .integer(Int64(limit)), meetings.map { .ids($0) }]).compactMap { row in
+            ORDER BY \(substring ? "meeting DESC, t" : "rank") LIMIT ?2
+            """, [.text(substring ? query.json : query.match), .integer(Int64(limit)), meetings.map { .ids($0) }]).compactMap { row in
             guard let kind = KnowledgeHit.Kind(rawValue: Int(row.int(0) % 8)) else { return nil }
+            let snippet = substring ? SearchHighlight.snippet(row.string(1), marking: query.words) : row.string(1)
             return KnowledgeHit(rowid: row.int(0), kind: kind, refID: row.int(0) / 8, meetingID: row.optionalInt(2),
-                                t: row.optionalDouble(3), snippet: row.string(1))
+                                t: row.optionalDouble(3), snippet: snippet)
         }
     }
 }
