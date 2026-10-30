@@ -8,8 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- **The speakers' echo.** With speakers instead of headphones the microphone hears the other participants, and Vauta wrote their words again as yours, so the minutes gave you their words and their tasks. Every finished recording now marks those lines. They stay in the transcript, dimmed, with **It Was Me** to take a mark back (it can be undone), and they are left out of the minutes, notes, answers, owners, search, talk time and exports. A line the person says is theirs is never marked again. A recording in which the microphone never heard the others (headphones) marks nothing. Meetings recorded earlier are not marked.
+- While recording, the panel suggests headphones when the meeting plays through speakers: the Mac's own, a display, AirPlay, or any output the microphone is heard to pick up, such as Bluetooth or USB speakers. **Dismiss** hides it for the recording.
+
 Developer tools:
 
+- `Vauta llm-eval --tasks echo` measures the speakers' echo detection on public transcripts, with no audio and no model. Each participant is replayed as the Me channel with the others' speech heard again 0.03, 0.15 or 0.4 s later and 10–30 % of its words wrong, and once more with the far side sending every line back. It writes the score of every setting to `echo/sweep.tsv`. On the 24 DEV meetings the release settings find 90.7 % of the echo's words and mark 0.30 % of the participants' own lines.
+- `Vauta llm-eval` writes the replies of a minutes run that failed to `minutes/<meeting>.<provider>.failed.json`, so the cause can be read.
 - `Vauta llm-eval` can write the minutes of public transcripts and answer their questions on a model server (`--providers server --server <config.json> [--ask-key]`), through the app's own client and address rules, and runs several minutes variants of one backend interleaved in one run (`--variants old,new`).
 - Ask on a model server can reason briefly before an answer after the meeting (`low` effort, with its own room and no schema over it). It stays off in this release until it is measured: `llm-eval --tasks live-answer --providers server --after-meeting --ask-reasoning on,off` asks each question both ways in one run.
 - The statistics the evaluation gates use (Wilson intervals, exact sign and McNemar tests, meeting-cluster bootstrap, kappa, Jeffreys gates, paired TOST, Holm and BH) are in `tools/llm-eval/stats.py`, standard library only, with tests that CI runs.
@@ -20,6 +25,10 @@ Developer tools:
 
 ### Fixed
 
+- The first seconds of a recording are no longer lost while the speech analyzers start. The microphone and the system audio start first, and their audio waits for the analyzers.
+- A stall or a gap in the system audio no longer "corrects" its sample rate when the rate was right. The rate is measured on the capture times, and a correction needs two windows that agree.
+- Custom vocabulary no longer asks the recognizer for the misspellings Vauta learned from accepted corrections. Vauta still recognizes them as the name.
+- On a model server, once the reasoning of the minutes has run past the length limit, the one repair of an answer that can't be read no longer reasons again. Two DEV meetings spent another 10,000 tokens, some ten minutes each, there.
 - `scripts/update.sh` stopped with `unbound variable` before verifying the release, in shells that read the `…` after a variable name as part of the name. If it stopped for you, run `git checkout main && git pull` once and run it again.
 - `scripts/update.sh` ended with `dir: unbound variable` and exit status 1 after a successful install, and left a temporary folder behind.
 - Checking the model server (Settings → Status, Test Connection, or installing the search or integrated model) no longer cancels minutes or an answer that are on their way.
