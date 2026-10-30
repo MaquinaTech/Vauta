@@ -41,6 +41,9 @@ let usage = """
       diarize <audio> [--rttm <out>] [--threshold <n>] [--live-agreement]
                                           Separate the speakers of an audio file on this Mac and print RTTM (no text,
                                           no audio is written); --threshold is the clustering cut (default 0.70)
+      echo-coupling <me audio> <others audio>
+                                          Evaluation: whether the microphone heard the others, measured over two files
+                                          as over a recording's two channels (prints counts only)
       minutes-file <transcript.json> --out <minutes.json> [--locale <id>]
                                           Evaluation: write the minutes of a PUBLIC transcript with Apple's on-device
                                           model and save the items with their citations (never use it on a real meeting)
@@ -191,6 +194,18 @@ func runCLI(_ arguments: [String]) async -> Int32 {
                 print(rttm, terminator: "")
             }
             printError(String(format: "%d speakers · %d turns · %.1f s", result.speakerCount, result.turns.count, Date().timeIntervalSince(t0)))
+        case "echo-coupling":
+            // Evaluation tool: whether a recording's microphone heard the others, measured over two files as over the two
+            // channels. It prints one line of counts, never text, and writes nothing.
+            guard invocation.positional.count == 2 else { throw Usage() }
+            let urls = invocation.positional.map { URL(fileURLWithPath: $0) }
+            for url in urls where !FileManager.default.isReadableFile(atPath: url.path) {
+                printError("Can't read \(url.path). The sandboxed app can only open files you pick; run .build/release/Vauta from a source build.")
+                return 1
+            }
+            let echo = try await EchoCouplingEvaluation.measure(me: urls[0], others: urls[1])
+            print("windows \(echo.windows) · heard \(echo.heard) · delay " + (echo.delay.map { String(format: "%.2f s", $0) } ?? "-")
+                  + " · never heard \(echo.neverHeard) · heard lately \(echo.heardLately)")
         #if VAUTA_DIAGNOSTICS
         case "speaker-centroids":
             return try await speakerCentroids(invocation)
