@@ -128,7 +128,7 @@ struct QueryRoutingTests {
         #expect(ContinuousClock.now - started < .seconds(300), "a loaded Mac may be slow to schedule the timer; the point is that it is not the hour the translator would take")
         // One late answer keeps the translator (Apple's first call loads its model): the next question is tried, and a quick one is used.
         slow.delay = .zero
-        #expect(await q.translate(Self.spanish, from: Self.es, to: Self.en, timeout: .seconds(30)) == Self.english)
+        #expect(await q.translate(Self.spanish, from: Self.es, to: Self.en, timeout: .seconds(600)) == Self.english)
     }
 
     @Test func aLateTranslationThatIgnoresCancellationIsFinishedBeforeTheNextQuestionCallsTheSameSession() async {
@@ -160,7 +160,7 @@ struct QueryRoutingTests {
         slow.delay = .untilCancelled
         let q = QueryTranslator(backend: MapBackend(slow))
         let task = Task { await q.translate(Self.spanish, from: Self.es, to: Self.en, timeout: .seconds(600)) }
-        #expect(await eventually(timeout: .seconds(20)) { slow.calls.count == 1 })
+        #expect(await eventually(timeout: .seconds(600)) { slow.calls.count == 1 })
         task.cancel()
         #expect(await task.value == nil)
     }

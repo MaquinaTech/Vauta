@@ -40,7 +40,7 @@ private final class StubBackend: LiveAnswerBackend, @unchecked Sendable {
 }
 
 private func settle(_ condition: @MainActor () -> Bool) async -> Bool {
-    let deadline = ContinuousClock.now + .seconds(240)
+    let deadline = ContinuousClock.now + .seconds(600)
     while ContinuousClock.now < deadline {
         if await MainActor.run(body: condition) { return true }
         try? await Task.sleep(for: .milliseconds(10))

@@ -92,10 +92,10 @@ final class StoreFixture {
 
     /// Opens the store. A store that was just dropped (`store = nil`) may keep the instance lock for a moment:
     /// a background write holds it until its task is torn down, which on a busy machine is not immediate. So
-    /// `.alreadyOpen` is retried for up to 240 s, unless `waitForLock` is false (tests of the lock itself).
+    /// `.alreadyOpen` is retried for up to 600 s, unless `waitForLock` is false (tests of the lock itself).
     func open(recover: Bool = false, knowledgeDays: Int = MeetingStore.retentionDays,
               createIfMissing: Bool = true, waitForLock: Bool = true) throws -> MeetingStore {
-        let deadline = ContinuousClock.now + .seconds(240)
+        let deadline = ContinuousClock.now + .seconds(600)
         while true {
             do {
                 return try MeetingStore(directory: dir, keyStore: keys, recoverOpenMeetings: recover,

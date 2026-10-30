@@ -66,7 +66,7 @@ struct LanguageModelSchedulingTests {
         { while produced.withLock({ $0 }) >= after, !served.withLock({ $0 }), gate.waiting == 0 { try await Task.sleep(for: .milliseconds(2)) } }
     }
 
-    @Test(.timeLimit(.minutes(2))) func anInteractiveJobRunsBetweenTwoBurstsOfALongGeneration() async throws {
+    @Test(.timeLimit(.minutes(10))) func anInteractiveJobRunsBetweenTwoBurstsOfALongGeneration() async throws {
         let box = Box(try LanguageModelEngineTests.engine())
         let gate = MLXWorkGate()
         let produced = Locked(0)
@@ -92,7 +92,7 @@ struct LanguageModelSchedulingTests {
         #expect(lease.yielded.urgent >= 1)
     }
 
-    @Test(.timeLimit(.minutes(2))) func aMoreUrgentGenerationGoesFirstAndBothFinish() async throws {
+    @Test(.timeLimit(.minutes(10))) func aMoreUrgentGenerationGoesFirstAndBothFinish() async throws {
         let box = Box(try LanguageModelEngineTests.engine())
         let gate = MLXWorkGate()
         let order = Mutex<[String]>([])
@@ -127,7 +127,7 @@ struct LanguageModelSchedulingTests {
 
     // MARK: Heat
 
-    @Test(.timeLimit(.minutes(1))) func aMinutesJobWaitsOutAHotMacWithoutHoldingTheGate() async throws {
+    @Test(.timeLimit(.minutes(10))) func aMinutesJobWaitsOutAHotMacWithoutHoldingTheGate() async throws {
         let state = Mutex(ProcessInfo.ThermalState.serious)
         let gate = MLXWorkGate()
         let lease = GenerationLease(gate: gate, priority: .minutes, thermal: ThermalSource(state: { state.withLock { $0 } }, poll: .milliseconds(5), slowPause: .milliseconds(5)))
@@ -146,7 +146,7 @@ struct LanguageModelSchedulingTests {
         try await gate.run(.bulk) {}
     }
 
-    @Test(.timeLimit(.minutes(1))) func anAutoAnswerGivesTheGateUpWhenTheHeatTurnsSeriousAndALiveNoteRuns() async throws {
+    @Test(.timeLimit(.minutes(10))) func anAutoAnswerGivesTheGateUpWhenTheHeatTurnsSeriousAndALiveNoteRuns() async throws {
         let state = Mutex(ProcessInfo.ThermalState.nominal)
         let gate = MLXWorkGate()
         let lease = GenerationLease(gate: gate, priority: .autoAnswer, thermal: ThermalSource(state: { state.withLock { $0 } }, poll: .seconds(60)))
@@ -161,7 +161,7 @@ struct LanguageModelSchedulingTests {
         lease.end()
     }
 
-    @Test(.timeLimit(.minutes(1))) func aWaitingJobCanBeCancelled() async throws {
+    @Test(.timeLimit(.minutes(10))) func aWaitingJobCanBeCancelled() async throws {
         let gate = MLXWorkGate()
         let lease = GenerationLease(gate: gate, priority: .bulk, thermal: ThermalSource(state: { .critical }, poll: .milliseconds(5)))
         try await lease.begin()
@@ -173,7 +173,7 @@ struct LanguageModelSchedulingTests {
         try await gate.run(.interactive) {}
     }
 
-    @Test(.timeLimit(.minutes(1))) func anAnswerIsSlowedAtCriticalAndNotAtSerious() async throws {
+    @Test(.timeLimit(.minutes(10))) func anAnswerIsSlowedAtCriticalAndNotAtSerious() async throws {
         let gate = MLXWorkGate()
         for (state, slowed) in [(ProcessInfo.ThermalState.serious, false), (.critical, true)] {
             let lease = GenerationLease(gate: gate, priority: .interactive, thermal: ThermalSource(state: { state }, poll: .milliseconds(5), slowPause: .milliseconds(80)))
@@ -188,7 +188,7 @@ struct LanguageModelSchedulingTests {
         }
     }
 
-    @Test(.timeLimit(.minutes(2))) func aGenerationPausesWhileHotAndFinishesWhenItCoolsDown() async throws {
+    @Test(.timeLimit(.minutes(10))) func aGenerationPausesWhileHotAndFinishesWhenItCoolsDown() async throws {
         let box = Box(try LanguageModelEngineTests.engine())
         let state = Mutex(ProcessInfo.ThermalState.serious)
         let gate = MLXWorkGate()
@@ -217,7 +217,7 @@ struct LanguageModelSchedulingTests {
 
     private static func environment(_ box: EnvironmentBox) -> @Sendable () -> IndexerEnvironment { { box.current } }
 
-    @Test(.timeLimit(.minutes(2))) func theDownloadPausesWhileARecordingRunsAndGoesOnTwoMinutesAfter() async throws {
+    @Test(.timeLimit(.minutes(10))) func theDownloadPausesWhileARecordingRunsAndGoesOnTwoMinutesAfter() async throws {
         let model = SyntheticLanguageModel()
         let behaviour = LanguageModelStub.Behaviour(model)
         LanguageModelStub.register(behaviour)

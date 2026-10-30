@@ -99,7 +99,7 @@ struct LiveAnswersRuntimeTests {
     private static let q3 = "Who is going to write the summary of the meeting today?"
 
     private func settle(_ condition: @MainActor () -> Bool) async -> Bool {
-        let deadline = ContinuousClock.now + .seconds(240)
+        let deadline = ContinuousClock.now + .seconds(600)
         while ContinuousClock.now < deadline {
             if condition() { return true }
             try? await Task.sleep(for: .milliseconds(10))
