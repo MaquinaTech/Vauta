@@ -270,7 +270,34 @@ Per meeting, from 6.7 % (IS1008d, headset) to 17.3 % (TS3004a, headset) and from
 Transcription took about 54 s per condition for 6,000 s of audio (about 110 times faster than real time, including start-up of the
 command for each file), on the machine above.
 
-## Spanish
+### Word confidence
+
+The app does not ask the recognizer how sure it is of each word. `run_wer.py --confidence` measures, on 30 October 2026, what
+asking would cost and what it would tell. It runs one more oracle-masked pass of the 10 meetings that asks for it
+(`transcribe-file --out`), alternating which pass goes first. Words without a confidence are left out. Run
+`wer-confidence-1`; the plain passes reproduce the table above (10.8 % and 20.2 %).
+
+| Condition | WER plain | WER asking | Time ratio | Scored words | Right | Mean confidence | ECE | Brier | AUROC |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Headset | 10.8 % | 10.8 % | 0.98 | 6,379 | 92.8 % | 0.858 | 0.079 | 0.082 | 0.785 |
+| Others (simulated remote mix) | 20.2 % | 20.2 % | 1.00 | 7,655 | 91.4 % | 0.833 | 0.088 | 0.097 | 0.773 |
+
+Reliability: the share of right words in each confidence band, both conditions together.
+
+| Confidence | Words | Right |
+|---|---:|---:|
+| below 0.3 | 408 | 65.9 % |
+| 0.3–0.5 | 818 | 75.1 % |
+| 0.5–0.7 | 1,701 | 86.5 % |
+| 0.7–0.9 | 2,798 | 88.8 % |
+| 0.9–1.0 | 8,309 | 97.2 % |
+
+**What this says.** Asking changes no word and takes no longer. The confidence does tell right words from wrong ones (AUROC 0.77
+to 0.79), and it is lower than the share of right words below 0.9: a word at 0.5 to 0.7 is right 86.5 % of the time. A threshold
+or a calibration made from these numbers would be fitted on the same 10 meetings; the held-out sets would have to confirm it.
+"Right" is a word aligned to the same reference word, after the normalisation of `score_wer.py`; a scored word is a recognised
+word that has a confidence (insertions included).
+
 
 Spanish is measured in two ways, and neither is a real Spanish meeting. **No claim is made about real Spanish calls.**
 
