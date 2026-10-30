@@ -298,8 +298,11 @@ this Mac (EmbeddingGemma 2 in `VautaMLX`), or are off (Ask then uses keyword sea
   that states the commitment, not requests, opinions or needs) owns a task the model left without owner or gave to them,
   unless the words name another person of the meeting; when the model chose somebody else its owner is kept and marked
   (one line can hold two actions). Otherwise the model's owner is validated against the meeting's people, the named
-  speakers and the cited words, and a doubtful label never gives a task. The owner check runs in every meeting, with or
-  without speaker data. `MinutesVerifier` checks figures (the due date's own words are cut out of both sides first; Han
+  speakers and the cited words, and a doubtful label never gives a task. A speaker whose voice cluster spreads out
+  (`meeting_speakers.voice_spread`, schema 32: the `SpeakerCentroid.spread` of the diarization, one number and not a voice,
+  below `VoiceProfileThresholds.minimumSpread`) probably holds two voices: the owners its lines give are kept but marked
+  "not confirmed" in both extractions (`SpeakerTag.mayBeAnotherVoice`; a line the user moved by hand has no score and is
+  exempt). The owner check runs in every meeting, with or without speaker data. `MinutesVerifier` checks figures (the due date's own words are cut out of both sides first; Han
   numerals are parsed), due date (`DateWords`: whole phrases bounded by the calendar, weekdays within the coming days)
   and named people literally against the cited segment; a mismatch sets `decisions.unconfirmed` / `tasks.unconfirmed`, an unbacked owner sets
   `tasks.owner_uncertain` (schema 16), the separate owner counterpart of `unconfirmed`; `markDecisionChecked` / `markTaskChecked` clear

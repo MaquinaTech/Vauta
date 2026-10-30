@@ -9,11 +9,12 @@ extension MeetingStore {
 
     func speakerRows(_ ids: [Int64]) throws -> [SpeakerUndo.SpeakerRow] {
         try db.query("""
-            SELECT id, meeting_id, channel, ordinal, entity_id, source, confidence FROM meeting_speakers
+            SELECT id, meeting_id, channel, ordinal, entity_id, source, confidence, voice_spread FROM meeting_speakers
             WHERE id IN (SELECT value FROM json_each(?))
             """, [.ids(ids)]).map {
             SpeakerUndo.SpeakerRow(id: $0.int(0), meetingID: $0.int(1), channel: $0.string(2), ordinal: $0.int(3),
-                                   entityID: $0.optionalInt(4), source: $0.string(5), confidence: $0.optionalDouble(6))
+                                   entityID: $0.optionalInt(4), source: $0.string(5), confidence: $0.optionalDouble(6),
+                                   voiceSpread: $0.optionalDouble(7))
         }
     }
 
@@ -98,10 +99,12 @@ extension MeetingStore {
                     try db.query("SELECT coalesce(merged_into, id) FROM entities WHERE id = ? AND kind = 'person'", [.integer(id)]).first?.int(0)
                 }
                 try run("""
-                    INSERT INTO meeting_speakers(id, meeting_id, channel, ordinal, entity_id, source, confidence) VALUES (?, ?, ?, ?, ?, ?, ?)
-                    ON CONFLICT(id) DO UPDATE SET entity_id = excluded.entity_id, source = excluded.source, confidence = excluded.confidence
+                    INSERT INTO meeting_speakers(id, meeting_id, channel, ordinal, entity_id, source, confidence, voice_spread) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    ON CONFLICT(id) DO UPDATE SET entity_id = excluded.entity_id, source = excluded.source, confidence = excluded.confidence,
+                        voice_spread = excluded.voice_spread
                     """, [.integer(row.id), .integer(row.meetingID), .text(row.channel), .integer(row.ordinal), person.map { .integer($0) },
-                          .text(person == nil && row.entityID != nil ? MeetingSpeaker.Source.auto.rawValue : row.source), row.confidence.map { .real($0) }])
+                          .text(person == nil && row.entityID != nil ? MeetingSpeaker.Source.auto.rawValue : row.source), row.confidence.map { .real($0) },
+                          row.voiceSpread.map { .real($0) }])
             }
             for s in record.segments {
                 // A deleted segment has nothing to restore; one that is another meeting's now cannot be touched.

@@ -22,7 +22,7 @@ extension MeetingStore {
             FROM segments s \(Self.speakerJoins) WHERE s.meeting_id = ?\(echoes ? "" : " AND \(Self.notEcho)") ORDER BY s.start, s.id
             """, [.integer(meetingID)]).map { row in
             var segment = Self.segment(row, speakerAt: 6)
-            segment.isEcho = row.int(12) == 1
+            segment.isEcho = row.int(6 + Self.speakerColumnCount) == 1
             return segment
         }
     }

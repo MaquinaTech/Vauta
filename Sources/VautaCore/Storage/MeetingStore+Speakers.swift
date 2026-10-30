@@ -133,13 +133,15 @@ extension MeetingStore {
                 var (entity, source) = (draft.entityID.flatMap { people[$0] }, draft.source)
                 if source == .auto || entity == nil { (entity, source) = (nil, .auto) }
                 try run("""
-                    INSERT INTO meeting_speakers(meeting_id, channel, ordinal, entity_id, source, confidence) VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO meeting_speakers(meeting_id, channel, ordinal, entity_id, source, confidence, voice_spread) VALUES (?, ?, ?, ?, ?, ?, ?)
                     ON CONFLICT(meeting_id, channel, ordinal) DO UPDATE SET
                         confidence = excluded.confidence,
+                        voice_spread = excluded.voice_spread,
                         entity_id = CASE WHEN meeting_speakers.source = 'user' THEN meeting_speakers.entity_id ELSE excluded.entity_id END,
                         source = CASE WHEN meeting_speakers.source = 'user' THEN 'user' ELSE excluded.source END
                     """, [.integer(meetingID), .text(draft.channel.storedCode), .integer(Int64(final(draft.channel, draft.ordinal))),
-                          entity.map { .integer($0) }, .text(source.rawValue), draft.confidence.map { .real(min(1, max(0, $0))) }])
+                          entity.map { .integer($0) }, .text(source.rawValue), draft.confidence.map { .real(min(1, max(0, $0))) },
+                          draft.voiceSpread.flatMap { $0.isFinite ? .real(Double(min(1, max(-1, $0)))) : nil }])
             }
             if !assignments.isEmpty || !drafts.isEmpty {
                 try run("""

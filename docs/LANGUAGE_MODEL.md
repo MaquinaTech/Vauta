@@ -1288,7 +1288,8 @@ exhaustive, so precision measured against it is a floor (see "Adjudication").
   answered by another speaker who commits (certain) or only says "yes" (kept, **marked "owner not confirmed"**); a call for volunteers answered by
   somebody who commits; a role or third party ("the Industrial Designer will…", "que el ejecutivo…") or a group ("we should…"): nobody; anything else:
   the model's person only if the words name them, otherwise nobody (marked uncertain when the model named someone). The asker is never the owner;
-  a doubtful label (low score, crosstalk) never gives a task; "Me" on a line that is not the user's is no proposal. Self-commitment is read inside the clause
+  a doubtful label (low score, crosstalk) never gives a task, and an owner given by a speaker whose cluster holds two voices (a spread below
+  0.60) is kept, marked; "Me" on a line that is not the user's is no proposal. Self-commitment is read inside the clause
   (a "?" or a "not" elsewhere in the turn no longer cancels it), and "I will need your snippets" is a request, not a commitment.
 - **Closing pass**: one more request over the last 12% of the meeting or the last 6 minutes, whichever is longer, started at the beginning of the
   speaker turn and cut from the front to the room. Integrated model: the existing second-pass request on that one window, on the kept prefix

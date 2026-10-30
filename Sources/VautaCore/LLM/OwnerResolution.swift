@@ -62,10 +62,11 @@ public struct SpeakerDirectory: Sendable, Equatable {
     }
 
     /// The person who said a segment and whether the label deserves trust: the speaker is mapped to a person, the
-    /// line is not in crosstalk, its assignment is not below `SpeakerTag.lowConfidenceBelow`.
-    func person(of tag: SpeakerTag?) -> (entity: Int64, confident: Bool)? {
+    /// line is not in crosstalk, its assignment is not below `SpeakerTag.lowConfidenceBelow`. `mixed`: the speaker's
+    /// cluster probably holds a second voice (`SpeakerTag.mayBeAnotherVoice`), so the owner it gives is marked.
+    func person(of tag: SpeakerTag?) -> (entity: Int64, confident: Bool, mixed: Bool)? {
         guard let tag, let id = tag.id, let entity = people[id] else { return nil }
-        return (entity, !tag.isLowConfidence && !tag.overlap)
+        return (entity, !tag.isLowConfidence && !tag.overlap, tag.mayBeAnotherVoice)
     }
 }
 
@@ -99,17 +100,18 @@ enum OwnerResolver {
         // 1. A confidently identified speaker who says what they will do owns it when the model agrees or gave no
         //    owner and the words name nobody else of the meeting ("Ana, send the deck and I'll review it" names Ana).
         //    When the model chose somebody else, its owner is kept (after the checks below) and marked: a line can
-        //    hold two actions, and Swift cannot tell which one the task is.
+        //    hold two actions, and Swift cannot tell which one the task is. A speaker whose cluster holds two voices
+        //    owns it too, marked: the line may be the other voice's.
         var disagrees = false
         if let speaker, speaker.confident, FirstPerson.commits(segment.text) {
             if proposed == speaker.entity {
-                return OwnerVerdict(owner: speaker.entity, uncertain: false, deterministic: true)
+                return OwnerVerdict(owner: speaker.entity, uncertain: speaker.mixed, deterministic: !speaker.mixed)
             }
             if proposed == nil {
                 let others = Set(meetingPeople).union(directory.namedPeople).union(selfEntity.map { [$0] } ?? [])
                     .subtracting([speaker.entity])
                 if !others.contains(where: { byID[$0].map(names) ?? false }) {
-                    return OwnerVerdict(owner: speaker.entity, uncertain: false, deterministic: true)
+                    return OwnerVerdict(owner: speaker.entity, uncertain: speaker.mixed, deterministic: !speaker.mixed)
                 }
             } else if !named {
                 disagrees = true
@@ -126,9 +128,9 @@ enum OwnerResolver {
         if owner != selfEntity, !meetingPeople.contains(owner), !directory.namedPeople.contains(owner), !named {
             return OwnerVerdict()
         }
-        // 4. Backed by a name in the words, by a confident label, or (the user) by their own channel.
+        // 4. Backed by a name in the words, by a confident label of one voice, or (the user) by their own channel.
         let backed = named
-            || (speaker?.confident == true && speaker?.entity == owner)
+            || (speaker?.confident == true && speaker?.mixed == false && speaker?.entity == owner)
             || (owner == selfEntity && segment.channel == .me && (segment.speaker == nil || speaker?.entity == selfEntity && speaker?.confident == true))
         return OwnerVerdict(owner: owner, uncertain: !backed || disagrees)
     }
