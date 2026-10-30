@@ -50,7 +50,7 @@ A server configuration names three models:
 | Role | Used for | Advice |
 |---|---|---|
 | **Fast model** | Live notes while recording, and Ask during a recording | Small and quick. Reasoning ("thinking") is turned off for it |
-| **Main model** | Minutes and Ask | The best model the computer can run. For one-request minutes Vauta allows brief reasoning (`low` effort); if the reasoning runs past the length limit, the request is sent once more without it, and so is the one repair of an answer that can't be read |
+| **Main model** | Minutes and Ask | The best model the computer can run. For one-request minutes Vauta allows brief reasoning (`low` effort); if the reasoning runs past the length limit, the request is sent once more without it, and so is the one repair of an answer that can't be read. After two minutes in a row whose reasoning ran out, the next five are written without it (the minutes came from the request without reasoning anyway), then Vauta tries again; this is kept until Vauta quits |
 | **Translation model** | Improving Live Translation captions (**Settings → Translation**) | Defaults to the fast model. Qwen3.5-9B is a sensible choice. The refined caption replaces Apple's only if the answer arrives within Vauta's 4 s budget, so a model that is too slow, such as a 27B one, makes the captions keep Apple's translation; **Test** reports the real latency. Small dedicated translation models are not recommended: they were not better in our early, unpublished trials. It is not a separate server role: pick any model the server lists, or leave it on the fast model |
 | **Model for search by meaning** | Search by meaning (an embedding model) | A multilingual embedding model, at least 256 dimensions |
 
