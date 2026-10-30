@@ -22,7 +22,7 @@ import Security
 ///   it before the first request of a session (`LLMClient+PeerCheck.swift`),
 ///   and every completed request checks it again; otherwise further requests
 ///   are refused.
-/// - The key (optional) is read from the Keychain for each request and never logged.
+/// - The key (optional) is read from the Keychain once per launch (`ServerCredentials.sessionBearer`) and never logged.
 public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Sendable {
     /// Keychain account of the server key (optional: local LM Studio or Ollama need none).
     public static let bearerAccount = ServerCredentials.bearerAccount
@@ -97,7 +97,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     }
 
     public convenience init(config: LLMServerConfig? = nil,
-                            bearer: @escaping @Sendable () throws -> String? = { try ServerCredentials.readBearer() }) {
+                            bearer: @escaping @Sendable () throws -> String? = { try ServerCredentials.sessionBearer() }) {
         self.init(config: config, bearer: bearer, protocolClasses: nil)
     }
 
@@ -137,7 +137,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     }
 
     /// Closes connections (a client made for one check, such as Test Connection, closes them when it is done). A new key does not
-    /// need it: the key is read for each request.
+    /// need it: each request asks for the key (`ServerCredentials.sessionBearer`, which saving it keeps current).
     public func reset() {
         lock.withLock {
             _session?.invalidateAndCancel()

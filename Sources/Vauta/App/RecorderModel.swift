@@ -400,7 +400,7 @@ final class RecorderModel {
     init(preferences: Preferences) {
         self.preferences = preferences
         liveTranslation = LiveTranslationModel(preferences: preferences)
-        hasServerKey = ((try? ServerCredentials.readBearer()) ?? nil).map { !$0.isEmpty } ?? false
+        hasServerKey = ((try? ServerCredentials.sessionBearer()) ?? nil).map { !$0.isEmpty } ?? false
         do {
             serverConfig = try LLMServerConfig.load()
         } catch {
