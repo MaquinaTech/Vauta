@@ -306,6 +306,32 @@ or a calibration made from these numbers would be fitted on the same 10 meetings
 "Right" is a word aligned to the same reference word, after the normalisation of `score_wer.py`; a scored word is a recognised
 word that has a confidence (insertions included).
 
+## Whether the microphone heard the others
+
+While recording, `EchoCoupling` decides from the loudness of the two channels (10 ms energies) whether the microphone hears the
+Others channel. Over speakers it does, and the echo marks of the Me lines run. A recording in which it never does in a minute of
+the others speaking ("never heard") is taken as headphones, and nothing is marked. A microphone that hears them in two of the
+last six windows of 10 s suggests headphones in the panel ("heard lately"). Its thresholds were set on simulated energies;
+`eval/scripts/run_echo_coupling.py` (`Vauta echo-coupling`) measures them on real speech, 30 October 2026, the first 600 s of
+the 10 AMI meetings above. The Others file is the remote mix of `build_sets.py`, and the Me file is, by condition:
+
+- **room**: the left-out participant's raw headset. The four sat in one room, so the headset hears the others faintly, as a
+  microphone hears speakers turned low. The hardest case to hear.
+- **speakers**: the same headset with the remote mix added 20 dB lower and 150 ms later. Where the room's cross-talk is the
+  stronger, it gives the delay (about 0 s).
+- **headphones**: the left-out participant's headset of the next meeting, whose room never heard this mix.
+
+| Condition | Expected | Windows | Heard | Never heard | Heard lately | Median delay |
+|---|---|---:|---:|---:|---:|---:|
+| room | heard | 452 | 76.1 % | 0 of 10 | 8 of 10 | 0.01 s |
+| speakers | heard | 452 | 92.0 % | 0 of 10 | 10 of 10 | 0.15 s |
+| headphones | never heard | 452 | 0.0 % | 10 of 10 | 0 of 10 | - |
+
+No meeting is taken for headphones when the microphone hears the others, even faintly, and none recorded "over headphones"
+hears them. The panel's suggestion would not come up in two of the ten faint-room meetings. These are headsets in one room
+with a simulated codec, not a laptop microphone and real speakers: they test the measure on real speech, not every room.
+
+## Spanish
 
 Spanish is measured in two ways, and neither is a real Spanish meeting. **No claim is made about real Spanish calls.**
 
