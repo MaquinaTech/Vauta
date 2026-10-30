@@ -32,6 +32,17 @@ struct CaptureLanguageTests {
         #expect(Set(c.languages.map(\.id)).count == c.languages.count)
     }
 
+    /// The system lists the Spanish model as installed, but this app can't use it (an ad-hoc build signed again by an update): it
+    /// counts as not installed, so Settings offers the download that the recording needs, instead of a recording that doesn't start.
+    @Test func aModelThisAppCannotUseIsNotInstalled() async throws {
+        let listed = ["es-ES", "en-US"].map(Locale.init(identifier:))
+        let usable = await SpeechLanguages.usable(listed, .speech) { locale, engine in engine == .speech && locale.identifier(.bcp47) == "en-US" }
+        #expect(usable.map { $0.identifier(.bcp47) } == ["en-US"])
+        let c = SpeechLanguageCatalog(speech: speech, dictation: dictation, installedSpeech: usable)
+        #expect(try #require(c.language(matching: "es-ES")).isInstalled == false)
+        #expect(try #require(c.language(matching: "en-US")).isInstalled)
+    }
+
     @Test(arguments: [
         ("es-ES", "es-ES"), ("es_ES", "es-ES"), ("es", "es-ES"), ("es-AR", "es-ES"), ("es-MX", "es-MX"),
         ("en", "en-US"), ("en-IE", "en-US"), ("en-GB", "en-GB"), ("pt", "pt-BR"), ("pt-PT", "pt-PT"),
