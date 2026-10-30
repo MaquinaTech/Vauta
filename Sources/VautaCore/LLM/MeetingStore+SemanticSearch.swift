@@ -66,26 +66,6 @@ extension MeetingStore {
         return out
     }
 
-    private struct Located {
-        let key: String
-        let meeting: Int64
-        let start: Double
-        let end: Double
-        let chunkID: Int64?
-    }
-
-    /// Every chunk of `space` that holds a moment (chunks overlap by a segment, so a moment can belong to two), in order; else the
-    /// time bucket a keyword hit falls in when the meeting has no chunk of that space there yet.
-    private func locateAll(_ meeting: Int64, _ t: Double, space: EmbeddingSpace) throws -> [Located] {
-        let chunks = try db.query("SELECT id, start, end FROM chunks WHERE meeting_id = ? AND model = ? AND dims = ? AND start <= ? AND end >= ? ORDER BY start, id",
-                                  [.integer(meeting), .text(space.model), .integer(Int64(space.dimensions)), .real(t), .real(t)])
-        if !chunks.isEmpty {
-            return chunks.map { Located(key: "c\($0.int(0))", meeting: meeting, start: $0.double(1), end: $0.double(2), chunkID: $0.int(0)) }
-        }
-        let bucket = (t / Self.chunkTarget).rounded(.down) * Self.chunkTarget
-        return [Located(key: "m\(meeting)@\(Int(bucket))", meeting: meeting, start: bucket, end: bucket + Self.chunkMax, chunkID: nil)]
-    }
-
     /// Ranks by the cosine of the question to each passage (a stored int8 vector), then adds the boosts of `SemanticRanker`:
     /// +0.30 for a passage with every code of the question, +0.15 times the share of its rare names, and on the cosine scale the
     /// signals Ask already had (a named entity, a speaker the person named, a noted moment). The candidates are the vector top-K
@@ -116,9 +96,11 @@ extension MeetingStore {
         // Exact items.
         let codes = SemanticRanker.codes(in: question)
         let codeHits = try codes.compactMap { item in try ftsMatches(item, within: within, excluding: excluding, space: space).map { (item, $0) } }
-        let rows = (try? db.query("SELECT COUNT(*) FROM segments")[0].int(0)).map(Int.init) ?? 0
+        let names = SemanticRanker.nameCandidates(in: question, excluding: codes)
+        // The size of the transcript says when a name is rare: it is counted only for a question with a name.
+        let rows = names.isEmpty ? 0 : (try? db.query("SELECT COUNT(*) FROM segments")[0].int(0)).map(Int.init) ?? 0
         var nameHits: [(String, [Located])] = []
-        for name in SemanticRanker.nameCandidates(in: question, excluding: codes) {
+        for name in names {
             guard let phrase = SemanticRanker.phrase(name) else { continue }
             let df = try db.query("SELECT COUNT(*) FROM (SELECT 1 FROM segments_fts WHERE segments_fts MATCH ? LIMIT ?)",
                                   [.text(phrase), .integer(Int64(SemanticRanker.rareLimit(rows: rows) + 1))])[0].int(0)
@@ -167,21 +149,13 @@ extension MeetingStore {
         // The context graph: passages that name the question's people or projects, and what a named speaker said.
         let entities = try entitiesNamed(in: question, locale: profile.locale)
         if !entities.isEmpty {
-            for (key, r) in ranges {
-                let named = try db.query("SELECT COUNT(DISTINCT entity_id) FROM mentions WHERE meeting_id = ? AND t BETWEEN ? AND ? AND entity_id IN (SELECT value FROM json_each(?))",
-                                         [.integer(r.meeting), .real(r.start), .real(r.end), .ids(entities)])[0].int(0)
-                if named > 0 { score[key, default: 0] += 0.08 }
-                let said = try db.query("""
-                    SELECT COUNT(*) FROM segments s JOIN meeting_speakers sp ON sp.id = s.speaker_id
-                    WHERE s.meeting_id = ?1 AND s.start BETWEEN ?2 AND ?3 AND sp.source = 'user'
-                      AND sp.entity_id IN (SELECT id FROM entities WHERE id IN (SELECT value FROM json_each(?4)) OR merged_into IN (SELECT value FROM json_each(?4)))
-                      AND (s.speaker_confidence IS NULL OR s.speaker_confidence >= ?5) AND s.overlap = 0 AND \(Self.notEcho)
-                    """, [.integer(r.meeting), .real(r.start), .real(r.end), .ids(entities), .real(SpeakerTag.lowConfidenceBelow)])[0].int(0)
-                if said > 0 { score[key, default: 0] += 0.08 }
+            for (key, signal) in try graphSignals(ranges, entities: entities) {
+                if signal.named > 0 { score[key, default: 0] += 0.08 }
+                if signal.said { score[key, default: 0] += 0.08 }
             }
         }
         for moment in try noteCitedMoments(terms: terms, within: within).prefix(40) where moment.meeting != excluding {
-            for l in try locateAll(moment.meeting, moment.t, space: space) where ranges[l.key] != nil { score[l.key, default: 0] += 0.04 }
+            for l in try locate(moment.t, in: moment.meeting, space: space) where ranges[l.key] != nil { score[l.key, default: 0] += 0.04 }
         }
         return try assemble(Array(score), ranges: ranges, limit: limit, maxChars: maxChars, cosine: cosine.filter { !placeholder.contains($0.key) })
     }
@@ -190,14 +164,17 @@ extension MeetingStore {
     private func ftsMatches(_ item: String, within: Int64?, excluding: Int64?, space: EmbeddingSpace) throws -> [Located]? {
         guard let phrase = SemanticRanker.phrase(item) else { return nil }
         let rows = try db.query("""
-            SELECT s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
+            SELECT s.id, s.meeting_id, s.start FROM segments_fts f JOIN segments s ON s.id = f.rowid
             WHERE segments_fts MATCH ?1 AND (?2 IS NULL OR s.meeting_id = ?2) AND (?3 IS NULL OR s.meeting_id <> ?3) AND \(Self.notEcho) ORDER BY rank LIMIT 400
             """, [.text(phrase), within.map { .integer($0) }, excluding.map { .integer($0) }])
         guard !rows.isEmpty else { return nil }
+        let holding = try chunksHolding(rows.map { $0.int(0) }, space: space)
         var seen = Set<String>()
         var out: [Located] = []
         for r in rows {
-            for l in try locateAll(r.int(0), r.double(1), space: space) where seen.insert(l.key).inserted { out.append(l) }
+            let m = r.int(1)
+            let found = holding[r.int(0)]?.map { Located(chunk: $0, meeting: m) } ?? [Located(bucketOf: r.double(2), meeting: m)]
+            for l in found where seen.insert(l.key).inserted { out.append(l) }
         }
         return out
     }
@@ -214,10 +191,12 @@ extension MeetingStore {
                               AND c.start <= s.start AND c.end >= s.start)
             ORDER BY rank LIMIT 20
             """, [.text(match), within.map { .integer($0) }, .text(space.model), .integer(Int64(space.dimensions)), excluding.map { .integer($0) }])
+        // No chunk of the space holds these segments: each goes to its time bucket.
         var seen = Set<String>()
         var out: [Located] = []
         for r in rows {
-            for l in try locateAll(r.int(0), r.double(1), space: space) where seen.insert(l.key).inserted { out.append(l) }
+            let l = Located(bucketOf: r.double(1), meeting: r.int(0))
+            if seen.insert(l.key).inserted { out.append(l) }
         }
         return out.isEmpty ? nil : out
     }
