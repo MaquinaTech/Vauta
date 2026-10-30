@@ -121,6 +121,9 @@ struct LocalizationTests {
                 == "Found 2 mentions and 1 ambiguous name in 1\u{00A0}meeting.")
         #expect(format("No new names were found in %lld meetings.", 1) == "No new names were found in 1\u{00A0}meeting.")
         #expect(format("Stopped after %lld of %lld meetings.", 1, 1) == "Stopped after 1 of 1 meeting.")
+        #expect(format("Searched %lld meetings (%@).", 1, "Oct 28, 2026" as NSString) == "Searched 1 meeting (Oct 28, 2026).")
+        #expect(format("Passages from %lld meetings and %lld documents were sent to the model.", 1, 2)
+                == "Passages from 1 meeting and 2 documents were sent to the\u{00A0}model.")
 
         // Every plural key resolves without leaving a variable unexpanded.
         let dict = try Self.plist(Self.english.appendingPathComponent("Localizable.stringsdict"))

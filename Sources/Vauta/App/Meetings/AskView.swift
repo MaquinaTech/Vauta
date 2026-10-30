@@ -59,6 +59,9 @@ struct AskView: View {
                 if let note = model.note {
                     Label(note, systemImage: "info.circle").font(.callout).foregroundStyle(.secondary)
                 }
+                if let coverage = model.coverage, let text = AskModel.coverageText(coverage) {
+                    Label(text, systemImage: "text.magnifyingglass").font(.callout).foregroundStyle(.secondary)
+                }
                 if showsNoPassages { noPassages }
                 if !model.passages.isEmpty { passages }
                 if !model.documentPassages.isEmpty { documentPassages }

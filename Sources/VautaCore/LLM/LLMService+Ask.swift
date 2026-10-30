@@ -16,12 +16,15 @@ extension LLMService {
         public let anchoredMeetings: [Int64: Int64]
         /// Nothing in the meetings the question was limited to (`meetings`) matched, so all of them were searched.
         public let widenedScope: Bool
+        /// Across the library: what was searched and what reached the model (nil about one meeting, for a question heard, or only documents).
+        public let coverage: AskCoverage?
 
         public init(answer: VerifiedAnswer, passages: [RetrievedPassage], sent: [Int64: CitableSegment],
                     documentPassages: [DocumentPassage] = [], sentDocuments: [String: DocumentPassage] = [:],
-                    anchoredMeetings: [Int64: Int64] = [:], widenedScope: Bool = false) {
+                    anchoredMeetings: [Int64: Int64] = [:], widenedScope: Bool = false, coverage: AskCoverage? = nil) {
             self.anchoredMeetings = anchoredMeetings
             self.widenedScope = widenedScope
+            self.coverage = coverage
             self.answer = answer
             self.passages = passages
             self.sent = sent
@@ -151,6 +154,7 @@ extension LLMService {
         var sentDocuments: [String: DocumentPassage] = [:]
         var wholeMeeting = false
         var widened = false
+        var coverage: AskCoverage?
         func tail(_ last: ChatMessage) -> [ChatMessage] { wholeMeeting ? [last] : (passageRules.map { [$0, last] } ?? [last]) }
         // What had been said when the question was asked (the whole meeting for a finished one): the quotes of the answer are looked
         // for here when the model cited the wrong segment.
@@ -336,12 +340,16 @@ extension LLMService {
             for p in passages { p.segments.forEach { sent[$0.id] = $0 } }
             messages = built.messages
             sentDocuments = built.ids
+            if useMeetings, meetingID == nil, auto == nil {
+                coverage = await askCoverage(meetings: widened ? nil : limited, space: meetingMode == .keyword ? nil : query?.space,
+                                             passages: passages, documents: Set(documentPassages.map(\.fileID)).count)
+            }
         }
         // The question's own lines were read for context but may not be cited (a question's premise is not a fact).
         if let auto { for id in auto.uncitable { sent[id] = nil } }
         guard !sent.isEmpty || !sentDocuments.isEmpty else {
             return AskResult(answer: VerifiedAnswer(answer: Self.notFoundText(scope: scope, documents: useDocuments), claims: [], found: false), passages: [], sent: [:],
-                             widenedScope: widened)
+                             widenedScope: widened, coverage: coverage)
         }
         messages += tail(instruction)
         let offered = OutputSchemas.Offered(segments: Set(sent.keys.map { Int($0) }), documents: Set(sentDocuments.keys.compactMap { Int($0.dropFirst()) }))
@@ -499,7 +507,7 @@ extension LLMService {
             answer = VerifiedAnswer(answer: Self.notFoundText(scope: scope, documents: useDocuments), claims: [], found: false)
         }
         return AskResult(answer: answer, passages: passages, sent: sent, documentPassages: documentPassages, sentDocuments: sentDocuments,
-                         anchoredMeetings: anchoredMeetings, widenedScope: widened)
+                         anchoredMeetings: anchoredMeetings, widenedScope: widened, coverage: coverage)
     }
 
     /// The segments a quote may be moved to: the ones visible when the question was asked (one meeting), or the meetings of the

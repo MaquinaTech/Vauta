@@ -273,6 +273,38 @@
 			<string>altre %lld note</string>
 		</dict>
 	</dict>
+	<key>%lld of them aren’t indexed for search by meaning yet and were searched by keywords.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld di queste non è ancora nell’indice di ricerca per significato ed è stata consultata con la ricerca per parole chiave.</string>
+			<key>other</key>
+			<string>%lld di queste non sono ancora nell’indice di ricerca per significato e sono state consultate con la ricerca per parole chiave.</string>
+		</dict>
+	</dict>
+	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld riunione meno recente non ha più la trascrizione e non è stata consultata.</string>
+			<key>other</key>
+			<string>%lld riunioni meno recenti non hanno più la trascrizione e non sono state consultate.</string>
+		</dict>
+	</dict>
 	<key>%lld to review</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -527,6 +559,81 @@
 			<string>Altri elementi possibili, %lld elemento</string>
 			<key>other</key>
 			<string>Altri elementi possibili, %lld elementi</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Al modello sono stati inviati passaggi di %lld documento.</string>
+			<key>other</key>
+			<string>Al modello sono stati inviati passaggi di %lld documenti.</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings and %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Al modello sono stati inviati passaggi di %1$#@meetings@ e %2$#@documents@.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld riunione</string>
+			<key>other</key>
+			<string>%1$lld riunioni</string>
+		</dict>
+		<key>documents</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld documento</string>
+			<key>other</key>
+			<string>%2$lld documenti</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Al modello sono stati inviati passaggi di %lld riunione.</string>
+			<key>other</key>
+			<string>Al modello sono stati inviati passaggi di %lld riunioni.</string>
+		</dict>
+	</dict>
+	<key>Searched %lld meetings (%@).</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Ricerca in %1$#@meetings@ (%2$@).</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld riunione</string>
+			<key>other</key>
+			<string>%1$lld riunioni</string>
 		</dict>
 	</dict>
 	<key>Spoke in %lld meetings</key>

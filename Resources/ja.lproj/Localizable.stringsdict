@@ -239,6 +239,34 @@
 			<string>ほか%lld件のメモ</string>
 		</dict>
 	</dict>
+	<key>%lld of them aren’t indexed for search by meaning yet and were searched by keywords.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>そのうち %lld⁠件は意味による検索のインデックスがまだないため、キーワード検索で検索しました。</string>
+		</dict>
+	</dict>
+	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>古いミーティング %lld⁠件は文字起こしが残っていないため、検索しませんでした。</string>
+		</dict>
+	</dict>
 	<key>%lld to review</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -461,6 +489,71 @@
 			<string>lld</string>
 			<key>other</key>
 			<string>その他の候補項目、%lld件</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld⁠件の書類の箇所をモデルに送りました。</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings and %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@meetings@と%2$#@documents@の箇所をモデルに送りました。</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld⁠件のミーティング</string>
+		</dict>
+		<key>documents</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%2$lld⁠件の書類</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld⁠件のミーティングの箇所をモデルに送りました。</string>
+		</dict>
+	</dict>
+	<key>Searched %lld meetings (%@).</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@meetings@を検索しました（%2$@）。</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld⁠件のミーティング</string>
 		</dict>
 	</dict>
 	<key>Spoke in %lld meetings</key>
