@@ -136,7 +136,8 @@ struct QueryRoutingTests {
         let q = QueryTranslator(backend: StubbornBackend(stubborn))
         #expect(await q.translate(Self.spanish, from: Self.es, to: Self.en, timeout: .milliseconds(50)) == nil)
         #expect(stubborn.running == 1, "the first call is still running: it does not honour cancelling")
-        #expect(await q.translate("otra pregunta", from: Self.es, to: Self.en, timeout: .seconds(20)) == "another question")
+        // It waits for the first call, then runs its own: under a second here, but a loaded CI runner took minutes.
+        #expect(await q.translate("otra pregunta", from: Self.es, to: Self.en, timeout: .seconds(600)) == "another question")
         #expect(stubborn.peak == 1, "never two calls on the session at once")
         #expect(stubborn.running == 0)
     }

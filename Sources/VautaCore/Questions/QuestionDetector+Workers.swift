@@ -207,7 +207,7 @@ extension QuestionDetector {
             // The person's own question took the model: this one is asked again once if it is still fresh and not the same question.
             // Only the person's own questions count here: the candidate itself is always in `dedup`.
             // A question that arrived meanwhile is newer and keeps the place: the older one is not put back over it.
-            if !item.requeued, clock() - q.arrivedAt < 60, answerQueue.isEmpty,
+            if !item.requeued, clock() - q.arrivedAt < timing.requeueWithin, answerQueue.isEmpty,
                !manualDedup.isDuplicate(text: q.candidate.text, locale: meetingLocale, now: clock()) {
                 var again = item
                 again.requeued = true

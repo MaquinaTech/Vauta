@@ -77,6 +77,7 @@ struct QuestionDetectorTests {
     static var fast: QuestionTiming {
         var t = QuestionTiming()
         t.settle = 0.05; t.checkInterval = 0.2; t.cardInterval = 0.4; t.staleAfter = 600; t.lateAfter = 600; t.dropAfter = 1_200; t.cardWaitMax = 2
+        t.requeueWithin = 600
         return t
     }
 

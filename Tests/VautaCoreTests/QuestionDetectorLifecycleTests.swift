@@ -123,6 +123,21 @@ struct QuestionDetectorLifecycleTests {
         await r.detector.stop()
     }
 
+    @Test func aQuestionPushedOutAfterTheRequeueWindowIsNotAskedAgain() async throws {
+        let backend = FakeAnswerBackend()
+        backend.scripted = [.superseded]
+        var timing = QuestionDetectorTests.fast
+        timing.checkInterval = 0.01
+        timing.cardInterval = 0.01
+        timing.requeueWithin = 0
+        let r = try await QuestionDetectorTests.rig(timing: timing, backend: backend)
+        await QuestionDetectorTests.ask(r, "Who is responsible for the vendor contract?", at: 700)
+        #expect(await settle { (try? await r.store.detectedQuestions(r.meeting))?.first?.outcome == .superseded })
+        #expect(backend.answers.count == 1)
+        #expect(r.events.answers.isEmpty)
+        await r.detector.stop()
+    }
+
     @Test func aCardNeverAppearsAfterCriticalHeatEvenWhenTheAnswerFinishedWithNoWaitingForTheBudget() async throws {
         let state = Locked(LiveAnswerEnvironment())
         let backend = FakeAnswerBackend()

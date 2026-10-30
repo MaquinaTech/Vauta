@@ -31,6 +31,8 @@ public struct QuestionTiming: Sendable, Equatable {
     /// A card shown later than `lateAfter` after the question says when it was asked; later than `dropAfter` it is not shown.
     public var lateAfter = 45.0
     public var dropAfter = 120.0
+    /// A heard question whose answer the person's own question pushed out is asked again once if it arrived less than this long ago.
+    public var requeueWithin = 60.0
     /// Duplicate memory.
     public var dedupWindow = 600.0
     public var jaccard = 0.6
