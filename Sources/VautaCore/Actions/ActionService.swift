@@ -72,7 +72,7 @@ public actor ActionService {
     public static let reminderSimilarity = 0.8
     /// Events: a title at least this much alike around the day.
     public static let eventSimilarity = 0.6
-    /// A reminder edited this long after the ledger recorded the save counts as changed by the person.
+    /// A reminder edited this long after Vauta saved it counts as changed by the person.
     static let editTolerance: TimeInterval = 10
     /// A save that returned late is still found: an item created more than this after the intent is not Vauta's (the person typed it).
     static let adoptionWindow: TimeInterval = 120
@@ -294,7 +294,7 @@ public actor ActionService {
             try? await store.setActionState(row.id, .missing)
             return .missing
         }
-        if !confirmedEdited, let modified = item.lastModified, modified > row.writtenAt.addingTimeInterval(Self.editTolerance) { return .editedElsewhere }
+        if !confirmedEdited, Self.editedElsewhere(item, row) { return .editedElsewhere }
         do {
             try await writer.remove(kind, itemID: item.itemID)
         } catch {
@@ -311,8 +311,18 @@ public actor ActionService {
         let kind: ActionKind = row.target == .reminder ? .reminder : .event
         guard await writer.access(kind) == .full,
               let item = await writer.item(kind, itemID: itemID, externalID: row.externalID, containerID: row.containerID) else { return nil }
-        let edited = item.lastModified.map { $0 > row.writtenAt.addingTimeInterval(Self.editTolerance) } ?? false
+        let edited = Self.editedElsewhere(item, row)
         return RemovalPreview(actionID: actionID, kind: kind, title: item.title, containerID: item.containerID, edited: edited)
+    }
+
+    /// Changed there after Vauta saved it. The tolerance runs from the save, which is the item's creation date (the same clock as its
+    /// modification date), not from the intent: on a busy Mac the save can end seconds after it, and the item looked edited. A creation
+    /// date more than `adoptionWindow` after the intent is not that save (the item is not Vauta's own), and then it runs from the intent.
+    static func editedElsewhere(_ item: ActionItem, _ row: CreatedAction) -> Bool {
+        guard let modified = item.lastModified else { return false }
+        var saved = row.writtenAt
+        if let created = item.creationDate, created > saved, created <= saved.addingTimeInterval(adoptionWindow) { saved = created }
+        return modified > saved.addingTimeInterval(editTolerance)
     }
 
     /// Undo of a batch: each row separately, in reverse order. Rows the person edited are reported, not removed.
