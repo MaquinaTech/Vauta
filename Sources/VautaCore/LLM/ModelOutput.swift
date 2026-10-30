@@ -214,6 +214,19 @@ struct Lossy<T: Decodable>: Decodable {
     init(from decoder: Decoder) throws { value = try? T(from: decoder) }
 }
 
+/// An open question as a model writes it: a string, or an object that holds it under one of `keys`. A model asked for a list of
+/// strings often writes the shape of its decisions instead ({"text", "seg", "quote"}), or names the key after the list.
+struct OpenQuestionText: Decodable {
+    static let keys = ["text", "question", "mention", "texto", "pregunta"]
+    let value: String?
+
+    init(from decoder: Decoder) throws {
+        if let s = try? decoder.singleValueContainer().decode(String.self) { value = s; return }
+        let c = try decoder.container(keyedBy: AnyKey.self)
+        value = Self.keys.lazy.compactMap { try? c.decode(String.self, forKey: AnyKey($0)) }.first
+    }
+}
+
 /// An ID as a number or a string.
 struct FlexibleID: Decodable {
     let id: Int64?

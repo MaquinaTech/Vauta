@@ -371,7 +371,7 @@ extension VautaPrompts {
             decisions = c.list(Decision.self, "decisions", "decisiones") ?? []
             tasks = c.list(Task.self, "tasks", "tareas") ?? []
             entities = c.list(Mention.self, "entities", "entidades") ?? []
-            openQuestions = c.list(String.self, "open_questions", "abiertas") ?? []
+            openQuestions = (c.list(OpenQuestionText.self, "open_questions", "abiertas") ?? []).compactMap(\.value)
         }
     }
 
