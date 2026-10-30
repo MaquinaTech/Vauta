@@ -11,7 +11,13 @@ import Observation
 @MainActor
 @Observable
 final class AskModel {
-    var question = ""
+    var question = "" {
+        didSet { if question != oldValue { readTime() } }
+    }
+    /// The time the question names (`AskTimeScope`): applied, or offered as a control under the question.
+    private(set) var timeScope: AskTimeScope?
+    /// The person turned that control on or off (nil: as `timeScope.applies` says). Forgotten when the question names another time.
+    private(set) var timeChoice: Bool?
     /// About one meeting (its whole transcript) instead of all of them.
     var thisMeeting = false
     /// The meeting "this meeting" refers to.
@@ -95,6 +101,18 @@ final class AskModel {
                comment: "Ask: shown under an answer with checked quotes whose text was cut at the length limit")
     }
 
+    /// The question names a time with no meetings (a day off, a week before the first recording).
+    static func noMeetingsThenNote(_ period: AskTimeScope) -> String {
+        String(localized: "No meetings from \(period.label()), so all meetings were searched.",
+               comment: "Ask: shown under the answer when the question names a time with no meetings; the argument is a date, a range of dates, a month, a quarter or a year")
+    }
+
+    /// The meetings of the time the question names have nothing that matches it.
+    static func nothingThenNote(_ period: AskTimeScope) -> String {
+        String(localized: "Nothing in the meetings from \(period.label()) matched, so all meetings were searched.",
+               comment: "Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year")
+    }
+
     /// A live question about something that has not happened yet in the meeting.
     static var notYetText: String {
         String(localized: "That hasn’t come up yet in this meeting.", comment: "Ask: the answer to a question about something that has not happened yet in the meeting being recorded")
@@ -102,11 +120,34 @@ final class AskModel {
 
     var canAsk: Bool { !busy && question.trimmingCharacters(in: .whitespacesAndNewlines).count >= 3 }
 
+    /// The time control under the question: not about one meeting (its whole transcript is read) nor only about documents.
+    var offeredTimeScope: AskTimeScope? { thisMeeting || scope == .documents ? nil : timeScope }
+
+    /// Whether the next question looks only in the meetings of the time it names.
+    var usesTimeScope: Bool { offeredTimeScope.map { timeChoice ?? $0.applies } ?? false }
+
+    /// Turns the time control on or off; the answer on screen, if it is this question's, is asked again.
+    func chooseTimeScope(_ on: Bool) {
+        timeChoice = on
+        let current = SingleLineText.flatten(question).trimmingCharacters(in: .whitespacesAndNewlines)
+        if !busy, current == answeredQuestion, answer != nil || !passages.isEmpty || needsModel || failure != nil { ask() }
+    }
+
+    /// The question's language when it can be told, else the person's: the words of the other languages are not looked for
+    /// (German "hier" is "here").
+    private func readTime() {
+        let languages = OutputLanguage.confident(question).map { [$0.identifier] } ?? Locale.preferredLanguages
+        let read = AskTimeScope.read(question, languages: languages)
+        if read?.interval != timeScope?.interval { timeChoice = nil }
+        timeScope = read
+    }
+
     func ask() {
         let question = SingleLineText.flatten(self.question).trimmingCharacters(in: .whitespacesAndNewlines)
         guard question.count >= 3, !busy else { return }
         // "Only documents" looks in the whole library: a meeting's materials are a narrower search, which the meeting picker (hidden then) asks for.
         let scope = thisMeeting && self.scope != .documents ? meetingID : nil
+        let period = usesTimeScope ? timeScope : nil
         task?.cancel()
         onAsked?(question)
         busy = true
@@ -130,9 +171,22 @@ final class AskModel {
             defer { if generation == current { busy = false } }
             // At once: passages from local search (BM25 + graph), no server needed.
             let kind = answeredScope
-            let local = kind == .documents ? [] : ((try? await store.retrieve(question, queryVector: nil, within: scope)) ?? [])
+            // The meetings of the time the question names; none (a day without meetings) is the whole library, and said so.
+            var meetings: [Int64]?
+            var widenedNote: String?
+            if let period, kind != .documents {
+                let ids = (try? await store.meetingIDs(matching: MeetingFilter(from: period.interval.start, to: period.interval.end))) ?? []
+                if ids.isEmpty { widenedNote = Self.noMeetingsThenNote(period) } else { meetings = ids }
+            }
+            var local = kind == .documents ? [] : ((try? await store.retrieve(question, queryVector: nil, within: scope, meetings: meetings)) ?? [])
+            if local.isEmpty, meetings != nil, kind != .documents {
+                local = (try? await store.retrieve(question, queryVector: nil, within: scope)) ?? []
+                // Without a model these passages are all there is: say they come from all the meetings.
+                if !local.isEmpty, await llm?.isConfigured != true, let period { widenedNote = Self.nothingThenNote(period) }
+            }
             let localDocuments = kind == .meetings ? [] : (await llm?.documentPassages(for: question, meetingID: scope) ?? [])
             guard !Task.isCancelled else { return }
+            if let widenedNote { note = widenedNote }
             show(local)
             documentPassages = localDocuments
             guard let llm, await llm.isConfigured else {
@@ -140,7 +194,7 @@ final class AskModel {
                 return
             }
             do {
-                let result = try await llm.ask(question, meetingID: scope, scope: kind) { n in
+                let result = try await llm.ask(question, meetingID: scope, meetings: meetings, scope: kind) { n in
                     Task { @MainActor in if self.generation == current { self.progressTokens = n } }
                 }
                 guard !Task.isCancelled else { return }
@@ -154,6 +208,7 @@ final class AskModel {
                     for (id, segment) in result.sent where segments[id] == nil { segments[id] = segment }
                 }
                 if !result.documentPassages.isEmpty { documentPassages = result.documentPassages }
+                if result.widenedScope, let period { note = Self.nothingThenNote(period) }
                 answer = result.answer
             } catch is CancellationError {
             } catch where Task.isCancelled {

@@ -5614,6 +5614,21 @@
 /* Ask: shown while the documents are still being indexed; the arguments are the files read and the files to read */
 "Still indexing your documents (%lld of %lld). Answers use what’s indexed so far." = "문서를 아직 색인하는 중입니다(%lld/%lld). 답변은 지금까지 색인된 내용을 사용합니다.";
 
+/* Ask: a toggle under the question that limits the search to the meetings of the time the question names; the argument is a date, a range of dates, a month, a quarter or a year */
+"Only meetings from %@" = "%@ 회의만";
+
+/* Ask: help on the time toggle when it is on */
+"Only the meetings held then are searched. Click to search all meetings." = "이 기간의 회의에서만 검색합니다. 모든 회의에서 검색하려면 클릭하세요.";
+
+/* Ask: help on the time toggle when it is off */
+"Click to search only the meetings held then." = "이 기간의 회의에서만 검색하려면 클릭하세요.";
+
+/* Ask: shown under the answer when the question names a time with no meetings; the argument is a date, a range of dates, a month, a quarter or a year */
+"No meetings from %@, so all meetings were searched." = "%@에 회의가 없어 모든 회의에서 검색했습니다.";
+
+/* Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year */
+"Nothing in the meetings from %@ matched, so all meetings were searched." = "%@ 회의에서 일치하는 내용이 없어 모든 회의에서 검색했습니다.";
+
 /* Button that stops finding an answer */
 "Stop" = "중지";
 
