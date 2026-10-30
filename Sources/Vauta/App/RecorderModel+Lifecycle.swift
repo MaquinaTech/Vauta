@@ -217,7 +217,9 @@ extension RecorderModel {
         var removedEmpty = false
         if let store, let id = meetingID {
             do {
-                removedEmpty = try await store.endMeeting(id, at: .now) == false
+                // Over headphones the microphone never heard the others: no line of the user's is an echo of them.
+                let heard = capture?.speakerEcho()
+                removedEmpty = try await store.endMeeting(id, at: .now, marksEchoes: heard?.neverHeard != true) == false
                 UserDefaults.standard.removeObject(forKey: Self.recordingMeetingKey)
                 saveError = nil
             } catch {

@@ -396,6 +396,14 @@ notes, answers, owners), search and its chunks, mentions, quotes, talk time, fol
 `segments(of:echoes:)` gives it to the transcript and the speaker tools only. The person can say a line is theirs (2), and
 it is never marked again.
 
+While recording, `EchoCoupling` (`Capture/`) measures whether the microphone hears the Others channel at all, from the
+loudness of both channels by 10 ms (no samples kept), fed by the channel pipes and measured off the audio threads. In each
+10 s window in which the others speak, it correlates the two loudnesses during the others' turns at lags of −0.1 to 0.6 s.
+In the user's own turns the microphone is the user, whatever it hears. A recording with a minute of the others speaking
+that the microphone (almost) never heard (`SpeakerEcho.neverHeard`: headphones) marks no echo. While recording, a
+microphone that hears them suggests headphones in the panel, with `OutputRoute` for the speakers it can name (the Mac's
+own, a display, AirPlay).
+
 Splitting a segment keeps the left part's ID, inserts the right part, moves the citations whose surface or time lies in
 the right text and updates the full-text index by hand. The user's split (refused while the meeting records) locks both
 parts and drops the segment's translations. The aligner's splits go through `finalizeSpeakers(..., splits:)` in the same

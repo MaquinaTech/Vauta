@@ -40,6 +40,7 @@ public final class MeetingCapture: @unchecked Sendable {
     private var systemPipe: ChannelPipe?
     private let levels = LevelMeter()
     private let origin = SessionOrigin()
+    private let coupling = EchoCoupling()
 
     /// Diagnostic messages (audio formats, device changes). No content.
     public var onDiagnostic: (@Sendable (String) -> Void)?
@@ -104,7 +105,7 @@ public final class MeetingCapture: @unchecked Sendable {
 
             // Microphone first: with Bluetooth headsets opening it switches the
             // profile (A2DP → HFP) and the output rate, so the tap starts with the right one.
-            let micPipe = ChannelPipe(channel: micChannel, levels: levels, origin: origin)
+            let micPipe = ChannelPipe(channel: micChannel, levels: levels, origin: origin, coupling: coupling)
             self.micPipe = micPipe
             mic.onDiagnostic = diagnostic
             mic.onHealth = { health.report($0, for: .me, from: .device) }
@@ -112,7 +113,7 @@ public final class MeetingCapture: @unchecked Sendable {
             let micFormat = mic.format
             diagnostic?("microphone: \(Int(micFormat.sampleRate)) Hz, \(micFormat.channelCount) channel(s)")
 
-            let systemPipe = ChannelPipe(channel: systemChannel, levels: levels, origin: origin, diarizer: diarizer)
+            let systemPipe = ChannelPipe(channel: systemChannel, levels: levels, origin: origin, coupling: coupling, diarizer: diarizer)
             self.systemPipe = systemPipe
             system.onDiagnostic = diagnostic
             system.onHealth = { health.report($0, for: .others, from: .device) }
@@ -162,6 +163,10 @@ public final class MeetingCapture: @unchecked Sendable {
 
     /// Mean level (dBFS) per channel since the last call; for the meters.
     public func drainLevels() -> [Channel: Double] { levels.drain() }
+
+    /// Whether the microphone hears the Others channel so far (speakers), measuring the windows not measured yet. A few
+    /// milliseconds every 10 s of audio; not on the audio threads.
+    public func speakerEcho() -> SpeakerEcho { coupling.summary() }
 }
 
 /// Merges device and transcriber health per channel (from any thread) and

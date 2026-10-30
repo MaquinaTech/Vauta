@@ -9,13 +9,16 @@ import AVFoundation
 /// stop(). The lock guards against the last in-flight callback during flush().
 /// With a `diarizer` (the Others channel), every chunk also goes to it with the transcriber's frame counter.
 /// Each chunk carries the time it was captured at (from the buffers' host time, against the session `origin`), so
-/// the transcriber keeps the channel on the session's clock across device gaps.
+/// the transcriber keeps the channel on the session's clock across device gaps. With `coupling`, each chunk's loudness by
+/// 10 ms goes to it at the same time (whether the microphone hears the speakers).
 final class ChannelPipe: @unchecked Sendable {
     private let lock = NSLock()
     private let channel: ChannelTranscriber
     private let diarizer: Diarizer?
     private let levels: LevelMeter
     private let origin: SessionOrigin
+    private let coupling: EchoCoupling?
+    private let couplingFrames: Int
     private let chunkFrames: AVAudioFrameCount
     private let bytesPerFrame: Int
     private var resampler: Resampler?
@@ -24,11 +27,13 @@ final class ChannelPipe: @unchecked Sendable {
     private var chunkCapturedAt: Double?
     private var scratch: [Float] = []
 
-    init(channel: ChannelTranscriber, levels: LevelMeter, origin: SessionOrigin, diarizer: Diarizer? = nil) {
+    init(channel: ChannelTranscriber, levels: LevelMeter, origin: SessionOrigin, coupling: EchoCoupling? = nil, diarizer: Diarizer? = nil) {
         self.channel = channel
         self.diarizer = diarizer
         self.levels = levels
         self.origin = origin
+        self.coupling = coupling
+        couplingFrames = max(1, Int((channel.analyzerFormat.sampleRate * EchoCoupling.frame).rounded()))
         chunkFrames = AVAudioFrameCount(max(channel.analyzerFormat.sampleRate / 10, 160))
         bytesPerFrame = Int(channel.analyzerFormat.streamDescription.pointee.mBytesPerFrame)
     }
@@ -70,6 +75,9 @@ final class ChannelPipe: @unchecked Sendable {
         self.chunk = nil
         chunk.mutableAudioBufferList.pointee.mBuffers.mDataByteSize = UInt32(Int(chunk.frameLength) * bytesPerFrame)
         levels.add(channel.channel, meanSquare(chunk, scratch: &scratch))
+        if let coupling, let at = chunkCapturedAt {
+            coupling.add(channel.channel, capturedAt: at, meanSquares: frameMeanSquares(chunk, frame: couplingFrames, scratch: &scratch))
+        }
         let start = channel.feed(chunk, capturedAt: chunkCapturedAt)
         chunkCapturedAt = nil
         diarizer?.push(chunk, startFrame: start)
