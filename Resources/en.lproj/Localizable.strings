@@ -3994,6 +3994,9 @@
 /* No comment provided by engineer. */
 "Not verified: the quote doesn’t appear as such" = "Not verified: the quote doesn’t appear as such";
 
+/* Ask: help on a claim whose quote was found, while a number it states is not in the quoted words */
+"Not verified: the quote is there, but a figure in this sentence isn’t" = "Not verified: the quote is there, but a figure in this sentence isn’t";
+
 /* Ask: badge at the top of the answer to a question about something that has not happened yet in the meeting */
 "Not yet" = "Not yet";
 

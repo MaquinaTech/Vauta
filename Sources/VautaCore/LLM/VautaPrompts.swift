@@ -121,12 +121,15 @@ public struct VerifiedAnswer: Sendable, Equatable {
         /// The model cited another segment (this id) than the one that holds the quote: the citation was moved to where the words are.
         /// For diagnostics and evaluation; the interface does not show it.
         public let reanchoredFrom: Int64?
+        /// Not verified although the quote is there: a figure of the claim is not in what holds the quote.
+        public let figureMissing: Bool
         /// The claim rests on documents only (no transcript segment is cited): the answer labels it "From your documents".
         public var isFromDocumentsOnly: Bool { citations.isEmpty && !documents.isEmpty }
 
         public init(id: String, text: String, citations: [Int64], verified: Bool, documents: [DocumentCitation] = [],
-                    reanchoredFrom: Int64? = nil) {
+                    reanchoredFrom: Int64? = nil, figureMissing: Bool = false) {
             self.reanchoredFrom = reanchoredFrom
+            self.figureMissing = figureMissing
             self.id = id
             self.text = text
             self.citations = citations

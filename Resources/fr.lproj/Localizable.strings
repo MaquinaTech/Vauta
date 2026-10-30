@@ -3952,6 +3952,9 @@
 /* No comment provided by engineer. */
 "Not verified: the quote doesn’t appear as such" = "Non vérifié : la citation n’apparaît pas telle quelle";
 
+/* Ask: help on a claim whose quote was found, while a number it states is not in the quoted words */
+"Not verified: the quote is there, but a figure in this sentence isn’t" = "Non vérifié : la citation y figure, mais pas un chiffre de cette phrase";
+
 /* Ask: badge at the top of the answer to a question about something that has not happened yet in the meeting */
 "Not yet" = "Pas encore";
 

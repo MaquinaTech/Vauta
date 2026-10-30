@@ -94,7 +94,10 @@ extension AskView {
                     // Only related: the quote is in the transcript but may not answer the question, so no green seal.
                     Image(systemName: answer.kind == .related && claim.verified ? "text.quote" : claim.verified ? "checkmark.seal.fill" : "questionmark.circle")
                         .foregroundStyle(answer.kind == .related && claim.verified ? Color.secondary : claim.verified ? .green : .orange)
-                        .help(claim.isFromDocumentsOnly
+                        .help(claim.figureMissing
+                              ? Text("Not verified: the quote is there, but a figure in this sentence isn’t",
+                                     comment: "Ask: help on a claim whose quote was found, while a number it states is not in the quoted words")
+                              : claim.isFromDocumentsOnly
                               ? (claim.verified ? Text("Verified: the quote appears word for word in your document") : Text("Not verified: the quote doesn’t appear as such"))
                               : (claim.verified ? Text("Verified: the quote appears word for word in the transcript") : Text("Not verified: the quote doesn’t appear as such")))
                         .accessibilityLabel(answer.kind == .related && claim.verified
