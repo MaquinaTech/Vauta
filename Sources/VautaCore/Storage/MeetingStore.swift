@@ -250,6 +250,8 @@ public actor MeetingStore {
             for name in (try? fm.contentsOfDirectory(atPath: dir.path)) ?? [] where StoreFiles.isTemporary(name) {
                 try? fm.removeItem(at: dir.appendingPathComponent(name))
             }
+            // A meeting left open never reached `endMeeting`: its echoes are marked later, with the earlier meetings'.
+            try db.query("INSERT OR IGNORE INTO echo_pending (meeting_id) SELECT id FROM meetings WHERE ended_at IS NULL")
             try db.query("""
                 UPDATE meetings SET ended_at = COALESCE(started_at + (SELECT MAX(end) FROM segments WHERE meeting_id = meetings.id), started_at)
                 WHERE ended_at IS NULL

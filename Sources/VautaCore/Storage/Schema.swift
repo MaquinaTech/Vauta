@@ -486,6 +486,14 @@ enum Schema {
         Migration(32, .sql("""
             ALTER TABLE meeting_speakers ADD COLUMN voice_spread REAL CHECK(voice_spread IS NULL OR voice_spread BETWEEN -1 AND 1);
             """)),
+        // The meetings whose Me lines were never checked for the speakers' echo: those recorded before it was marked (migration 31)
+        // and, added when the store opens, those a crash left open, which never reached `endMeeting`. `markPendingEchoes` checks
+        // each once and takes it off the list. A meeting with a line already marked, or said to be the person's, was checked.
+        Migration(33, .sql("""
+            CREATE TABLE echo_pending (meeting_id INTEGER PRIMARY KEY REFERENCES meetings(id) ON DELETE CASCADE);
+            INSERT INTO echo_pending (meeting_id) SELECT id FROM meetings WHERE ended_at IS NOT NULL AND raw_purged_at IS NULL
+                AND NOT EXISTS (SELECT 1 FROM segments WHERE meeting_id = meetings.id AND echo <> 0);
+            """)),
     ]
 
     /// The schema version this build writes.
