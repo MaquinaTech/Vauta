@@ -152,7 +152,7 @@ Transcription works without either. Without a model, you still get transcripts b
 
 Vauta is distributed as source code only. There is no download, no installer and no Homebrew package: you clone the repository and build Vauta on your own Mac. That is also how you know what you run (see [SECURITY.md](SECURITY.md#verifying-what-you-run)).
 
-Requirements, besides those above: Git and Apple's **Command Line Tools** with the macOS 27 SDK (Swift 6.4), installed with `xcode-select --install`. Xcode is not required. A build made on your own Mac is not quarantined, so Gatekeeper does not block it.
+Requirements, besides those above: Git and Apple's **Command Line Tools** with the macOS 27 SDK (Swift 6.4), installed with `xcode-select --install`, and about 8 GB free on the disk. Xcode is not required. `install.sh` and `update.sh` check all of it before building and say what is missing. A build made on your own Mac is not quarantined, so Gatekeeper does not block it.
 
 ```sh
 git clone https://github.com/MaquinaTech/Vauta.git

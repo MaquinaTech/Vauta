@@ -6,6 +6,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 source scripts/config.sh
+# What the build needs, before it starts (and how many jobs this Mac's memory takes): see scripts/preflight.sh.
+source scripts/preflight.sh
+vauta_preflight || exit 1
 ./scripts/build-app.sh
 
 APP_BIN="$HOME/Applications/Vauta.app/Contents/MacOS/Vauta"

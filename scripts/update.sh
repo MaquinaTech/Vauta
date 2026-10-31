@@ -39,6 +39,10 @@ main() {
     || fail "run this from a Git clone of Vauta (a downloaded archive cannot update itself: clone the repository)"
   [[ -z "$(git status --porcelain --untracked-files=no)" ]] \
     || fail "this folder has local changes; commit or stash them first (git stash)"
+  # What the build needs, checked now from this checkout (a release tag checked out below may predate the check), and how many
+  # jobs this Mac's memory takes (VAUTA_JOBS, for the tests and the build): see scripts/preflight.sh.
+  source scripts/preflight.sh
+  vauta_preflight || exit 1
 
   # The trusted key, from what is already on this Mac. Not local: the EXIT trap runs after main has returned.
   dir="$(mktemp -d)"
@@ -105,9 +109,9 @@ main() {
   if [[ $tests -eq 1 ]]; then
     echo "Running the tests…"
     if [[ "$(xcode-select -p 2>/dev/null)" == *CommandLineTools* ]]; then
-      swift test -Xswiftc -plugin-path -Xswiftc /Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing
+      swift test ${VAUTA_JOBS:+-j "$VAUTA_JOBS"} -Xswiftc -plugin-path -Xswiftc /Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing
     else
-      swift test
+      swift test ${VAUTA_JOBS:+-j "$VAUTA_JOBS"}
     fi
   fi
   ./scripts/install.sh
