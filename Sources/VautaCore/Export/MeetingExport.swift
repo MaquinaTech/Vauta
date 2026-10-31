@@ -167,6 +167,8 @@ public struct MeetingExport: Sendable, Equatable {
     public var notes: [NoteEntry]
     /// Empty when the transcript expired (retention) or nobody spoke.
     public var transcript: [Line]
+    /// When the recording was paused: written with the transcript, where nothing was captured.
+    public var pauses: [MeetingPause]
     /// The meeting's speakers; empty when it has no speaker data.
     public var speakers: [Speaker]
     /// The questions the person kept, in the order they were asked.
@@ -175,8 +177,10 @@ public struct MeetingExport: Sendable, Equatable {
     public init(title: String, startedAt: Date, endedAt: Date? = nil, language: String? = nil, participantsInformedAt: Date? = nil,
                 attendees: [String] = [],
                 summary: String = "", topics: [String] = [], openQuestions: [String] = [], decisions: [Item] = [],
-                tasks: [TaskEntry] = [], notes: [NoteEntry] = [], transcript: [Line] = [], speakers: [Speaker] = [], questions: [QuestionEntry] = []) {
+                tasks: [TaskEntry] = [], notes: [NoteEntry] = [], transcript: [Line] = [], pauses: [MeetingPause] = [], speakers: [Speaker] = [],
+                questions: [QuestionEntry] = []) {
         self.questions = questions
+        self.pauses = pauses
         self.title = title
         self.startedAt = startedAt
         self.endedAt = endedAt
