@@ -60,6 +60,8 @@
 
 /* Settings → General; argument is a shortcut */
 "%@ is used by another app. Choose a different shortcut to open the notepad." = "%@は他のアプリが使用しています。メモ帳を開くには別のショートカットを選んでください。";
+"%@ is used by another app. Choose a different shortcut to pause and resume." = "%@は他のアプリが使用しています。一時停止と再開には別のショートカットを選んでください。";
+"Pause or resume recording" = "録音の一時停止／再開";
 
 /* Settings → General; argument is a shortcut
    Status detail; argument is a shortcut */
@@ -6471,7 +6473,7 @@
 "These names haven’t been checked on this server. Test the connection to choose from its models." = "これらの名前はこのサーバ上で確認されていません。接続をテストすると、サーバのモデルから選択できます。";
 
 /* Settings → General */
-"These shortcuts work in any app. Marking a moment, taking a note and Live Translation work only while recording." = "これらのショートカットはどのアプリでも使えます。瞬間のマーク、メモ、ライブ翻訳は録音中のみ使えます。";
+"These shortcuts work in any app. Marking a moment, taking a note, pausing and Live Translation work only while recording." = "これらのショートカットはどのアプリでも使えます。瞬間のマーク、メモ、一時停止、ライブ翻訳は録音中のみ使えます。";
 
 /* No comment provided by engineer. */
 "These stay, without the link:" = "以下はリンクが外れた状態で残ります：";

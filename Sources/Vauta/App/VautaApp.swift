@@ -110,6 +110,7 @@ struct AppCommands: Commands {
                 .keyboardShortcut(Self.shortcut(model.preferences.recordHotKey, available: model.hotKeyAvailable))
                 .disabled(model.isBusy || model.isReplacingData || (!model.isRecording && model.panelDataUnavailable))
             Button(model.isPaused ? "Resume Recording" : "Pause Recording") { model.togglePause() }
+                .keyboardShortcut(Self.shortcut(model.preferences.pauseHotKey, available: model.pauseHotKeyAvailable))
                 .disabled(!model.canTogglePause)
             Button("Mark a Moment") { model.markMoment() }
                 .keyboardShortcut(Self.shortcut(model.preferences.markHotKey, available: model.markHotKeyAvailable))

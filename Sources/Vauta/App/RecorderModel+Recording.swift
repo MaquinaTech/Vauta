@@ -131,6 +131,7 @@ extension RecorderModel {
                 liveTranslation.recordingStarted(language: plan.language.locale)
                 registerMarkHotKey()
                 registerNoteHotKey()
+                registerPauseHotKey()
                 lastOthersHeard = .now
                 lastMeHeard = nil
                 phase = .recording

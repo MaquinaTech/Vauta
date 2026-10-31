@@ -60,6 +60,8 @@
 
 /* Settings → General; argument is a shortcut */
 "%@ is used by another app. Choose a different shortcut to open the notepad." = "%@ 단축키는 다른 앱에서 사용 중입니다. 메모장을 열려면 다른 단축키를 선택하세요.";
+"%@ is used by another app. Choose a different shortcut to pause and resume." = "%@ 단축키는 다른 앱에서 사용 중입니다. 일시 중지와 재개에는 다른 단축키를 선택하세요.";
+"Pause or resume recording" = "녹음 일시 중지 또는 재개";
 
 /* Settings → General; argument is a shortcut
    Status detail; argument is a shortcut */
@@ -6471,7 +6473,7 @@
 "These names haven’t been checked on this server. Test the connection to choose from its models." = "이 이름은 이 서버에서 확인되지 않았습니다. 서버의 모델 중에서 선택하려면 연결을 테스트하세요.";
 
 /* Settings → General */
-"These shortcuts work in any app. Marking a moment, taking a note and Live Translation work only while recording." = "이 단축키는 어느 앱에서나 작동합니다. 순간 북마크, 메모, 실시간 번역은 녹음 중에만 작동합니다.";
+"These shortcuts work in any app. Marking a moment, taking a note, pausing and Live Translation work only while recording." = "이 단축키는 어느 앱에서나 작동합니다. 순간 북마크, 메모, 일시 중지, 실시간 번역은 녹음 중에만 작동합니다.";
 
 /* No comment provided by engineer. */
 "These stay, without the link:" = "다음 항목은 연결 없이 유지됩니다:";

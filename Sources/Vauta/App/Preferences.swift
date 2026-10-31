@@ -91,6 +91,10 @@ final class Preferences {
     var noteHotKey: HotKeySpec {
         didSet { save(noteHotKey, Keys.noteHotKey) }
     }
+    /// Pauses and resumes the recording.
+    var pauseHotKey: HotKeySpec {
+        didSet { save(pauseHotKey, Keys.pauseHotKey) }
+    }
     /// The notepad opens by itself when a recording starts (off by default).
     var openNotepadOnStart: Bool {
         didSet { defaults.set(openNotepadOnStart, forKey: Keys.openNotepadOnStart) }
@@ -244,6 +248,8 @@ final class Preferences {
     static let defaultMarkHotKey = HotKeySpec(keyCode: 46, modifiers: 0x1800)
     /// ⌃⌥N on the ANSI layout (kVK_ANSI_N = 45).
     static let defaultNoteHotKey = HotKeySpec(keyCode: 45, modifiers: 0x1800)
+    /// ⌃⌥P on the ANSI layout (kVK_ANSI_P = 35).
+    static let defaultPauseHotKey = HotKeySpec(keyCode: 35, modifiers: 0x1800)
     /// ⌃⌥T on the ANSI layout (kVK_ANSI_T = 17).
     static let defaultTranslationHotKey = HotKeySpec(keyCode: 17, modifiers: 0x1800)
 
@@ -282,6 +288,7 @@ final class Preferences {
         recordHotKey = Self.load(defaults, Keys.recordHotKey) ?? Self.defaultRecordHotKey
         markHotKey = Self.load(defaults, Keys.markHotKey) ?? Self.defaultMarkHotKey
         noteHotKey = Self.load(defaults, Keys.noteHotKey) ?? Self.defaultNoteHotKey
+        pauseHotKey = Self.load(defaults, Keys.pauseHotKey) ?? Self.defaultPauseHotKey
         openNotepadOnStart = defaults.bool(forKey: Keys.openNotepadOnStart)
         liveTranslationEnabled = defaults.bool(forKey: Keys.liveTranslation)
         translationTarget = defaults.string(forKey: Keys.translationTarget)
@@ -330,6 +337,7 @@ final class Preferences {
         update(\.recordHotKey, Self.load(defaults, Keys.recordHotKey) ?? Self.defaultRecordHotKey)
         update(\.markHotKey, Self.load(defaults, Keys.markHotKey) ?? Self.defaultMarkHotKey)
         update(\.noteHotKey, Self.load(defaults, Keys.noteHotKey) ?? Self.defaultNoteHotKey)
+        update(\.pauseHotKey, Self.load(defaults, Keys.pauseHotKey) ?? Self.defaultPauseHotKey)
         update(\.openNotepadOnStart, defaults.bool(forKey: Keys.openNotepadOnStart))
         update(\.liveTranslationEnabled, defaults.bool(forKey: Keys.liveTranslation))
         update(\.translationTarget, defaults.string(forKey: Keys.translationTarget))
@@ -377,6 +385,7 @@ final class Preferences {
         static let recordHotKey = "recordHotKey"
         static let markHotKey = "markHotKey"
         static let noteHotKey = "noteHotKey"
+        static let pauseHotKey = "pauseHotKey"
         static let openNotepadOnStart = "openNotepadOnStart"
         static let onboardingVersion = "onboardingCompletedVersion"
         static let liveTranslation = "liveTranslationEnabled"
