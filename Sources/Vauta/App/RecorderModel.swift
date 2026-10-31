@@ -385,6 +385,11 @@ final class RecorderModel {
     @ObservationIgnored var liveNotesToken: UUID?
     @ObservationIgnored var lastLiveNotes: ContinuousClock.Instant?
     @ObservationIgnored var charsSinceLiveNotes = 0
+    /// "Update Now" was pressed and is waiting for the run in flight to end (see `updateLiveNotesNow`).
+    @ObservationIgnored var liveNotesAsked = false
+    /// Observed by the Live notes card: a run is in flight, and text arrived since the last one started.
+    var liveNotesRunning = false
+    var liveNotesHaveNewText = false
     /// "Can't reach the model server" was already notified for this recording.
     @ObservationIgnored var serverDownNotified = false
     @ObservationIgnored var unlock: UnlockWindow

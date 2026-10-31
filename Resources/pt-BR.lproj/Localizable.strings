@@ -3121,6 +3121,10 @@
 /* Model server activity in the menu bar panel
    Network Activity purpose */
 "Live notes" = "Notas ao vivo";
+"Update Now" = "Atualizar agora";
+"Updating the live notes…" = "Atualizando as notas ao vivo…";
+"Update the live notes with what was said since the last ones" = "Atualizar as notas ao vivo com o que foi dito desde as últimas";
+"Nothing new was said since the last live notes" = "Nada de novo foi dito desde as últimas notas ao vivo";
 
 /* Notification body when the model server is unreachable while recording */
 "Live notes are paused. Recording continues, and the minutes will be written when the server is back." = "As notas ao vivo estão em pausa. A gravação continua, e a ata será escrita quando o servidor voltar.";

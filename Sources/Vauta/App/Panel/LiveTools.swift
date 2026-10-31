@@ -231,6 +231,7 @@ struct LiveNotesView: View {
                     Label("Live notes", systemImage: "list.bullet.rectangle").panelCardTitle()
                     Spacer(minLength: 4)
                     if hiddenCount > 0 || expanded { moreButton }
+                    updateNow
                 }
                 scrollingNotes
             }
@@ -267,6 +268,31 @@ struct LiveNotesView: View {
     static func hiddenCount(rowBottoms: [CGFloat], notesHeight: CGFloat, limit: CGFloat?, shown: CGFloat) -> Int {
         guard let limit, notesHeight > 0, notesHeight > limit else { return 0 }
         return rowBottoms.filter { $0 > shown - fade + 0.5 }.count
+    }
+
+    /// Writing the notes: a spinner of the size of the title, as in the Answers card. Otherwise, while recording, "Update Now" writes
+    /// them from what was said since the last ones (dimmed with nothing new), without waiting for the next 3 minutes.
+    @ViewBuilder
+    private var updateNow: some View {
+        if model.liveNotesRunning {
+            ThinkingOrb()
+                .frame(width: 16, height: 16)
+                .accessibilityElement()
+                .accessibilityLabel(Text("Updating the live notes…", comment: "VoiceOver label of the spinner in the Live notes card while the model writes them"))
+        } else if model.phase == .recording && model.llmStatus.configured {
+            Button { model.updateLiveNotesNow() } label: {
+                Image(systemName: "arrow.clockwise").font(.caption.weight(.semibold))
+                    .frame(minWidth: 20, minHeight: 20)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .disabled(!model.canUpdateLiveNotesNow)
+            .help(model.canUpdateLiveNotesNow
+                  ? String(localized: "Update the live notes with what was said since the last ones", comment: "Help of the Update Now button in the Live notes card of the panel")
+                  : String(localized: "Nothing new was said since the last live notes", comment: "Help of the dimmed Update Now button in the Live notes card"))
+            .accessibilityLabel(Text("Update Now", comment: "VoiceOver label of the button in the Live notes card that writes the live notes at once"))
+        }
     }
 
     private var moreButton: some View {

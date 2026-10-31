@@ -3121,6 +3121,10 @@
 /* Model server activity in the menu bar panel
    Network Activity purpose */
 "Live notes" = "实时笔记";
+"Update Now" = "立即更新";
+"Updating the live notes…" = "正在更新实时笔记…";
+"Update the live notes with what was said since the last ones" = "用上次实时笔记之后的发言更新实时笔记";
+"Nothing new was said since the last live notes" = "自上次实时笔记以来没有新的发言";
 
 /* Notification body when the model server is unreachable while recording */
 "Live notes are paused. Recording continues, and the minutes will be written when the server is back." = "实时笔记已暂停。录音会继续，服务器恢复后将生成会⁠议⁠纪⁠要。";

@@ -205,6 +205,7 @@ extension RecorderModel {
         liveTranslation.feed(segment, key: liveID)
         persist(segment, liveID: liveID)
         charsSinceLiveNotes += segment.text.count
+        if !liveNotesHaveNewText { liveNotesHaveNewText = true }
         considerNoteExpansion()
         considerLiveNotes()
         considerWarmPrefix(liveID: liveID, segment: segment)
@@ -313,17 +314,28 @@ extension RecorderModel {
 
     // MARK: Live notes
 
-    /// Every 3 min or ~600 tokens of new text, never two at once.
-    static let liveNotesInterval: TimeInterval = 180
-    static let liveNotesChars = 2100
+    /// "Update Now" in the Live notes card: the notes are written from what was said since the last ones, without waiting for
+    /// the interval or the length (`LiveNotesSchedule`). Asked while a run or the pass over the person's notes is in flight, it
+    /// is kept for the next segment, never a second run at once.
+    func updateLiveNotesNow() {
+        guard phase == .recording, liveNotesHaveNewText else { return }
+        liveNotesAsked = true
+        considerLiveNotes()
+    }
+
+    /// The card can offer "Update Now": recording with a model, no run in flight and something new to read.
+    var canUpdateLiveNotesNow: Bool { phase == .recording && llmStatus.configured && !liveNotesRunning && liveNotesHaveNewText }
 
     /// Live notes from the fast model. They wait until the segment is saved (they cite its ID).
     private func considerLiveNotes() {
-        guard phase == .recording, liveNotesTask == nil, noteExpansionTask == nil, !liveNotesWaitForNotes,
-              let llm, let id = meetingID, llmStatus.configured else { return }
-        let due = lastLiveNotes.map { ContinuousClock.now - $0 >= .seconds(Self.liveNotesInterval) } ?? true
-        guard charsSinceLiveNotes >= Self.liveNotesChars || (due && charsSinceLiveNotes > 0) else { return }
+        guard phase == .recording, !liveNotesWaitForNotes, let llm, let id = meetingID, llmStatus.configured,
+              LiveNotesSchedule.starts(newCharacters: charsSinceLiveNotes, sinceLast: lastLiveNotes.map { ContinuousClock.now - $0 },
+                                       busy: liveNotesTask != nil || noteExpansionTask != nil, asked: liveNotesAsked)
+        else { return }
         charsSinceLiveNotes = 0
+        liveNotesHaveNewText = false
+        liveNotesAsked = false
+        liveNotesRunning = true
         lastLiveNotes = .now
         let t = currentOffset
         let pending = writes
@@ -340,7 +352,10 @@ extension RecorderModel {
                 liveNotesError = Self.liveNotesNotice(for: error)
             }
             // Only the current task clears itself (an old one never overwrites a new one).
-            if liveNotesToken == token { liveNotesTask = nil }
+            if liveNotesToken == token {
+                liveNotesTask = nil
+                liveNotesRunning = false
+            }
         }
     }
 
