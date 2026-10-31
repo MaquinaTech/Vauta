@@ -92,7 +92,7 @@ else
 fi
 
 # --- Build ---------------------------------------------------------------------------------
-SWIFT_ARGS=(-c release --arch arm64 ${VAUTA_SWIFT_FLAG_ARRAY[@]+"${VAUTA_SWIFT_FLAG_ARRAY[@]}"})
+SWIFT_ARGS=(-c release --arch arm64 ${VAUTA_JOBS:+-j "$VAUTA_JOBS"} ${VAUTA_SWIFT_FLAG_ARRAY[@]+"${VAUTA_SWIFT_FLAG_ARRAY[@]}"})
 swift build "${SWIFT_ARGS[@]}"
 BIN_DIR="$(swift build "${SWIFT_ARGS[@]}" --show-bin-path)"
 

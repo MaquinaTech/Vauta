@@ -7938,6 +7938,19 @@
 
 /* State: a meeting is being recorded right now (not the Settings pane) */
 "state.recording" = "Aufnahme läuft";
+"state.paused" = "Pausiert";
+"Pause Recording" = "Aufnahme pausieren";
+"Resume Recording" = "Aufnahme fortsetzen";
+"Capture the microphone and the meeting’s sound again" = "Mikrofon und Ton des Meetings wieder aufnehmen";
+"Stop capturing for now. The meeting stays open and the pause shows in its transcript." = "Vorerst nichts aufnehmen. Das Meeting bleibt offen und die Pause erscheint im Transkript.";
+"Recording paused. Nothing is captured until you resume." = "Aufnahme pausiert. Bis zum Fortsetzen wird nichts aufgenommen.";
+"Recording resumed." = "Aufnahme fortgesetzt.";
+"The recording couldn’t resume: %@" = "Die Aufnahme konnte nicht fortgesetzt werden: %@";
+"The pause couldn’t be saved with the meeting." = "Die Pause konnte nicht mit dem Meeting gespeichert werden.";
+"Paused, %@" = "Pausiert, %@";
+"Paused %@ – %@" = "Pausiert %@ – %@";
+"Paused %@ – %@ (%lld min)" = "Pausiert %@ – %@ (%lld Min.)";
+"Paused from %@ to the end" = "Pausiert ab %@ bis zum Ende";
 
 /* Status level, accessibility; not the OK button of an alert */
 "status.ok" = "OK";

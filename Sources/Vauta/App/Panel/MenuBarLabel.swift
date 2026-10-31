@@ -35,7 +35,7 @@ struct MenuBarLabel: View {
                     // Time left, with a minus sign, so it never reads as the time recorded.
                     Text(verbatim: "\u{2212}" + StopBanner.countdown(left)).monospacedDigit()
                 } else {
-                    Image(systemName: model.hasWarning ? "exclamationmark.triangle.fill" : "record.circle.fill")
+                    Image(systemName: model.hasWarning ? "exclamationmark.triangle.fill" : model.isPaused ? "pause.circle.fill" : "record.circle.fill")
                     Text(verbatim: model.elapsed).monospacedDigit()
                 }
             }
@@ -79,6 +79,9 @@ struct MenuBarLabel: View {
                     return String(localized: "Recording, needs attention, stops in \(ElapsedTime.spoken(left))", comment: "Menu-bar icon state for VoiceOver during the automatic-stop countdown with a warning; the argument is the time left")
                 }
                 return String(localized: "Recording, stops in \(ElapsedTime.spoken(left))", comment: "Menu-bar icon state for VoiceOver")
+            }
+            if model.isPaused {
+                return String(localized: "Paused, \(ElapsedTime.spoken(model.elapsedSeconds))", comment: "Menu-bar icon state for VoiceOver while the recording is paused; the argument is the time on the meeting's clock")
             }
             // The icon turns into a warning triangle: VoiceOver says so too.
             if model.hasWarning {

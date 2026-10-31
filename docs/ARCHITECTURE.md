@@ -60,7 +60,10 @@ flowchart LR
 1. **Capture.** `MeetingCapture` runs two channels. The microphone is always **Me**. **Others** is the audio of the
    meeting app, captured with a Core Audio process tap (`SystemAudioTap`) scoped by `SystemAudioScope`: specific app
    families from `MeetingAppCatalog`, the app that holds the microphone (`auto`), or all system audio except Vauta.
-   `MeetingPresence` watches which app uses the microphone from Core Audio metadata only.
+   `MeetingPresence` watches which app uses the microphone from Core Audio metadata only. `pause()` closes both
+   `ChannelPipe`s (the chunk being filled is sent on, anything later is dropped) and stops the microphone and the tap;
+   the transcribers stay open, so `resume()` starts the devices again in the same transcript and the time paused is a
+   gap on its clock (`ChannelTimeline`). The pauses are stored as times only (`meeting_pauses`, schema 35).
 2. **Transcription.** `ChannelPipe` converts each buffer to the analyzer format and groups it into ~100 ms chunks.
    `ChannelTranscriber` feeds Apple's `SpeechAnalyzer` with `SpeechTranscriber`, or `DictationTranscriber` for custom
    vocabulary and for languages `SpeechTranscriber` does not support (`SpeechLanguages`). The two channels tell *you*
@@ -88,7 +91,7 @@ flowchart LR
    each sentence (pure Swift and `NLTokenizer`/`NLTagger`/`NLLanguageRecognizer`, cue sets for the nine interface languages);
    S2 `QuestionFlow` holds a candidate for the next two lines (either channel) or four seconds, whichever comes first (the check then reads up to three lines after it, those that arrived while it waited for its turn); S3 `QuestionDedup` and `QuestionLimiter` drop
    duplicates (also against questions typed in Ask) and keep the rate limits; S4 `LLMService.questionEvidence` searches this
-   meeting up to the question, past meetings (`retrieve(excluding:)`) and documents with no model (the search model embeds the question only while the check budget would let the candidate reach the check; `QuestionCounters.embeddings` and `embeddingsSkipped` count it); S5
+   meeting up to the question, past meetings (`retrieve(excluding:)`; first only those the question names, "last week" or "the last meeting", as Ask reads them: `MeetingStore.askScope`) and documents with no model (the search model embeds the question only while the check budget would let the candidate reach the check; `QuestionCounters.embeddings` and `embeddingsSkipped` count it); S5
    `LLMService.checkQuestion` is one small request to the "While recording" model (a suffix on the kept prefix on the integrated
    model); S6 `LLMService.autoAnswer` is `ask` in its auto mode (`AutoAskRequest`; it does not embed the question again, and the question's own segments, which the model reads, are removed from what may be cited); S7 the card rules in `QuestionDetector`.
    Events go through `LiveAnswersBridge` (one ordered stream, and the Stop (the spinner in the card’s title) calls `QuestionDetector.cancel(row:)`) to `LiveAnswersModel`, which the Answers card (`AnswersCard`) draws; questions the model confirmed are stored in

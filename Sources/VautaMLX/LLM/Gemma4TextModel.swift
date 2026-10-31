@@ -187,10 +187,19 @@ public final class Gemma4TextModel {
         }()
 
         var shared: [Int: (MLXArray, MLXArray, Int)] = [:]
+        // Positions still going through. Only the last one's hidden state is returned, and the layers that share keys and values
+        // (24-41) write none, so from the first of them on only that position goes on: its query at its place, over every key it
+        // sees, with no mask. On a chunk of the prompt that is 18 of the 42 layers on one position instead of all of them.
+        var rows = n
         for L in layers {
             let i = L.index
+            if !L.ownsKV, rows > 1 {
+                h = h[0..., (n - 1)..., 0...]
+                ple = ple[0..., (n - 1)..., 0..., 0...]
+                rows = 1
+            }
             var x = rms(h, L.inNorm)
-            var queries = L.q(x).reshaped([1, n, config.heads, L.headDim])
+            var queries = L.q(x).reshaped([1, rows, config.heads, L.headDim])
             queries = rms(queries, L.qNorm).transposed(0, 2, 1, 3)
             let keys: MLXArray, values: MLXArray, offset: Int
             if L.ownsKV, let kp = L.k, let vp = L.v, let kn = L.kNorm {
@@ -203,12 +212,16 @@ public final class Gemma4TextModel {
                 (keys, values) = L.full ? caches.full[i]!.update(k, v) : caches.sliding[i]!.update(k, v)
                 shared[i] = (keys, values, offset)
             } else {
-                let src = config.kvSource(i)
-                (keys, values, offset) = shared[src]!
+                let (k, v, start) = shared[config.kvSource(i)]!
+                // The last position sees every key of a full layer and the last `slidingWindow` of a sliding one, itself included.
+                let from = L.full ? 0 : max(0, k.dim(2) - config.slidingWindow)
+                (keys, values) = from == 0 ? (k, v) : (k[0..., 0..., from..., 0...], v[0..., 0..., from..., 0...])
+                offset = start + n - 1
             }
             queries = rope(queries, L, offset: offset)
-            var a = MLXFast.scaledDotProductAttention(queries: queries, keys: keys, values: values, scale: 1.0, mask: L.full ? fullMask : slidingMask)
-            a = a.transposed(0, 2, 1, 3).reshaped([1, n, config.heads * L.headDim])
+            let mask: MLXFast.ScaledDotProductAttentionMaskMode = rows == 1 ? .none : L.full ? fullMask : slidingMask
+            var a = MLXFast.scaledDotProductAttention(queries: queries, keys: keys, values: values, scale: 1.0, mask: mask)
+            a = a.transposed(0, 2, 1, 3).reshaped([1, rows, config.heads * L.headDim])
             h = h + rms(L.o(a), L.postAttnNorm)
             x = rms(h, L.preFfNorm)
             let m = L.down(geluApproximate(L.gate(x)) * L.up(x))
@@ -217,7 +230,7 @@ public final class Gemma4TextModel {
             g = rms(L.pleProj(g), L.pleNorm)
             h = (h + g) * L.layerScalar
         }
-        return rms(h[0..., (n - 1)..., 0...], finalNorm)
+        return rms(h[0..., (rows - 1)..., 0...], finalNorm)
     }
 
     private func rope(_ x: MLXArray, _ L: Gemma4Layer, offset: Int) -> MLXArray {

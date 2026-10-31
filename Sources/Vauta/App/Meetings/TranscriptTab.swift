@@ -17,12 +17,13 @@ struct TranscriptTab: View {
     @FocusState private var focused: Bool
 
     private enum Item: Identifiable {
-        case segment(MeetingStore.StoredSegment), mark(MeetingMark), note(MeetingNote)
+        case segment(MeetingStore.StoredSegment), mark(MeetingMark), note(MeetingNote), pause(MeetingPause)
         var id: String {
             switch self {
             case .segment(let s): "s\(s.id)"
             case .mark(let m): "m\(m.id)"
             case .note(let n): "n\(n.id)"
+            case .pause(let p): "p\(p.start)"
             }
         }
         var t: Double {
@@ -30,12 +31,13 @@ struct TranscriptTab: View {
             case .segment(let s): s.start
             case .mark(let m): m.t
             case .note(let n): n.t
+            case .pause(let p): p.start
             }
         }
     }
 
     private var items: [Item] {
-        (model.transcript.map(Item.segment) + model.marks.map(Item.mark) + model.notes.map(Item.note)).sorted { $0.t < $1.t }
+        (model.transcript.map(Item.segment) + model.marks.map(Item.mark) + model.notes.map(Item.note) + model.pauses.map(Item.pause)).sorted { $0.t < $1.t }
     }
 
     var body: some View {
@@ -60,6 +62,7 @@ struct TranscriptTab: View {
                         case .segment(let segment): row(segment, cols).id(segment.id)
                         case .mark(let m): markRow(m, cols)
                         case .note(let n): noteRow(n, cols)
+                        case .pause(let p): pauseRow(p, cols)
                         }
                     }
                 }
@@ -201,6 +204,34 @@ struct TranscriptTab: View {
         .rowInset(fill: Self.annotationFill, flush: model.transcript.isEmpty)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(Text("Mark at \(ElapsedTime.stamp(m.t))"))
+    }
+
+    /// Where the recording was paused: nothing was captured until it resumed, so the gap in the times is not a silence.
+    private func pauseRow(_ p: MeetingPause, _ cols: Columns) -> some View {
+        let text = Self.pauseText(p)
+        return HStack(alignment: .firstTextBaseline, spacing: 8) {
+            Text(verbatim: ElapsedTime.stamp(p.start)).monospacedDigit().foregroundStyle(.secondary).frame(width: cols.time, alignment: .leading)
+            Image(systemName: "pause.circle").foregroundStyle(.secondary).frame(width: cols.speaker, alignment: .leading)
+                .accessibilityHidden(true)
+            Text(verbatim: text).foregroundStyle(.secondary).frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .rowInset(fill: Self.annotationFill, flush: model.transcript.isEmpty)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text(verbatim: text))
+    }
+
+    /// "Paused 12:03 – 12:10 (7 min)"; "Paused from 12:03 to the end" when the recording stopped during the pause.
+    static func pauseText(_ p: MeetingPause) -> String {
+        let from = ElapsedTime.stamp(p.start)
+        guard let end = p.end else {
+            return String(localized: "Paused from \(from) to the end", comment: "Transcript: the recording was paused at this time and not resumed before it ended; the argument is a time in the meeting (12:03)")
+        }
+        let minutes = Int(((end - p.start) / 60).rounded())
+        let to = ElapsedTime.stamp(end)
+        if minutes < 1 {
+            return String(localized: "Paused \(from) – \(to)", comment: "Transcript: nothing was captured between these two times of the meeting because the recording was paused (12:03 – 12:04)")
+        }
+        return String(localized: "Paused \(from) – \(to) (\(minutes) min)", comment: "Transcript: nothing was captured between these two times of the meeting because the recording was paused; the last argument is how many minutes (12:03 – 12:10 (7 min))")
     }
 
     /// A note in the same columns, tinted so it stands out from the speech.

@@ -169,6 +169,7 @@ extension RecorderModel {
 
     func stop() {
         guard phase == .recording, stopTask == nil else { return }
+        endPauseAtStop()
         phase = .stopping
         // At once, like the start, and not the same sound (told apart by ear when the panel is closed): saving takes seconds.
         // "Bottle" is Live Translation off and an empty recording; "Pop" follows when the meeting is saved.
@@ -282,6 +283,7 @@ extension RecorderModel {
         nextSegmentID = 0
         levels = [:]
         elapsedSeconds = 0
+        isPaused = false
         lastError = nil
         saveError = nil
         channelWarnings = [:]

@@ -95,7 +95,9 @@ package. It is built from source on the user's Mac with the steps below (the REA
 | Disk | `df -h ~` | A few GB for Apple's speech model and the build; more for local models |
 
 If the Command Line Tools are missing, the user runs `xcode-select --install`. Xcode is not required. If a
-requirement is not met, stop and explain it.
+requirement is not met, stop and explain it. `scripts/install.sh` and `scripts/update.sh` check the same before building
+(`scripts/preflight.sh`, which also sets `VAUTA_JOBS` from the memory: 3 up to 24 GB, 2 with 8 GB) and stop with what to do;
+`VAUTA_SKIP_PREFLIGHT=1` skips the checks.
 
 ### 2. Choose the bundle ID
 

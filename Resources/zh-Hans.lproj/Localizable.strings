@@ -7938,6 +7938,19 @@
 
 /* State: a meeting is being recorded right now (not the Settings pane) */
 "state.recording" = "正在录音";
+"state.paused" = "已暂停";
+"Pause Recording" = "暂停录音";
+"Resume Recording" = "继续录音";
+"Capture the microphone and the meeting’s sound again" = "重新捕获麦克风和会议声音";
+"Stop capturing for now. The meeting stays open and the pause shows in its transcript." = "暂时停止捕获。会议保持打开，暂停会显示在转录文本中。";
+"Recording paused. Nothing is captured until you resume." = "录音已暂停。继续之前不会捕获任何内容。";
+"Recording resumed." = "录音已继续。";
+"The recording couldn’t resume: %@" = "无法继续录音：%@";
+"The pause couldn’t be saved with the meeting." = "无法将暂停与会议一起存储。";
+"Paused, %@" = "已暂停，%@";
+"Paused %@ – %@" = "已暂停 %@ – %@";
+"Paused %@ – %@ (%lld min)" = "已暂停 %@ – %@（%lld 分钟）";
+"Paused from %@ to the end" = "从 %@ 起暂停至结束";
 
 /* Status level, accessibility; not the OK button of an alert */
 "status.ok" = "正常";

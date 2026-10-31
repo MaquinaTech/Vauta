@@ -61,6 +61,8 @@ public enum QuestionReplay {
         public var outcome: String
         public var evidenceSources: [String] = []
         public var evidenceMatches: [String: Int] = [:]
+        /// The meetings the question named that the past meetings' passages came from (`AskMeetingScope.trace`); nil for all of them.
+        public var pastScope: String?
         public var evidenceSeconds: Double = 0
         public var checkKind: String?
         public var rewrite: String?
@@ -138,6 +140,7 @@ public enum QuestionReplay {
                 t += record.evidenceSeconds
                 record.evidenceSources = names(evidence.passing)
                 record.evidenceMatches = evidence.matches
+                if evidence.pastScope.narrows { record.pastScope = evidence.pastScope.trace }
                 guard evidence.passes else { record.outcome = "no_evidence"; records.append(record); workerFree = t; continue }
                 if options.detectOnly { record.outcome = "evidence"; records.append(record); workerFree = t; continue }
                 // The check is rate limited: wait on the simulated clock.

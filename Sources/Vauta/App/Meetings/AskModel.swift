@@ -270,12 +270,7 @@ final class AskModel {
 
     /// The meetings `place` names, newest first, within `period`; nil when it needs a person or project and the question names none.
     private func meetings(at place: AskMeetingPlace, question: String, period: AskTimeScope?) async -> [MeetingStore.Meeting]? {
-        var entities: [Int64] = []
-        if place.ofNamed {
-            entities = (try? await store.entitiesNamed(in: question)) ?? []
-            guard !entities.isEmpty else { return nil }
-        }
-        guard let ids = try? await store.meetingIDs(at: place.which, entities: entities, from: period?.interval.start, to: period?.interval.end) else { return nil }
+        guard let ids = (try? await store.meetingIDs(named: place, in: question, period: period)) ?? nil else { return nil }
         var found: [MeetingStore.Meeting] = []
         for id in ids { if let meeting = try? await store.meeting(id) { found.append(meeting) } }
         return found
@@ -321,20 +316,12 @@ final class AskModel {
             // At once: passages from local search (BM25 + graph), no server needed.
             let kind = answeredScope
             // The meetings the question names by their place, within its time: one is read whole, as when the question is about it,
-            // several are searched like the meetings of a time.
-            var within = scope
-            var meetings: [Int64]?
-            var widenedNote: String?
-            var placed = false
-            if let place, kind != .documents, let found = await self.meetings(at: place, question: reading, period: period), !found.isEmpty {
-                if found.count == 1 { within = found[0].id } else { meetings = found.map(\.id) }
-                placed = true
-            } else if let period, kind != .documents {
-                // The meetings of the time the question names; none (a day without meetings) is the whole library, and said so.
-                let ids = (try? await store.meetingIDs(matching: MeetingFilter(from: period.interval.start, to: period.interval.end))) ?? []
-                if ids.isEmpty { widenedNote = Self.noMeetingsThenNote(period) } else { meetings = ids }
-            }
-            let widened = placed ? Self.nothingThereNote : period.map(Self.nothingThenNote)
+            // several are searched like the meetings of a time. A time without meetings (a day off) is the whole library, and said so.
+            let resolved = kind == .documents ? .everywhere : ((try? await store.askScope(reading, period: period, place: place)) ?? .everywhere)
+            let within = resolved.within ?? scope
+            let meetings = resolved.meetings
+            var widenedNote = resolved.noMeetingsInPeriod ? period.map(Self.noMeetingsThenNote) : nil
+            let widened = resolved.placed ? Self.nothingThereNote : period.map(Self.nothingThenNote)
             var local = kind == .documents ? [] : ((try? await store.retrieve(reading, queryVector: nil, within: within, meetings: meetings)) ?? [])
             if local.isEmpty, meetings != nil, kind != .documents {
                 local = (try? await store.retrieve(reading, queryVector: nil, within: within)) ?? []

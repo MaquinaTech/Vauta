@@ -288,6 +288,12 @@ extension LLMEvaluation {
                 }
             }
             guard loaded else { continue }
+            // The time and the meetings a question names, as Ask reads them with its controls left as they start (a time it would only
+            // offer is not used): "now" is the day after the last meeting, in a fixed calendar so a run reads the same on any Mac.
+            let now = Date(timeIntervalSince1970: 1_104_537_600 + Double(first.meetings.count) * 7 * 86_400 - 6 * 86_400)
+            var calendar = Calendar(identifier: .gregorian)
+            calendar.timeZone = TimeZone(identifier: "UTC") ?? calendar.timeZone
+            calendar.firstWeekday = 2
             for q in group {
                 let (waited, _) = await waitForQuiet(o)
                 let sequence = order(pair, o.providers)
@@ -295,9 +301,10 @@ extension LLMEvaluation {
                     guard let rig = rigs.first(where: { $0.kind == kind }) else { continue }
                     var answerText = "", cited: [String] = [], sent: [String] = []
                     let before = rig.providers.chatModel.records.count
+                    let scope = (try? await rig.store.askScope(of: q.question, languages: [q.question_language ?? "en"], now: now, calendar: calendar)) ?? .everywhere
                     let trace = await measure(task: "ask-cross", provider: kind, item: q.qid, pair: pair, order: sequence[0] == o.providers[0] ? "AB" : "BA",
                                               model: rig.model, waited: waited, options: o) {
-                        let r = try await rig.service.ask(q.question, meetingID: nil)
+                        let r = try await rig.service.ask(q.question, meetingID: scope.within, meetings: scope.meetings)
                         answerText = r.answer.answer
                         cited = Array(Set(r.answer.claims.flatMap(\.citations).compactMap { owner[$0] })).sorted()
                         sent = Array(Set(r.sent.keys.compactMap { owner[$0] })).sorted()
@@ -307,7 +314,8 @@ extension LLMEvaluation {
                                  "refusedWithAnswer": "\(!r.answer.found && r.answer.withheldAnAnswer)", "cutShort": "\(r.answer.cutShort)",
                                  "unverified": "\(r.answer.isUnverified)", "answerable": "\(q.answerable ?? true)", "category": q.category ?? "",
                                  "language": q.question_language ?? "", "meetings": q.meetings.joined(separator: ","),
-                                 "ask": o.ask.names, "sent": sent.joined(separator: ",")])
+                                 "ask": o.ask.names, "sent": sent.joined(separator: ","), "scope": scope.trace,
+                                 "widened": "\(r.widenedScope)"])
                     }
                     write(trace)
                     jsonLine(["case": q.qid, "answer": answerText, "citations": cited, "sent": sent, "reply": rig.providers.chatModel.last ?? "", "error": trace.error ?? NSNull()],
