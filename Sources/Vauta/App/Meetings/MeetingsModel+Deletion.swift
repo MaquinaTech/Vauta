@@ -182,6 +182,8 @@ extension MeetingsModel {
         undoManager?.removeAllActions(withTarget: self)
         if highlighted == segment.id { highlighted = nil }
         if let llm { Task { await llm.lineDeleted(meetingID: segment.meetingID) } }
+        // A follow-up meeting the line set the day of goes with it; another line may still name one.
+        _ = try? await store.redetectFollowUps(segment.meetingID)
         if selectedID == segment.meetingID {
             await refreshDetail()
             if !hits.isEmpty { await runSearch() }

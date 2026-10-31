@@ -4306,6 +4306,20 @@
 /* Brief: heading of the open tasks of the people coming to the meeting
    Heading of the Tasks mode and section of the People card (a heading inside the window: sentence case) */
 "Open tasks" = "Tarefas abertas";
+"Copy protection is on, so meeting text can’t be exported." = "A proteção contra cópia está ativada, então o texto das reuniões não pode ser exportado.";
+"Couldn’t export the week" = "Não foi possível exportar a semana";
+"Export Week" = "Exportar semana";
+"Next Week" = "Próxima semana";
+"Nothing This Week" = "Nada nesta semana";
+"Nothing was recorded this week." = "Nada foi gravado nesta semana.";
+"Open Tasks" = "Tarefas abertas";
+"Overdue tasks" = "Tarefas atrasadas";
+"Previous Week" = "Semana anterior";
+"Save this week as a Markdown file" = "Salvar esta semana como arquivo Markdown";
+"Tasks added" = "Tarefas adicionadas";
+"Tasks done" = "Tarefas concluídas";
+"This Week" = "Esta semana";
+"Week of %@" = "Semana de %@";
 
 /* Heading of the Tasks mode filtered by person (a heading inside the window: sentence case) */
 "Open tasks for %@" = "Tarefas abertas de %@";

@@ -183,7 +183,7 @@ At Stop:
 | `Network/` | The audited network choke point and its in-memory log | `AuditedSession`, `AuditedBytes`, `NetworkActivityLog`, `NetworkActivityEntry`, `NetworkPurpose`, `NetworkDestination` |
 | `Backup/` | Encrypted backup file and restore | `BackupArchive`, `BackupManifest`, `BackupPreferences`, `OpenedBackup`, `BackupPassword`, `MeetingStore+Backup` |
 | `Storage/` | Encrypted store, schema, persistence | `MeetingStore`, `SQLiteDatabase`, `Schema`, `Migration`, `SnapshotEnvelope`, `Journal`, `AtomicFile`, `KeychainDatabaseKeyStore`, `KeychainSecret`, `StoreError` |
-| `Knowledge/` | Context, name resolution, decisions and tasks, cards, the ranking rule of the search model | `SemanticRanker`, `MeetingStore+Graph` (`analyze`), `NameMatcher`, `TextKeys`, `LanguageProfile`, `MeetingStore+Context`, `MeetingStore+Items`, `MeetingStore+Review` |
+| `Knowledge/` | Context, name resolution, decisions and tasks, cards, the ranking rule of the search model | `SemanticRanker`, `MeetingStore+Graph` (`analyze`), `NameMatcher`, `TextKeys`, `LanguageProfile`, `MeetingStore+Context`, `MeetingStore+Items`, `MeetingStore+Review`, `MeetingStore+WeekDigest` (This Week: a calendar week read from the store, no model) |
 | `LLM/` | Model clients, prompts, validation, search, job queue | `LLMService`, `LLMClient`, `LLMServerConfig`, `ServerProfile`, `ServerDiscovery`, `ServerTrust`, `ServerAddress`, `ServerCredentials`, `VautaPrompts`, `OwnerResolver`, `MinutesVerifier`, `ContextBudget`, `VectorIndex`, `ModelProviding`, `SystemModelProviders`, `ModelProviderSettings` |
 | `LLM/Providers/` | Model implementations | `AppleChatModel` (Foundation Models, with guided generation for answers: `AppleGuidedSchema`) |
 | `SearchModel/` | The optional search model (EmbeddingGemma 2): pinned manifest and tensor table, store, downloader, importer, verifier, tokenizer, engine, controller | `SearchModelManifest`, `SearchModelSpec`, `SearchModelStore`, `SearchModelDownloader`, `SearchModelImporter`, `SearchModelVerifier`, `SearchModelDestinations`, `GemmaTokenizer`, `SearchModelEngine`, `GemmaEmbeddingModel`, `SearchModelController`, `SearchModelStatus` |
@@ -569,7 +569,7 @@ changed.
 marked `unconfirmed_reason = 'deleted'` (the user's are left alone), note-expansion sentences (and the `previous` level of
 undo) lose the citation, a quote taken from the line and their confirmation, the questions heard in it and the suggested
 follow-ups detected in it are deleted (one with a live event or hand-off stays, as in `storeDetectedFollowUps`), `rewriteQuestionAnswers` drops the claims of stored answers that cite it, and the
-meeting's chunks are deleted (`LLMService.lineDeleted` embeds the meeting again from what is left). The row goes with its
+meeting's chunks are deleted (`LLMService.lineDeleted` embeds the meeting again from what is left, and the app runs `redetectFollowUps`). The row goes with its
 `original_text`; the FTS trigger, the translation cascade and `analyzeInTransaction` follow. Then, as `deleteMeeting` does,
 every FTS index is merged and the database vacuumed (or that is left pending while recording), and a full snapshot replaces
 the file and removes the journal before it returns. There is no undo: the app drops its undo steps, which may need the line.

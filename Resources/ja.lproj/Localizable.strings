@@ -4306,6 +4306,20 @@
 /* Brief: heading of the open tasks of the people coming to the meeting
    Heading of the Tasks mode and section of the People card (a heading inside the window: sentence case) */
 "Open tasks" = "未完了のタスク";
+"Copy protection is on, so meeting text can’t be exported." = "コピー防止がオンのため、ミーティングのテキストは書き出せません。";
+"Couldn’t export the week" = "週を書き出せませんでした";
+"Export Week" = "週を書き出す";
+"Next Week" = "翌週";
+"Nothing This Week" = "今週は何もありません";
+"Nothing was recorded this week." = "今週は何も録音されていません。";
+"Open Tasks" = "未完了のタスク";
+"Overdue tasks" = "期限切れのタスク";
+"Previous Week" = "前週";
+"Save this week as a Markdown file" = "この週をMarkdownファイルとして保存";
+"Tasks added" = "追加されたタスク";
+"Tasks done" = "完了したタスク";
+"This Week" = "今週";
+"Week of %@" = "%@の週";
 
 /* Heading of the Tasks mode filtered by person (a heading inside the window: sentence case) */
 "Open tasks for %@" = "%@の未完了のタスク";
