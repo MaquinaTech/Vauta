@@ -133,6 +133,22 @@ words carry it. Its manual VoiceOver pass is in the checklist below.
 - The sidebar's "By meaning" group is a section like the others; its rows read the meeting, the moment and the passage and say they open the meeting.
 - There is no animated shimmer; progress bars follow the system's Reduce Motion setting.
 
+## Find in Meeting (the Transcript tab)
+
+Status: designed and unit-tested; the VoiceOver and Full Keyboard Access pass is still to be recorded.
+
+- ⌘F (Edit → **Find in Meeting**) opens the bar and puts the keyboard focus in its field; with no meeting shown the same item reads
+  **Search Meetings** and moves the focus to the sidebar's search field, which ⌥⌘F always does.
+- The field is labelled "Find in Meeting". Return, ⌘G and ⇧⌘G go to the next and previous place; the previous and next buttons are
+  labelled and have tooltips, and the speaker menu reads the speaker it is limited to ("Everyone" by default), with its tooltip as the hint.
+- The count ("3 of 12", "No Results") is text next to the field; each move posts it as a VoiceOver announcement, because the focus stays
+  in the field (or the transcript) while the transcript scrolls. The chosen place's line becomes the highlighted passage, so it reads
+  as selected and **Speaker Options for Highlighted Passage** works on it.
+- Not by colour alone: every place is bold, the chosen one has a solid marker with dark text in both appearances, and its line has the
+  bar of the highlighted passage. Scrolling to it follows Reduce Motion.
+- Escape in the bar closes it (only there: the window keeps Escape for everything else); **Done** closes it too, and so does leaving the
+  Transcript tab or the meeting.
+
 ## Manual VoiceOver pass for the speaker screens and the panel (to record)
 
 Turn VoiceOver on (⌘F5), open a meeting with speakers and go through each item; write the date, macOS version and

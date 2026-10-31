@@ -2354,6 +2354,11 @@
 
 /* No comment provided by engineer. */
 "Find Names in This Meeting" = "このミーティングで名前を検索";
+"Find in Meeting" = "ミーティング内を検索";
+"Find Next" = "次を検索";
+"Find Previous" = "前を検索";
+"Find only in what one speaker said" = "1人の話者の発言だけを検索";
+"find.done" = "完了";
 
 /* Model server activity in the menu bar panel while it answers a question heard in the meeting */
 "Finding an answer" = "回答を探しています";

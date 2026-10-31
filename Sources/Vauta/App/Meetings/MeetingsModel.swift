@@ -130,6 +130,7 @@ final class MeetingsModel {
             saveDraftsInBackground()
             // Words being edited and a note not yet added belong to the meeting being left: they are saved there.
             notepad.commitPendingBeforeLeaving()
+            if findShown { closeFind() }
             highlighted = pendingHighlight
             pendingHighlight = nil
             if highlighted == nil {
@@ -209,7 +210,12 @@ final class MeetingsModel {
     // MARK: Meeting detail
 
     var tab: DetailTab = .summary {
-        didSet { if tab != oldValue { opensOnNotes = false } }
+        didSet {
+            guard tab != oldValue else { return }
+            opensOnNotes = false
+            // The bar of Find in Meeting is the transcript's.
+            if tab != .transcript, findShown { closeFind() }
+        }
     }
     /// The meeting just opened shows its Notes tab if it has notes.
     @ObservationIgnored var opensOnNotes = false
@@ -217,7 +223,10 @@ final class MeetingsModel {
     let notepad = NotepadModel()
     /// The note a search result opened, highlighted in the Notes tab.
     var highlightedNote: Int64?
-    var transcript: [MeetingStore.StoredSegment] = []
+    var transcript: [MeetingStore.StoredSegment] = [] {
+        // Another meeting, or lines added: the places found are the new transcript's.
+        didSet { if findShown, transcript != oldValue { refreshFind() } }
+    }
     /// Stored translations by segment, in one language (see `TranslationDisplay`).
     var translations: [Int64: String] = [:]
     /// The language of `translations` (a language identifier).
@@ -354,6 +363,15 @@ final class MeetingsModel {
     var ownerFilter: Int64?
     /// Bumped by Edit > Find: the window moves the focus to the search field.
     var searchFocusRequest = 0
+    /// Find in the meeting shown (⌘F, `MeetingsModel+Find`): the bar, its text, the speaker it is limited to, the places found and the
+    /// one chosen.
+    var findShown = false
+    var findText = "" { didSet { if findText != oldValue { refreshFind() } } }
+    var findSpeaker: Int64? { didSet { if findSpeaker != oldValue { refreshFind() } } }
+    var findMatches: [TranscriptFind.Match] = []
+    var findIndex: Int?
+    /// Bumped by ⌘F: the bar moves the focus to its field.
+    var findFocusRequest = 0
 
     // MARK: People and projects
 

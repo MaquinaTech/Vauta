@@ -2354,6 +2354,11 @@
 
 /* No comment provided by engineer. */
 "Find Names in This Meeting" = "이 회의에서 이름 찾기";
+"Find in Meeting" = "회의에서 찾기";
+"Find Next" = "다음 찾기";
+"Find Previous" = "이전 찾기";
+"Find only in what one speaker said" = "한 화자가 말한 내용에서만 찾기";
+"find.done" = "완료";
 
 /* Model server activity in the menu bar panel while it answers a question heard in the meeting */
 "Finding an answer" = "답변을 찾는 중";
