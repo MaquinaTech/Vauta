@@ -89,6 +89,11 @@ enum MinutesPDFRenderer {
             add(String(localized: "Attendees: \(e.attendees.joined(separator: ", "))", comment: "PDF export: attendee list"),
                 font: body, color: secondary, style: paragraph(spacingBefore: 0))
         }
+        if let informed = MeetingExportRenderer.informedTime(e, options: options) {
+            add(String(localized: "Participants informed: \(informed)",
+                       comment: "PDF export: the time the user marked that the participants were told the meeting was being recorded"),
+                font: body, color: secondary, style: paragraph(spacingBefore: 0))
+        }
         if !e.notes.isEmpty {
             // The user's own document comes first: their words in bold, what the transcript says under each, in gray.
             heading(String(localized: "Your notes", comment: "Exported minutes: section title for the notes the user typed themselves; it comes first"))
