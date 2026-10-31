@@ -147,6 +147,8 @@ extension RecorderModel {
                 livePoints = []; liveDecisions = []; liveTasks = []; liveNotesError = nil
                 lastLiveNotes = .now
                 charsSinceLiveNotes = 0
+                liveNotesHaveNewText = false
+                liveNotesAsked = false
                 serverDownNotified = false
                 await llm?.setRecording(true, meetingID: id)
                 // The recording may have been stopped (and even saved) during that wait: nothing more starts for it.

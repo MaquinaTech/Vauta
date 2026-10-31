@@ -211,6 +211,8 @@ extension RecorderModel {
         liveNotesTask?.cancel()
         liveNotesTask = nil
         liveNotesToken = nil
+        liveNotesRunning = false
+        liveNotesAsked = false
         noteExpansionTask?.cancel()
         noteExpansionTask = nil
         noteExpansionToken = nil

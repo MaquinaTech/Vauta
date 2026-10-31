@@ -3103,6 +3103,10 @@
 /* Model server activity in the menu bar panel
    Network Activity purpose */
 "Live notes" = "ライブメモ";
+"Update Now" = "今すぐ更新";
+"Updating the live notes…" = "ライブメモを更新中…";
+"Update the live notes with what was said since the last ones" = "前回のライブメモ以降の発言でライブメモを更新";
+"Nothing new was said since the last live notes" = "前回のライブメモ以降、新しい発言はありません";
 
 /* Notification body when the model server is unreachable while recording */
 "Live notes are paused. Recording continues, and the minutes will be written when the server is back." = "ライブメモは一時停止中です。録音は続いており、サーバが復旧したら議事録が作成されます。";

@@ -3103,6 +3103,10 @@
 /* Model server activity in the menu bar panel
    Network Activity purpose */
 "Live notes" = "실시간 메모";
+"Update Now" = "지금 업데이트";
+"Updating the live notes…" = "실시간 메모 업데이트 중…";
+"Update the live notes with what was said since the last ones" = "지난 실시간 메모 이후의 발언으로 실시간 메모를 업데이트";
+"Nothing new was said since the last live notes" = "지난 실시간 메모 이후 새로운 발언이 없습니다";
 
 /* Notification body when the model server is unreachable while recording */
 "Live notes are paused. Recording continues, and the minutes will be written when the server is back." = "실시간 메모가 일시 정지되었습니다. 녹음은 계속되며, 서버가 복구되면 회의록이 작성됩니다.";

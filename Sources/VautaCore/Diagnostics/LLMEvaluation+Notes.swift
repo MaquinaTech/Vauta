@@ -96,8 +96,8 @@ extension LLMEvaluation {
 
     // MARK: Live notes
 
-    /// The app's cadence (`RecorderModel.considerLiveNotes`): every 2100 characters, or when 180 s have passed and something is new
-    /// (the first call as soon as there is a line), measured on the transcript's own clock.
+    /// The app's cadence (`LiveNotesSchedule`, as `RecorderModel.considerLiveNotes` runs it): every 2100 characters, or when 180 s
+    /// have passed and something is new (the first call as soon as there is a line), measured on the transcript's own clock.
     static func runLiveNotes(_ o: Options, store: LanguageModelStore, engine: LanguageModelEngine, write: (Trace) -> Void) async throws {
         var files = setFiles(o)
         if let m = o.maxItems { files = Array(files.prefix(m)) }
@@ -117,8 +117,7 @@ extension LLMEvaluation {
                 clock = start + 10
                 for rig in rigs { try await rig.append(p, start: start, warm: true) }
                 chars += p.text.count
-                let due = lastTick.map { start - $0 >= 180 } ?? true
-                guard chars >= 2100 || (due && chars > 0) else { continue }
+                guard LiveNotesSchedule.starts(newCharacters: chars, sinceLast: lastTick.map { .seconds(start - $0) }, busy: false) else { continue }
                 chars = 0
                 lastTick = start
                 let (waited, _) = await waitForQuiet(o)

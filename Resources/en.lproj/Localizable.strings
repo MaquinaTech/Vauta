@@ -4069,6 +4069,9 @@
 /* No comment provided by engineer. */
 "Nothing is being translated." = "Nothing is being translated.";
 
+/* Help of the dimmed Update Now button in the Live notes card */
+"Nothing new was said since the last live notes" = "Nothing new was said since the last live notes";
+
 /* Menu-bar panel, brief card: earlier meetings left no open task, decision or question */
 "Nothing open from earlier meetings" = "Nothing open from earlier meetings";
 
@@ -6976,14 +6979,23 @@
    Meetings: the view with the brief of the next meeting */
 "Upcoming" = "Upcoming";
 
+/* VoiceOver label of the button in the Live notes card that writes the live notes at once */
+"Update Now" = "Update Now";
+
 /* Recovery suggestion when a backup comes from a newer app version */
 "Update Vauta to the latest version and try again." = "Update Vauta to the latest version and try again.";
 
 /* Recovery suggestion when the store comes from a newer app version */
 "Update Vauta to the latest version." = "Update Vauta to the latest version.";
 
+/* Help of the Update Now button in the Live notes card of the panel */
+"Update the live notes with what was said since the last ones" = "Update the live notes with what was said since the last ones";
+
 /* No comment provided by engineer. */
 "Updated" = "Updated";
+
+/* VoiceOver label of the spinner in the Live notes card while the model writes them */
+"Updating the live notes…" = "Updating the live notes…";
 
 /* No comment provided by engineer. */
 "Use" = "Use";
