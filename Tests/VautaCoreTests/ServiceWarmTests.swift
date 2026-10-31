@@ -108,15 +108,19 @@ struct ServiceWarmTests {
     }
 
     @Test func theDebounceWaitsForThirtySecondsAndForEnoughSpeech() async throws {
+        let real = LLMService.WarmCadence()
+        #expect(real.startDelay == 30 && real.minInterval == 20 && real.minCharacters == 600)
         let (service, chat, _, id) = try await Self.rig()
-        await service.setWarmCadence(LLMService.WarmCadence())   // the real rules
+        // The real rules, with the waits made an hour long: a loaded machine can take more than 30 s (or 20) between two lines of
+        // this test, and the rules must hold however long it takes.
+        await service.setWarmCadence(LLMService.WarmCadence(startDelay: 3_600))
         for _ in 0..<5 { await service.segmentSaved(meetingID: id, characters: 800) }
         try await Task.sleep(for: .milliseconds(100))
-        #expect(chat.reads.isEmpty, "not in the first 30 seconds of the recording")
-        await service.setWarmCadence(.init(startDelay: 0, minInterval: 20, minCharacters: 600, maxInterval: 120, lowPowerInterval: 180))
+        #expect(chat.reads.isEmpty, "not before the start delay of the recording")
+        await service.setWarmCadence(.init(startDelay: 0, minInterval: 3_600, minCharacters: 600, maxInterval: 7_200, lowPowerInterval: 180))
         await service.segmentSaved(meetingID: id, characters: 100)   // 4,100 characters have arrived by now
         #expect(await Self.eventually { chat.reads.count == 1 })
-        // Right after a tick: 20 seconds have not passed, and a few characters are not enough.
+        // Right after a tick: the interval has not passed, so even enough characters wait.
         await service.segmentSaved(meetingID: id, characters: 700)
         try await Task.sleep(for: .milliseconds(100))
         #expect(chat.reads.count == 1)

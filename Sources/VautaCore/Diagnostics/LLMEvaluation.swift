@@ -441,6 +441,8 @@ public enum LLMEvaluation {
             try EchoEvaluation.run(o, log: log)
             return
         }
+        // Apple's own token counts against Vauta's estimate: no generation.
+        if o.tasks == ["token-count"] { try await TokenCountEvaluation.run(o, log: log); return }
         let engine = LanguageModelEngine(store: store)
         if o.tasks == ["ask-retrieval"] {   // no model call: Apple's model object is only handed to the service
             try await runAskRetrieval(o, store: store, engine: engine)

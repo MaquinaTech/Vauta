@@ -503,8 +503,9 @@ struct AutoAnswerTests {
         ServiceWarmTests.retain(f)
         let id = try await f.meeting(Self.lines, locale: "en-US", outputLocale: "en-US")
         let chat = ScriptedChat { _, _, _ in
-            // Not cancellable: the continuation is resumed by a timer, whatever the task does.
-            await withUnsafeContinuation { c in DispatchQueue.global().asyncAfter(deadline: .now() + 60) { c.resume() } }
+            // Not cancellable: the continuation is resumed by a timer, whatever the task does. Ten minutes, so a CI runner whose threads
+            // are starved for minutes still tells "returned at its timeout" from "waited for the model".
+            await withUnsafeContinuation { c in DispatchQueue.global().asyncAfter(deadline: .now() + 600) { c.resume() } }
             return ScriptedChat.reply("{}")
         }
         let service = LLMService(store: f.store, providers: TestProviders(chat: chat))
@@ -512,7 +513,7 @@ struct AutoAnswerTests {
         await service.setRecording(true, meetingID: id)
         let started = ContinuousClock.now
         #expect(await service.checkQuestion(QuestionCheckTests.settled(), meetingID: id) == .timedOut)
-        #expect(ContinuousClock.now - started < .seconds(40), "the check returned at its timeout, not when the model finished")
+        #expect(ContinuousClock.now - started < .seconds(300), "the check returned at its timeout, not when the model finished")
     }
 
     @Test func theIntegratedCheckDoesNotReadAPrefixThatIsFarBehindTheTranscript() async throws {

@@ -21,6 +21,13 @@ struct SpeakerSuggestionTests {
         #expect(!own.contains { $0.contains("It’s %@") || $0.contains("Not %@") || $0.contains("not %@") })
     }
 
+    @Test func aSuggestionFromWhatWasSaidQuotesIt() {
+        let said = String(describing: SpeakerSuggestion(entityID: 2, name: "Ana", said: "Hi, I'm Ana").explanation)
+        #expect(said.contains("Hi, I'm Ana") && !said.contains("voice"), "what the speaker said, not a voice")
+        let voice = String(describing: SpeakerSuggestion(entityID: 2, name: "Ana").explanation)
+        #expect(voice.contains("voice"))
+    }
+
     @Test func aPersonsSuggestionCarriesTheirName() {
         let ana = texts(SpeakerSuggestion(entityID: 2, name: "Ana"))
         #expect(ana.allSatisfy { $0.contains("Ana") }, "every wording carries the person’s name")

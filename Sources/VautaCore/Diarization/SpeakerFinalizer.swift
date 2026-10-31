@@ -56,6 +56,8 @@ public enum SpeakerFinalizer {
             }.value
             let written = try await store.applyDiarization(diarization, to: meetingID, wordRuns: wordRuns, recognizeVoices: recognizeVoices)
             try await store.deleteDiarizationWindows(meetingID: meetingID)
+            // A speaker who said who they are ("Hi, I'm Ana") is asked about that person; a failure here costs only the suggestion.
+            if written > 0 { _ = try? await store.suggestSpeakersFromIntroductions(meetingID: meetingID) }
             return written > 0 ? .written(written) : .skipped
         } catch {
             return .failed

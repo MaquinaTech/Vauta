@@ -301,7 +301,10 @@ final class DocsFixture {
         let deadline = ContinuousClock.now + timeout
         while ContinuousClock.now < deadline {
             let snapshot = await indexer.snapshot()
-            if snapshot.pendingFiles == 0, snapshot.sources.allSatisfy({ $0.counts.ocrPending == 0 || !snapshot.ocrEnabled }) { return }
+            // A scan in flight (the folder's own watcher may have started one) has not queued what it lists yet: nothing pending is
+            // not settled until it ends, however slow the machine.
+            let scans = await !indexer.isScanning
+            if scans, snapshot.pendingFiles == 0, snapshot.sources.allSatisfy({ $0.counts.ocrPending == 0 || !snapshot.ocrEnabled }) { return }
             try await Task.sleep(for: .milliseconds(20))
         }
         Issue.record("the indexer did not settle")
@@ -310,4 +313,12 @@ final class DocsFixture {
     func search(_ question: String, filter: DocumentFilter? = nil, limit: Int = 8) async throws -> [DocumentPassage] {
         try await index.search(question, within: filter, limit: limit, locale: Locale(identifier: "en"))
     }
+}
+
+/// A scan held in flight, as the folder's watcher would have one, to see what a change during it does.
+extension DocumentIndexer {
+    func holdScan(_ id: Int64) { scanning[id] = -1 }
+    func releaseScan(_ id: Int64) { if scanning[id] == -1 { scanning[id] = nil } }
+    /// A scan in flight, or one to run again after it.
+    var isScanning: Bool { !scanning.isEmpty || !rescan.isEmpty }
 }

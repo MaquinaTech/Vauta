@@ -141,9 +141,11 @@ struct SpeakerFinalizerTests {
         let outcome = await SpeakerFinalizer.finalize(meetingID: id, in: store, run: DiarizationRun(records: records, totalSamples: windows * 32_000 + 160_000))
         let elapsed = ContinuousClock.now - began
         #expect(outcome == .written(6))
-        // 15 s is the budget of an optimized build (measured: 0.27 s); an unoptimized debug build is about 100 times slower
+        // 15 s is the budget of an optimized build (measured: 0.27 s); an unoptimized debug build is about 100 times slower (1.8 s for
+        // the whole test on an M2). A CI runner, a virtual machine running the parallel suite with coverage, took 80 s: there the debug
+        // budget is 5 minutes, still far under what a quadratic slip would take.
         #if DEBUG
-        let budget = Duration.seconds(60)
+        let budget = Duration.seconds(TestMachine.isVirtual ? 300 : 60)
         #else
         let budget = Duration.seconds(15)
         #endif

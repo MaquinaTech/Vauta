@@ -57,6 +57,9 @@ public actor DocumentIndexer {
     var publishScheduled = false
     /// The source scans in flight (with the ticket of each), so a burst of events does one scan.
     var scanning: [Int64: Int] = [:]
+    /// Sources changed while their scan was in flight, which may have listed the folder before the change: scanned again after it
+    /// (true: also with the skipped files queued again, as Reindex asked).
+    var rescan: [Int64: Bool] = [:]
     var ticket = 0
     /// Counts the times the store was replaced (Erase Everything, Restore): work that started before it writes nothing.
     var epoch = 0
@@ -294,6 +297,7 @@ public actor DocumentIndexer {
         dirty.remove(id)
         nonLocal.remove(id)
         scanning[id] = nil
+        rescan[id] = nil
         forgetCharacterTotal()
         resolved[id] = nil
         unreachable[id] = nil
@@ -351,6 +355,7 @@ public actor DocumentIndexer {
         epoch += 1
         sourceChanges += 1
         scanning = [:]
+        rescan = [:]
         dirty = []
         nonLocal = []
         unsaved = false

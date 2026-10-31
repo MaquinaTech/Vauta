@@ -61,7 +61,10 @@ extension MeetingsModel {
     /// The speaker's suggested person (“Is this Ana?”), if the speaker has one.
     func suggestion(for speaker: MeetingSpeaker) -> SpeakerSuggestion? {
         guard speaker.source == .suggested, let id = speaker.entityID, let name = speaker.entityName else { return nil }
-        return SpeakerSuggestion(entityID: id, name: MeetingStore.displayName(name, isSelf: speaker.entityIsSelf), isSelf: speaker.entityIsSelf)
+        // Said, not heard: the line where the speaker gave the name, cut to what fits a sentence.
+        let said = speaker.suggestedBySegment.flatMap { line in transcript.first { $0.id == line }?.text }
+            .map { $0.count > 140 ? String($0.prefix(137)).trimmingCharacters(in: .whitespaces) + "…" : $0 }
+        return SpeakerSuggestion(entityID: id, name: MeetingStore.displayName(name, isSelf: speaker.entityIsSelf), isSelf: speaker.entityIsSelf, said: said)
     }
 
     /// A saved voice was deleted in Settings: the entity card shows it.
@@ -75,12 +78,14 @@ extension MeetingsModel {
     }
 }
 
-/// A person a saved voice suggests for a speaker. For the user's own voice the question and both answers have their own
+/// A person a saved voice, or what the speaker said ("Hi, I'm Ana"), suggests for a speaker. For the user's own voice the question and both answers have their own
 /// wording (“Is this you?”, “Yes, That’s Me”): the localized name “Me” does not fit “It’s %@” in most languages.
 struct SpeakerSuggestion: Equatable {
     let entityID: Int64
     let name: String
     var isSelf = false
+    /// What the speaker said that gave the name ("Hi, I'm Ana"), when the suggestion comes from that and not from a voice.
+    var said: String?
 
     /// The question shown with Yes and No.
     var question: Text {
@@ -91,7 +96,11 @@ struct SpeakerSuggestion: Equatable {
 
     /// Under the question in the popover: why the speaker is not named yet.
     var explanation: Text {
-        isSelf
+        if let said {
+            return Text("They said: “\(said)”. Vauta never names a speaker from what they say alone.",
+                        comment: "Speaker popover, under “Is this Ana?” when the speaker said who they are; the argument is what they said")
+        }
+        return isSelf
             ? Text("This voice resembles your saved voice. Vauta never names a speaker from a voice alone.", comment: "Speaker popover, under “Is this you?”: why the speaker is not named yet")
             : Text("This voice resembles a saved voice. Vauta never names a speaker from a voice alone.", comment: "Speaker popover, under “Is this Ana?”: why the speaker is not named yet")
     }

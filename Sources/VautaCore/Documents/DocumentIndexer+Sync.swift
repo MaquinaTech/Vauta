@@ -22,16 +22,31 @@ extension DocumentIndexer {
     /// A scan can take seconds and the actor is free meanwhile, so the source may be removed, or the whole store replaced (Erase
     /// Everything, Restore), before it ends. Every step after a wait checks that (`isCurrent`) and writes nothing otherwise.
     /// While a meeting records, or on battery for a network volume, nothing is scanned or saved: the source waits (`dirty`).
+    ///
+    /// One scan per source at a time. A change that arrives during a scan may come after the folder was listed, so it is not dropped:
+    /// the scan in flight lists the folder again when it ends (`rescan`).
     func sync(_ id: Int64, requeueSkipped: Bool = false) async {
-        guard let source = sources[id] else { return }
+        guard await scan(id, requeueSkipped: requeueSkipped) else { return }
+        while let requeue = rescan.removeValue(forKey: id) {
+            guard await scan(id, requeueSkipped: requeue) else { return }
+        }
+    }
+
+    /// One scan of the source; false when another one was in flight (the change is then left to it).
+    private func scan(_ id: Int64, requeueSkipped: Bool = false) async -> Bool {
+        guard let source = sources[id] else { return false }
         let epoch = self.epoch
         let policy = IndexerPolicy.decide(await environment())
         lastPolicy = policy
-        guard isCurrent(id, epoch), scanning[id] == nil else { return }
+        guard isCurrent(id, epoch) else { return false }
+        guard scanning[id] == nil else {
+            rescan[id] = (rescan[id] ?? false) || requeueSkipped
+            return false
+        }
         guard policy.text else {
             dirty.insert(id)
             publish(force: true)
-            return
+            return false
         }
         ticket += 1
         let mine = ticket
@@ -48,42 +63,42 @@ extension DocumentIndexer {
             watchers[id]?.stop()
             watchers[id] = nil
             publish(force: true)
-            return
+            return true
         }
-        guard let root = resolved[id] else { return }
+        guard let root = resolved[id] else { return true }
         let started = access.begin(root)
         defer { if started { access.end(root) } }
         let local = await volumeIsLocal(root)
-        guard isCurrent(id, epoch) else { return }
+        guard isCurrent(id, epoch) else { return true }
         if local { nonLocal.remove(id) } else { nonLocal.insert(id) }
         // A network volume is not worked on while the Mac runs on battery.
         guard local || policy.network else {
             dirty.insert(id)
             publish(force: true)
-            return
+            return true
         }
         if local && source.kind == .folder { watch(id, url: root) } else { watchers[id]?.stop(); watchers[id] = nil }
         // Listing a large folder is slow disk work: off the actor, so Ask and the pane are never queued behind it.
         let scanned = await scanFolder(root, kind: source.kind)
         guard !Task.isCancelled else {
             if isCurrent(id, epoch) { dirty.insert(id) }
-            return
+            return true
         }
-        guard isCurrent(id, epoch) else { return }
+        guard isCurrent(id, epoch) else { return true }
         guard let result = scanned else {
             markUnresponsive(id)
-            return
+            return true
         }
         dirty.remove(id)
         truncated = result.truncated ? truncated.union([id]) : truncated.subtracting([id])
-        guard let known = try? await index.files(source: id), isCurrent(id, epoch) else { return }
+        guard let known = try? await index.files(source: id), isCurrent(id, epoch) else { return true }
         let room = ((try? await index.totalCharacters()) ?? 0) < DocumentLimits.maxTotalCharacters
-        guard isCurrent(id, epoch) else { return }
+        guard isCurrent(id, epoch) else { return true }
         var plan = DocumentSync.plan(scanned: result.files, known: known, indexHasRoom: room)
         // A source folder that is not on this Mac is not an empty one: what was indexed from it stays.
         if result.rootNotOnThisMac { plan.removed = [] }
         await apply(&plan, source: source, root: root, epoch: epoch)
-        guard isCurrent(id, epoch) else { return }
+        guard isCurrent(id, epoch) else { return true }
         if requeueSkipped {
             for record in known where record.state == .skipped && record.reason != .crashed && record.reason != .exportAsPDF && record.reason != .googleDriveShortcut && record.reason != .unsupported {
                 if let scanned = result.files.first(where: { $0.relPath == record.relPath }), scanned.skip == nil, let format = scanned.format {
@@ -93,10 +108,11 @@ extension DocumentIndexer {
         }
         forgetCharacterTotal()
         checked[id] = .now
-        guard isCurrent(id, epoch) else { return }
+        guard isCurrent(id, epoch) else { return true }
         // The image is not written while a meeting records (capture comes first); the loop saves it when the pause ends.
         if IndexerPolicy.decide(await environment()).text, isCurrent(id, epoch) { try? await index.save() } else { unsaved = true }
         publish(force: true)
+        return true
     }
 
     func apply(_ plan: inout DocumentSyncPlan, source: DocumentSource, root: URL, epoch: Int) async {
