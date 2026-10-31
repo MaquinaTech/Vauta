@@ -1465,6 +1465,13 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "Die Zeile konnte nicht geändert werden";
 "Couldn’t correct the line" = "Die Zeile konnte nicht korrigiert werden";
+"Couldn’t delete the line" = "Zeile konnte nicht gelöscht werden";
+"Delete Line" = "Zeile löschen";
+"Delete this line for good?" = "Diese Zeile endgültig löschen?";
+"Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "Die Wörter der Zeile werden aus dem Transkript, der Suche und „Fragen“ gelöscht, zusammen mit dem, was transkribiert wurde, und der Übersetzung. Was das Protokoll daraus geschrieben hat, wird zur Prüfung markiert, und „Protokoll neu schreiben“ schreibt es ohne sie. Das lässt sich nicht widerrufen, und ein zuvor erstelltes Backup enthält die Zeile weiterhin.";
+"Line deleted" = "Zeile gelöscht";
+"Line deleted. What the minutes wrote from it is marked for you to check." = "Zeile gelöscht. Was das Protokoll daraus geschrieben hat, ist zur Prüfung markiert.";
+"You deleted the transcript line this was written from. Check that it still belongs in the minutes." = "Du hast die Zeile des Transkripts gelöscht, aus der dies stammt. Prüfe, ob es noch ins Protokoll gehört.";
 "Add “%@” to Glossary" = "„%@“ zum Glossar hinzufügen";
 "Added to the glossary" = "Zum Glossar hinzugefügt";
 "Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Im Glossar angeheftet, kommt es ins eigene Vokabular des Diktats, und ein späteres Meeting, das es falsch zu verstehen scheint, bekommt einen Vorschlag.";

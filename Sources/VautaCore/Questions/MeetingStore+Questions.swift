@@ -147,7 +147,7 @@ extension MeetingStore {
     }
 
     @discardableResult
-    private func rewriteQuestionAnswers(dropping gone: (AutoAnswerContent.Cite) throws -> Bool) throws -> Int {
+    func rewriteQuestionAnswers(dropping gone: (AutoAnswerContent.Cite) throws -> Bool) throws -> Int {
         let rows = try db.query("SELECT id, answer, kept FROM detected_questions WHERE answer IS NOT NULL")
         var changed = 0
         for row in rows {

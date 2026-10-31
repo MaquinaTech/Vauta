@@ -84,6 +84,8 @@ struct TranscriptTab: View {
                 model.correctHighlight()
                 return .handled
             }
+            // ⌫ and Edit ▸ Delete ask to delete the highlighted line, as in Finder.
+            .onDeleteCommand { model.confirmDeleteHighlight() }
             .onChange(of: model.highlighted, initial: true) {
                 if let h = model.highlighted { withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo(h, anchor: .center) } }
             }
@@ -316,6 +318,10 @@ struct TranscriptTab: View {
         .contextMenu {
             if canCorrect, !isEditing { Button(CorrectLineButton.title + "…") { model.beginCorrecting(segment) } }
             if segment.originalText != nil { Button(CorrectedNote.restoreTitle) { Task { await model.restoreOriginal(segment) } } }
+            if canCorrect, !isEditing {
+                Divider()
+                Button(DeleteLineLabel.title + "…", role: .destructive) { model.confirmDelete(segment) }
+            }
         }
         // The field of the line being corrected stays reachable.
         .accessibilityElement(children: isEditing ? .contain : .ignore)
@@ -335,6 +341,7 @@ struct TranscriptTab: View {
             }
             if canCorrect { Button(CorrectLineButton.title) { model.beginCorrecting(segment) } }
             if segment.originalText != nil { Button(CorrectedNote.restoreTitle) { Task { await model.restoreOriginal(segment) } } }
+            if canCorrect { Button(DeleteLineLabel.title + "…") { model.confirmDelete(segment) } }
         }
         .accessibilityHint(Text("Highlights the passage to cite it"))
     }

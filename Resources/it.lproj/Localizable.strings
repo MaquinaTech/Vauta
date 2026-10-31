@@ -1465,6 +1465,13 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "Impossibile modificare la riga";
 "Couldn’t correct the line" = "Impossibile correggere la riga";
+"Couldn’t delete the line" = "Impossibile eliminare la riga";
+"Delete Line" = "Elimina riga";
+"Delete this line for good?" = "Eliminare definitivamente questa riga?";
+"Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "Le sue parole vengono cancellate dalla trascrizione, dalla ricerca e da Chiedi, insieme a ciò che era stato trascritto e alla sua traduzione. Ciò che il verbale ne ha tratto viene segnato perché tu lo controlli, e “Riscrivi verbale” lo riscrive senza di essa. Non si può annullare, e un backup fatto prima conserva la riga.";
+"Line deleted" = "Riga eliminata";
+"Line deleted. What the minutes wrote from it is marked for you to check." = "Riga eliminata. Ciò che il verbale ne ha tratto è segnato perché tu lo controlli.";
+"You deleted the transcript line this was written from. Check that it still belongs in the minutes." = "Hai eliminato la riga della trascrizione da cui è stato scritto. Controlla che abbia ancora posto nel verbale.";
 "Add “%@” to Glossary" = "Aggiungi “%@” al glossario";
 "Added to the glossary" = "Aggiunto al glossario";
 "Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Fissato nel glossario, entra nel vocabolario personalizzato della dettatura, e una riunione successiva che sembra capirlo male riceve un suggerimento.";
