@@ -97,6 +97,7 @@ struct CorrectEverywhereTests {
         let fx = StoreFixture()
         let store = try fx.open()
         let m = try await meeting(store, ["Ana will send the report", "The budget is set"])
+        try await store.saveEntity(EntityDraft(kind: .person, name: "Anna"))   // a name Context has is no new term
         let c = try #require(try await store.correctSegment(m.lines[0], text: "Anna will send the report"))
         #expect(try await store.correctEverywhereOffer(after: c) == nil)
         let added = try #require(try await store.correctSegment(m.lines[1], text: "The budget is set for March"))

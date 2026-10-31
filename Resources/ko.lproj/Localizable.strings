@@ -1465,6 +1465,9 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "줄을 변경할 수 없습니다";
 "Couldn’t correct the line" = "줄을 수정할 수 없습니다";
+"Add “%@” to Glossary" = "“%@”을(를) 용어집에 추가";
+"Added to the glossary" = "용어집에 추가했습니다";
+"Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "용어집에 고정하면 받아쓰기의 사용자 지정 어휘에 포함되고, 이후 회의에서 잘못 들은 것 같은 부분에 제안이 표시됩니다.";
 "Also elsewhere in this meeting: %@" = "이 회의의 다른 곳에도 있습니다: %@";
 "Correct Everywhere" = "모두 수정";
 "Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "전사의 다른 줄과 회의록에서도 이 단어를 수정합니다. 실행 취소하면 되돌아갑니다.";

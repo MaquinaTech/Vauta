@@ -293,7 +293,8 @@ struct TranscriptTab: View {
                     CorrectedNote(original: original) { Task { await model.restoreOriginal(segment) } }
                 }
                 if let offer = model.everywhereOffer, offer.segmentID == segment.id {
-                    CorrectEverywhereNote(offer: offer, accept: { Task { await model.correctEverywhere() } }, dismiss: { model.everywhereOffer = nil })
+                    CorrectEverywhereNote(offer: offer, accept: { Task { await model.correctEverywhere() } },
+                                          add: { term in Task { await model.addToGlossary(term) } }, dismiss: { model.everywhereOffer = nil })
                 }
                 if segment.isEcho {
                     EchoNote(channel: segment.channel) { Task { await model.setEcho(segment, false) } }

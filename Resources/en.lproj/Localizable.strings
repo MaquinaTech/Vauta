@@ -438,6 +438,9 @@
 /* Button: adds the typed name as a new person and assigns it; the argument is the name */
 "Add “%@” as a New Person" = "Add “%@” as a New Person";
 
+/* Transcript: button under a corrected line that adds the name or term the user wrote to the glossary in Context; also the action Edit ▸ Undo takes back */
+"Add “%@” to Glossary" = "Add “%@” to Glossary";
+
 /* VoiceOver announcement after a source was added; the argument is its name */
 "Added %@. Indexing started." = "Added %@. Indexing started.";
 
@@ -458,6 +461,9 @@
 
 /* Bar after adding a reminder; the argument is the list and its account, such as Work · iCloud */
 "Added to Reminders · %@" = "Added to Reminders · %@";
+
+/* Confirmation after the person added a corrected name or term to the glossary */
+"Added to the glossary" = "Added to the glossary";
 
 /* Documents pane: shown after a folder or file was added; the argument is its name */
 "Added “%@”. Indexing started." = "Added “%@”. Indexing started.";
@@ -4623,6 +4629,9 @@
 
 /* No comment provided by engineer. */
 "Pinned" = "Pinned";
+
+/* Transcript: tooltip of the button that adds a corrected name or term to the glossary */
+"Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion.";
 
 /* Help under the pinned toggle of a glossary term */
 "Pinned terms take priority in the vocabulary given to the speech recognizer." = "Pinned terms take priority in the vocabulary given to the speech recognizer.";

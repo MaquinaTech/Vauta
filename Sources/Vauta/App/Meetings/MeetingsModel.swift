@@ -150,6 +150,8 @@ final class MeetingsModel {
     }
     /// Called after "Erase All" (so other views drop what they held).
     @ObservationIgnored var onErased: (() -> Void)?
+    /// Called after a term was added to the glossary from here (so Context lists it).
+    @ObservationIgnored var onGlossaryChanged: (() -> Void)?
     /// Called on user activity, so an unlocked window stays unlocked while in
     /// use (the relock timer lives in the recorder). Throttled.
     @ObservationIgnored var onActivity: (() -> Void)?

@@ -1465,6 +1465,9 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "Não foi possível alterar a linha";
 "Couldn’t correct the line" = "Não foi possível corrigir a linha";
+"Add “%@” to Glossary" = "Adicionar “%@” ao glossário";
+"Added to the glossary" = "Adicionado ao glossário";
+"Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Fixado no glossário, ele entra no vocabulário personalizado do Ditado, e uma reunião posterior que pareça ouvi-lo errado recebe uma sugestão.";
 "Also elsewhere in this meeting: %@" = "Também em outras partes desta reunião: %@";
 "Correct Everywhere" = "Corrigir em todo lugar";
 "Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "Corrigir estas palavras também nas outras linhas da transcrição e na ata. Desfazer reverte.";

@@ -1465,6 +1465,9 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "无法更改此行";
 "Couldn’t correct the line" = "无法修正此行";
+"Add “%@” to Glossary" = "将“%@”添加到术语表";
+"Added to the glossary" = "已添加到术语表";
+"Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "置顶到术语表后，它会进入听写的自定义词汇；之后的会议中疑似听错的地方会收到建议。";
 "Also elsewhere in this meeting: %@" = "本次会议的其他地方也有：%@";
 "Correct Everywhere" = "全部修正";
 "Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "同时修正转写其他行和会议纪要中的这些文字。撤销即可恢复。";

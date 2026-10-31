@@ -104,12 +104,46 @@ struct TranscriptCorrectionModelTests {
         #expect(model.transcript[1].text == "Ana agreed", "nothing changes before the person accepts")
 
         await model.correctEverywhere()
-        #expect(model.everywhereOffer == nil)
+        #expect(model.everywhereOffer?.isElsewhere != true, "at most the glossary is still offered")
         #expect(model.transcript.map(\.text) == ["Anna will deploy it", "Anna agreed", "The end"])
         #expect(undo.undoActionName == CorrectEverywhereNote.title)
         undo.undo()
         try await until { model.transcript[1].text == "Ana agreed" }
         #expect(model.transcript[0].text == "Anna will deploy it", "the line the person corrected stays")
+    }
+
+    @Test func aNewTermIsAddedToTheGlossaryWhenThePersonAccepts() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-correct-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = try MeetingStore(directory: dir, keyStore: CorrectionKey())
+        let id = try await meeting(store, ["we deploy on cubernetes", "cubernetes is down"])
+        let model = MeetingsModel(store: store)
+        let undo = UndoManager()
+        model.undoManager = undo
+        var glossaryChanges = 0
+        model.onGlossaryChanged = { glossaryChanges += 1 }
+        await model.reload()
+        model.selectedID = id
+        try await until { model.transcript.count == 2 }
+        model.tab = .transcript
+        model.beginCorrecting(model.transcript[0])
+        model.lineDraft?.text = "we deploy on Kubernetes"
+        model.saveLineDraft()
+        try await until { model.everywhereOffer != nil }
+        #expect(model.everywhereOffer?.newTerms == ["Kubernetes"])
+        #expect(CorrectEverywhereNote.announcement(try #require(model.everywhereOffer))
+                == "Also elsewhere in this meeting: cubernetes → Kubernetes. Add “Kubernetes” to Glossary")
+
+        await model.correctEverywhere()
+        #expect(model.everywhereOffer?.isElsewhere == false && model.everywhereOffer?.newTerms == ["Kubernetes"], "the term stays offered")
+        await model.addToGlossary("Kubernetes")
+        #expect(model.everywhereOffer == nil)
+        #expect(try await store.glossary().map(\.term) == ["Kubernetes"])
+        #expect(glossaryChanges == 1 && undo.undoActionName == CorrectEverywhereNote.addTitle("Kubernetes"))
+        undo.undo()
+        for _ in 0..<250 where (try await store.glossary()).isEmpty == false { try await Task.sleep(for: .milliseconds(20)) }
+        #expect(try await store.glossary().isEmpty)
+        #expect(model.transcript.map(\.text) == ["we deploy on Kubernetes", "Kubernetes is down"], "only the term is taken back")
     }
 
     @Test func theMeetingBeingRecordedIsNotCorrected() async throws {

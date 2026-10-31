@@ -7,7 +7,9 @@ import Foundation
 /// usually wrong in other lines too, and in the summary, decisions and tasks the model wrote from them. Vauta offers to correct
 /// them there as well (`correctEverywhereOffer`) and only does it when the person says so (`correctEverywhere`), with one Undo.
 /// Each line changes as a correction of its own (`correctSegment`: its original kept, the marks it calls for). The minutes keep
-/// who wrote them and their marks, except an "edited" mark the change answers: the item then says what its line says.
+/// who wrote them and their marks, except an "edited" mark the change answers: the item then says what its line says. A name or
+/// term the correction put in that Vauta doesn't know yet is offered for the glossary, so later meetings get it right
+/// (`addCorrectedTerm`).
 extension MeetingStore {
     public struct CorrectEverywhereOffer: Sendable, Equatable {
         public struct Replacement: Sendable, Equatable {
@@ -20,8 +22,28 @@ extension MeetingStore {
         public let segmentID: Int64
         public let replacements: [Replacement]
         /// How many other lines, and minutes items (the summary counting as one), have the old words.
-        public let lines: Int
-        public let items: Int
+        public private(set) var lines: Int
+        public private(set) var items: Int
+        /// The names and terms the correction put in that neither the glossary nor Context has yet (`TranscriptCorrection.newTerms`),
+        /// offered for the glossary (`addCorrectedTerm`).
+        public private(set) var newTerms: [String]
+
+        /// Other lines or the minutes have the old words: Correct Everywhere is offered.
+        public var isElsewhere: Bool { lines + items > 0 }
+
+        /// What is left to offer once the words were corrected everywhere: the terms for the glossary; nil when none.
+        public func corrected() -> Self? {
+            var left = self
+            (left.lines, left.items) = (0, 0)
+            return left.newTerms.isEmpty ? nil : left
+        }
+
+        /// What is left to offer once `term` is in the glossary; nil when nothing.
+        public func adding(_ term: String) -> Self? {
+            var left = self
+            left.newTerms.removeAll { $0 == term }
+            return left.isElsewhere || !left.newTerms.isEmpty ? left : nil
+        }
     }
 
     /// What `correctEverywhere` changed, for Edit ▸ Undo. Kept in memory only.
@@ -44,16 +66,18 @@ extension MeetingStore {
         var isEmpty: Bool { lines.isEmpty && items.isEmpty && card == nil }
     }
 
-    /// What else in the meeting has the words a correction replaced; nil when nothing has (or the correction replaced none).
+    /// What else in the meeting has the words a correction replaced, and the new names and terms it put in; nil when nothing has
+    /// them and there are none (or the correction replaced no words).
     public func correctEverywhereOffer(after c: TextCorrection) throws -> CorrectEverywhereOffer? {
         let profile = LanguageProfile(locale: try meetingLocale(c.meetingID))
-        let replacements = TranscriptCorrection(from: c.before, to: c.after, profile: profile).replacements()
-            .map { CorrectEverywhereOffer.Replacement(from: $0.from, to: $0.to) }
+        let correction = TranscriptCorrection(from: c.before, to: c.after, profile: profile)
+        let replacements = correction.replacements().map { CorrectEverywhereOffer.Replacement(from: $0.from, to: $0.to) }
         guard !replacements.isEmpty else { return nil }
         let plan = try everywherePlan(c.meetingID, except: c.segmentID, replacements, profile)
-        guard !plan.isEmpty else { return nil }
+        let terms = try unknownTerms(correction.newTerms())
+        guard !plan.isEmpty || !terms.isEmpty else { return nil }
         return CorrectEverywhereOffer(meetingID: c.meetingID, segmentID: c.segmentID, replacements: replacements,
-                                      lines: plan.lines.count, items: plan.items.count + (plan.card == nil ? 0 : 1))
+                                      lines: plan.lines.count, items: plan.items.count + (plan.card == nil ? 0 : 1), newTerms: terms)
     }
 
     /// Writes the offer's new words wherever the meeting still has the old ones. nil when nothing has them any more. Refuses the

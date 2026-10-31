@@ -551,6 +551,12 @@ changed.
   line as transcribed, with the same replacements, reads as the line now or the rest of the change does not touch the item.
   `CorrectEverywhereUndo` takes back the items and the card while they read as it left them, then each line; a line that moved
   on fails the whole undo.
+- **Terms for the glossary.** `TranscriptCorrection.newTerms()` keeps the replacements whose new side is one or two words
+  that carry meaning, one of them reading as a name or a term: an acronym or a word with a digit or a capital inside, a
+  capitalized word inside a sentence where capitals mark names, or a name to `NLTagger`'s `.nameType` (which finds one that
+  opens the sentence). The offer lists those neither in the glossary nor an alias of a live entity (`unknownTerms`).
+  `addCorrectedTerm` adds one, pinned, so `recognitionVocabulary` gives it to dictation and the fuzzy corrector suggests it
+  in later meetings; `undoAddCorrectedTerm` takes it out unless it was renamed since.
 - **Interface.** `MeetingsModel.lineDraft` is the line being corrected (Return on the highlighted line, the pencil, the
   context menu, Edit › Correct Highlighted Passage); it is saved when the person leaves the meeting or the window locks,
   like a note. `TranscriptLineEditor` uses `NoCopyText`, so copy protection applies. Afterwards the meeting is read again
