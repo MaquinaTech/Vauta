@@ -1465,6 +1465,10 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "无法更改此行";
 "Couldn’t correct the line" = "无法修正此行";
+"Also elsewhere in this meeting: %@" = "本次会议的其他地方也有：%@";
+"Correct Everywhere" = "全部修正";
+"Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "同时修正转写其他行和会议纪要中的这些文字。撤销即可恢复。";
+"Corrected in the whole meeting" = "已在整个会议中修正";
 "Corrected words" = "修正后的文字";
 "Return saves, Esc cancels" = "按 Return 存储，按 Esc 取消";
 "Corrected" = "已修正";

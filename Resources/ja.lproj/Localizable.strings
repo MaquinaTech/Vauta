@@ -1465,6 +1465,10 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "行を変更できませんでした";
 "Couldn’t correct the line" = "行を修正できませんでした";
+"Also elsewhere in this meeting: %@" = "この会議のほかの箇所にもあります: %@";
+"Correct Everywhere" = "すべて修正";
+"Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "文字起こしのほかの行と議事録でも、この語句を修正します。取り消すと元に戻ります。";
+"Corrected in the whole meeting" = "会議全体で修正しました";
 "Corrected words" = "修正した語句";
 "Return saves, Esc cancels" = "Returnで保存、Escでキャンセル";
 "Corrected" = "修正済み";

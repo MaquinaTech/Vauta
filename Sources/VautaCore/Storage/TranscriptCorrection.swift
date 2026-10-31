@@ -110,6 +110,57 @@ struct TranscriptCorrection {
         }
     }
 
+    /// Where the correction put other words in place of some (a misheard name or term), as written in each line: at most
+    /// `maxWords` on each side, with an old word that carries meaning. Words only added or only removed are not replacements.
+    func replacements(maxWords: Int = 3) -> [(from: String, to: String)] {
+        var out: [(from: String, to: String)] = []
+        var (i, j) = (0, 0)
+        while i < oldTokens.count || j < newTokens.count {
+            if i < oldTokens.count, j < newTokens.count, oldToNew[i] == j {
+                i += 1
+                j += 1
+                continue
+            }
+            let (i0, j0) = (i, j)
+            while i < oldTokens.count, oldToNew[i] == nil { i += 1 }
+            while j < newTokens.count, newToOld[j] == nil { j += 1 }
+            guard i > i0 || j > j0 else { break }
+            guard i > i0, j > j0, i - i0 <= maxWords, j - j0 <= maxWords,
+                  (i0..<i).contains(where: { carriesMeaning(oldTokens[$0].norm) }) else { continue }
+            out.append((String(old[oldTokens[i0].range.lowerBound..<oldTokens[i - 1].range.upperBound]),
+                        String(new[newTokens[j0].range.lowerBound..<newTokens[j - 1].range.upperBound])))
+        }
+        return out
+    }
+
+    /// `text` with every run of whole words that reads `from` (`TextKeys.norm`) written as `to`; nil when it has none. A place
+    /// that already reads `to` ("Ana María" for "Ana" → "Ana María") is left as it is.
+    static func replacing(_ from: String, with to: String, in text: String, profile: LanguageProfile) -> String? {
+        let words = TextKeys.tokens(from, profile: profile).map(\.norm)
+        let target = TextKeys.tokens(to, profile: profile).map(\.norm)
+        let tokens = TextKeys.tokens(text, profile: profile)
+        guard !words.isEmpty, tokens.count >= words.count else { return nil }
+        func reads(_ phrase: [String], at start: Int) -> Bool {
+            start + phrase.count <= tokens.count && phrase.indices.allSatisfy { tokens[start + $0].norm == phrase[$0] }
+        }
+        var ranges: [Range<String.Index>] = []
+        var start = 0
+        while start + words.count <= tokens.count {
+            if !target.isEmpty, reads(target, at: start) {
+                start += target.count
+            } else if reads(words, at: start) {
+                ranges.append(tokens[start].range.lowerBound..<tokens[start + words.count - 1].range.upperBound)
+                start += words.count
+            } else {
+                start += 1
+            }
+        }
+        guard !ranges.isEmpty else { return nil }
+        var out = text
+        for r in ranges.reversed() { out.replaceSubrange(r, with: to) }
+        return out
+    }
+
     private func carriesMeaning(_ norm: String) -> Bool {
         !profile.stopwords.contains(norm) && !Self.hesitations.contains(norm)
     }

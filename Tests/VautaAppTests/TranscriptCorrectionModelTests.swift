@@ -82,6 +82,36 @@ struct TranscriptCorrectionModelTests {
         #expect(undo.undoActionName == CorrectedNote.restoreTitle)
     }
 
+    @Test func theSameWordsAreCorrectedEverywhereWhenThePersonAccepts() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-correct-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = try MeetingStore(directory: dir, keyStore: CorrectionKey())
+        let id = try await meeting(store, ["Ana will deploy it", "Ana agreed", "The end"])
+        let model = MeetingsModel(store: store)
+        let undo = UndoManager()
+        model.undoManager = undo
+        await model.reload()
+        model.selectedID = id
+        try await until { model.transcript.count == 3 }
+        model.tab = .transcript
+        model.beginCorrecting(model.transcript[0])
+        model.lineDraft?.text = "Anna will deploy it"
+        model.saveLineDraft()
+        try await until { model.everywhereOffer != nil }
+        let offer = try #require(model.everywhereOffer)
+        #expect(offer.segmentID == model.transcript[0].id && offer.lines == 1)
+        #expect(CorrectEverywhereNote.text(offer) == "Also elsewhere in this meeting: Ana → Anna")
+        #expect(model.transcript[1].text == "Ana agreed", "nothing changes before the person accepts")
+
+        await model.correctEverywhere()
+        #expect(model.everywhereOffer == nil)
+        #expect(model.transcript.map(\.text) == ["Anna will deploy it", "Anna agreed", "The end"])
+        #expect(undo.undoActionName == CorrectEverywhereNote.title)
+        undo.undo()
+        try await until { model.transcript[1].text == "Ana agreed" }
+        #expect(model.transcript[0].text == "Anna will deploy it", "the line the person corrected stays")
+    }
+
     @Test func theMeetingBeingRecordedIsNotCorrected() async throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-correct-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: dir) }

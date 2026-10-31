@@ -1465,6 +1465,10 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "Impossible de modifier la ligne";
 "Couldn’t correct the line" = "Impossible de corriger la ligne";
+"Also elsewhere in this meeting: %@" = "Aussi ailleurs dans cette réunion : %@";
+"Correct Everywhere" = "Corriger partout";
+"Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "Corriger aussi ces mots dans les autres lignes de la transcription et dans le compte rendu. Annuler revient en arrière.";
+"Corrected in the whole meeting" = "Corrigé dans toute la réunion";
 "Corrected words" = "Mots corrigés";
 "Return saves, Esc cancels" = "Retour enregistre, Échap annule";
 "Corrected" = "Corrigée";

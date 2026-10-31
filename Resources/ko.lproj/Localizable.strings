@@ -1465,6 +1465,10 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "줄을 변경할 수 없습니다";
 "Couldn’t correct the line" = "줄을 수정할 수 없습니다";
+"Also elsewhere in this meeting: %@" = "이 회의의 다른 곳에도 있습니다: %@";
+"Correct Everywhere" = "모두 수정";
+"Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "전사의 다른 줄과 회의록에서도 이 단어를 수정합니다. 실행 취소하면 되돌아갑니다.";
+"Corrected in the whole meeting" = "회의 전체에서 수정했습니다";
 "Corrected words" = "수정한 단어";
 "Return saves, Esc cancels" = "Return은 저장, Esc는 취소";
 "Corrected" = "수정됨";

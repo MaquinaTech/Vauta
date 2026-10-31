@@ -543,6 +543,14 @@ changed.
   `undoCorrection` restores them only while the line still reads as the correction left it, and leaves anything the user
   changed since. A user split of a corrected line cuts `original_text` at the same word (`oldCut(atNew:)`) and its
   `SpeakerUndo.Split` keeps the whole original.
+- **Correct Everywhere.** `TranscriptCorrection.replacements()` gives the words a correction put in place of others (at most
+  three on each side, an old one that carries meaning; words only added or removed are none). `correctEverywhereOffer` counts
+  the other lines (not echoes), decisions, tasks and card fields with them as whole words (`replacing`, which leaves a place
+  that already reads the new words). `correctEverywhere` runs only when the person accepts: each line through
+  `correctInTransaction` (one `analyzeInTransaction` at the end), items keep `source`, and an `edited` mark goes when the
+  line as transcribed, with the same replacements, reads as the line now or the rest of the change does not touch the item.
+  `CorrectEverywhereUndo` takes back the items and the card while they read as it left them, then each line; a line that moved
+  on fails the whole undo.
 - **Interface.** `MeetingsModel.lineDraft` is the line being corrected (Return on the highlighted line, the pencil, the
   context menu, Edit › Correct Highlighted Passage); it is saved when the person leaves the meeting or the window locks,
   like a note. `TranscriptLineEditor` uses `NoCopyText`, so copy protection applies. Afterwards the meeting is read again

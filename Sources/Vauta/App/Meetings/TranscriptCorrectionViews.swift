@@ -94,3 +94,39 @@ struct CorrectLineButton: View {
         .help(String(localized: "Correct the words of this line (Return)", comment: "Transcript: tooltip of the pencil at the end of the highlighted line"))
     }
 }
+
+/// Under a line just corrected, when the words it replaced are elsewhere in the meeting (other lines, the minutes): the offer
+/// to correct them there too. Nothing changes until the person accepts, and Edit ▸ Undo takes it all back.
+struct CorrectEverywhereNote: View {
+    let offer: MeetingStore.CorrectEverywhereOffer
+    let accept: () -> Void
+    let dismiss: () -> Void
+
+    static let title = String(localized: "Correct Everywhere",
+                              comment: "Transcript: button under a corrected line that also corrects the same words in the other lines and in the minutes; also the action Edit ▸ Undo takes back")
+
+    /// "Also elsewhere in this meeting: Ana → Anna", also what VoiceOver hears when the offer appears.
+    static func text(_ offer: MeetingStore.CorrectEverywhereOffer) -> String {
+        let words = offer.replacements.map { "\($0.from) → \($0.to)" }.joined(separator: ", ")
+        return String(localized: "Also elsewhere in this meeting: \(words)",
+                      comment: "Transcript: under a corrected line whose replaced words are in other lines or in the minutes; the argument lists them, such as “Ana → Anna”")
+    }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Image(systemName: "text.magnifyingglass").accessibilityHidden(true)
+            Text(verbatim: Self.text(offer))
+            Button(Self.title, action: accept)
+                .buttonStyle(.link)
+                .help(String(localized: "Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back.",
+                             comment: "Transcript: tooltip of the Correct Everywhere button"))
+            Button(action: dismiss) { Image(systemName: "xmark") }
+                .buttonStyle(.borderless)
+                .help("Dismiss")
+                .accessibilityLabel(Text("Dismiss"))
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .accessibilityElement(children: .contain)
+    }
+}
