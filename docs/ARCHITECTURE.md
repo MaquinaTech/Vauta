@@ -324,6 +324,10 @@ this Mac (EmbeddingGemma 2 in `VautaMLX`), or are off (Ask then uses keyword sea
   speaker column: it is read from its segment, so it cannot go stale (`MentionRef.speaker`, `spokenQuotes`). This departs
   from the original design's "mention rows carry speaker_id"; whether to keep it is open. A run of `embed` that gives up with
   chunks still behind the transcript does not mark the meeting as checked.
+- **Search and misheard names** (`MeetingStore+Misheard.swift`). For each person or project the question names, the lines
+  that spell it as the transcript misheard it are candidates in every retrieval mode, as a keyword hit is. A learned alias (a
+  correction the person accepted) counts as the name itself, in every meeting. An open correction counts half, in its own
+  meeting, for its first candidate. A rejected one does not count.
 - `VectorIndex` keeps int8 vectors in memory and searches them by brute force with Accelerate. Each vector records
   its embedding space (model and dimensions); changing the model re-embeds meetings.
 

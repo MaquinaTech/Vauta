@@ -394,6 +394,13 @@ extension MeetingStore {
         // speaker the user named Ana talks.
         let entities = try entitiesNamed(in: question, locale: profile.locale)
         if !entities.isEmpty {
+            // Where the transcript misheard one of them (`misheardMoments`): a candidate as a keyword hit is, at half the weight while
+            // the correction is open.
+            let misheard = try misheardMoments(of: entities, scope: scope, excluding: excluding)
+            let holdingMisheard = try chunksHolding(misheard.map(\.segment), space: nil)
+            for (rank, m) in misheard.enumerated() {
+                place(m.meeting, m.t, in: holdingMisheard[m.segment]?.first, rank: rank, weight: m.confirmed ? 1 : 0.5)
+            }
             for (key, signal) in try graphSignals(ranges, entities: entities) {
                 if signal.named > 0 { add(key, rank: 0, weight: Double(signal.named)) }
                 if signal.said { add(key, rank: 0, weight: 1.5) }
