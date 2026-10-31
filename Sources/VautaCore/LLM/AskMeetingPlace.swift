@@ -161,13 +161,14 @@ public struct AskMeetingPlace: Sendable, Equatable {
 extension MeetingStore {
     /// The ended meetings at `place`, newest first: the latest n, the first n or the one before the latest. `entities`: only the
     /// meetings that name all of them (as `MeetingFilter`); `from`, `to`: only those started then. The meeting being recorded is
-    /// not one of them ("the last meeting" while recording is the one before).
-    public func meetingIDs(at place: AskMeetingPlace.Which, entities: [Int64] = [], from: Date? = nil, to: Date? = nil) throws -> [Int64] {
+    /// not one of them ("the last meeting" while recording is the one before), nor is `excluding`.
+    public func meetingIDs(at place: AskMeetingPlace.Which, entities: [Int64] = [], from: Date? = nil, to: Date? = nil,
+                           excluding: Int64? = nil) throws -> [Int64] {
         let candidates = try meetingIDs(matching: MeetingFilter(entities: entities, from: from, to: to))
         guard !candidates.isEmpty else { return [] }
         let ended = Set(try db.query("SELECT id FROM meetings WHERE ended_at IS NOT NULL AND id IN (SELECT value FROM json_each(?))",
                                      [.ids(candidates)]).map { $0.int(0) })
-        let newest = candidates.filter(ended.contains)
+        let newest = candidates.filter { ended.contains($0) && $0 != excluding }
         switch place {
         case .last(let n): return Array(newest.prefix(n))
         case .first(let n): return Array(newest.suffix(n))

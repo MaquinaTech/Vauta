@@ -10,6 +10,9 @@ public struct QuestionEvidence: Sendable {
     public var thisMeeting: [RetrievedPassage] = []
     public var past: [RetrievedPassage] = []
     public var documents: [DocumentPassage] = []
+    /// The meetings the question named that `past` comes from ("last week", "the last meeting"); `.everywhere` when it named none or
+    /// nothing there matched.
+    public var pastScope = AskMeetingScope.everywhere
     /// The sources that passed the gate.
     public var passing: LiveAnswerSources = []
     /// The source with the strongest passage (nil when none passed).
@@ -211,8 +214,16 @@ extension LLMService {
             let routed = await routedQuery(text, mode: mode, corpus: await corpusLanguage(meeting: nil, wholeLibrary: true), locale: queryLocale, timeout: translationBudget())
             let sourceKeys = routed.translated ? QuestionDedup.keys(routed.text, locale: routed.locale?.identifier ?? language.identifier) : keys
             let sourceLocale = routed.translated ? routed.locale?.identifier ?? language.identifier : language.identifier
-            let found = (try? await store.retrieve(routed.text, queryVector: query?.vector, within: nil, excluding: meetingID, space: query?.space, limit: 3,
-                                                   maxChars: 6_000, locale: routed.locale, mode: mode)) ?? []
+            // The meetings the question names ("what did we decide last week?", "in the last meeting"), read in its words as heard: only
+            // there, and in all of them when nothing there matches, as Ask does. A time Ask would only offer is not used: nobody can turn
+            // it on here.
+            let named = (try? await store.askScope(of: text, languages: [language.identifier, locale], excluding: meetingID)) ?? .everywhere
+            func search(_ scope: AskMeetingScope) async -> [RetrievedPassage] {
+                (try? await store.retrieve(routed.text, queryVector: query?.vector, within: scope.within, excluding: meetingID, meetings: scope.meetings,
+                                           space: query?.space, limit: 3, maxChars: 6_000, locale: routed.locale, mode: mode)) ?? []
+            }
+            var found = named.narrows ? await search(named) : []
+            if found.isEmpty { found = await search(.everywhere) } else { evidence.pastScope = named }
             evidence.past = found
             if mode == .semantic { evidence.ungated.semantic.insert(.pastMeetings) }
             for p in found {

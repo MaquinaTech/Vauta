@@ -113,6 +113,26 @@ struct QuestionEvidenceTests {
         #expect(!none.passes && none.past.isEmpty, "retrieve(excluding:) leaves the live meeting out")
     }
 
+    @Test func aHeardQuestionThatNamesItsMeetingLooksThereFirst() async throws {
+        let (service, f, live, past, segments) = try await Self.rig()
+        let newest = try await f.meeting(["Budget review", "The Berlin pilot budget went up to sixty thousand euros"], locale: "en-US", outputLocale: "en-US",
+                                         at: .now - 86_400)
+        let named = await service.questionEvidence(text: "How much was the Berlin pilot budget in the last meeting?", locale: "en-US", meetingID: live,
+                                                   segmentID: segments[4].id, sources: [.pastMeetings])
+        #expect(named.passes && named.past.allSatisfy { $0.meeting.id == newest } && named.pastScope == AskMeetingScope(within: newest, placed: true))
+        let unnamed = await service.questionEvidence(text: "How much was the Berlin pilot budget?", locale: "en-US", meetingID: live, segmentID: segments[4].id,
+                                                     sources: [.pastMeetings])
+        #expect(Set(unnamed.past.map(\.meeting.id)) == [past, newest] && unnamed.pastScope == .everywhere)
+    }
+
+    @Test func aNamedMeetingWithNothingThatMatchesLooksInAllOfThem() async throws {
+        let (service, f, live, past, segments) = try await Self.rig()
+        _ = try await f.meeting(["The plants in the office", "Someone should water them on Fridays"], locale: "en-US", outputLocale: "en-US", at: .now - 86_400)
+        let evidence = await service.questionEvidence(text: "How much was the Berlin pilot budget in the last meeting?", locale: "en-US", meetingID: live,
+                                                      segmentID: segments[4].id, sources: [.pastMeetings])
+        #expect(evidence.passes && evidence.past.allSatisfy { $0.meeting.id == past } && evidence.pastScope == .everywhere)
+    }
+
     @Test func aSourceThatIsOffIsNeverSearched() async throws {
         let (service, _, live, _, segments) = try await Self.rig()
         let evidence = await service.questionEvidence(text: "How much was the Berlin pilot budget?", locale: "en-US", meetingID: live, segmentID: segments[4].id, sources: [.thisMeeting])
