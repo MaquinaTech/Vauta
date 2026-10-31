@@ -2617,6 +2617,12 @@
 /* No comment provided by engineer. */
 "Hide Transcript" = "Nascondi trascrizione";
 
+/* No comment provided by engineer. */
+"Hide Vauta Windows" = "Nascondi finestre di Vauta";
+
+/* No comment provided by engineer. */
+"Hide Windows" = "Nascondi finestre";
+
 /* Settings → Live answers: the switch that hides an answer card when the people in the meeting already answered the question */
 "Hide answers when someone answers aloud" = "Nascondi le risposte quando qualcuno risponde a voce";
 
@@ -3190,6 +3196,9 @@
 "Updating the live notes…" = "Aggiornamento delle note in diretta…";
 "Update the live notes with what was said since the last ones" = "Aggiorna le note in diretta con ciò che è stato detto dalle ultime";
 "Nothing new was said since the last live notes" = "Non è stato detto nulla di nuovo dalle ultime note in diretta";
+
+/* Detail of the panel notice while Vauta’s windows are hidden for sharing the screen; a window the user opens on purpose still shows */
+"Nothing of Vauta comes on screen by itself until you show them again." = "Niente di Vauta compare sullo schermo da solo finché non le mostri di nuovo.";
 
 /* Notification body when the model server is unreachable while recording */
 "Live notes are paused. Recording continues, and the minutes will be written when the server is back." = "Le note in diretta sono in pausa. La registrazione continua e il verbale verrà scritto quando il server sarà di nuovo disponibile.";
@@ -5474,6 +5483,12 @@
 /* No comment provided by engineer. */
 "Show Transcript" = "Mostra trascrizione";
 
+/* No comment provided by engineer. */
+"Show Vauta Windows" = "Mostra finestre di Vauta";
+
+/* No comment provided by engineer. */
+"Show Windows" = "Mostra finestre";
+
 /* Brief: button that shows every item of a section; the argument is how many there are */
 "Show all (%lld)" = "Mostra tutto (%lld)";
 
@@ -5902,6 +5917,9 @@
 
 /* Shortcut name: opens the floating notepad to type a short note during a recording */
 "Take a note" = "Prendi una nota";
+
+/* No comment provided by engineer. */
+"Takes Vauta’s windows, the notepad and the captions off the screen while you share it. The recording goes on." = "Toglie dallo schermo le finestre di Vauta, il blocco note e i sottotitoli mentre lo condividi. La registrazione continua.";
 
 /* Accessibility label
    Kind of the target of a relation; also a field label
@@ -7395,6 +7413,12 @@
 
 /* Settings → General, after setup when the menu bar icon couldn't be found */
 "Vauta’s icon may be hidden in the menu bar, for example behind the notch. Open Vauta again from Finder, Spotlight or Apps to come back here." = "L’icona di Vauta potrebbe essere nascosta nella barra dei menu, ad esempio dietro il notch. Riapri Vauta dal Finder, da Spotlight o da App per tornare qui.";
+
+/* Panel notice while Vauta’s windows, the notepad and the captions are hidden for sharing the screen */
+"Vauta’s windows are hidden" = "Le finestre di Vauta sono nascoste";
+
+/* Menu-bar icon state for VoiceOver, after the recording state, while Vauta’s windows are hidden for sharing the screen */
+"Vauta’s windows hidden" = "finestre di Vauta nascoste";
 
 /* No comment provided by engineer. */
 "Verified" = "Verificata";

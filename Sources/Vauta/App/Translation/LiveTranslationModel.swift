@@ -35,6 +35,11 @@ final class LiveTranslationModel {
     private(set) var speakerNames: [Int: String] = [:]
     /// The pointer is over the panel: its controls show.
     var controlsVisible = false
+    /// Vauta's windows are hidden for presenting (`RecorderModel.hideWindows`): the captions panel stays off the screen until
+    /// they come back, while the translation goes on.
+    var holdsPanelBack = false {
+        didSet { if holdsPanelBack != oldValue { reconcile() } }
+    }
     /// The last download did not finish (declined in Apple's sheet or failed): the captions say so and offer it again.
     private(set) var downloadFailed = false
     /// The pair whose last download did not finish, so Settings can say which language and offer it again.
@@ -321,7 +326,7 @@ final class LiveTranslationModel {
             Task { await running.stop() }
             snapshot = CaptionSnapshot()
         }
-        if wanted { panel.show() } else { panel.hide() }
+        if wanted, !holdsPanelBack { panel.show() } else { panel.hide() }
     }
 
     private func start() {
