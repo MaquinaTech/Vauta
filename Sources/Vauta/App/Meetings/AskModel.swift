@@ -62,6 +62,8 @@ final class AskModel {
     /// A question typed here is told to the live answers, so the same one is not answered twice.
     @ObservationIgnored var onAsked: ((String) -> Void)?
     @ObservationIgnored var openCitation: ((Int64, Int64) -> Void)?
+    /// Opens a meeting's minutes (a citation of the minutes of a meeting whose transcript is gone, `MinutesEvidence`).
+    @ObservationIgnored var openMinutes: ((Int64) -> Void)?
     @ObservationIgnored var meetingTitle: ((Int64) -> String?)?
     @ObservationIgnored private let store: MeetingStore
     @ObservationIgnored private var task: Task<Void, Never>?
@@ -91,6 +93,16 @@ final class AskModel {
     static var partlyVerifiedNote: String {
         String(localized: "Some points couldn’t be found word for word. Check the ones marked before relying on them.",
                comment: "Ask: shown under the claims of an answer when some of them are verified and some are not")
+    }
+
+    /// Under a partly verified answer: the claims that could not be checked, and the figures of its sentence that are in nothing the
+    /// model read (`VerifiedAnswer.unbackedFigures`).
+    static func partlyVerifiedNote(for answer: VerifiedAnswer) -> String {
+        guard !answer.unbackedFigures.isEmpty else { return partlyVerifiedNote }
+        let figures = answer.unbackedFigures.formatted(.list(type: .and))
+        let note = String(localized: "Not in the transcript or documents the answer was based on: \(figures). Check before relying on it.",
+                          comment: "Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350)")
+        return answer.claims.allSatisfy(\.verified) ? note : ClaimProse.join([partlyVerifiedNote, note])
     }
 
     /// Under the claims of an answer whose quoted moments were judged to only touch the topic.
@@ -154,8 +166,8 @@ final class AskModel {
                                 comment: "Ask: under an answer; the arguments are how many meetings and how many of the person's documents had passages in the request to the model"))
         }
         if c.purged > 0 {
-            parts.append(String(localized: "\(c.purged) older meetings no longer have a transcript and weren’t searched.",
-                                comment: "Ask: under an answer; the argument is how many meetings had their transcript deleted by the retention setting (their minutes stay), so Ask could not search them"))
+            parts.append(String(localized: "\(c.purged) older meetings no longer have a transcript; only their minutes were searched.",
+                                comment: "Ask: under an answer; the argument is how many meetings had their transcript deleted by the retention setting (their minutes stay), so Ask searched only their minutes"))
         }
         return parts.isEmpty ? nil : ClaimProse.join(parts)
     }
@@ -429,18 +441,24 @@ final class AskModel {
 
     func open(citation segment: Int64) {
         guard let meeting = segmentMeeting[segment] else { return }
-        openCitation?(meeting, segment)
+        if MinutesEvidence.isMinutes(segment) { openMinutes?(meeting) } else { openCitation?(meeting, segment) }
     }
 
     /// "Weekly sync · 12:34" (or just the time when asking about one meeting), then who said it when the meeting
     /// has speaker data: "Weekly sync · 12:34 · Ana".
     func citationLabel(_ segment: Int64) -> String {
-        let time = segments[segment].map { ElapsedTime.stamp($0.start) } ?? "?"
+        // A line of the minutes has no moment of its own: it is named by the minutes it comes from.
+        let time = MinutesEvidence.isMinutes(segment) ? Self.minutesWord : segments[segment].map { ElapsedTime.stamp($0.start) } ?? "?"
         var label = time
         if !thisMeeting, let meeting = segmentMeeting[segment], let title = meetingTitle?(meeting) {
             label = String(localized: "citation.meeting.time", defaultValue: "\(title) · \(time)", comment: "A citation in an Ask answer: meeting title and time")
         }
         return withSpeaker(label, of: segment)
+    }
+
+    /// The name of the minutes, as the meeting's tab says it ("Weekly sync · Minutes").
+    static var minutesWord: String {
+        String(localized: "meeting.tab.minutes", defaultValue: "Minutes", comment: "Tab of a meeting with its minutes: summary, topics, decisions and open questions. Same word as the minutes everywhere else (es acta, fr compte rendu, de Protokoll)")
     }
 
     /// The labels of one claim's citations, in order. A citation from the same meeting as the one before it
@@ -449,7 +467,7 @@ final class AskModel {
         var previous: Int64?
         return citations.map { segment in
             defer { previous = segmentMeeting[segment] }
-            if let previous, previous == segmentMeeting[segment] {
+            if let previous, previous == segmentMeeting[segment], !MinutesEvidence.isMinutes(segment) {
                 return withSpeaker(segments[segment].map { ElapsedTime.stamp($0.start) } ?? "?", of: segment)
             }
             return citationLabel(segment)
@@ -470,7 +488,7 @@ final class AskModel {
 
     /// The citation with who said it (see `CitationLabel`).
     private func withSpeaker(_ label: String, of segment: Int64) -> String {
-        guard let s = segments[segment] else { return label }
+        guard let s = segments[segment], !MinutesEvidence.isMinutes(segment) else { return label }
         return CitationLabel.label(label, speaker: s.speaker, channel: s.channel)
     }
 
@@ -478,7 +496,7 @@ final class AskModel {
     func copyableAnswer() -> AnswerExport? {
         guard let answer else { return nil }
         return AnswerExport(question: answeredQuestion, answer: answer, unverifiedNote: answer.cutShort && answer.claims.isEmpty ? Self.cutShortNote : Self.unverifiedNote(for: answeredScope),
-                            partlyVerifiedNote: Self.partlyVerifiedNote, relatedNote: Self.relatedNote, endsIncompleteNote: Self.endsIncompleteNote, source: { [self] id in
+                            partlyVerifiedNote: Self.partlyVerifiedNote(for: answer), relatedNote: Self.relatedNote, endsIncompleteNote: Self.endsIncompleteNote, source: { [self] id in
             segments[id] == nil ? nil : citationLabel(id)
         })
     }

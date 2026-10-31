@@ -320,7 +320,7 @@
 			<string>%lld delas ainda não estão no índice de busca por significado e foram pesquisadas por palavras-chave.</string>
 		</dict>
 	</dict>
-	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<key>%lld older meetings no longer have a transcript; only their minutes were searched.</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@count@</string>
@@ -331,9 +331,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>lld</string>
 			<key>one</key>
-			<string>%lld reunião mais antiga não tem mais transcrição e não foi pesquisada.</string>
+			<string>%lld reunião mais antiga não tem mais transcrição; só a ata foi pesquisada.</string>
 			<key>other</key>
-			<string>%lld reuniões mais antigas não têm mais transcrição e não foram pesquisadas.</string>
+			<string>%lld reuniões mais antigas não têm mais transcrição; só as atas foram pesquisadas.</string>
 		</dict>
 	</dict>
 	<key>%lld to review</key>

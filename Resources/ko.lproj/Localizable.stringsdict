@@ -253,7 +253,7 @@
 			<string>그중 %lld개는 아직 의미 검색 색인에 없어 키워드 검색으로 검색했습니다.</string>
 		</dict>
 	</dict>
-	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<key>%lld older meetings no longer have a transcript; only their minutes were searched.</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@count@</string>
@@ -264,7 +264,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>lld</string>
 			<key>other</key>
-			<string>오래된 회의 %lld개는 녹취록이 더 이상 없어 검색하지 않았습니다.</string>
+			<string>오래된 회의 %lld개는 녹취록이 더 이상 없어 회의록만 검색했습니다.</string>
 		</dict>
 	</dict>
 	<key>%lld to review</key>

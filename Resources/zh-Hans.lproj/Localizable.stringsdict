@@ -253,7 +253,7 @@
 			<string>其中 %lld 个尚未建立按语义搜索的索引，已改用关键词搜索。</string>
 		</dict>
 	</dict>
-	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<key>%lld older meetings no longer have a transcript; only their minutes were searched.</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@count@</string>
@@ -264,7 +264,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>lld</string>
 			<key>other</key>
-			<string>%lld 个较早的会议已没有转录文本，未被搜索。</string>
+			<string>%lld 个较早的会议已没有转录文本，仅搜索了其会议纪要。</string>
 		</dict>
 	</dict>
 	<key>%lld to review</key>
