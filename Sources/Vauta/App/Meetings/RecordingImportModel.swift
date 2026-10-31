@@ -81,6 +81,15 @@ final class RecordingImportModel {
         await begin(url)
     }
 
+    /// The recording among files dropped on the Meetings window: exactly one audio or video file on this Mac, the types the
+    /// open panel offers. Anything else (several files, a folder, a document) is not taken, so the drop is refused.
+    nonisolated static func importable(_ urls: [URL]) -> URL? {
+        guard urls.count == 1, let url = urls.first, url.isFileURL else { return nil }
+        let type = (try? url.resourceValues(forKeys: [.contentTypeKey]))?.contentType ?? UTType(filenameExtension: url.pathExtension)
+        guard let type, type.conforms(to: .audio) || type.conforms(to: .movie) else { return nil }
+        return url
+    }
+
     func begin(_ url: URL) async {
         finishAccess()
         self.url = url
