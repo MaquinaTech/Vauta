@@ -60,9 +60,13 @@ struct ActionsReviewFixTests {
         let intent = try await t.store.beginAction(target: .ics, source: .followUp, sourceID: id, containerID: nil, titleHash: "h")
         t.writer.setAccess(.event, .notDetermined)
         t.writer.setAccess(.reminder, .notDetermined)
+        // Dated ahead, so it is within the 10 s grace however long a busy machine takes to reach the next line.
+        try await t.store.executeForTest("UPDATE created_actions SET written_at = ? WHERE id = ?",
+                                         [.real(AppClock.now.timeIntervalSince1970 + 3_600), .integer(intent.action.id)])
         await t.service.reconcileWriting()
         #expect(try await t.store.writingActions().count == 1, "a hand-off in progress is left alone")
-        try await t.store.executeForTest("UPDATE created_actions SET written_at = written_at - 120 WHERE id = ?", [.integer(intent.action.id)])
+        try await t.store.executeForTest("UPDATE created_actions SET written_at = ? WHERE id = ?",
+                                         [.real(AppClock.now.timeIntervalSince1970 - 120), .integer(intent.action.id)])
         await t.service.reconcileWriting()
         let remaining = try await t.store.writingActions()
         let live = try await t.store.liveAction(target: .ics, source: .followUp, sourceID: id)
