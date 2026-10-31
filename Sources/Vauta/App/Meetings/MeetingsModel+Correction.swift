@@ -152,10 +152,11 @@ extension MeetingsModel {
         undoManager.setActionName(correction.restored ? CorrectedNote.restoreTitle : CorrectLineButton.title)
     }
 
-    /// The minutes' marks, the names, the translation shown and the questions may have changed with the line; search and Ask
-    /// embed the meeting again when its text changed.
+    /// The minutes' marks, the names, the translation shown, the questions and the follow-up meetings found in it may have changed
+    /// with the line; search and Ask embed the meeting again when its text changed.
     private func reloadAfterCorrection(_ meetingID: Int64) async {
         if let llm { Task { await llm.speakersChanged(meetingID: meetingID) } }
+        _ = try? await store.redetectFollowUps(meetingID)
         guard selectedID == meetingID else { return }
         await refreshDetail()
         if !hits.isEmpty { await runSearch() }
