@@ -524,7 +524,7 @@ changed.
 ### Transcript corrections
 
 - **Storage.** `segments.text` is the corrected line, so every reader (search, Ask, chunks, the graph, the minutes, the
-  exports) reads it with no change; `original_text` keeps what the transcriber wrote (NULL = never corrected, or restored)
+  exports) reads it with no change, and the JSON export flags the line `corrected` without `original_text`; `original_text` keeps what the transcriber wrote (NULL = never corrected, or restored)
   and `edited_at` when the line first differed from it (migration 36). `segments_fts` is external-content, so
   `MeetingStore.correctSegment` tells it the old text and the new one. Translations stay stored and `translations(of:)`
   leaves out corrected lines: they translate what was transcribed and come back with Restore Original.

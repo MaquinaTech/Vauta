@@ -209,4 +209,16 @@ struct TranscriptEditTests {
         try await store.splitSegment(m.lines[0], atCharacter: Array(corrected).firstIndex(of: "y")! + 2)
         #expect(try await store.segments(of: m.id).map(\.originalText) == [nil, "and Ana will deploy"])
     }
+
+    @Test func theJSONExportMarksACorrectedLineWithoutWhatWasTranscribed() async throws {
+        let fx = StoreFixture()
+        let store = try fx.open()
+        let m = try await meeting(store)
+        try await store.correctSegment(m.lines[0], text: "The Kubernetes cluster is ready")
+        let e = try #require(try await store.meetingExport(m.id))
+        #expect(e.transcript.map(\.corrected) == [true, false])
+        let json = try MeetingExportJSON.encode(e, options: MeetingExportOptions(locale: Locale(identifier: "en_US"), timeZone: .gmt))
+        #expect(json.components(separatedBy: "\"corrected\" : true").count == 2, "only on the corrected line")
+        #expect(json.contains("The Kubernetes cluster is ready") && !json.contains("cubernetes"), "what was transcribed stays in Vauta")
+    }
 }
