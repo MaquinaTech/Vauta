@@ -235,6 +235,18 @@ struct FollowUpDetectorTests {
         #expect(try await f.store.followUps(id).count == 1, "detecting twice does not duplicate")
     }
 
+    @Test func aCorrectedLineIsLookedAtAgain() async throws {
+        let f = try KnowledgeFixture()
+        let id = try await f.store.startMeeting(at: Self.monday, timeZone: Self.madrid)
+        let line = try await f.store.append(Segment(channel: .others, start: 0, end: 8, text: "Let's meet again on October 21.", isFinal: true), to: id)
+        try await f.store.endMeeting(id, at: Self.monday.addingTimeInterval(600))
+        #expect(try await !f.store.redetectFollowUps(id), "never looked for: nothing to look at again")
+        _ = try await f.store.detectFollowUps(id)
+        try await f.store.correctSegment(line, text: "Let's meet again on October 23.")
+        #expect(try await f.store.redetectFollowUps(id))
+        #expect(try await f.store.followUps(id).map { $0.day?.string } == ["2026-10-23"])
+    }
+
     @Test func theDetectorIsDeterministic() {
         let texts = ["Let's meet again next Tuesday at 10.", "Same time in two weeks?"]
         #expect(Self.detect(texts, cited: [1, 2]) == Self.detect(texts, cited: [1, 2]))

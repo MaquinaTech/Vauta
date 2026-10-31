@@ -5379,6 +5379,9 @@
 /* No comment provided by engineer. */
 "Search Meetings" = "Search Meetings";
 
+/* Placeholder of the search field at the top of the Settings sidebar */
+"Search Settings" = "Search Settings";
+
 /* Ask; under the question: Ask finds passages with the search model
    Network Activity purpose: building the search index with the embedding model
    Settings → Models activity
