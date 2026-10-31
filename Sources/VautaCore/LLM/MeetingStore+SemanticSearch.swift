@@ -163,6 +163,10 @@ extension MeetingStore {
         for moment in try noteCitedMoments(terms: terms, scope: scope).prefix(40) where moment.meeting != excluding {
             for l in try locate(moment.t, in: moment.meeting, space: space) where ranges[l.key] != nil { score[l.key, default: 0] += 0.04 }
         }
+        // The minutes' items that match the question: a smaller lift than the person's own notes, on a passage already ranked by meaning.
+        for moment in try itemCitedMoments(terms: terms, scope: scope) where moment.meeting != excluding {
+            for l in try locate(moment.t, in: moment.meeting, space: space) where ranges[l.key] != nil { score[l.key, default: 0] += 0.04 * itemKeyWeight / 1.5 }
+        }
         return try assemble(Array(score), ranges: ranges, limit: limit, maxChars: maxChars, cosine: cosine.filter { !placeholder.contains($0.key) })
     }
 

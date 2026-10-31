@@ -110,6 +110,10 @@ public enum LLMEvaluation {
         /// `--tasks notepad`: the shorthand notes of the meetings (`dev/notepad.jsonl`); `--tasks ask-cross`: the cross-meeting questions.
         public var notepad: URL?
         public var crossQuestions: URL?
+        /// `--tasks ask-retrieval`: minutes written for the meetings (`<meeting>.server.new.json` as `minutes-eval` keeps them), whose decisions
+        /// and tasks are stored before the questions, and the weight of those items as keys of the retrieval (`--item-key-weight`, 0 = off).
+        public var minutesItems: URL?
+        public var itemKeyWeight: Double?
         /// `live-questions`: the cue threshold, the variant without the model check (V0), the suppression of questions answered aloud,
         /// the sources and the earlier meetings of a series as past meetings.
         public var questionSensitivity: QuestionSensitivity = .standard

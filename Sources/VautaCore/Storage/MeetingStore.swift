@@ -102,6 +102,8 @@ public actor MeetingStore {
     var writesInFlight = 0
     /// Second speed of retention, see `init`.
     public internal(set) var knowledgeRetentionDays: Int
+    /// How much the minutes' items weigh as keys of Ask's retrieval (`itemCitedMoments`); 0 turns them off (the evaluation compares both).
+    public internal(set) var itemKeyWeight = MeetingStore.defaultItemKeyWeight
 
     var dirty: Bool { needsSnapshot || !pendingOps.isEmpty }
 

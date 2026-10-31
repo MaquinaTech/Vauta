@@ -386,6 +386,10 @@ extension MeetingStore {
         for (rank, moment) in try noteCitedMoments(terms: terms, scope: scope).prefix(40).enumerated() {
             place(moment.meeting, moment.t, in: try chunks(holding: moment.t, in: moment.meeting, space: nil).first, rank: rank, weight: 1.5)
         }
+        // The minutes' decisions and tasks, and the kept questions, that match: the moments they cite are candidates too.
+        for (rank, moment) in try itemCitedMoments(terms: terms, scope: scope).enumerated() {
+            place(moment.meeting, moment.t, in: try chunks(holding: moment.t, in: moment.meeting, space: nil).first, rank: rank, weight: itemKeyWeight)
+        }
         // Graph: passages that name the people or projects of the question, and (for "What did Ana say about X") passages where a
         // speaker the user named Ana talks.
         let entities = try entitiesNamed(in: question, locale: profile.locale)
