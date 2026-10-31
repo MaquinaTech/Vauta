@@ -34,6 +34,7 @@ Developer tools:
 
 ### Changed
 
+- While recording on battery, the integrated model reads the meeting ahead every 3 minutes with new text, as in Low Power Mode, instead of every 20 seconds: each reading costs GPU energy that the minutes spend anyway when the recording ends. On the charger nothing changes.
 - A task owner given by a speaker whose voice probably mixes two people is marked **owner not confirmed**. Speaker separation can put two similar voices, or one person's line, in another person's speaker, and the minutes then gave that person the other's task with nothing to say so. Vauta now keeps how tight each speaker's voice is (one number, not the voice), and the owners that a loose speaker's lines give stay, marked. A line you moved to a speaker yourself is not marked. Meetings whose speakers were separated earlier are not marked.
 - **By meaning** in the meetings list also works with a filter (a person, a series or the last days). It looks only in the filtered meetings, and it ranks by meaning once those meetings are indexed, even while the rest of the library still is. As with the keyword results under a filter, it shows no documents. Before, a filter turned it off.
 - With a model server whose structured output is "JSON schema" or "JSON object" (Settings → Models → Advanced), the minutes' block extracts, merges and closing request and the live notes ask for their shape in `response_format`, as Ask already did. The requests with reasoning on send none. A server that answers 400, 415 or 422 to it is asked once more without it.

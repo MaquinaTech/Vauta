@@ -280,6 +280,33 @@ struct ServiceWarmPowerTests {
         #expect(chat.reads.count == 2, "once loaded, a reading goes on in Low Power Mode")
     }
 
+    @Test func theCadenceOnBatteryIsTheOneOfLowPowerMode() {
+        let c = LLMService.WarmCadence()
+        #expect(c.due(sinceStart: 60, sinceTick: 30, characters: 700, saving: false))
+        #expect(!c.due(sinceStart: 60, sinceTick: 30, characters: 700, saving: true), "on battery: not every 20 s")
+        #expect(c.due(sinceStart: 600, sinceTick: 180, characters: 10, saving: true), "every 3 minutes with any new text")
+        #expect(!c.due(sinceStart: 600, sinceTick: 900, characters: 0, saving: true), "never with nothing new")
+        #expect(!c.due(sinceStart: 10, sinceTick: .infinity, characters: 5_000, saving: false), "not in the first 30 seconds")
+        #expect(c.due(sinceStart: 60, sinceTick: 120, characters: 50, saving: false), "every 2 minutes with any new text")
+        #expect(!c.due(sinceStart: 60, sinceTick: 119, characters: 599, saving: false))
+    }
+
+    @Test func onBatteryTheReadingSpacesOutButStillReads() async throws {
+        let (service, chat, _, id) = try await ServiceWarmTests.rig()
+        let battery = Locked(true)
+        await service.setEnvironmentProvider { IndexerEnvironment(onBattery: battery.withLock { $0 }) }
+        await service.setWarmCadence(.init(startDelay: 0, minInterval: 0, minCharacters: 1, maxInterval: 0, lowPowerInterval: 3_600))
+        await service.segmentSaved(meetingID: id, characters: 700)
+        #expect(await ServiceWarmTests.eventually { chat.reads.count == 1 }, "the model is loaded and read on battery too")
+        _ = await ServiceWarmTests.eventually { await service.warm?.reading != true }
+        await service.segmentSaved(meetingID: id, characters: 700)
+        try await Task.sleep(for: .milliseconds(150))
+        #expect(chat.reads.count == 1, "the next one waits for the interval of Low Power Mode")
+        battery.withLock { $0 = false }
+        await service.segmentSaved(meetingID: id, characters: 700)
+        #expect(await ServiceWarmTests.eventually { chat.reads.count == 2 }, "on the charger, the usual cadence")
+    }
+
     @Test func aQuestionAndATickShareOneGateSoOnlyOneReadingRuns() async throws {
         let (service, chat, _, id) = try await ServiceWarmTests.rig()
         chat.readDelay = .milliseconds(200)

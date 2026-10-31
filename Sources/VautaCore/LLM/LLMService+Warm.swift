@@ -34,13 +34,22 @@ extension LLMService {
     }
 
     /// When the reading ticks: not before 30 seconds of recording; then after 20 seconds and 600 new characters, or every 2 minutes with
-    /// any new text; every 3 minutes in Low Power Mode.
+    /// any new text; every 3 minutes on battery or in Low Power Mode.
     struct WarmCadence {
         var startDelay: TimeInterval = 30
         var minInterval: TimeInterval = 20
         var minCharacters = 600
         var maxInterval: TimeInterval = 120
         var lowPowerInterval: TimeInterval = 180
+
+        /// Whether a reading is due, `sinceStart` seconds into the recording and `sinceTick` after the last one, with `characters` new.
+        /// `saving`: on battery or in Low Power Mode, where a tick costs energy the minutes would spend anyway once the recording ends:
+        /// one every `lowPowerInterval`, with any new text.
+        func due(sinceStart: TimeInterval, sinceTick: TimeInterval, characters: Int, saving: Bool) -> Bool {
+            guard sinceStart >= startDelay, characters > 0 else { return false }
+            if saving { return sinceTick >= lowPowerInterval }
+            return (characters >= minCharacters && sinceTick >= minInterval) || sinceTick >= maxInterval
+        }
     }
 
     func setWarmCadence(_ cadence: WarmCadence) { warmCadence = cadence }
@@ -67,13 +76,9 @@ extension LLMService {
     }
 
     private func shouldTick(_ state: WarmState, now: Date = .now) -> Bool {
-        let c = warmCadence
-        guard now.timeIntervalSince(state.startedAt) >= c.startDelay else { return false }
-        let since = now.timeIntervalSince(state.lastTick)
         let env = environmentProvider()
-        if env.lowPowerMode { return since >= c.lowPowerInterval && state.charactersSince > 0 }
-        if state.charactersSince >= c.minCharacters, since >= c.minInterval { return true }
-        return state.charactersSince > 0 && since >= c.maxInterval
+        return warmCadence.due(sinceStart: now.timeIntervalSince(state.startedAt), sinceTick: now.timeIntervalSince(state.lastTick),
+                               characters: state.charactersSince, saving: env.lowPowerMode || env.onBattery)
     }
 
     /// Reads the transcript so far into the meeting's prefix. Runs only when the minutes would use the integrated model, the model is
