@@ -147,6 +147,26 @@ import Testing
         #expect(seconds < 60)
     }
 
+    // MARK: The settings in a backup
+
+    @Test func aMutatedSettingsPayloadKeepsOnlyAllowedSettingsOfTheirType() async throws {
+        let rejected = try await offPool { () -> [Int] in
+            guard let seed = BackupPreferences(values: [
+                "transcriptionLanguage": .string("es-ES"), "copyProtection": .bool(true), "autoStopMinutes": .int(10),
+                "recordHotKey": .data(Data(#"{"keyCode":15,"modifiers":6144}"#.utf8)), "notAllowed": .string("x"),
+            ]).encoded() else { return [-1] }
+            var rng = SeededGenerator(seed: 14)
+            var rejected: [Int] = []
+            for i in 0..<Fuzz.iterations {
+                let read = BackupPreferences(decoding: Fuzz.mutate(seed, &rng))
+                // What is read is what the allow-list accepts, each with its type and size: filtering it again keeps it all.
+                if BackupPreferences(values: read.values).values != read.values { rejected.append(i) }
+            }
+            return rejected
+        }
+        #expect(rejected.isEmpty, "seed 14, iterations \(rejected.prefix(5))")
+    }
+
     @Test func anImageDeclaringMoreThanAnIntCanHoldIsRefused() {
         for declared: UInt64 in [UInt64(Int.max) + 1, .max] {
             var plain = Data()
