@@ -56,6 +56,7 @@ Developer tools:
 
 ### Fixed
 
+- A backup file declaring an image larger than any Mac can hold made Vauta quit while restoring it; it is now refused as damaged. Fuzz tests now feed mutated input to the parsers of a model server's stream, the store's journal and the store image, and check that each ends in a value or an error within its limits.
 - A file added to a document folder while Vauta was scanning it is no longer missed until the next change in that folder. A change that arrives during a scan lists the folder again when the scan ends, and **Reindex** asked during a scan still reads the skipped files again.
 - A recording no longer fails to start for a speech model that Settings shows as installed, with no way to download it. After an update re-signs an ad-hoc build, macOS still lists the model as installed, but Vauta can no longer use it. Settings, the first-run setup, `Vauta languages` and `Vauta doctor` now count a model as installed only when Vauta can use it, so they offer the download the recording needs.
 - A recording that stays on "Starting…" can be given up with the record button. After a minute it says what it waits for, with the Settings pane that fixes it, and quitting no longer waits for it. It waited without end on a step macOS held: after an update re-signs an ad-hoc build, macOS asks again for system audio, in a dialog that can sit behind other windows.
