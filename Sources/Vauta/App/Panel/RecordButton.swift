@@ -65,8 +65,11 @@ struct RecordButton: View {
                 Text(verbatim: model.elapsed)
                     .font(.system(.title2, design: .rounded).weight(.medium).monospacedDigit())
                     .contentTransition(.numericText())
+                    // Paused, the clock goes on (the transcript's) but quieter: nothing is being captured.
+                    .foregroundStyle(model.isPaused ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary))
                     .accessibilityLabel(Text("Elapsed time"))
                     .accessibilityValue(Text(verbatim: ElapsedTime.spoken(model.elapsedSeconds)))
+                PauseButton(model: model)
             } else {
                 Text(verbatim: statusText)
                     .font(.callout)
@@ -141,8 +144,9 @@ struct RecordButton: View {
         if model.isBusy || restoringNow { return .working }
         // Opaque, so the white glyph reads (4.5:1); it still looks quieter than the coloured button.
         if blocked { return .blocked(Self.blockedGrey) }
-        // Stepping back is not being disabled: the button stays fully opaque (smaller, no glow, no orbit).
-        if isMuted { return .muted }
+        // Stepping back is not being disabled: the button stays fully opaque (smaller, no glow, no orbit). Paused, nothing is
+        // captured: the quiet disc, not the red one that listens.
+        if isMuted || model.isPaused { return .muted }
         return model.isRecording ? .listening : .idle
     }
 
@@ -183,6 +187,8 @@ struct RecordButton: View {
     private var accessibilityValue: String {
         switch model.phase {
         // "Recording" alone is also the name of a Settings pane; a state needs its own key.
+        case .recording where model.isPaused: String(localized: "state.paused", defaultValue: "Paused",
+                                                     comment: "State: the recording of a meeting is paused; nothing is captured until it is resumed")
         case .recording: String(localized: "state.recording", defaultValue: "Recording",
                                 comment: "State: a meeting is being recorded right now (not the Settings pane)")
         // While busy the name already says what is going on; repeating it as the value would read twice.
@@ -190,6 +196,31 @@ struct RecordButton: View {
         case _ where restoringNow: ""
         default: String(localized: "Not recording", comment: "Record button state for VoiceOver")
         }
+    }
+}
+
+/// Pause and Resume, under the time while recording: a small button like the panel's other actions.
+private struct PauseButton: View {
+    let model: RecorderModel
+
+    var body: some View {
+        Button { model.togglePause() } label: {
+            if model.isPaused {
+                Label { Text("Resume", comment: "Button under the time of a paused recording: captures the microphone and the meeting again") } icon: {
+                    Image(systemName: "play.fill")
+                }
+            } else {
+                Label { Text("Pause", comment: "Button under the time of a recording: stops capturing for now, the meeting stays open") } icon: {
+                    Image(systemName: "pause.fill")
+                }
+            }
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+        .disabled(!model.canTogglePause)
+        .accessibilityLabel(model.isPaused ? Text("Resume Recording") : Text("Pause Recording"))
+        .help(model.isPaused ? Text("Capture the microphone and the meeting’s sound again")
+                             : Text("Stop capturing for now. The meeting stays open and the pause shows in its transcript."))
     }
 }
 

@@ -50,6 +50,12 @@ extension RecorderModel {
     private func tick() {
         guard let capture else { return }
         let mono = ContinuousClock.now
+        if isPaused {
+            // Nothing is captured: no meters, no silence warnings, no automatic stop. The clock goes on (the transcript's own).
+            _ = capture.drainLevels()
+            updateElapsed()
+            return
+        }
         let db = capture.drainLevels()
         if !db.isEmpty {
             var next = levels
@@ -99,11 +105,14 @@ extension RecorderModel {
         }
         let left = pendingAutoStopAt.map { max(0, Int($0.timeIntervalSinceNow.rounded(.up))) }
         if left != autoStopRemaining { autoStopRemaining = left }
-        if startedAt != nil {
-            // The transcript's clock, so the time shown matches where marks and notes land.
-            let s = Int(currentOffset)
-            if s != elapsedSeconds { elapsedSeconds = s }
-        }
+        updateElapsed()
+    }
+
+    /// The transcript's clock, so the time shown matches where marks and notes land.
+    private func updateElapsed() {
+        guard startedAt != nil else { return }
+        let s = Int(currentOffset)
+        if s != elapsedSeconds { elapsedSeconds = s }
     }
 
     /// A meeting app has held the microphone for a minute and nothing has reached "Others": explain, once per silent

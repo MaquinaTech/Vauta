@@ -17,6 +17,7 @@ extension MeetingsModel {
             let segs = try await store.segments(of: id, echoes: true)
             let stored = try await store.translations(of: id)
             let marks = try await store.marks(id)
+            let pauses = try await store.pauses(of: id)
             let notes = try await store.notes(id)
             let decisions = try await store.decisions(id)
             let tasks = try await store.tasks(id)
@@ -49,6 +50,7 @@ extension MeetingsModel {
             translations = TranslationDisplay.texts(from: stored, preferred: preferences?.translationTarget)
             translationLanguage = TranslationDisplay.chooseLanguage(from: stored, preferred: preferences?.translationTarget)
             self.marks = marks
+            self.pauses = pauses
             self.notes = notes
             let sameMeeting = notepad.meetingID == id
             notepad.meetingID = id
@@ -118,7 +120,7 @@ extension MeetingsModel {
         notepad.meetingID = nil; notepad.rows = []; notepad.draft = ""; notepad.editingID = nil; notepad.working = []
         notepad.disclosed = []; notepad.updated = []; notepad.clearBanners(); highlightedNote = nil
         speakers = []; keptVoices = []; voiceConsent = nil; voiceHistory = nil; reviewingPastVoices = false; roster = .empty; speakersOff = false; meetingImported = false; speakersRemovedHere = false; separationTouched = false; speakerPopover = nil; confirmingSpeakersOff = false
-        transcript = []; translations = [:]; translationLanguage = nil; marks = []; notes = []; decisions = []; tasks = []; suggestions = []
+        transcript = []; translations = [:]; translationLanguage = nil; marks = []; pauses = []; notes = []; decisions = []; tasks = []; suggestions = []
         attendees = []; othersNamed = []; topics = []; openQuestions = []; liveNotes = []; detectedQuestions = []; jobs = []
         participantsInformedAt = nil
         materials = []; relatedDocuments = []; relatedMeetings = []

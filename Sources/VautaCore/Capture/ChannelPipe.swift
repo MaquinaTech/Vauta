@@ -10,7 +10,8 @@ import AVFoundation
 /// With a `diarizer` (the Others channel), every chunk also goes to it with the transcriber's frame counter.
 /// Each chunk carries the time it was captured at (from the buffers' host time, against the session `origin`), so
 /// the transcriber keeps the channel on the session's clock across device gaps. With `coupling`, each chunk's loudness by
-/// 10 ms goes to it at the same time (whether the microphone hears the speakers).
+/// 10 ms goes to it at the same time (whether the microphone hears the speakers). While it is closed (a paused recording,
+/// `setAccepting`) nothing goes anywhere.
 final class ChannelPipe: @unchecked Sendable {
     private let lock = NSLock()
     private let channel: ChannelTranscriber
@@ -26,6 +27,7 @@ final class ChannelPipe: @unchecked Sendable {
     private var chunk: AVAudioPCMBuffer?
     private var chunkCapturedAt: Double?
     private var scratch: [Float] = []
+    private var accepting = true
 
     init(channel: ChannelTranscriber, levels: LevelMeter, origin: SessionOrigin, coupling: EchoCoupling? = nil, diarizer: Diarizer? = nil) {
         self.channel = channel
@@ -42,6 +44,7 @@ final class ChannelPipe: @unchecked Sendable {
     func push(_ buffer: AVAudioPCMBuffer, hostTime: UInt64?) {
         let capturedAt = hostTime.map { origin.offset(ofHostSeconds: HostTime.seconds($0)) }
         lock.withLock {
+            guard accepting else { return }
             if resampler == nil || inputFormat != buffer.format {
                 emitLocked()   // never mix audio of two input formats in one chunk
                 resampler = Resampler(from: buffer.format, to: channel.analyzerFormat)
@@ -68,6 +71,19 @@ final class ChannelPipe: @unchecked Sendable {
     }
 
     func flush() { lock.withLock { emitLocked() } }
+
+    /// Closes or opens the pipe. Closed, a buffer that still arrives is dropped, and the chunk being filled goes to the
+    /// transcriber at once (it was captured before). Opened again, the next buffer starts a new conversion: the audio before
+    /// the gap is not mixed into the audio after it.
+    func setAccepting(_ on: Bool) {
+        lock.withLock {
+            guard on != accepting else { return }
+            if !on { emitLocked() }
+            resampler = nil
+            inputFormat = nil
+            accepting = on
+        }
+    }
 
     /// AnalyzerInput keeps the buffer, so every chunk is a new one.
     private func emitLocked() {

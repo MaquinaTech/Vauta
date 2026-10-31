@@ -994,6 +994,9 @@
 "Captions start with your next recording." = "Captions start with your next recording.";
 
 /* No comment provided by engineer. */
+"Capture the microphone and the meeting’s sound again" = "Capture the microphone and the meeting’s sound again";
+
+/* No comment provided by engineer. */
 "Category" = "Category";
 
 /* Server pins field */
@@ -4499,7 +4502,7 @@
 /* Model guide: before a command; Terminal is the macOS app */
 "Paste this in Terminal:" = "Paste this in Terminal:";
 
-/* No comment provided by engineer. */
+/* Button under the time of a recording: stops capturing for now, the meeting stays open */
 "Pause" = "Pause";
 
 /* No comment provided by engineer. */
@@ -4507,6 +4510,9 @@
 
 /* No comment provided by engineer. */
 "Pause Indexing" = "Pause Indexing";
+
+/* No comment provided by engineer. */
+"Pause Recording" = "Pause Recording";
 
 /* No comment provided by engineer. */
 "Pause Translation" = "Pause Translation";
@@ -4517,6 +4523,12 @@
 /* Documents pane: the person paused indexing of this source
    Notice title inside the Live notes card of the panel: the notes stopped; the sentence under it says why */
 "Paused" = "Paused";
+
+/* Transcript: nothing was captured between these two times of the meeting because the recording was paused (12:03 – 12:04) */
+"Paused %@ – %@" = "Paused %@ – %@";
+
+/* Transcript: nothing was captured between these two times of the meeting because the recording was paused; the last argument is how many minutes (12:03 – 12:10 (7 min)) */
+"Paused %@ – %@ (%lld min)" = "Paused %@ – %@ (%lld min)";
 
 /* Settings → Status; a paused download of the integrated model; the arguments are sizes, e.g. 6.1 GB and 15 GB */
 "Paused at %@ of %@" = "Paused at %@ of %@";
@@ -4533,11 +4545,17 @@
 /* Settings → Models; the search model download waits for the recording to end */
 "Paused during the recording; it will continue afterwards." = "Paused during the recording; it will continue afterwards.";
 
+/* Transcript: the recording was paused at this time and not resumed before it ended; the argument is a time in the meeting (12:03) */
+"Paused from %@ to the end" = "Paused from %@ to the end";
+
 /* Documents pane: indexing waits because the Mac is in Low Power Mode */
 "Paused while on Low Power Mode" = "Paused while on Low Power Mode";
 
 /* Documents pane: indexing waits because the Mac is too hot */
 "Paused while the Mac is hot" = "Paused while the Mac is hot";
+
+/* Menu-bar icon state for VoiceOver while the recording is paused; the argument is the time on the meeting's clock */
+"Paused, %@" = "Paused, %@";
 
 /* Context editor section: people
    Meetings window mode: people and projects
@@ -4833,6 +4851,12 @@
    Notification title when an imported recording has been transcribed */
 "Recording imported" = "Recording imported";
 
+/* VoiceOver announcement when the recording is paused */
+"Recording paused. Nothing is captured until you resume." = "Recording paused. Nothing is captured until you resume.";
+
+/* VoiceOver announcement when a paused recording captures again */
+"Recording resumed." = "Recording resumed.";
+
 /* VoiceOver announcement */
 "Recording started" = "Recording started";
 
@@ -5114,7 +5138,7 @@
 /* Network Activity column */
 "Result" = "Result";
 
-/* No comment provided by engineer. */
+/* Button under the time of a paused recording: captures the microphone and the meeting again */
 "Resume" = "Resume";
 
 /* No comment provided by engineer. */
@@ -5122,6 +5146,9 @@
 
 /* No comment provided by engineer. */
 "Resume Indexing" = "Resume Indexing";
+
+/* No comment provided by engineer. */
+"Resume Recording" = "Resume Recording";
 
 /* No comment provided by engineer. */
 "Resume Repair" = "Resume Repair";
@@ -5794,6 +5821,9 @@
 "Stop and save (%@)" = "Stop and save (%@)";
 
 /* No comment provided by engineer. */
+"Stop capturing for now. The meeting stays open and the pause shows in its transcript." = "Stop capturing for now. The meeting stays open and the pause shows in its transcript.";
+
+/* No comment provided by engineer. */
 "Stop finding names" = "Stop finding names";
 
 /* Settings → Recording; the picker beside it lists how many minutes without meeting audio */
@@ -6394,11 +6424,17 @@
 /* No comment provided by engineer. */
 "The passwords don’t match." = "The passwords don’t match.";
 
+/* Warning while recording */
+"The pause couldn’t be saved with the meeting." = "The pause couldn’t be saved with the meeting.";
+
 /* Server config error; argument is the pin */
 "The pin “%@” isn’t a base64 SHA-256 (44 characters)." = "The pin “%@” isn’t a base64 SHA-256 (44 characters).";
 
 /* Import error */
 "The recording couldn’t be read." = "The recording couldn’t be read.";
+
+/* Warning when a paused recording can't capture again; the argument says why (the microphone could not start…) */
+"The recording couldn’t resume: %@" = "The recording couldn’t resume: %@";
 
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded.";
@@ -8107,6 +8143,9 @@
 /* Citation of a presentation slide; the argument is its number
    VoiceOver: a presentation slide; the argument is its number */
 "slide %lld" = "slide %lld";
+
+/* State: the recording of a meeting is paused; nothing is captured until it is resumed */
+"state.paused" = "Paused";
 
 /* State: a meeting is being recorded right now (not the Settings pane) */
 "state.recording" = "Recording";

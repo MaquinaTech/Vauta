@@ -60,7 +60,10 @@ flowchart LR
 1. **Capture.** `MeetingCapture` runs two channels. The microphone is always **Me**. **Others** is the audio of the
    meeting app, captured with a Core Audio process tap (`SystemAudioTap`) scoped by `SystemAudioScope`: specific app
    families from `MeetingAppCatalog`, the app that holds the microphone (`auto`), or all system audio except Vauta.
-   `MeetingPresence` watches which app uses the microphone from Core Audio metadata only.
+   `MeetingPresence` watches which app uses the microphone from Core Audio metadata only. `pause()` closes both
+   `ChannelPipe`s (the chunk being filled is sent on, anything later is dropped) and stops the microphone and the tap;
+   the transcribers stay open, so `resume()` starts the devices again in the same transcript and the time paused is a
+   gap on its clock (`ChannelTimeline`). The pauses are stored as times only (`meeting_pauses`, schema 35).
 2. **Transcription.** `ChannelPipe` converts each buffer to the analyzer format and groups it into ~100 ms chunks.
    `ChannelTranscriber` feeds Apple's `SpeechAnalyzer` with `SpeechTranscriber`, or `DictationTranscriber` for custom
    vocabulary and for languages `SpeechTranscriber` does not support (`SpeechLanguages`). The two channels tell *you*

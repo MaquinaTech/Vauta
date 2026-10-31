@@ -232,6 +232,8 @@ final class MeetingsModel {
     /// The language of `translations` (a language identifier).
     var translationLanguage: String?
     var marks: [MeetingMark] = []
+    /// When the recording was paused: the transcript shows where nothing was captured.
+    var pauses: [MeetingPause] = []
     var notes: [MeetingNote] = []
     var decisions: [Decision] = []
     var tasks: [TaskItem] = []

@@ -7938,6 +7938,19 @@
 
 /* State: a meeting is being recorded right now (not the Settings pane) */
 "state.recording" = "녹음 중";
+"state.paused" = "일시 중지됨";
+"Pause Recording" = "녹음 일시 중지";
+"Resume Recording" = "녹음 재개";
+"Capture the microphone and the meeting’s sound again" = "마이크와 회의 소리를 다시 캡처합니다";
+"Stop capturing for now. The meeting stays open and the pause shows in its transcript." = "지금은 캡처를 멈춥니다. 회의는 계속 열려 있고 일시 중지는 녹취록에 표시됩니다.";
+"Recording paused. Nothing is captured until you resume." = "녹음이 일시 중지되었습니다. 재개할 때까지 아무것도 캡처되지 않습니다.";
+"Recording resumed." = "녹음이 재개되었습니다.";
+"The recording couldn’t resume: %@" = "녹음을 재개할 수 없습니다: %@";
+"The pause couldn’t be saved with the meeting." = "일시 중지를 회의와 함께 저장할 수 없습니다.";
+"Paused, %@" = "일시 중지됨, %@";
+"Paused %@ – %@" = "일시 중지 %@ – %@";
+"Paused %@ – %@ (%lld min)" = "일시 중지 %@ – %@ (%lld분)";
+"Paused from %@ to the end" = "%@부터 끝까지 일시 중지";
 
 /* Status level, accessibility; not the OK button of an alert */
 "status.ok" = "정상";
