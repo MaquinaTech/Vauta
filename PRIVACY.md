@@ -606,10 +606,11 @@ who can see your screen from taking a screenshot.
 
 ## Sharing your screen
 
-Vauta asks macOS to keep its windows, the panel, the Notepad and the captions out of screen sharing and screenshots
-(`sharingType = .none`), which macOS no longer guarantees for every sharing app. Before you share your screen in a call,
+Vauta asks macOS to keep its windows, the panel, the meeting companion, the Notepad and the captions out of screen sharing
+and screenshots (`sharingType = .none`), which macOS no longer guarantees for every sharing app. The meeting companion shows
+only the recording's time and its controls, no meeting text. Before you share your screen in a call,
 **Recording › Hide Vauta Windows** (or **Hide Windows** at the bottom of the panel while recording) takes Vauta's windows,
-the Notepad and the captions off the screen while the recording goes on. Nothing of Vauta comes on screen by itself
+the meeting companion, the Notepad and the captions off the screen while the recording goes on. Nothing of Vauta comes on screen by itself
 meanwhile (the Notepad when a recording starts, the captions); a window you open on purpose shows as usual. The menu-bar
 icon shows a crossed-out eye until **Show Vauta Windows** (or **Show Windows** in the panel) brings back what was on screen,
 as it was. A minimized window stays in the Dock, and the panel still opens when you click the menu-bar icon.

@@ -301,6 +301,9 @@
 /* Settings → Calendar & Reminders: what the brief is */
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "关于即将开始的会议的简短页面：谁会参加、上次会议遗留了什么，以及相关的会议、文稿和笔记。它在这台 Mac 上生成。会前简报绝不会更改你的日历、提醒事项或备忘录。";
 
+/* Settings → General, under the switch that opens the meeting companion with each recording */
+"A small bar beside your meeting app with the recording’s time, Mark a Moment, the notepad, Pause and Stop. It never takes the keyboard. Recording → Hide Vauta Windows takes it off the screen before you share it." = "会议 App 旁边的一个小条，包含录音时间、标记时刻、记事本、暂停和停止。它不会抢走键盘输入。共享屏幕前，可以用“录音 → 隐藏 Vauta 窗口”将它移出屏幕。";
+
 /* Settings → General, under the switch that opens the notepad when a recording starts */
 "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "用于输入简短笔记的小型浮动窗口。在你点按它或使用快捷键之前，它不会抢走会议 App 的键盘输入。Vauta 会请求 macOS 不让它出现在屏幕共享中，但这并不能保证。";
 
@@ -2606,6 +2609,9 @@
 "Hears your voice, shown as “%@”." = "采集你的声音，显示为“%@”。";
 
 /* No comment provided by engineer. */
+"Hide Meeting Companion" = "隐藏会议助手";
+
+/* No comment provided by engineer. */
 "Hide Transcript" = "隐藏转录文本";
 
 /* No comment provided by engineer. */
@@ -3339,6 +3345,9 @@
 
 /* No comment provided by engineer. */
 "Meeting Apps" = "会议 App";
+
+/* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
+"Meeting Companion" = "会议助手";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "会议音频";
@@ -5451,6 +5460,9 @@
 "Show Less" = "收起";
 
 /* No comment provided by engineer. */
+"Show Meeting Companion" = "显示会议助手";
+
+/* No comment provided by engineer. */
 "Show Meetings" = "显示会议";
 
 /* No comment provided by engineer. */
@@ -5503,6 +5515,9 @@
 
 /* Settings → Calendar & Reminders: the switch that adds related reminders to the brief */
 "Show related reminders in the brief" = "在会前简报中显示相关提醒事项";
+
+/* No comment provided by engineer. */
+"Show the meeting companion while recording" = "录音时显示会议助手";
 
 /* No comment provided by engineer. */
 "Show the original words" = "显示原文";

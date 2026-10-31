@@ -301,6 +301,9 @@
 /* Settings → Calendar & Reminders: what the brief is */
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "Eine kurze Seite zum Meeting, das gleich beginnt: wer kommt, was das letzte Meeting offen gelassen hat, sowie zugehörige Meetings, Dokumente und Notizen. Sie wird auf diesem Mac erstellt. Das Briefing ändert nie deinen Kalender, deine Erinnerungen oder Notizen.";
 
+/* Settings → General, under the switch that opens the meeting companion with each recording */
+"A small bar beside your meeting app with the recording’s time, Mark a Moment, the notepad, Pause and Stop. It never takes the keyboard. Recording → Hide Vauta Windows takes it off the screen before you share it." = "Eine kleine Leiste neben deiner Meeting-App mit der Aufnahmezeit, „Einen Moment markieren“, dem Notizblock, Pause und Stopp. Sie nimmt nie die Tastatur. Aufnahme → Vauta-Fenster ausblenden nimmt sie vom Bildschirm, bevor du ihn teilst.";
+
 /* Settings → General, under the switch that opens the notepad when a recording starts */
 "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "Ein kleines schwebendes Fenster für kurze Notizen. Es nimmt deiner Meeting-App die Tastatur erst weg, wenn du es anklickst oder den Tastaturkurzbefehl benutzt. Vauta bittet macOS, es aus der Bildschirmfreigabe herauszuhalten, aber das ist nicht garantiert.";
 
@@ -2606,6 +2609,9 @@
 "Hears your voice, shown as “%@”." = "Hört deine Stimme, angezeigt als „%@“.";
 
 /* No comment provided by engineer. */
+"Hide Meeting Companion" = "Meeting-Begleiter ausblenden";
+
+/* No comment provided by engineer. */
 "Hide Transcript" = "Transkript ausblenden";
 
 /* No comment provided by engineer. */
@@ -3339,6 +3345,9 @@
 
 /* No comment provided by engineer. */
 "Meeting Apps" = "Meeting-Apps";
+
+/* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
+"Meeting Companion" = "Meeting-Begleiter";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "Meeting-Audio";
@@ -5451,6 +5460,9 @@
 "Show Less" = "Weniger anzeigen";
 
 /* No comment provided by engineer. */
+"Show Meeting Companion" = "Meeting-Begleiter anzeigen";
+
+/* No comment provided by engineer. */
 "Show Meetings" = "Meetings anzeigen";
 
 /* No comment provided by engineer. */
@@ -5503,6 +5515,9 @@
 
 /* Settings → Calendar & Reminders: the switch that adds related reminders to the brief */
 "Show related reminders in the brief" = "Passende Erinnerungen im Briefing zeigen";
+
+/* No comment provided by engineer. */
+"Show the meeting companion while recording" = "Meeting-Begleiter während der Aufnahme anzeigen";
 
 /* No comment provided by engineer. */
 "Show the original words" = "Originalwörter anzeigen";
