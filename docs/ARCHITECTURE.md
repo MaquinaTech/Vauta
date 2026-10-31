@@ -553,7 +553,7 @@ changed.
 `MeetingStore.deleteSegment` takes a line out of the record in one transaction: the model's decisions and tasks that cite it are
 marked `unconfirmed_reason = 'deleted'` (the user's are left alone), note-expansion sentences (and the `previous` level of
 undo) lose the citation, a quote taken from the line and their confirmation, the questions heard in it and the suggested
-follow-ups detected in it are deleted, `rewriteQuestionAnswers` drops the claims of stored answers that cite it, and the
+follow-ups detected in it are deleted (one with a live event or hand-off stays, as in `storeDetectedFollowUps`), `rewriteQuestionAnswers` drops the claims of stored answers that cite it, and the
 meeting's chunks are deleted (`LLMService.lineDeleted` embeds the meeting again from what is left). The row goes with its
 `original_text`; the FTS trigger, the translation cascade and `analyzeInTransaction` follow. Then, as `deleteMeeting` does,
 every FTS index is merged and the database vacuumed (or that is left pending while recording), and a full snapshot replaces

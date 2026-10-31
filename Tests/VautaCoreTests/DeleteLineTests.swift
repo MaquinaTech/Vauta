@@ -41,6 +41,14 @@ struct DeleteLineTests {
         try await store.execForTests("""
             INSERT INTO follow_ups(meeting_id, segment_id, t, title, source, recipe, created_at) VALUES (?, ?, 0, 'zzcodexq review', 'detected', 1, 0)
             """, [.integer(m.id), .integer(gone)])
+        // A follow-up already in Calendar stays: the ledger row needs it.
+        try await store.execForTests("""
+            INSERT INTO follow_ups(meeting_id, segment_id, t, title, source, recipe, created_at) VALUES (?, ?, 0, 'Launch review', 'detected', 1, 0)
+            """, [.integer(m.id), .integer(gone)])
+        try await store.execForTests("""
+            INSERT INTO created_actions(target, src_kind, src_id, meeting_id, title_hash, state, written_at, updated_at)
+            VALUES ('event', 'follow_up', (SELECT max(id) FROM follow_ups), ?, 'h', 'created', 0, 0)
+            """, [.integer(m.id)])
         let decision = try await item(store, "decisions", m.id, gone, "Launch with the eagle code")
         let other = try await item(store, "decisions", m.id, kept, "The budget is agreed")
         let mine = try await item(store, "decisions", m.id, gone, "Keep the code secret", source: "user")
@@ -64,6 +72,7 @@ struct DeleteLineTests {
             #expect(try await !store.imageContains(word), "\(word): no trace in the tables, the indexes or free pages")
         }
         #expect(try await store.intsForTests("SELECT count(*) FROM chunks") == [0], "the meeting is embedded again from what is left")
+        #expect(try await store.followUps(m.id).map(\.title) == ["Launch review"])
 
         let decisions = try await store.decisions(m.id)
         #expect(decisions.first { $0.id == decision }?.unconfirmedReason == UnconfirmedReason.deleted)

@@ -36,7 +36,12 @@ extension MeetingStore {
             }
             marked += try forgetInExpansions(segmentID, words: [row.string(1), row.optionalString(2)].compactMap { $0 })
             try run("DELETE FROM detected_questions WHERE segment_id = ?", [.integer(segmentID)])
-            try run("DELETE FROM follow_ups WHERE segment_id = ? AND source = 'detected' AND state = 'suggested'", [.integer(segmentID)])
+            // As `storeDetectedFollowUps` does, one with a live event or hand-off stays: its ledger row needs it.
+            try run("""
+                DELETE FROM follow_ups WHERE segment_id = ? AND source = 'detected' AND state = 'suggested'
+                  AND NOT EXISTS (SELECT 1 FROM created_actions WHERE src_kind = 'follow_up' AND src_id = follow_ups.id
+                                  AND state IN ('writing','created','linked','handed_off'))
+                """, [.integer(segmentID)])
             try rewriteQuestionAnswers { $0.segmentID == segmentID }
             try run("DELETE FROM chunks WHERE meeting_id = ?", [.integer(meetingID)])
             try run("DELETE FROM segments WHERE id = ?", [.integer(segmentID)])
