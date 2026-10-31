@@ -122,7 +122,7 @@ extension AskView {
                         let labels = model.citationLabels(claim.citations)
                         TokenFlowLayout(spacing: 10) {
                             ForEach(Array(claim.citations.enumerated()), id: \.offset) { index, segment in
-                                CitationLink(label: labels[index], segment: model.segments[segment], question: model.answeredQuestion) {
+                                CitationLink(label: labels[index], segment: model.segments[segment], question: model.markedWords) {
                                     model.open(citation: segment)
                                 }
                             }
@@ -169,7 +169,7 @@ extension AskView {
         let labels = model.citationLabels(segments)
         return TokenFlowLayout(spacing: 10) {
             ForEach(Array(segments.enumerated()), id: \.offset) { index, segment in
-                CitationLink(label: labels[index], segment: model.segments[segment], question: model.answeredQuestion) {
+                CitationLink(label: labels[index], segment: model.segments[segment], question: model.markedWords) {
                     model.open(citation: segment)
                 }
             }

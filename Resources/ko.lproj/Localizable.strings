@@ -5676,6 +5676,9 @@
 
 /* Ask: a toggle under the question that limits the search to the one meeting the question names by its place (the last meeting, the first meeting with someone); the arguments are its title and its date */
 "Only “%@” (%@)" = "“%@”(%@)만";
+"Following up on “%@”" = "“%@”에 이어서";
+"This question is read together with the one before. Click to ask it on its own." = "이 질문은 이전 질문과 함께 읽힙니다. 따로 질문하려면 클릭하세요.";
+"Click to read this question together with the one before." = "이 질문을 이전 질문과 함께 읽으려면 클릭하세요.";
 
 /* Button that stops finding an answer */
 "Stop" = "중지";

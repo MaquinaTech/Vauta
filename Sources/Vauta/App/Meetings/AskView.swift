@@ -33,6 +33,7 @@ struct AskView: View {
                 }
                 // The question stays as asked while the answer is written: the highlights belong to it.
                 .disabled(model.busy)
+                if let thread = model.offeredFollowUp { followUpToggle(thread) }
                 if let period = model.offeredTimeScope { timeScopeToggle(period) }
                 if let found = model.offeredPlace { placeToggle(found) }
                 if let mode = recorder.searchModel.askMode { searchModeLabel(mode) }
@@ -433,7 +434,7 @@ struct AskView: View {
     private func documentText(_ passage: DocumentPassage) -> AttributedString {
         let body = VautaPrompts.body(of: passage)
         var out = AttributedString(body)
-        for range in MeetingStore.matchedRanges(of: model.answeredQuestion, in: body) {
+        for range in MeetingStore.matchedRanges(of: model.markedWords, in: body) {
             if let lower = AttributedString.Index(range.lowerBound, within: out), let upper = AttributedString.Index(range.upperBound, within: out) {
                 out.markMatch(lower..<upper, dark: colorScheme == .dark)
             }
@@ -477,7 +478,7 @@ struct AskView: View {
             : segment.channel.quotePrefix(for: segment.speaker, tint: segment.channel.tint(ordinal: segment.speaker?.ordinal ?? 1))
         // The words the search matched (whole words, no function words) are marked like the sidebar search.
         var body = AttributedString(segment.text)
-        for range in MeetingStore.matchedRanges(of: model.answeredQuestion, in: segment.text) {
+        for range in MeetingStore.matchedRanges(of: model.markedWords, in: segment.text) {
             if let lower = AttributedString.Index(range.lowerBound, within: body), let upper = AttributedString.Index(range.upperBound, within: body) {
                 body.markMatch(lower..<upper, dark: colorScheme == .dark)
             }

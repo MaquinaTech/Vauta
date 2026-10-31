@@ -5676,6 +5676,9 @@
 
 /* Ask: a toggle under the question that limits the search to the one meeting the question names by its place (the last meeting, the first meeting with someone); the arguments are its title and its date */
 "Only “%@” (%@)" = "Solo “%@” (%@)";
+"Following up on “%@”" = "Seguito di “%@”";
+"This question is read together with the one before. Click to ask it on its own." = "Questa domanda viene letta insieme alla precedente. Fai clic per farla da sola.";
+"Click to read this question together with the one before." = "Fai clic per leggere questa domanda insieme alla precedente.";
 
 /* Button that stops finding an answer */
 "Stop" = "Interrompi";
