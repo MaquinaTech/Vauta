@@ -62,7 +62,7 @@ struct NetworkAuditSourceScanTests {
         ("Sources/VautaCore/Storage/MeetingStore.swift", "Data(contentsOf:)", 1),
         // The snapshot just written by a restore, read back from the store folder.
         ("Sources/VautaCore/Backup/MeetingStore+Backup.swift", "Data(contentsOf:)", 2),
-        // The backup file the person chose in a file panel.
+        // The backup file the person chose in a file panel, or the one just saved there (`BackupModel.read`, file URLs only).
         ("Sources/Vauta/App/Settings/BackupModel.swift", "Data(contentsOf:)", 1),
         // The documents index (`vauta.docs.enc`) in the store folder.
         ("Sources/VautaCore/Documents/DocumentIndex.swift", "Data(contentsOf:)", 1),

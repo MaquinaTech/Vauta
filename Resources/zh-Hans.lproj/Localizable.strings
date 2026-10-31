@@ -839,6 +839,9 @@
 /* Backup sheet title once the backup file is saved */
 "Backup Saved" = "备份已存储";
 
+/* Verify sheet title once the backup passed the check */
+"Backup Verified" = "备份已验证";
+
 /* No comment provided by engineer. */
 "Backup password" = "备份密码";
 
@@ -1069,6 +1072,9 @@
 
 /* Status while the integrated model checks an answer to a question */
 "Checking the answer" = "正在检查回答";
+
+/* Backup sheet after saving, and verify sheet: the backup file is read back and opened as a restore would */
+"Checking the backup…" = "正在验证备份…";
 
 /* Settings → Status; the integrated model is being checked against its checksums */
 "Checking the model" = "正在检查模型";
@@ -1967,6 +1973,9 @@
 /* VoiceOver, brief: what a line is; a file or a passage of one */
 "Document" = "文档";
 
+/* Verify sheet: how many folders and files added as knowledge sources the backup holds */
+"Document sources" = "文档来源";
+
 /* Ask scope: only documents
    Meetings sidebar search: the group of passages found in the person's documents
    Settings pane: the folders and files Ask can answer from */
@@ -2155,6 +2164,12 @@
 /* Brief: under the suggested agenda; every line is checked against the lines of the brief it names */
 "Each suggestion cites the lines it comes from." = "每条建议都会标明所依据的条目。";
 
+/* Meetings list: the header of this month's meetings started before this week */
+"Earlier This Month" = "本月";
+
+/* Meetings list: the header of this week's meetings started before yesterday */
+"Earlier This Week" = "本周";
+
 /* Brief: how many earlier meetings the user and this person were in; the argument is a number */
 "Earlier meetings together: %lld" = "此前共同参加的会议：%lld";
 
@@ -2217,6 +2232,9 @@
 
 /* Restore sheet: shown under the error after a failed restore, when the password field is empty again */
 "Enter the backup password again to retry." = "请重新输入备份密码以重试。";
+
+/* Verify sheet: the sentence under the title */
+"Enter the backup’s password. Vauta opens it as Restore would, without changing anything." = "请输入备份的密码。Vauta 会像恢复时一样打开它，不会更改任何内容。";
 
 /* Server config error */
 "Enter the fast model name exactly as the server lists it." = "请输入与服务器列出的名称完全一致的快速模型名称。";
@@ -2756,6 +2774,9 @@
 
 /* No comment provided by engineer. */
 "Include unconfirmed items" = "包含未确认的项目";
+
+/* Verify sheet: the backup carries the settings */
+"Included" = "已包含";
 
 /* Documents pane: header of the section with the size of the index and its switches */
 "Index" = "索引";
@@ -4336,6 +4357,9 @@
 /* Model guide note; the argument is a website host */
 "Opens %@ in your browser. Vauta doesn’t download anything." = "在浏览器中打开 %@。Vauta 本身不会下载任何内容。";
 
+/* Settings → Privacy; explanation of Verify Backup */
+"Opens a backup with its password, as Restore would, and shows what it holds. Nothing on this Mac changes. Each backup is also checked right after it’s saved." = "用备份的密码像恢复时一样打开它，并显示其中的内容。这台 Mac 上不会有任何更改。每个备份在存储后也会立即验证。";
+
 /* VoiceOver hint of an icon button that opens a menu */
 "Opens a menu" = "打开菜单";
 
@@ -5366,6 +5390,9 @@
 /* Model provider recovery */
 "Set up a model server for better minutes, or choose “Apple Intelligence on this Mac”." = "设置模型服务器可获得更好的会⁠议⁠纪⁠要，或选择“这台 Mac 上的 Apple Intelligence”。";
 
+/* Verify sheet: whether the backup carries the app's settings */
+"Settings" = "设置";
+
 /* No comment provided by engineer. */
 "Settings…" = "设置…";
 
@@ -5533,6 +5560,9 @@
 
 /* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
 "Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "答案所依据的转录文本或文档中没有：%@。请在依赖它之前核实。";
+
+/* Verify sheet: the backup carries no settings (made by an earlier version) */
+"Not included" = "未包含";
 
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "有已存储的声音未被使用";
@@ -5994,8 +6024,14 @@
 /* Capture error */
 "The audio devices couldn’t be read." = "无法读取音频设备。";
 
+/* Backup sheet: title when the saved file failed the check that reads it back */
+"The backup couldn’t be read back" = "无法重新读取备份";
+
 /* Backup error: restore failed before replacing anything */
 "The backup couldn’t be restored. Your current meetings were left unchanged." = "无法恢复备份。当前的会议未受影响。";
+
+/* Backup and verify sheets: the backup file was read back, decrypted and checked as a restore would */
+"The backup opens with this password, and nothing in it is damaged." = "此备份可以用这个密码打开，其中没有任何损坏。";
 
 /* Meetings, Brief tab of a recorded meeting: heading */
 "The brief you had when this meeting started" = "这场会议开始时你看到的会前简报";
@@ -6343,6 +6379,12 @@
 
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "录音会在这台 Mac 上转录。该文件不会被更改、拷贝或上传。";
+
+/* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
+"The saved file is damaged: don’t rely on it. Choose another location and try again." = "存储的文件已损坏，请不要依赖它。请选择其他位置，然后重试。";
+
+/* Backup sheet: advice when the saved file failed the check and was deleted */
+"The saved file was damaged, so it was deleted. Choose another location and try again." = "存储的文件已损坏，因此已被删除。请选择其他位置，然后重试。";
 
 /* Settings → Models; shown when the server address or trust was edited */
 "The saved key won’t be sent to a different server." = "已存储的密钥不会发送到其他服务器。";
@@ -6710,6 +6752,9 @@
 
 /* Settings → Speakers, details in the Learn More popover when it is on: how to save the user’s own voice */
 "To teach Vauta your own voice, import a recording where you speak and choose “This Is My Voice” on your speaker. Later imported recordings can then suggest which speaker is you." = "要让 Vauta 学会你的声音，请导入一段你在其中说话的录音，并在你的发言人上选择“这是我的声音”。之后导入的录音就可以建议哪位发言人是你。";
+
+/* Meetings list: the header of the meetings started today */
+"Today" = "今天";
 
 /* Documents: why a file was skipped; it is bigger than Vauta reads */
 "Too large" = "文件过大";
@@ -7336,6 +7381,18 @@
 /* No comment provided by engineer. */
 "Verified: the quote appears word for word in your document" = "已验证：引文逐字出现在你的文档中";
 
+/* Verify sheet: the button that opens and checks the backup */
+"Verify" = "验证";
+
+/* No comment provided by engineer. */
+"Verify Backup…" = "验证备份…";
+
+/* Verify sheet title: check a backup file without restoring it */
+"Verify a Backup" = "验证备份";
+
+/* Settings → Privacy; title of the row that checks a backup file without restoring it */
+"Verify a backup" = "验证备份";
+
 /* About; arguments are the version and build numbers */
 "Version %@ (%@)" = "版本 %@（%@）";
 
@@ -7554,6 +7611,9 @@
 
 /* VoiceOver: accepts the suggestion that a speaker is the user */
 "Yes, that’s me" = "是的，是我";
+
+/* Meetings list: the header of the meetings started yesterday */
+"Yesterday" = "昨天";
 
 /* Reminder editor: the task was deleted here, its reminder is still there; the argument is a date */
 "You added this to Reminders on %@" = "你已于 %@ 将其添加到“提醒事项”";

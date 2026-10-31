@@ -839,6 +839,9 @@
 /* Backup sheet title once the backup file is saved */
 "Backup Saved" = "Backup salvo";
 
+/* Verify sheet title once the backup passed the check */
+"Backup Verified" = "Backup verificado";
+
 /* No comment provided by engineer. */
 "Backup password" = "Senha do backup";
 
@@ -1069,6 +1072,9 @@
 
 /* Status while the integrated model checks an answer to a question */
 "Checking the answer" = "Verificando a resposta";
+
+/* Backup sheet after saving, and verify sheet: the backup file is read back and opened as a restore would */
+"Checking the backup…" = "Verificando o backup…";
 
 /* Settings → Status; the integrated model is being checked against its checksums */
 "Checking the model" = "Verificando o modelo";
@@ -1967,6 +1973,9 @@
 /* VoiceOver, brief: what a line is; a file or a passage of one */
 "Document" = "Documento";
 
+/* Verify sheet: how many folders and files added as knowledge sources the backup holds */
+"Document sources" = "Fontes de documentos";
+
 /* Ask scope: only documents
    Meetings sidebar search: the group of passages found in the person's documents
    Settings pane: the folders and files Ask can answer from */
@@ -2155,6 +2164,12 @@
 /* Brief: under the suggested agenda; every line is checked against the lines of the brief it names */
 "Each suggestion cites the lines it comes from." = "Cada sugestão cita as linhas de onde vem.";
 
+/* Meetings list: the header of this month's meetings started before this week */
+"Earlier This Month" = "Este mês";
+
+/* Meetings list: the header of this week's meetings started before yesterday */
+"Earlier This Week" = "Esta semana";
+
 /* Brief: how many earlier meetings the user and this person were in; the argument is a number */
 "Earlier meetings together: %lld" = "Reuniões anteriores juntos: %lld";
 
@@ -2217,6 +2232,9 @@
 
 /* Restore sheet: shown under the error after a failed restore, when the password field is empty again */
 "Enter the backup password again to retry." = "Digite a senha do backup novamente para tentar de novo.";
+
+/* Verify sheet: the sentence under the title */
+"Enter the backup’s password. Vauta opens it as Restore would, without changing anything." = "Digite a senha do backup. Vauta o abre como Restaurar faria, sem alterar nada.";
 
 /* Server config error */
 "Enter the fast model name exactly as the server lists it." = "Digite o nome do modelo rápido exatamente como o servidor o lista.";
@@ -2756,6 +2774,9 @@
 
 /* No comment provided by engineer. */
 "Include unconfirmed items" = "Incluir itens não confirmados";
+
+/* Verify sheet: the backup carries the settings */
+"Included" = "Incluídos";
 
 /* Documents pane: header of the section with the size of the index and its switches */
 "Index" = "Índice";
@@ -4336,6 +4357,9 @@
 /* Model guide note; the argument is a website host */
 "Opens %@ in your browser. Vauta doesn’t download anything." = "Abre %@ no seu navegador. Vauta não baixa nada.";
 
+/* Settings → Privacy; explanation of Verify Backup */
+"Opens a backup with its password, as Restore would, and shows what it holds. Nothing on this Mac changes. Each backup is also checked right after it’s saved." = "Abre um backup com a senha dele, como Restaurar faria, e mostra o que ele contém. Nada muda neste Mac. Cada backup também é verificado logo depois de ser salvo.";
+
 /* VoiceOver hint of an icon button that opens a menu */
 "Opens a menu" = "Abre um menu";
 
@@ -5366,6 +5390,9 @@
 /* Model provider recovery */
 "Set up a model server for better minutes, or choose “Apple Intelligence on this Mac”." = "Configure um servidor de modelos para ter atas melhores ou escolha “Apple Intelligence neste Mac”.";
 
+/* Verify sheet: whether the backup carries the app's settings */
+"Settings" = "Ajustes";
+
 /* No comment provided by engineer. */
 "Settings…" = "Ajustes…";
 
@@ -5533,6 +5560,9 @@
 
 /* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
 "Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "Não está na transcrição nem nos documentos em que a resposta se baseia: %@. Confira antes de confiar nela.";
+
+/* Verify sheet: the backup carries no settings (made by an earlier version) */
+"Not included" = "Não incluídos";
 
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "Algumas vozes salvas não estão em uso";
@@ -5994,8 +6024,14 @@
 /* Capture error */
 "The audio devices couldn’t be read." = "Não foi possível ler os dispositivos de áudio.";
 
+/* Backup sheet: title when the saved file failed the check that reads it back */
+"The backup couldn’t be read back" = "Não foi possível ler o backup de novo";
+
 /* Backup error: restore failed before replacing anything */
 "The backup couldn’t be restored. Your current meetings were left unchanged." = "Não foi possível restaurar o backup. Suas reuniões atuais não foram alteradas.";
+
+/* Backup and verify sheets: the backup file was read back, decrypted and checked as a restore would */
+"The backup opens with this password, and nothing in it is damaged." = "O backup abre com esta senha, e nada nele está danificado.";
 
 /* Meetings, Brief tab of a recorded meeting: heading */
 "The brief you had when this meeting started" = "O resumo prévio que você tinha quando esta reunião começou";
@@ -6343,6 +6379,12 @@
 
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "A gravação é transcrita neste Mac. O arquivo não é alterado, copiado nem enviado.";
+
+/* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
+"The saved file is damaged: don’t rely on it. Choose another location and try again." = "O arquivo salvo está danificado: não confie nele. Escolha outro local e tente novamente.";
+
+/* Backup sheet: advice when the saved file failed the check and was deleted */
+"The saved file was damaged, so it was deleted. Choose another location and try again." = "O arquivo salvo estava danificado, então foi apagado. Escolha outro local e tente novamente.";
 
 /* Settings → Models; shown when the server address or trust was edited */
 "The saved key won’t be sent to a different server." = "A chave salva não será enviada a outro servidor.";
@@ -6710,6 +6752,9 @@
 
 /* Settings → Speakers, details in the Learn More popover when it is on: how to save the user’s own voice */
 "To teach Vauta your own voice, import a recording where you speak and choose “This Is My Voice” on your speaker. Later imported recordings can then suggest which speaker is you." = "Para Vauta aprender sua voz, importe uma gravação em que você fala e escolha “Esta é a minha voz” no seu falante. As gravações importadas depois poderão sugerir qual falante é você.";
+
+/* Meetings list: the header of the meetings started today */
+"Today" = "Hoje";
 
 /* Documents: why a file was skipped; it is bigger than Vauta reads */
 "Too large" = "Grande demais";
@@ -7336,6 +7381,18 @@
 /* No comment provided by engineer. */
 "Verified: the quote appears word for word in your document" = "Verificada: a citação aparece palavra por palavra no seu documento";
 
+/* Verify sheet: the button that opens and checks the backup */
+"Verify" = "Verificar";
+
+/* No comment provided by engineer. */
+"Verify Backup…" = "Verificar backup…";
+
+/* Verify sheet title: check a backup file without restoring it */
+"Verify a Backup" = "Verificar um backup";
+
+/* Settings → Privacy; title of the row that checks a backup file without restoring it */
+"Verify a backup" = "Verificar um backup";
+
 /* About; arguments are the version and build numbers */
 "Version %@ (%@)" = "Versão %@ (%@)";
 
@@ -7554,6 +7611,9 @@
 
 /* VoiceOver: accepts the suggestion that a speaker is the user */
 "Yes, that’s me" = "Sim, sou eu";
+
+/* Meetings list: the header of the meetings started yesterday */
+"Yesterday" = "Ontem";
 
 /* Reminder editor: the task was deleted here, its reminder is still there; the argument is a date */
 "You added this to Reminders on %@" = "Você adicionou isto aos Lembretes em %@";

@@ -193,7 +193,7 @@ At Stop:
 | `Questions/` | Live answers: cue scoring, settle, duplicates and rate limits, the model check's prompt and parser, the evidence gate, the detector actor, the stored questions | `QuestionCues`, `QuestionFlow`, `QuestionLimiter`, `QuestionDedup`, `QuestionCheck`, `QuestionEvidence`, `QuestionDetector`, `AutoAnswerContent`, `LiveAnswerSettings` |
 | `Export/` | Pure renderers of a meeting | `MeetingExport`, `MeetingExportRenderer`, `SubtitleRenderer`, `MeetingExportJSON`, `AnswerExport` |
 | `Import/` | Recordings as meetings | `AudioFileDecoder`, `RecordingTranscriber`, `RecordingImport` |
-| `Settings/`, `App/`, `Meetings/` | UI logic kept out of views so it can be tested | `ServerDraft`, `RetentionChange`, `KnowledgeRetention`, `HotKeyRules`, `OnboardingFlow`, `UnlockWindow`, `AppNotification`, `RecordingSetup`, `MeetingDraft` |
+| `Settings/`, `App/`, `Meetings/` | UI logic kept out of views so it can be tested | `ServerDraft`, `RetentionChange`, `KnowledgeRetention`, `HotKeyRules`, `OnboardingFlow`, `UnlockWindow`, `AppNotification`, `RecordingSetup`, `MeetingDraft`, `MeetingDateSection` |
 
 ### `Sources/Vauta`
 

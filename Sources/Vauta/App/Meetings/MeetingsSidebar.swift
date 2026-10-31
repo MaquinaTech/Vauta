@@ -2,6 +2,8 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
 import VautaCore
+import AppKit
+import Combine
 import SwiftUI
 
 /// The sidebar: the mode picker, then the list of the current mode.
@@ -9,6 +11,8 @@ struct MeetingsSidebar: View {
     @Bindable var model: MeetingsModel
     let onImport: () -> Void
     @ViewLocalState private var pickerWidth: CGFloat = 300
+    /// The day the sections are counted from: moved on at midnight and when Vauta comes back to the front (after a sleep).
+    @ViewLocalState private var now = Date.now
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,12 +36,22 @@ struct MeetingsSidebar: View {
     private var meetingsList: some View {
         Group {
             if model.query.trimmingCharacters(in: .whitespaces).count < 2 {
-                List(model.visibleMeetings, selection: $model.selectedID) { meeting in
-                    MeetingRow(meeting: meeting, suggestions: model.suggestionCounts[meeting.id] ?? 0,
-                               recording: meeting.id == model.activeMeetingID, isSelected: meeting.id == model.selectedID)
-                        .tag(meeting.id)
+                // Sections by the day each meeting started, in the user's calendar: Today, Yesterday, Earlier This Week,
+                // Earlier This Month, then one per month. The list is newest first, so the sections are too.
+                List(selection: $model.selectedID) {
+                    ForEach(MeetingDateSection.group(model.visibleMeetings, now: now, calendar: .autoupdatingCurrent) { $0.startedAt }) { group in
+                        Section(group.section.title(now: now, calendar: .autoupdatingCurrent)) {
+                            ForEach(group.items) { meeting in
+                                MeetingRow(meeting: meeting, section: group.section, suggestions: model.suggestionCounts[meeting.id] ?? 0,
+                                           recording: meeting.id == model.activeMeetingID, isSelected: meeting.id == model.selectedID)
+                                    .tag(meeting.id)
+                            }
+                        }
+                    }
                 }
                 .onDeleteCommand { model.confirmDeleteSelected() }
+                .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in now = .now }
+                .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in now = .now }
                 .overlay {
                     // Filters that match nothing are explained here, where the results would be (like a text search).
                     // With no meetings at all, the detail pane explains what to do, so the list stays empty.
@@ -230,6 +244,8 @@ private struct UntitledStyle: ViewModifier {
 
 private struct MeetingRow: View {
     let meeting: MeetingStore.Meeting
+    /// The section the row is in: its header already says the day, so the row doesn't repeat it.
+    let section: MeetingDateSection
     let suggestions: Int
     let recording: Bool
     var isSelected = false
@@ -278,7 +294,11 @@ private struct MeetingRow: View {
     }
 
     private var subtitle: String {
-        let date = meeting.startedAt.formatted(date: .abbreviated, time: .shortened)
+        let date = switch section {
+        case .today, .yesterday: meeting.startedAt.formatted(date: .omitted, time: .shortened)
+        case .thisWeek: meeting.startedAt.formatted(.dateTime.weekday(.wide).hour().minute())
+        case .thisMonth, .month: meeting.startedAt.formatted(date: .abbreviated, time: .shortened)
+        }
         if recording || meeting.endedAt == nil {
             return String(localized: "\(date) · Recording", comment: "Meeting list subtitle of a meeting being recorded")
         }
@@ -498,5 +518,23 @@ extension Channel {
         if let tint { who.swiftUI.foregroundColor = tint }
         who.inlinePresentationIntent = tag?.isLowConfidence == true ? [.stronglyEmphasized, .emphasized] : .stronglyEmphasized
         return who
+    }
+}
+
+extension MeetingDateSection {
+    /// The header of the section in the meetings list. An earlier month names its year only when it isn't this one.
+    func title(now: Date, calendar: Calendar) -> String {
+        switch self {
+        case .today: return String(localized: "Today", comment: "Meetings list: the header of the meetings started today")
+        case .yesterday: return String(localized: "Yesterday", comment: "Meetings list: the header of the meetings started yesterday")
+        case .thisWeek:
+            return String(localized: "Earlier This Week", comment: "Meetings list: the header of this week's meetings started before yesterday")
+        case .thisMonth:
+            return String(localized: "Earlier This Month", comment: "Meetings list: the header of this month's meetings started before this week")
+        case .month(let year, let month):
+            guard let first = calendar.date(from: DateComponents(year: year, month: month, day: 1)) else { return "" }
+            let style = Date.FormatStyle(calendar: calendar, timeZone: calendar.timeZone).month(.wide)
+            return first.formatted(calendar.component(.year, from: now) == year ? style : style.year())
+        }
     }
 }

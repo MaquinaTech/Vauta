@@ -250,6 +250,9 @@ Format of a backup file (`.vautabackup`; backups from an earlier version are sti
   nothing outside the allow-list is ever written. Format 1 (no settings) is still read and leaves the settings alone;
   a reader that only knows format 1 refuses a format 2 file by its manifest. The archive version byte stays 1.
 - Plaintext buffers that Vauta controls are zeroed after use; nothing unencrypted is written to disk.
+- A new backup is read back from the disk and opened with its password exactly as a restore would (`MeetingStore.checkBackup`),
+  in memory, before the sheet says it was saved; one that fails is deleted. **Verify Backup…** runs the same check on any file
+  without restoring it, and the decrypted copy is dropped (its memory zeroed) as soon as it has been counted.
 - A backup is treated as untrusted even though it is authenticated (whoever knows the password can author one). Every
   database connection runs with `trusted_schema = OFF` and `cell_size_check = ON`; a declared image size is capped
   (1 GiB, and LZ4 payloads cannot declare more than 256 times their length).
