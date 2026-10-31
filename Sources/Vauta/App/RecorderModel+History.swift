@@ -145,9 +145,9 @@ extension RecorderModel {
         guard unlock.expiresAt != nil else { return }
         relockTimer = Task { [weak self] in
             while let expires = self?.unlock.expiresAt {
-                let wait = expires.timeIntervalSinceNow
-                if wait <= 0 { break }
-                do { try await Task.sleep(for: .seconds(wait)) } catch { return }
+                let wait = ContinuousClock.now.duration(to: expires)
+                if wait <= .zero { break }
+                do { try await Task.sleep(for: wait) } catch { return }
             }
             guard let self, self.historyUnlocked, !self.unlock.isUnlocked(at: .now) else { return }
             self.lockHistory()
