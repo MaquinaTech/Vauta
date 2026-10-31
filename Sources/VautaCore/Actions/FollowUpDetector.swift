@@ -196,4 +196,14 @@ extension MeetingStore {
         try await storeDetectedFollowUps(candidates, meetingID: meetingID)
         return candidates
     }
+
+    /// After the person changed the transcript (a line corrected, or a correction undone), the follow-up meetings are looked for
+    /// again, if they had been: a corrected "Tuesday" is a Tuesday no longer. What the person dismissed or acted on stays
+    /// (`storeDetectedFollowUps`). Returns whether it looked.
+    @discardableResult
+    public func redetectFollowUps(_ meetingID: Int64) async throws -> Bool {
+        guard ActionsRelease.followUpDetection, activeMeetingID != meetingID, try followUpsRecipe(meetingID) != 0 else { return false }
+        try await detectFollowUps(meetingID)
+        return true
+    }
 }
