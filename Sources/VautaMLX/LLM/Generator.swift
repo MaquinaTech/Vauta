@@ -187,7 +187,12 @@ public final class Gemma4Engine {
             let j = min(ids.endIndex, i + size)
             let started = Date()
             let h = try model.forward(Array(ids[i..<j]), caches: caches)
-            eval([h] + caches.arrays)
+            // Only the last chunk's hidden state is ever read, and only when the caller wants it. For any other chunk, evaluating the
+            // caches alone runs only what they need (MLX evaluates lazily): the layers that own keys and values, up to the keys and
+            // values of the last of them, and none of the 18 layers that share them (24-41 of 42). Its hidden state is not kept either:
+            // unevaluated, it would hold the old cache buffers alive.
+            let keep = wantHidden && j == ids.endIndex
+            eval(keep ? [h] + caches.arrays : caches.arrays)
             let elapsed = Date().timeIntervalSince(started)
             // Short tails say little about the speed; the rest feed a moving average.
             if j - i >= 16, elapsed > 0 {
@@ -197,10 +202,10 @@ public final class Gemma4Engine {
             chunksRun += 1
             memoryProbe?(MLXRuntime.physFootprintMB())
             afterChunk?(caches.offset)
-            last = h
+            if keep { last = h }
             i = j
         }
-        return wantHidden ? last : nil
+        return last
     }
 
     public func generate(_ request: GenerationRequest, constraint: LogitConstraint? = nil,
