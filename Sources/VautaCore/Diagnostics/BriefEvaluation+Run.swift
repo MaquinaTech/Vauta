@@ -99,9 +99,26 @@ extension BriefEvaluation {
         var detail: [String: String]
     }
 
+    /// Runs one arm in a throwaway store, removed afterwards. The documents indexer is stopped first, on every path: it saves
+    /// the index in the background, and a save after the removal would put the folder back.
     static func runArm(_ arm: Arm, fixture f: Fixture, options o: LLMEvaluation.Options, model: EvaluationModel, minutes: [String: [String: StoredMinutes]]) async throws -> ArmRun {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-brief-eval-\(UUID().uuidString)", isDirectory: true)
-        defer { try? FileManager.default.removeItem(at: directory) }
+        var indexer: DocumentIndexer?
+        do {
+            let run = try await runArm(arm, fixture: f, options: o, model: model, minutes: minutes, in: directory) { indexer = $0 }
+            await indexer?.stop()
+            try? FileManager.default.removeItem(at: directory)
+            return run
+        } catch {
+            await indexer?.stop()
+            try? FileManager.default.removeItem(at: directory)
+            throw error
+        }
+    }
+
+    private static func runArm(_ arm: Arm, fixture f: Fixture, options o: LLMEvaluation.Options, model: EvaluationModel,
+                               minutes: [String: [String: StoredMinutes]], in directory: URL,
+                               started: (DocumentIndexer) -> Void) async throws -> ArmRun {
         let store = try MeetingStore(directory: directory.appendingPathComponent("store"), keyStore: MemoryKeyStore())
         let start = referenceDate
         let used = minutes[arm.provider ?? "integrated"].flatMap { $0.isEmpty ? nil : $0 } ?? minutes["integrated"] ?? minutes["apple"] ?? [:]
@@ -114,6 +131,7 @@ extension BriefEvaluation {
         // The fixture documents and the exported notes, as two sources of a documents index; the notes folder carries the Notes flag.
         let index = try DocumentIndex(directory: store.storeDirectory, key: await store.documentsKey())
         let indexer = DocumentIndexer(store: store, index: index, access: LLMEvaluation.PlainFolderAccess())
+        started(indexer)
         await indexer.start(background: false)
         let docsFolder = directory.appendingPathComponent("documents"), notesFolder = directory.appendingPathComponent("notes")
         if try writeFolder(f.documents, to: docsFolder) { _ = try await indexer.addSource(docsFolder, isDirectory: true) }
