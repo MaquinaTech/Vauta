@@ -2478,6 +2478,12 @@
 /* No comment provided by engineer. */
 "From your documents" = "Dos seus documentos";
 
+/* VoiceOver: action on a citation of an Ask answer that shows the passage it cites */
+"Preview Passage" = "Pré-visualizar trecho";
+
+/* Ask: button of the preview of a citation of an older meeting's minutes, which opens them */
+"Open Minutes" = "Abrir ata";
+
 /* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
 "From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "Da ata: a citação está na ata de uma reunião cuja transcrição foi excluída. A ata resume o que foi dito; não são as palavras ditas.";
 

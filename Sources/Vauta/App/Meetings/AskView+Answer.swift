@@ -122,12 +122,9 @@ extension AskView {
                         let labels = model.citationLabels(claim.citations)
                         TokenFlowLayout(spacing: 10) {
                             ForEach(Array(claim.citations.enumerated()), id: \.offset) { index, segment in
-                                Button(labels[index]) { model.open(citation: segment) }
-                                    .buttonStyle(.link)
-                                    .lineLimit(1)
-                                    .accessibilityHint(MinutesEvidence.isMinutes(segment)
-                                                       ? Text("Opens the meeting’s minutes", comment: "VoiceOver: hint of a citation of the minutes of an older meeting")
-                                                       : Text("Opens the transcript at this moment"))
+                                CitationLink(label: labels[index], segment: model.segments[segment], question: model.answeredQuestion) {
+                                    model.open(citation: segment)
+                                }
                             }
                             ForEach(claim.documents) { citation in
                                 Button { meetings.openDocument(citation) } label: {
@@ -172,10 +169,9 @@ extension AskView {
         let labels = model.citationLabels(segments)
         return TokenFlowLayout(spacing: 10) {
             ForEach(Array(segments.enumerated()), id: \.offset) { index, segment in
-                Button(labels[index]) { model.open(citation: segment) }
-                    .buttonStyle(.link)
-                    .lineLimit(1)
-                    .accessibilityHint(Text("Opens the transcript at this moment"))
+                CitationLink(label: labels[index], segment: model.segments[segment], question: model.answeredQuestion) {
+                    model.open(citation: segment)
+                }
             }
         }
     }

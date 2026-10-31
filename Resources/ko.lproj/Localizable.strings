@@ -2478,6 +2478,12 @@
 /* No comment provided by engineer. */
 "From your documents" = "내 문서에서";
 
+/* VoiceOver: action on a citation of an Ask answer that shows the passage it cites */
+"Preview Passage" = "구간 미리 보기";
+
+/* Ask: button of the preview of a citation of an older meeting's minutes, which opens them */
+"Open Minutes" = "회의록 열기";
+
 /* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
 "From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "회의록에서: 인용문은 녹취록이 삭제된 회의의 회의록에 있습니다. 회의록은 말한 내용을 요약한 것으로, 실제로 한 말은 아닙니다.";
 

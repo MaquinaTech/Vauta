@@ -4253,6 +4253,9 @@
 /* Alert button */
 "Open Meetings" = "Open Meetings";
 
+/* Ask: button of the preview of a citation of an older meeting's minutes, which opens them */
+"Open Minutes" = "Open Minutes";
+
 /* No comment provided by engineer. */
 "Open Network Activity" = "Open Network Activity";
 
@@ -4582,6 +4585,9 @@
 
 /* No comment provided by engineer. */
 "Press %@ in any app to start or stop recording." = "Press %@ in any app to start or stop recording.";
+
+/* VoiceOver: action on a citation of an Ask answer that shows the passage it cites */
+"Preview Passage" = "Preview Passage";
 
 /* About */
 "Privacy" = "Privacy";

@@ -2478,6 +2478,12 @@
 /* No comment provided by engineer. */
 "From your documents" = "De vos documents";
 
+/* VoiceOver: action on a citation of an Ask answer that shows the passage it cites */
+"Preview Passage" = "Aperçu du passage";
+
+/* Ask: button of the preview of a citation of an older meeting's minutes, which opens them */
+"Open Minutes" = "Ouvrir le compte rendu";
+
 /* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
 "From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "Du compte rendu : la citation se trouve dans le compte rendu d’une réunion dont la transcription a été supprimée. Le compte rendu résume ce qui a été dit, ce ne sont pas ses mots.";
 
