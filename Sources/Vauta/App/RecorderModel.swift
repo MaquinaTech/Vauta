@@ -151,6 +151,10 @@ final class RecorderModel {
     let notepad = NotepadModel()
     /// The floating notepad (see `NotepadPanelController`).
     @ObservationIgnored let notepadWindow = NotepadPanelController()
+    /// Hide Vauta Windows, for presenting (see `+Concealment`); `notepadComesBack`: the notepad was open, or was to open by
+    /// itself, while they were hidden.
+    let concealer = WindowConcealer()
+    @ObservationIgnored var notepadComesBack = false
     /// The Answers card: answers to the questions heard in the meeting (see `+LiveAnswers`).
     let answers = LiveAnswersModel()
     /// The detector of the recording in progress, and the order in which lines reach it.

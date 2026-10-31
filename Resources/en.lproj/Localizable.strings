@@ -2701,6 +2701,12 @@
 /* No comment provided by engineer. */
 "Hide Transcript" = "Hide Transcript";
 
+/* No comment provided by engineer. */
+"Hide Vauta Windows" = "Hide Vauta Windows";
+
+/* No comment provided by engineer. */
+"Hide Windows" = "Hide Windows";
+
 /* Settings → Live answers: the switch that hides an answer card when the people in the meeting already answered the question */
 "Hide answers when someone answers aloud" = "Hide answers when someone answers aloud";
 
@@ -4213,6 +4219,9 @@
 /* Help of the dimmed Update Now button in the Live notes card */
 "Nothing new was said since the last live notes" = "Nothing new was said since the last live notes";
 
+/* Detail of the panel notice while Vauta’s windows are hidden for sharing the screen; a window the user opens on purpose still shows */
+"Nothing of Vauta comes on screen by itself until you show them again." = "Nothing of Vauta comes on screen by itself until you show them again.";
+
 /* Menu-bar panel, brief card: earlier meetings left no open task, decision or question */
 "Nothing open from earlier meetings" = "Nothing open from earlier meetings";
 
@@ -5682,6 +5691,12 @@
 /* No comment provided by engineer. */
 "Show Transcript" = "Show Transcript";
 
+/* No comment provided by engineer. */
+"Show Vauta Windows" = "Show Vauta Windows";
+
+/* No comment provided by engineer. */
+"Show Windows" = "Show Windows";
+
 /* Brief: button that shows every item of a section; the argument is how many there are */
 "Show all (%lld)" = "Show all (%lld)";
 
@@ -6086,6 +6101,9 @@
 
 /* Shortcut name: opens the floating notepad to type a short note during a recording */
 "Take a note" = "Take a note";
+
+/* No comment provided by engineer. */
+"Takes Vauta’s windows, the notepad and the captions off the screen while you share it. The recording goes on." = "Takes Vauta’s windows, the notepad and the captions off the screen while you share it. The recording goes on.";
 
 /* Accessibility label
    Kind of the target of a relation; also a field label
@@ -7653,6 +7671,12 @@
 
 /* Settings → General, after setup when the menu bar icon couldn't be found */
 "Vauta’s icon may be hidden in the menu bar, for example behind the notch. Open Vauta again from Finder, Spotlight or Apps to come back here." = "Vauta’s icon may be hidden in the menu bar, for example behind the notch. Open Vauta again from Finder, Spotlight or Apps to come back here.";
+
+/* Panel notice while Vauta’s windows, the notepad and the captions are hidden for sharing the screen */
+"Vauta’s windows are hidden" = "Vauta’s windows are hidden";
+
+/* Menu-bar icon state for VoiceOver, after the recording state, while Vauta’s windows are hidden for sharing the screen */
+"Vauta’s windows hidden" = "Vauta’s windows hidden";
 
 /* No comment provided by engineer. */
 "Verified" = "Verified";
