@@ -84,19 +84,11 @@ public struct LanguageModelStore: Sendable {
         try excludeFromBackup()
     }
 
-    func excludeFromBackup() throws {
-        var url = root
-        var values = URLResourceValues()
-        values.isExcludedFromBackup = true
-        try url.setResourceValues(values)
-    }
+    func excludeFromBackup() throws { try BackupExclusion.exclude(root) }
 
-    /// Read from the disk each time, as `SearchModelStore.isExcludedFromBackup` is: a URL keeps the resource values it read.
-    public var isExcludedFromBackup: Bool {
-        var url = root
-        url.removeAllCachedResourceValues()
-        return (try? url.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup) == true
-    }
+    /// Read from the folder's own attribute each time (`BackupExclusion`): a change made through another URL (a rename or a
+    /// restore that dropped it) is seen at once.
+    public var isExcludedFromBackup: Bool { BackupExclusion.isExcluded(root) }
 
     func createStaging() throws {
         try prepare()
