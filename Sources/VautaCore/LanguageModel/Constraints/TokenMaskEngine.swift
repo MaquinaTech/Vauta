@@ -312,24 +312,32 @@ public final class SchemaConstraint: OutputConstraint, @unchecked Sendable {
     }
 }
 
-/// One `TokenIndex` per tokenizer instance, shared by all constraints.
+/// One `TokenIndex` per tokenizer instance, shared by all constraints. The cache holds its tokenizer too: an identifier is an
+/// address, and a tokenizer freed while its index stayed could let a new one at the same address find the wrong index.
 final class TokenIndexCache: @unchecked Sendable {
     static let shared = TokenIndexCache()
     private let lock = NSLock()
-    private var cached: [ObjectIdentifier: TokenIndex] = [:]
+    private var cached: [ObjectIdentifier: (tokenizer: GemmaTokenizer, index: TokenIndex)] = [:]
 
-    /// Drops the indexes (tens of MB for the 262k-token vocabulary): the model was unloaded. Constraints in use keep their own.
+    /// Drops the indexes (tens of MB for the 262k-token vocabulary): the tokenizer was let go. Constraints in use keep their own.
     func clear() {
         lock.lock(); defer { lock.unlock() }
         cached = [:]
     }
 
+    /// The index of `tokenizer`, built once; a second caller waits for the first one's build.
     func index(for tokenizer: GemmaTokenizer) -> TokenIndex {
         lock.lock(); defer { lock.unlock() }
         let id = ObjectIdentifier(tokenizer)
-        if let i = cached[id] { return i }
+        if let entry = cached[id] { return entry.index }
         let i = TokenIndex(tokenizer: tokenizer)
-        cached[id] = i
+        cached[id] = (tokenizer, i)
         return i
+    }
+
+    /// Whether the index of `tokenizer` is built (for the tests).
+    func hasIndex(for tokenizer: GemmaTokenizer) -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        return cached[ObjectIdentifier(tokenizer)] != nil
     }
 }
