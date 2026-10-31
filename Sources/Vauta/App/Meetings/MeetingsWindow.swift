@@ -17,6 +17,8 @@ struct MeetingsWindow: View {
     /// The Settings window's state (to open it at Context).
     let settings: SettingsModel
     @FocusState private var searchFocused: Bool
+    /// A file is being dragged over the window: the window's edge shows where it can be dropped.
+    @ViewLocalState private var importTargeted = false
     @Environment(\.openWindow) private var openWindow
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// The window's: speaker edits register with it, so Edit ▸ Undo takes them back.
@@ -90,6 +92,21 @@ struct MeetingsWindow: View {
         }
         .sheet(isPresented: Binding(get: { model.importer.isPresented }, set: { if !$0 { model.importer.cancel() } })) {
             ImportRecordingSheet(model: model.importer)
+        }
+        // A recording dropped on the window is imported, as with File ▸ Import Recording… (one audio or video file).
+        .dropDestination(for: URL.self) { urls, _ in
+            guard !model.importer.isPresented, let url = RecordingImportModel.importable(urls) else { return false }
+            Task { await model.importer.begin(url) }
+            return true
+        } isTargeted: { importTargeted = $0 }
+        .overlay {
+            if importTargeted {
+                RoundedRectangle(cornerRadius: 8)
+                    .strokeBorder(Color.accentColor, lineWidth: 3)
+                    .padding(2)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+            }
         }
         .sheet(isPresented: $model.showingExport) {
             ExportSheet(model: model)
