@@ -22,7 +22,7 @@ struct CitationLink: View {
     @Environment(\.colorScheme) private var colorScheme
 
     /// How long the pointer rests on the link before the preview opens: long enough not to open on the way to something else.
-    static let restDelay: Duration = .milliseconds(700)
+    nonisolated static let restDelay: Duration = .milliseconds(700)
 
     private var isMinutes: Bool { segment.map { MinutesEvidence.isMinutes($0.id) } ?? false }
 
