@@ -239,7 +239,9 @@ Format of a backup file (`.vautabackup`; backups from an earlier version are sti
 - Plaintext inside the sealed box: manifest length (UInt32) | manifest (JSON: format, app version, schema version,
   creation time, meeting count, settings length) | the settings (format 2 only) | the database image in the same
   packed form as the snapshot (size | LZ4 | bytes). The image is taken from the open store in one step on the store's
-  actor, so it is consistent.
+  actor, so it is consistent. A backup is authenticated but not trusted: its declared image size must fit in 1 GiB and in
+  what LZ4 can expand to before anything is allocated, and the parsers of the image and of the store's journal are fuzzed
+  (`ParserFuzzTests`).
 - Settings (`BackupPreferences`): a binary property list of an explicit allow-list of UserDefaults keys (languages,
   templates, shortcuts, privacy and recording switches, the choice of where models run), each with the type it must
   have. No Keychain item is ever read: the server address, models, key, certificate authority and pins stay out, as
