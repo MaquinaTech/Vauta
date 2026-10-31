@@ -89,8 +89,12 @@ public struct SearchModelStore: Sendable {
         try url.setResourceValues(values)
     }
 
+    /// Read from the disk each time: a URL keeps the resource values it read, so a change made through another URL (a
+    /// rename or a restore that dropped the attribute) would otherwise go unseen.
     public var isExcludedFromBackup: Bool {
-        (try? root.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup) == true
+        var url = root
+        url.removeAllCachedResourceValues()
+        return (try? url.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup) == true
     }
 
     func createStaging() throws {
