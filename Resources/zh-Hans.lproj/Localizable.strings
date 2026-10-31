@@ -7965,6 +7965,8 @@
 "Stop capturing for now. The meeting stays open and the pause shows in its transcript." = "暂时停止捕获。会议保持打开，暂停会显示在转录文本中。";
 "Recording paused. Nothing is captured until you resume." = "录音已暂停。继续之前不会捕获任何内容。";
 "Recording resumed." = "录音已继续。";
+"Nothing has been captured for %@. Resume if the meeting goes on, or stop to save it." = "已有%@没有录制任何内容。如果会议仍在进行，请继续录音；否则请停止以保存。";
+"The recording is still paused" = "录音仍处于暂停状态";
 "The recording couldn’t resume: %@" = "无法继续录音：%@";
 "The pause couldn’t be saved with the meeting." = "无法将暂停与会议一起存储。";
 "Paused, %@" = "已暂停，%@";

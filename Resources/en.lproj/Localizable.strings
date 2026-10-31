@@ -4132,6 +4132,9 @@
 /* Meetings, Brief tab of a recorded meeting: every line it pointed to was deleted */
 "Nothing from this brief is left to show." = "Nothing from this brief is left to show.";
 
+/* Notification body when a recording has been paused for a while; the argument is a length of time in words, like 15 minutes */
+"Nothing has been captured for %@. Resume if the meeting goes on, or stop to save it." = "Nothing has been captured for %@. Resume if the meeting goes on, or stop to save it.";
+
 /* Panel alert: what to check; the first argument is the channel name (Others), the second an app name such as Zoom */
 "Nothing has come through on “%@” for a minute. Check that %@ isn’t muted, that its sound plays through this Mac, and that Vauta is allowed to record system audio." = "Nothing has come through on “%@” for a minute. Check that %@ isn’t muted, that its sound plays through this Mac, and that Vauta is allowed to record system audio.";
 
@@ -5198,7 +5201,8 @@
 /* Network Activity column */
 "Result" = "Result";
 
-/* Button under the time of a paused recording: captures the microphone and the meeting again */
+/* Button under the time of a paused recording: captures the microphone and the meeting again
+   Notification button: resumes the paused recording */
 "Resume" = "Resume";
 
 /* No comment provided by engineer. */
@@ -6498,6 +6502,9 @@
 
 /* Warning when a paused recording can't capture again; the argument says why (the microphone could not start…) */
 "The recording couldn’t resume: %@" = "The recording couldn’t resume: %@";
+
+/* Notification title when a recording has been paused for a while */
+"The recording is still paused" = "The recording is still paused";
 
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded.";

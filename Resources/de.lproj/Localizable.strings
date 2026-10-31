@@ -7965,6 +7965,8 @@
 "Stop capturing for now. The meeting stays open and the pause shows in its transcript." = "Vorerst nichts aufnehmen. Das Meeting bleibt offen und die Pause erscheint im Transkript.";
 "Recording paused. Nothing is captured until you resume." = "Aufnahme pausiert. Bis zum Fortsetzen wird nichts aufgenommen.";
 "Recording resumed." = "Aufnahme fortgesetzt.";
+"Nothing has been captured for %@. Resume if the meeting goes on, or stop to save it." = "Seit %@ wurde nichts aufgenommen. Setze fort, wenn das Meeting weitergeht, oder stoppe, um es zu sichern.";
+"The recording is still paused" = "Die Aufnahme ist noch pausiert";
 "The recording couldn’t resume: %@" = "Die Aufnahme konnte nicht fortgesetzt werden: %@";
 "The pause couldn’t be saved with the meeting." = "Die Pause konnte nicht mit dem Meeting gespeichert werden.";
 "Paused, %@" = "Pausiert, %@";

@@ -230,6 +230,7 @@ extension RecorderModel {
         switch action {
         case .keepRecording: keepRecording()
         case .stopRecording: stop()
+        case .resumeRecording: resumeRecording()
         case .transcribe: acceptSuggestion()
         case .openMeeting:
             Task { await openMeeting(meetingID) }

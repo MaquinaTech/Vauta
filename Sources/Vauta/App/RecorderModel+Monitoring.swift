@@ -53,6 +53,7 @@ extension RecorderModel {
         if isPaused {
             // Nothing is captured: no meters, no silence warnings, no automatic stop. The clock goes on (the transcript's own).
             _ = capture.drainLevels()
+            remindOfPauseIfDue(now: mono)
             updateElapsed()
             return
         }

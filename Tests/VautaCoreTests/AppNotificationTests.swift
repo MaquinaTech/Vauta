@@ -19,6 +19,14 @@ struct AppNotificationTests {
         #expect(Set(AppNotification.Kind.allCases.map(\.rawValue)).count == AppNotification.Kind.allCases.count)
     }
 
+    @Test func aLongPauseIsRemindedWithResumeAndStop() {
+        let n = AppNotification.pauseReminder(minutes: 15)
+        #expect(n.kind == .pauseReminder && n.identifier == "vauta.paused")
+        #expect(n.kind.actions == [.resumeRecording, .stopRecording] && n.kind.defaultAction == nil)
+        #expect(AppNotification.isAllowed(.pauseReminder, notifyMinutesReady: false, notifyProblems: false), "a prompt about the recording in progress")
+        #expect(n.body.contains("15"), "the time in words, in the language of the Mac")
+    }
+
     @Test func actionIdentifiersKeepThe010Names() {
         #expect(AppNotification.Action.keepRecording.rawValue == "keep")
         #expect(AppNotification.Action.stopRecording.rawValue == "stop")

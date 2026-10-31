@@ -69,6 +69,9 @@ final class RecorderModel {
     var elapsedSeconds = 0
     /// The recording is paused (`+Pause`): nothing is captured, the meeting stays open.
     var isPaused = false
+    /// When the pause that is on began, and whether its reminder was posted (`pauseReminderMinutes`).
+    @ObservationIgnored var pausedSince: ContinuousClock.Instant?
+    @ObservationIgnored var pauseReminded = false
     /// Final segments, in time order.
     var segments: [LiveSegment] = []
     /// The latest provisional result of each channel, in time order.

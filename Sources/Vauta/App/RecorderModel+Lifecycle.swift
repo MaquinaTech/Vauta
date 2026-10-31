@@ -301,6 +301,7 @@ extension RecorderModel {
         pauseHotKeyAvailable = false
         notifier.remove(.autoStopWarning)
         notifier.remove(.hangup)
+        notifier.remove(.pauseReminder)
         allowSuddenTermination()
     }
 
