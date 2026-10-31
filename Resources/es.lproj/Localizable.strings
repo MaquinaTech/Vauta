@@ -1467,6 +1467,13 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "No se ha podido cambiar la línea";
 "Couldn’t correct the line" = "No se ha podido corregir la línea";
+"Couldn’t delete the line" = "No se ha podido eliminar la línea";
+"Delete Line" = "Eliminar línea";
+"Delete this line for good?" = "¿Eliminar esta línea para siempre?";
+"Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "Sus palabras se borran de la transcripción, la búsqueda y Preguntar, junto con lo que se transcribió y su traducción. Lo que el acta escribió a partir de ella queda marcado para que lo revises, y «Volver a redactar el acta» la redacta sin esa línea. No se puede deshacer, y una copia de seguridad anterior conserva la línea.";
+"Line deleted" = "Línea eliminada";
+"Line deleted. What the minutes wrote from it is marked for you to check." = "Línea eliminada. Lo que el acta escribió a partir de ella queda marcado para que lo revises.";
+"You deleted the transcript line this was written from. Check that it still belongs in the minutes." = "Eliminaste la línea de la transcripción de la que salió esto. Comprueba que sigue teniendo sentido en el acta.";
 "Add “%@” to Glossary" = "Añadir «%@» al glosario";
 "Added to the glossary" = "Añadido al glosario";
 "Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Fijado en el glosario, entra en el vocabulario personalizado del dictado, y una reunión posterior que parezca oírlo mal recibe una sugerencia.";

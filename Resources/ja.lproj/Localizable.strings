@@ -1467,6 +1467,13 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "行を変更できませんでした";
 "Couldn’t correct the line" = "行を修正できませんでした";
+"Couldn’t delete the line" = "行を削除できませんでした";
+"Delete Line" = "行を削除";
+"Delete this line for good?" = "この行を完全に削除しますか？";
+"Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "この行の語句は、文字起こしされた元の内容と翻訳とともに、文字起こし・検索・「質問」から消去されます。この行をもとに議事録に書かれた内容は確認用にマークされ、「議事録を再作成」でこの行なしに書き直せます。この操作は取り消せません。以前に作成したバックアップにはこの行が残ります。";
+"Line deleted" = "行を削除しました";
+"Line deleted. What the minutes wrote from it is marked for you to check." = "行を削除しました。この行をもとに議事録に書かれた内容は確認用にマークされています。";
+"You deleted the transcript line this was written from. Check that it still belongs in the minutes." = "これのもとになった文字起こしの行を削除しました。議事録に残すべきか確認してください。";
 "Add “%@” to Glossary" = "「%@」を用語集に追加";
 "Added to the glossary" = "用語集に追加しました";
 "Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "用語集に固定すると、音声入力のカスタム語彙に含まれ、後のミーティングで聞き間違えたと思われる箇所に候補が表示されます。";

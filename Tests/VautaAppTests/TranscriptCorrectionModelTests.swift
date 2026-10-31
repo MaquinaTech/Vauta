@@ -146,6 +146,38 @@ struct TranscriptCorrectionModelTests {
         #expect(model.transcript.map(\.text) == ["we deploy on Kubernetes", "Kubernetes is down"], "only the term is taken back")
     }
 
+    @Test func aLineIsDeletedForGoodAfterAsking() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-correct-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = try MeetingStore(directory: dir, keyStore: CorrectionKey())
+        let id = try await meeting(store, ["Keep this", "Take this out"])
+        let model = MeetingsModel(store: store)
+        let undo = UndoManager()
+        model.undoManager = undo
+        await model.reload()
+        model.selectedID = id
+        try await until { model.transcript.count == 2 }
+        model.tab = .transcript
+        model.beginCorrecting(model.transcript[0])
+        model.lineDraft?.text = "Keep this one"
+        model.saveLineDraft()
+        try await until { model.transcript.first?.originalText != nil }
+        #expect(undo.canUndo)
+
+        model.moveHighlight(by: 1)
+        model.moveHighlight(by: 1)
+        model.confirmDeleteHighlight()
+        let pending = try #require(model.pendingDeletion)
+        guard case .line(let line) = pending else { Issue.record("not a line"); return }
+        #expect(line.text == "Take this out" && model.transcript.count == 2, "nothing goes before the person confirms")
+        #expect(pending.confirmLabel == DeleteLineLabel.title)
+
+        await model.performDeletion(pending)
+        #expect(model.transcript.map(\.text) == ["Keep this one"])
+        #expect(model.highlighted == nil)
+        #expect(!undo.canUndo, "an undo step recorded before can't bring the line back")
+    }
+
     @Test func theMeetingBeingRecordedIsNotCorrected() async throws {
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-correct-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: dir) }
@@ -161,5 +193,7 @@ struct TranscriptCorrectionModelTests {
         #expect(!model.canCorrect(line))
         model.beginCorrecting(line)
         #expect(model.lineDraft == nil)
+        model.confirmDelete(line)
+        #expect(model.pendingDeletion == nil, "nor deleted")
     }
 }

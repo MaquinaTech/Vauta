@@ -19,7 +19,16 @@ enum VerificationText {
 
     /// The help of an unconfirmed item: why it is marked, when that is something other than a check of its words.
     static func help(reason: String?) -> String {
-        reason == UnconfirmedReason.edited ? editedHelp : unconfirmedHelp
+        switch reason {
+        case UnconfirmedReason.edited: editedHelp
+        case UnconfirmedReason.deleted: deletedHelp
+        default: unconfirmedHelp
+        }
+    }
+
+    static var deletedHelp: String {
+        String(localized: "You deleted the transcript line this was written from. Check that it still belongs in the minutes.",
+               comment: "Help of the mark on a decision or task whose cited transcript line the user deleted; also the note in the task editor")
     }
 
     static var editedHelp: String {

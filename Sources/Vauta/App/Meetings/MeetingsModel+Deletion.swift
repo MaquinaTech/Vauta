@@ -14,6 +14,8 @@ enum PendingDeletion: Identifiable {
     case question(index: Int, text: String)
     /// The saved voices of a person (“Voice saved on this Mac · Delete”).
     case voice(entity: Int64, name: String, isSelf: Bool)
+    /// A line of the transcript, taken out of the record (`MeetingStore.deleteSegment`).
+    case line(MeetingStore.StoredSegment)
 
     var id: String {
         switch self {
@@ -24,6 +26,7 @@ enum PendingDeletion: Identifiable {
         case .mark(let m): "mark-\(m.id)"
         case .question(let index, _): "question-\(index)"
         case .voice(let entity, _, _): "voice-\(entity)"
+        case .line(let s): "line-\(s.id)"
         }
     }
 
@@ -62,6 +65,7 @@ enum PendingDeletion: Identifiable {
         case .question: String(localized: "Delete this open question?", comment: "Confirmation title")
         case .voice(_, let name, let isSelf):
             isSelf ? Self.ownVoiceTitle : String(localized: "Delete the saved voice of \(name)?", comment: "Confirmation title; the argument is a person's name")
+        case .line: String(localized: "Delete this line for good?", comment: "Confirmation title when deleting a line of a meeting’s transcript")
         }
     }
 
@@ -77,6 +81,9 @@ enum PendingDeletion: Identifiable {
             String(localized: "\(n.text)\n\nThe note and its expansion will be deleted.", comment: "Confirmation message when deleting a note; the argument is the note’s text; the second line says its expansion goes too")
         case .mark(let m):
             String(localized: "The mark at \(ElapsedTime.stamp(m.t)) is removed.", comment: "Confirmation message; the argument is a time in the meeting")
+        case .line(let s):
+            s.text + "\n\n" + String(localized: "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line.",
+                                      comment: "Confirmation message when deleting a transcript line, under the line’s words")
         }
     }
 
@@ -90,6 +97,7 @@ enum PendingDeletion: Identifiable {
         case .mark: String(localized: "Delete Mark", comment: "Button: confirm deleting a mark")
         case .question: String(localized: "Delete Question", comment: "Button: confirm deleting an open question")
         case .voice: String(localized: "Delete Voice", comment: "Button: confirm deleting a saved voice")
+        case .line: DeleteLineLabel.title
         }
     }
 }
@@ -143,7 +151,46 @@ extension MeetingsModel {
         case .voice(let entity, _, _):
             await perform(String(localized: "Couldn’t delete the saved voice", comment: "Alert title")) { _ = try await store.deleteVoiceProfiles(entityID: entity) }
             await loadEntity()
+        case .line(let s): await deleteLine(s)
         }
+    }
+
+    /// Asks to delete a transcript line (the context menu, the VoiceOver action).
+    func confirmDelete(_ segment: MeetingStore.StoredSegment) {
+        guard canCorrect(segment) else { return }
+        pendingDeletion = .line(segment)
+    }
+
+    /// ⌫ and Edit ▸ Delete on the highlighted line of the transcript.
+    func confirmDeleteHighlight() {
+        guard canCorrectHighlight, let segment = highlightedSegment else { return }
+        confirmDelete(segment)
+    }
+
+    /// Deletes a transcript line for good. The undo steps recorded before are dropped: a correction or a speaker change of the
+    /// meeting may need the line, and nothing brings it back.
+    private func deleteLine(_ segment: MeetingStore.StoredSegment) async {
+        if lineDraft?.segmentID == segment.id { lineDraft = nil }
+        if everywhereOffer?.segmentID == segment.id { everywhereOffer = nil }
+        var deletion: MeetingStore.LineDeletion?
+        do {
+            deletion = try await store.deleteSegment(segment.id)
+        } catch {
+            // A failure to compact or write comes after the line is gone: the meeting is read again either way.
+            present(String(localized: "Couldn’t delete the line", comment: "Alert title: deleting a transcript line failed"), error)
+        }
+        undoManager?.removeAllActions(withTarget: self)
+        if highlighted == segment.id { highlighted = nil }
+        if let llm { Task { await llm.lineDeleted(meetingID: segment.meetingID) } }
+        if selectedID == segment.meetingID {
+            await refreshDetail()
+            if !hits.isEmpty { await runSearch() }
+        }
+        guard let deletion else { return }
+        show(MeetingsNotice(text: deletion.marked == 0
+            ? String(localized: "Line deleted", comment: "Confirmation after deleting a transcript line")
+            : String(localized: "Line deleted. What the minutes wrote from it is marked for you to check.",
+                     comment: "Confirmation after deleting a transcript line that decisions, tasks or note expansions were written from")))
     }
 
     private func deleteMeeting(_ id: Int64) async {
