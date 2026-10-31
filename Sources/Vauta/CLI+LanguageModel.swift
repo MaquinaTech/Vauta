@@ -169,6 +169,8 @@ func llmEval(_ invocation: CommandInvocation) async -> Int32 {
     options.outputLanguage = invocation.values["--output-language"]
     options.notepad = invocation.values["--notepad"].map { URL(fileURLWithPath: $0) }
     options.crossQuestions = invocation.values["--cross-questions"].map { URL(fileURLWithPath: $0) }
+    options.minutesItems = invocation.values["--items"].map { URL(fileURLWithPath: $0) }
+    options.itemKeyWeight = invocation.values["--item-key-weight"].flatMap(Double.init)
     // `release` on any of the four minutes choices: every backend runs what the app ships for it.
     for flag in ["--extraction", "--summary", "--harness", "--open-questions"] where invocation.values[flag]?.lowercased() == "release" { options.release = true }
     if let summary = invocation.values["--summary"], summary.lowercased() != "release" {

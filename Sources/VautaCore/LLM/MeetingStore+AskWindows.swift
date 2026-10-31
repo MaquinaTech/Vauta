@@ -40,6 +40,9 @@ extension MeetingStore {
         for (rank, moment) in try noteCitedMoments(terms: terms, scope: scope).prefix(40).enumerated() where moment.meeting != excluding {
             hits.append((moment.meeting, moment.t, 1.5 / Double(60 + rank)))
         }
+        for (rank, moment) in try itemCitedMoments(terms: terms, scope: scope).enumerated() where moment.meeting != excluding {
+            hits.append((moment.meeting, moment.t, itemKeyWeight / Double(60 + rank)))
+        }
         guard !hits.isEmpty else { return [] }
 
         let entities = try entitiesNamed(in: question, locale: profile.locale)

@@ -40,7 +40,14 @@ extension LLMEvaluation {
                     added += 1
                 }
             }
-            if o.afterMeeting { try await append(until: transcript.passages.count) }
+            if let weight = o.itemKeyWeight { await meetingStore.setItemKeyWeight(weight) }
+            if o.afterMeeting {
+                try await append(until: transcript.passages.count)
+                // The minutes of a finished meeting exist: their decisions and tasks are keys of the retrieval (`itemCitedMoments`).
+                if let items = o.minutesItems {
+                    try await storeItems(items.appendingPathComponent(setName + ".server.new.json"), in: meetingStore, meeting: meeting, passageOf: passageOf)
+                }
+            }
             for q in questions.filter({ $0.meeting == setName }).sorted(by: { $0.t_seg < $1.t_seg }) {
                 if !o.afterMeeting { try await append(until: transcript.passages.prefix { $0.id <= q.t_seg }.count) }
                 let language = OutputLanguage.detect([q.question], fallback: OutputLanguage(locale))
@@ -55,5 +62,27 @@ extension LLMEvaluation {
                 if let d = try? JSONSerialization.data(withJSONObject: line, options: [.sortedKeys]) { appendLine(d, to: out.appendingPathComponent("retrieval.json")) }
             }
         }
+    }
+
+    /// The decisions and tasks of minutes that `minutes-eval` kept (`items`: kind, text and the passages cited), stored in the meeting as the
+    /// app stores the minutes. A file that is missing or unreadable adds nothing.
+    static func storeItems(_ file: URL, in store: MeetingStore, meeting: Int64, passageOf: [Int64: Int64]) async throws {
+        struct Kept: Decodable {
+            struct Item: Decodable { let kind: String; let text: String; let citations: [Int64] }
+            let items: [Item]
+        }
+        guard let data = FileManager.default.contents(atPath: file.path), let kept = try? JSONDecoder().decode(Kept.self, from: data) else { return }
+        let storeID = Dictionary(passageOf.map { ($0.value, $0.key) }) { a, _ in a }
+        let starts = Dictionary(uniqueKeysWithValues: try await store.citableSegments(meeting).map { ($0.id, $0.start) })
+        var minutes = ValidatedMinutes()
+        for item in kept.items {
+            guard let segment = item.citations.lazy.compactMap({ storeID[$0] }).first, let t = starts[segment] else { continue }
+            switch item.kind {
+            case "decision": minutes.decisions.append(.init(text: item.text, segment: segment, t: t))
+            case "task": minutes.tasks.append(.init(text: item.text, owner: nil, due: nil, segment: segment, t: t))
+            default: continue
+            }
+        }
+        try await store.applyMinutes(minutes, to: meeting)
     }
 }
