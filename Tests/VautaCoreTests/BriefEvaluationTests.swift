@@ -6,7 +6,7 @@ import Testing
 @testable import VautaCore
 
 /// The `brief` task of `llm-eval` on invented sets: a keyword arm needs no model, so the whole path from the fixtures to the rendered brief runs here.
-@Suite("Brief: the evaluation task")
+@Suite("Brief: the evaluation task", .serialized)   // one throwaway store at a time, so the leftover check sees only its own
 struct BriefEvaluationTests {
     final class Folder {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-brief-eval-tests-\(UUID().uuidString)", isDirectory: true)
@@ -117,12 +117,16 @@ struct BriefEvaluationTests {
         let r = try Self.rig()
         let fixture = try #require(try BriefEvaluation.loadFixtures(r.options.brief).first?.fixture)
         let minutes = BriefEvaluation.loadMinutes(r.options.brief.minutes["integrated"])
+        func stores() -> Set<String> {
+            Set((try? FileManager.default.contentsOfDirectory(atPath: FileManager.default.temporaryDirectory.path))?
+                .filter { $0.hasPrefix("vauta-brief-eval-") && !$0.contains("tests") } ?? [])
+        }
+        let before = stores()   // a run that crashed earlier may have left one
         let one = try await BriefEvaluation.runArm(BriefEvaluation.Arm.all[0], fixture: fixture, options: r.options, model: .apple, minutes: ["integrated": minutes])
         let two = try await BriefEvaluation.runArm(BriefEvaluation.Arm.all[0], fixture: fixture, options: r.options, model: .apple, minutes: ["integrated": minutes])
         #expect(one.text == two.text && one.detail["digest"] == two.detail["digest"], "a replay gives the same brief")
         for word in ["K0", "keyword", "apple", "integrated", "cosine"] { #expect(!one.text.lowercased().contains(word.lowercased()), "\(word) would give the arm away") }
-        let leftovers = (try? FileManager.default.contentsOfDirectory(atPath: FileManager.default.temporaryDirectory.path))?.filter { $0.hasPrefix("vauta-brief-eval-") && !$0.contains("tests") } ?? []
-        #expect(leftovers.isEmpty, "the throwaway stores are removed")
+        #expect(stores().subtracting(before).isEmpty, "the throwaway stores are removed, with nothing written after")
     }
 
     @Test func theDayPrintedInTheBriefIsCheckedAgainstTheStoredMinutesInAnyTimeZone() throws {
