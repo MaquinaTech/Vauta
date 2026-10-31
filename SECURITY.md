@@ -255,8 +255,9 @@ Format of a backup file (`.vautabackup`; backups from an earlier version are sti
   (1 GiB, and LZ4 payloads cannot declare more than 256 times their length).
 - Restore decrypts and validates in memory (authentication, manifest, schema no newer than the app's, the image's
   schema compared object by object with Vauta's own DDL for that version, so a backup carrying any extra or changed
-  table, index, trigger, view or virtual table is refused before anything runs; SQLite `integrity_check`;
-  migrations for older schemas) before touching the store. Then, with no suspension point: a new random key is
+  table, index, trigger, view or virtual table is refused before anything runs; the full-text indexes, a binary format
+  SQLite parses whenever they are read, built again from their text before anything reads them, and refused if their
+  FTS5 settings aren't the ones Vauta sets; SQLite `integrity_check`; migrations for older schemas) before touching the store. Then, with no suspension point: a new random key is
   stored in a second Keychain item (`database-key-v1.staged`); the backup is written as the new snapshot, sealed with
   the new key, atomically over the old one (`F_FULLFSYNC`, rename, directory sync); the database key item is deleted
   and added again with the new key and Vauta's own access list; the staged item is deleted; the journal is removed.
