@@ -253,7 +253,7 @@
 			<string>そのうち %lld⁠件は意味による検索のインデックスがまだないため、キーワード検索で検索しました。</string>
 		</dict>
 	</dict>
-	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<key>%lld older meetings no longer have a transcript; only their minutes were searched.</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@count@</string>
@@ -264,7 +264,7 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>lld</string>
 			<key>other</key>
-			<string>古いミーティング %lld⁠件は文字起こしが残っていないため、検索しませんでした。</string>
+			<string>古いミーティング %lld⁠件は文字起こしが残っていないため、議事録だけを検索しました。</string>
 		</dict>
 	</dict>
 	<key>%lld to review</key>

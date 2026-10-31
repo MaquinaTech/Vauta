@@ -2478,6 +2478,24 @@
 /* No comment provided by engineer. */
 "From your documents" = "Dos seus documentos";
 
+/* VoiceOver: action on a citation of an Ask answer that shows the passage it cites */
+"Preview Passage" = "Pré-visualizar trecho";
+
+/* Ask: button of the preview of a citation of an older meeting's minutes, which opens them */
+"Open Minutes" = "Abrir ata";
+
+/* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
+"From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "Da ata: a citação está na ata de uma reunião cuja transcrição foi excluída. A ata resume o que foi dito; não são as palavras ditas.";
+
+/* VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript */
+"From the minutes" = "Da ata";
+
+/* Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted */
+"From the minutes of an older meeting" = "Da ata de uma reunião mais antiga";
+
+/* VoiceOver: hint of a citation of the minutes of an older meeting */
+"Opens the meeting’s minutes" = "Abre a ata da reunião";
+
 /* Placeholder of the name field of a person or project */
 "Full name" = "Nome completo";
 
@@ -5461,6 +5479,9 @@
 
 /* Ask: shown under the claims of an answer when some of them are verified and some are not */
 "Some points couldn’t be found word for word. Check the ones marked before relying on them." = "Alguns pontos não foram encontrados palavra por palavra. Confira os marcados antes de confiar neles.";
+
+/* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
+"Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "Não está na transcrição nem nos documentos em que a resposta se baseia: %@. Confira antes de confiar nela.";
 
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "Algumas vozes salvas não estão em uso";

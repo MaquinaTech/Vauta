@@ -2478,6 +2478,24 @@
 /* No comment provided by engineer. */
 "From your documents" = "Dai tuoi documenti";
 
+/* VoiceOver: action on a citation of an Ask answer that shows the passage it cites */
+"Preview Passage" = "Anteprima del passaggio";
+
+/* Ask: button of the preview of a citation of an older meeting's minutes, which opens them */
+"Open Minutes" = "Apri il verbale";
+
+/* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
+"From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "Dal verbale: la citazione è nel verbale di una riunione la cui trascrizione è stata eliminata. Il verbale riassume ciò che è stato detto; non sono le sue parole.";
+
+/* VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript */
+"From the minutes" = "Dal verbale";
+
+/* Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted */
+"From the minutes of an older meeting" = "Dal verbale di una riunione meno recente";
+
+/* VoiceOver: hint of a citation of the minutes of an older meeting */
+"Opens the meeting’s minutes" = "Apre il verbale della riunione";
+
 /* Placeholder of the name field of a person or project */
 "Full name" = "Nome completo";
 
@@ -5461,6 +5479,9 @@
 
 /* Ask: shown under the claims of an answer when some of them are verified and some are not */
 "Some points couldn’t be found word for word. Check the ones marked before relying on them." = "Alcuni punti non sono stati trovati parola per parola. Controlla quelli contrassegnati prima di fidarti.";
+
+/* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
+"Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "Non presente nella trascrizione o nei documenti su cui si basa la risposta: %@. Controlla prima di fidarti.";
 
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "Alcune voci salvate non vengono usate";
