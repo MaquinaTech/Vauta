@@ -105,6 +105,8 @@ final class MeetingsModel {
     var highlighted: Int64?
     /// The transcript line whose words are being corrected, with what was typed so far.
     var lineDraft: LineDraft?
+    /// After a correction: the same words elsewhere in the meeting, offered to correct there too.
+    var everywhereOffer: MeetingStore.CorrectEverywhereOffer?
     /// The meeting being recorded (it can't be deleted).
     var activeMeetingID: Int64?
     /// Meetings matching the tokens (nil = no filter).
@@ -133,6 +135,7 @@ final class MeetingsModel {
             // Words being edited and a note not yet added belong to the meeting being left: they are saved there.
             notepad.commitPendingBeforeLeaving()
             saveLineDraft()
+            everywhereOffer = nil
             if findShown { closeFind() }
             highlighted = pendingHighlight
             pendingHighlight = nil
@@ -147,6 +150,8 @@ final class MeetingsModel {
     }
     /// Called after "Erase All" (so other views drop what they held).
     @ObservationIgnored var onErased: (() -> Void)?
+    /// Called after a term was added to the glossary from here (so Context lists it).
+    @ObservationIgnored var onGlossaryChanged: (() -> Void)?
     /// Called on user activity, so an unlocked window stays unlocked while in
     /// use (the relock timer lives in the recorder). Throttled.
     @ObservationIgnored var onActivity: (() -> Void)?

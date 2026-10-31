@@ -31,6 +31,7 @@ extension MeetingsModel {
     func beginCorrecting(_ segment: MeetingStore.StoredSegment) {
         guard canCorrect(segment) else { return }
         noteActivity()
+        everywhereOffer = nil
         if let lineDraft, lineDraft.segmentID != segment.id { saveLineDraft() }
         highlighted = segment.id
         lineDraft = LineDraft(segmentID: segment.id, meetingID: segment.meetingID, text: segment.text)
@@ -63,7 +64,74 @@ extension MeetingsModel {
         }
         guard let correction else { return }
         registerUndo(of: correction)
+        // A misheard word is often misheard elsewhere too, and a new name is worth remembering: offered, never done without the
+        // person.
+        everywhereOffer = correction.restored ? nil : try? await store.correctEverywhereOffer(after: correction)
+        if let everywhereOffer { AccessibilityNotification.Announcement(CorrectEverywhereNote.announcement(everywhereOffer)).post() }
         await reloadAfterCorrection(meetingID)
+    }
+
+    /// Adds a name or term from the offer to the glossary (the person asked), with Edit ▸ Undo.
+    func addToGlossary(_ term: String) async {
+        everywhereOffer = everywhereOffer?.adding(term)
+        noteActivity()
+        let added: MeetingStore.CorrectedTerm?
+        do {
+            added = try await store.addCorrectedTerm(term)
+        } catch {
+            present(String(localized: "Couldn’t save the term", comment: "Alert title: saving a glossary term failed"), error)
+            return
+        }
+        guard let added else { return }
+        onGlossaryChanged?()
+        if let undoManager {
+            undoManager.registerUndo(withTarget: self) { model in
+                MainActor.assumeIsolated {
+                    _ = Task {
+                        do {
+                            try await model.store.undoAddCorrectedTerm(added)
+                        } catch {
+                            model.present(String(localized: "Couldn’t delete the term", comment: "Alert title: deleting a glossary term failed"), error)
+                        }
+                        model.onGlossaryChanged?()
+                    }
+                }
+            }
+            undoManager.setActionName(CorrectEverywhereNote.addTitle(term))
+        }
+        show(MeetingsNotice(text: String(localized: "Added to the glossary", comment: "Confirmation after the person added a corrected name or term to the glossary")))
+    }
+
+    /// Corrects the offered words in the rest of the meeting (the person accepted), with Edit ▸ Undo. The terms for the glossary
+    /// stay offered.
+    func correctEverywhere() async {
+        guard let offer = everywhereOffer, offer.isElsewhere else { return }
+        everywhereOffer = offer.corrected()
+        noteActivity()
+        let undo: MeetingStore.CorrectEverywhereUndo?
+        do {
+            undo = try await store.correctEverywhere(offer)
+        } catch {
+            present(String(localized: "Couldn’t correct the line", comment: "Alert title: saving the corrected words of a transcript line failed"), error)
+            return
+        }
+        if let undo, let undoManager, undo.meetingID == selectedID {
+            undoManager.registerUndo(withTarget: self) { model in
+                MainActor.assumeIsolated {
+                    _ = Task {
+                        do {
+                            try await model.store.undoCorrectEverywhere(undo)
+                        } catch {
+                            model.present(String(localized: "Couldn’t undo the change", comment: "Alert title: taking back a speaker edit failed"), error)
+                        }
+                        await model.reloadAfterCorrection(undo.meetingID)
+                    }
+                }
+            }
+            undoManager.setActionName(CorrectEverywhereNote.title)
+        }
+        await reloadAfterCorrection(offer.meetingID)
+        if undo != nil { show(MeetingsNotice(text: String(localized: "Corrected in the whole meeting", comment: "Confirmation after Correct Everywhere"))) }
     }
 
     /// Edit ▸ Undo. There is no Redo: the store restores, it does not replay.

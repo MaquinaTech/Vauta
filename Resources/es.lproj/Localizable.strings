@@ -1472,6 +1472,13 @@
 "Line deleted" = "Línea eliminada";
 "Line deleted. What the minutes wrote from it is marked for you to check." = "Línea eliminada. Lo que el acta escribió a partir de ella queda marcado para que lo revises.";
 "You deleted the transcript line this was written from. Check that it still belongs in the minutes." = "Eliminaste la línea de la transcripción de la que salió esto. Comprueba que sigue teniendo sentido en el acta.";
+"Add “%@” to Glossary" = "Añadir «%@» al glosario";
+"Added to the glossary" = "Añadido al glosario";
+"Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Fijado en el glosario, entra en el vocabulario personalizado del dictado, y una reunión posterior que parezca oírlo mal recibe una sugerencia.";
+"Also elsewhere in this meeting: %@" = "También en otras partes de esta reunión: %@";
+"Correct Everywhere" = "Corregir en todas partes";
+"Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "Corregir estas palabras también en las demás líneas de la transcripción y en el acta. Deshacer lo revierte.";
+"Corrected in the whole meeting" = "Corregido en toda la reunión";
 "Corrected words" = "Palabras corregidas";
 "Return saves, Esc cancels" = "Retorno guarda, Esc cancela";
 "Corrected" = "Corregida";

@@ -171,6 +171,7 @@ extension MeetingsModel {
     /// meeting may need the line, and nothing brings it back.
     private func deleteLine(_ segment: MeetingStore.StoredSegment) async {
         if lineDraft?.segmentID == segment.id { lineDraft = nil }
+        if everywhereOffer?.segmentID == segment.id { everywhereOffer = nil }
         var deletion: MeetingStore.LineDeletion?
         do {
             deletion = try await store.deleteSegment(segment.id)

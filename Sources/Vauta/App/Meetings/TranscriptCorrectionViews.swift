@@ -95,6 +95,62 @@ struct CorrectLineButton: View {
     }
 }
 
+/// Under a line just corrected, when the words it replaced are elsewhere in the meeting (other lines, the minutes): the offer
+/// to correct them there too; and when it put in a name or term Vauta doesn't know, the offer to add it to the glossary. Nothing
+/// changes until the person accepts, and Edit ▸ Undo takes it back.
+struct CorrectEverywhereNote: View {
+    let offer: MeetingStore.CorrectEverywhereOffer
+    let accept: () -> Void
+    let add: (String) -> Void
+    let dismiss: () -> Void
+
+    static let title = String(localized: "Correct Everywhere",
+                              comment: "Transcript: button under a corrected line that also corrects the same words in the other lines and in the minutes; also the action Edit ▸ Undo takes back")
+
+    /// "Also elsewhere in this meeting: Ana → Anna".
+    static func text(_ offer: MeetingStore.CorrectEverywhereOffer) -> String {
+        let words = offer.replacements.map { "\($0.from) → \($0.to)" }.joined(separator: ", ")
+        return String(localized: "Also elsewhere in this meeting: \(words)",
+                      comment: "Transcript: under a corrected line whose replaced words are in other lines or in the minutes; the argument lists them, such as “Ana → Anna”")
+    }
+
+    static func addTitle(_ term: String) -> String {
+        String(localized: "Add “\(term)” to Glossary",
+               comment: "Transcript: button under a corrected line that adds the name or term the user wrote to the glossary in Context; also the action Edit ▸ Undo takes back")
+    }
+
+    /// What VoiceOver hears when the offer appears.
+    static func announcement(_ offer: MeetingStore.CorrectEverywhereOffer) -> String {
+        ((offer.isElsewhere ? [text(offer)] : []) + offer.newTerms.map(addTitle)).joined(separator: ". ")
+    }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Image(systemName: offer.isElsewhere ? "text.magnifyingglass" : "character.book.closed").accessibilityHidden(true)
+            if offer.isElsewhere {
+                Text(verbatim: Self.text(offer))
+                Button(Self.title, action: accept)
+                    .buttonStyle(.link)
+                    .help(String(localized: "Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back.",
+                                 comment: "Transcript: tooltip of the Correct Everywhere button"))
+            }
+            ForEach(offer.newTerms, id: \.self) { term in
+                Button(Self.addTitle(term)) { add(term) }
+                    .buttonStyle(.link)
+                    .help(String(localized: "Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion.",
+                                 comment: "Transcript: tooltip of the button that adds a corrected name or term to the glossary"))
+            }
+            Button(action: dismiss) { Image(systemName: "xmark") }
+                .buttonStyle(.borderless)
+                .help("Dismiss")
+                .accessibilityLabel(Text("Dismiss"))
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .accessibilityElement(children: .contain)
+    }
+}
+
 /// Deleting a line of the transcript for good (the context menu, ⌫ and Edit ▸ Delete on the highlighted line, VoiceOver).
 enum DeleteLineLabel {
     static let title = String(localized: "Delete Line", comment: "Transcript: confirms deleting a line of the transcript for good; with an ellipsis, the context menu item and VoiceOver action that ask first")

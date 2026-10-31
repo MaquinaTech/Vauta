@@ -438,6 +438,9 @@
 /* Button: adds the typed name as a new person and assigns it; the argument is the name */
 "Add “%@” as a New Person" = "Add “%@” as a New Person";
 
+/* Transcript: button under a corrected line that adds the name or term the user wrote to the glossary in Context; also the action Edit ▸ Undo takes back */
+"Add “%@” to Glossary" = "Add “%@” to Glossary";
+
 /* VoiceOver announcement after a source was added; the argument is its name */
 "Added %@. Indexing started." = "Added %@. Indexing started.";
 
@@ -458,6 +461,9 @@
 
 /* Bar after adding a reminder; the argument is the list and its account, such as Work · iCloud */
 "Added to Reminders · %@" = "Added to Reminders · %@";
+
+/* Confirmation after the person added a corrected name or term to the glossary */
+"Added to the glossary" = "Added to the glossary";
 
 /* Documents pane: shown after a folder or file was added; the argument is its name */
 "Added “%@”. Indexing started." = "Added “%@”. Indexing started.";
@@ -588,6 +594,9 @@
 
 /* Speaker popover, under a person who already is another speaker of this meeting: picking the row leads to merging this speaker with that one */
 "Already speaking in this meeting" = "Already speaking in this meeting";
+
+/* Transcript: under a corrected line whose replaced words are in other lines or in the minutes; the argument lists them, such as “Ana → Anna” */
+"Also elsewhere in this meeting: %@" = "Also elsewhere in this meeting: %@";
 
 /* Settings → Calendar & Reminders: the switch that lets the brief cover in-person events */
 "Also for meetings without a video link" = "Also for meetings without a video link";
@@ -1462,6 +1471,9 @@
 /* Technical detail of a capture error */
 "Core Audio error %lld." = "Core Audio error %lld.";
 
+/* Transcript: button under a corrected line that also corrects the same words in the other lines and in the minutes; also the action Edit ▸ Undo takes back */
+"Correct Everywhere" = "Correct Everywhere";
+
 /* No comment provided by engineer. */
 "Correct Highlighted Passage" = "Correct Highlighted Passage";
 
@@ -1471,8 +1483,14 @@
 /* Transcript: tooltip of the pencil at the end of the highlighted line */
 "Correct the words of this line (Return)" = "Correct the words of this line (Return)";
 
+/* Transcript: tooltip of the Correct Everywhere button */
+"Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back.";
+
 /* Transcript: under a line whose words the user corrected */
 "Corrected" = "Corrected";
+
+/* Confirmation after Correct Everywhere */
+"Corrected in the whole meeting" = "Corrected in the whole meeting";
 
 /* Accessibility label of the field where the user corrects a transcript line */
 "Corrected words" = "Corrected words";
@@ -4629,6 +4647,9 @@
 
 /* No comment provided by engineer. */
 "Pinned" = "Pinned";
+
+/* Transcript: tooltip of the button that adds a corrected name or term to the glossary */
+"Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion.";
 
 /* Help under the pinned toggle of a glossary term */
 "Pinned terms take priority in the vocabulary given to the speech recognizer." = "Pinned terms take priority in the vocabulary given to the speech recognizer.";
