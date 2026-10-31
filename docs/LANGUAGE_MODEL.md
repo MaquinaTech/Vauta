@@ -833,6 +833,22 @@ Guided generation for Ask (`AppleGuidedSchema`) is **off by default** (since 202
 decisions (a question, a raw quote, a date of the meeting; a decision of fewer than 3 words or 6 characters of Chinese or Japanese is dropped) replace
 the 2026-10-13 failures. The "must be a decision" second pass for Apple was built on 2026-10-15 (below).
 
+**The token estimate against Apple's own count (2026-10-31).** Every budget is made with `PromptText.tokens` (about 3.2 characters a
+token for Latin text, 1.1 for Han, Kana and Hangul, 2 for other scripts, plus 7 a line for its prefix). `llm-eval --tasks token-count`
+counts the same text with `SystemLanguageModel.tokenCount(for:)` (macOS 27.2 (26B123)): the 24 harness dev transcripts, in the lines
+the prompts print, in windows of 25, 50 and 100 lines (479 windows), and the system prompt.
+
+| Text | Windows | Estimate / Apple, mean | min | max | Apple's characters a token |
+|---|---|---|---|---|---|
+| English (AMI) | 393 | 1.12 | 0.98 | 1.27 | 3.1 |
+| Spanish (council meetings) | 86 | 1.24 | 1.10 | 1.37 | 3.6 |
+| The system prompt | 1 | 1.45 (562 against 388) | | | |
+
+So the estimate leaves about an eighth of Apple's window unused in English and a quarter in Spanish, but it is not safe to lower it:
+in English it already falls under Apple's count in some windows (by 2% at most), and it serves every provider, whose tokenizers count
+differently. Not changed. A calibration for Apple alone (per language, or Apple's own count when it builds a request) would need the
+minutes and Ask gates of the 4K window run again. Chinese, Japanese and Korean are not measured: the harness has no transcripts in them.
+
 ### Fixes of 2026-10-14: what was fixed, what was measured, what stays open
 
 Same Mac and conditions as above (release build of the worktree, `nice -n 10`, another workload on the Mac, load1 1.1 to 3.8; integrated model
