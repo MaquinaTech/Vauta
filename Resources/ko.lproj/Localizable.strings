@@ -1465,6 +1465,13 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "줄을 변경할 수 없습니다";
 "Couldn’t correct the line" = "줄을 수정할 수 없습니다";
+"Couldn’t delete the line" = "줄을 삭제할 수 없음";
+"Delete Line" = "줄 삭제";
+"Delete this line for good?" = "이 줄을 완전히 삭제할까요?";
+"Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "이 줄의 단어가 변환된 원래 내용, 번역과 함께 녹취록, 검색, 질문에서 지워집니다. 이 줄을 바탕으로 회의록에 쓴 내용은 확인할 수 있도록 표시되며, “회의록 다시 작성”으로 이 줄 없이 다시 쓸 수 있습니다. 이 작업은 실행 취소할 수 없으며, 이전에 만든 백업에는 이 줄이 남아 있습니다.";
+"Line deleted" = "줄을 삭제했습니다";
+"Line deleted. What the minutes wrote from it is marked for you to check." = "줄을 삭제했습니다. 이 줄을 바탕으로 회의록에 쓴 내용은 확인할 수 있도록 표시되었습니다.";
+"You deleted the transcript line this was written from. Check that it still belongs in the minutes." = "이 내용의 근거가 된 녹취록 줄을 삭제했습니다. 회의록에 여전히 있어야 하는지 확인하세요.";
 "Corrected words" = "수정한 단어";
 "Return saves, Esc cancels" = "Return은 저장, Esc는 취소";
 "Corrected" = "수정됨";

@@ -94,3 +94,8 @@ struct CorrectLineButton: View {
         .help(String(localized: "Correct the words of this line (Return)", comment: "Transcript: tooltip of the pencil at the end of the highlighted line"))
     }
 }
+
+/// Deleting a line of the transcript for good (the context menu, ⌫ and Edit ▸ Delete on the highlighted line, VoiceOver).
+enum DeleteLineLabel {
+    static let title = String(localized: "Delete Line", comment: "Transcript: confirms deleting a line of the transcript for good; with an ellipsis, the context menu item and VoiceOver action that ask first")
+}

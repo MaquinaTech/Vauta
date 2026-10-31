@@ -1543,6 +1543,9 @@
 /* Alert title */
 "Couldn’t delete the decision" = "Couldn’t delete the decision";
 
+/* Alert title: deleting a transcript line failed */
+"Couldn’t delete the line" = "Couldn’t delete the line";
+
 /* Alert title */
 "Couldn’t delete the mark" = "Couldn’t delete the mark";
 
@@ -1769,6 +1772,9 @@
 /* No comment provided by engineer. */
 "Delete Entry…" = "Delete Entry…";
 
+/* Transcript: confirms deleting a line of the transcript for good; with an ellipsis, the context menu item and VoiceOver action that ask first */
+"Delete Line" = "Delete Line";
+
 /* Button: confirm deleting a mark */
 "Delete Mark" = "Delete Mark";
 
@@ -1899,6 +1905,9 @@
 
 /* Confirmation title */
 "Delete this decision?" = "Delete this decision?";
+
+/* Confirmation title when deleting a line of a meeting’s transcript */
+"Delete this line for good?" = "Delete this line for good?";
 
 /* Confirmation title */
 "Delete this mark?" = "Delete this mark?";
@@ -2959,6 +2968,9 @@
 /* Settings → Models; under “This Mac can’t run the search model” */
 "Its self-test failed on this Mac. Run “Vauta doctor” in Terminal for details. Keyword search keeps working." = "Its self-test failed on this Mac. Run “Vauta doctor” in Terminal for details. Keyword search keeps working.";
 
+/* Confirmation message when deleting a transcript line, under the line’s words */
+"Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line.";
+
 /* Export format name */
 "JSON" = "JSON";
 
@@ -3141,6 +3153,12 @@
 /* About the integrated model
    About the search model */
 "License: Apache License 2.0, as stated on the model card at this revision. Google’s Gemma terms are linked for information. Google doesn’t endorse Vauta." = "License: Apache License 2.0, as stated on the model card at this revision. Google’s Gemma terms are linked for information. Google doesn’t endorse Vauta.";
+
+/* Confirmation after deleting a transcript line */
+"Line deleted" = "Line deleted";
+
+/* Confirmation after deleting a transcript line that decisions, tasks or note expansions were written from */
+"Line deleted. What the minutes wrote from it is marked for you to check." = "Line deleted. What the minutes wrote from it is marked for you to check.";
 
 /* No comment provided by engineer. */
 "Link a Project or Client" = "Link a Project or Client";
@@ -7805,6 +7823,9 @@
 
 /* Help of the mark on a decision or task whose cited transcript line the user corrected after the minutes were written; also the note in the task editor */
 "You corrected the transcript here after the minutes were written. Check that this still says what was said." = "You corrected the transcript here after the minutes were written. Check that this still says what was said.";
+
+/* Help of the mark on a decision or task whose cited transcript line the user deleted; also the note in the task editor */
+"You deleted the transcript line this was written from. Check that it still belongs in the minutes." = "You deleted the transcript line this was written from. Check that it still belongs in the minutes.";
 
 /* Event editor: no writable calendar */
 "You have no calendar Vauta can add to." = "You have no calendar Vauta can add to.";

@@ -1465,6 +1465,13 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "Não foi possível alterar a linha";
 "Couldn’t correct the line" = "Não foi possível corrigir a linha";
+"Couldn’t delete the line" = "Não foi possível apagar a linha";
+"Delete Line" = "Apagar linha";
+"Delete this line for good?" = "Apagar esta linha para sempre?";
+"Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "Suas palavras são apagadas da transcrição, da busca e de Perguntar, junto com o que foi transcrito e sua tradução. O que a ata escreveu a partir dela fica marcado para você conferir, e “Reescrever ata” a reescreve sem ela. Não é possível desfazer, e um backup feito antes mantém a linha.";
+"Line deleted" = "Linha apagada";
+"Line deleted. What the minutes wrote from it is marked for you to check." = "Linha apagada. O que a ata escreveu a partir dela está marcado para você conferir.";
+"You deleted the transcript line this was written from. Check that it still belongs in the minutes." = "Você apagou a linha da transcrição de onde isto foi escrito. Confira se ainda faz sentido na ata.";
 "Corrected words" = "Palavras corrigidas";
 "Return saves, Esc cancels" = "Return salva, Esc cancela";
 "Corrected" = "Corrigida";
