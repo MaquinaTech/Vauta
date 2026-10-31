@@ -787,7 +787,7 @@ Deleting a meeting, and Erase Meetings and Context, drop both slots and the pin 
 meeting on a Mac with 17 GiB or less (768 MiB meeting cap). Priority of MLX work: `bulk < warm < minutes < live < interactive`. A reading tick is
 preempted (`GenerationPreempted`) by a question or a live note and retried at the next tick, never blocks transcription, and waits
 under `ThermalPolicy` heat (serious). Ticks: after 30 s of recording, then every 20 s with 600 new characters, or every 2 minutes with
-any new text, every 3 minutes in Low Power Mode. A tick took 1.1 to 4.4 s on a 20-minute meeting (the first 3 to 9 s). When the
+any new text, every 3 minutes on battery or in Low Power Mode (`WarmCadence.due`). A tick took 1.1 to 4.4 s on a 20-minute meeting (the first 3 to 9 s). When the
 recording stops the prefix is pinned for the minutes (15 minutes at most) and goes back to the idle rules when they are written.
 
 ### Minutes: the arms (3 AMI dev meetings: ES2011d, IB4002, TS3004b)
