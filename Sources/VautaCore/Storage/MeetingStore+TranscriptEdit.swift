@@ -62,26 +62,28 @@ extension MeetingStore {
     /// Takes a correction back: the line, its marks, quotes and questions return to what they were. Fails, changing nothing, when
     /// the line was corrected again, split or deleted since. A mark or text the user changed since is left as they made it.
     public func undoCorrection(_ c: TextCorrection) async throws {
-        try transaction {
-            guard let row = try db.query("SELECT meeting_id, text FROM segments WHERE id = ?", [.integer(c.segmentID)]).first,
-                  row.int(0) == c.meetingID, row.string(1) == c.after, c.meetingID != activeMeetingID
-            else { throw Self.cannotUndo }
-            try setText(c.segmentID, from: c.after, to: c.before, original: c.original, editedAt: c.editedAt)
-            for m in c.marks {
-                try run("""
-                    UPDATE \(m.table) SET unconfirmed = ?, unconfirmed_reason = ?
-                    WHERE id = ? AND source = 'llm' AND unconfirmed = ? AND unconfirmed_reason IS ?
-                    """, [.integer(m.before.unconfirmed ? 1 : 0), m.before.reason.map { .text($0) }, .integer(m.id),
-                          .integer(m.after.unconfirmed ? 1 : 0), m.after.reason.map { .text($0) }])
-            }
-            for e in c.expansions {
-                try run("UPDATE note_expansions SET sentences = ? WHERE note_id = ? AND sentences = ?", [.text(e.before), .integer(e.id), .text(e.after)])
-            }
-            for q in c.questions { try setQuestionText(q.id, to: q.before, ifStill: q.after) }
-            _ = try analyzeInTransaction(c.meetingID)
-        }
+        try transaction { try undoInTransaction(c) }
         try await commitEdit()
         if !c.marks.isEmpty { itemsEditedHandler?(c.meetingID) }
+    }
+
+    func undoInTransaction(_ c: TextCorrection, analyze: Bool = true) throws {
+        guard let row = try db.query("SELECT meeting_id, text FROM segments WHERE id = ?", [.integer(c.segmentID)]).first,
+              row.int(0) == c.meetingID, row.string(1) == c.after, c.meetingID != activeMeetingID
+        else { throw Self.cannotUndo }
+        try setText(c.segmentID, from: c.after, to: c.before, original: c.original, editedAt: c.editedAt)
+        for m in c.marks {
+            try run("""
+                UPDATE \(m.table) SET unconfirmed = ?, unconfirmed_reason = ?
+                WHERE id = ? AND source = 'llm' AND unconfirmed = ? AND unconfirmed_reason IS ?
+                """, [.integer(m.before.unconfirmed ? 1 : 0), m.before.reason.map { .text($0) }, .integer(m.id),
+                      .integer(m.after.unconfirmed ? 1 : 0), m.after.reason.map { .text($0) }])
+        }
+        for e in c.expansions {
+            try run("UPDATE note_expansions SET sentences = ? WHERE note_id = ? AND sentences = ?", [.text(e.before), .integer(e.id), .text(e.after)])
+        }
+        for q in c.questions { try setQuestionText(q.id, to: q.before, ifStill: q.after) }
+        if analyze { _ = try analyzeInTransaction(c.meetingID) }
     }
 
     private func commitCorrection(_ body: () throws -> TextCorrection?) async throws -> TextCorrection? {
@@ -91,7 +93,8 @@ extension MeetingStore {
         return correction
     }
 
-    private func correctInTransaction(_ segmentID: Int64, to new: String, now: Date) throws -> TextCorrection? {
+    /// `analyze` false leaves finding the names to the caller (one pass after several lines).
+    func correctInTransaction(_ segmentID: Int64, to new: String, now: Date, analyze: Bool = true) throws -> TextCorrection? {
         guard let row = try db.query("SELECT meeting_id, text, original_text, edited_at FROM segments WHERE id = ?", [.integer(segmentID)]).first
         else { throw Self.segmentGone }
         let (meetingID, old, original, editedAt) = (row.int(0), row.string(1), row.optionalString(2), row.optionalDouble(3))
@@ -114,7 +117,7 @@ extension MeetingStore {
             questions.append(.init(id: q.int(0), before: q.string(1), after: text))
         }
         // The names in the line: a corrected name is found, a misheard one is no longer suggested.
-        _ = try analyzeInTransaction(meetingID)
+        if analyze { _ = try analyzeInTransaction(meetingID) }
         return TextCorrection(segmentID: segmentID, meetingID: meetingID, restored: restored, before: old, original: original,
                               editedAt: editedAt, after: new, marks: marks, expansions: expansions, questions: questions)
     }

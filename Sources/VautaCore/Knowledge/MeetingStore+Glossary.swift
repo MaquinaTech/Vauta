@@ -40,18 +40,63 @@ extension MeetingStore {
     public func deleteGlossary(_ id: Int64) async throws {
         try transaction {
             try run("DELETE FROM glossary WHERE id = ?", [.integer(id)])
-            for row in try db.query("""
-                SELECT id, candidates FROM suggestions WHERE status = 'open'
-                   AND EXISTS (SELECT 1 FROM json_each(candidates, '$.c') WHERE json_extract(value, '$.glossaryID') = ?)
-                """, [.integer(id)]) {
-                guard var payload = try? JSONDecoder().decode(SuggestionPayload.self, from: Data(row.string(1).utf8)) else { continue }
-                payload.c.removeAll { $0.glossaryID == id }
-                if payload.c.isEmpty {
-                    try run("DELETE FROM suggestions WHERE id = ?", [.integer(row.int(0))])
-                } else {
-                    try run("UPDATE suggestions SET candidates = ? WHERE id = ?", [.text(try payload.json()), .integer(row.int(0))])
-                }
+            try dropFromSuggestions(glossary: id)
+        }
+        pendingCompaction = true
+        try await commitEdit()
+    }
+
+    private func dropFromSuggestions(glossary id: Int64) throws {
+        for row in try db.query("""
+            SELECT id, candidates FROM suggestions WHERE status = 'open'
+               AND EXISTS (SELECT 1 FROM json_each(candidates, '$.c') WHERE json_extract(value, '$.glossaryID') = ?)
+            """, [.integer(id)]) {
+            guard var payload = try? JSONDecoder().decode(SuggestionPayload.self, from: Data(row.string(1).utf8)) else { continue }
+            payload.c.removeAll { $0.glossaryID == id }
+            if payload.c.isEmpty {
+                try run("DELETE FROM suggestions WHERE id = ?", [.integer(row.int(0))])
+            } else {
+                try run("UPDATE suggestions SET candidates = ? WHERE id = ?", [.text(try payload.json()), .integer(row.int(0))])
             }
+        }
+    }
+
+    // MARK: Terms from corrections
+
+    /// A term `addCorrectedTerm` added, for Edit ▸ Undo. Kept in memory only.
+    public struct CorrectedTerm: Sendable {
+        public let id: Int64
+        let term: String
+    }
+
+    /// Of `terms`, those neither in the glossary nor a name of an entry in Context (`TextKeys.norm`), each once.
+    func unknownTerms(_ terms: [String]) throws -> [String] {
+        guard !terms.isEmpty else { return [] }
+        var known = Set(try db.query("SELECT term FROM glossary").map { TextKeys.norm($0.string(0)) })
+        known.formUnion(try db.query("SELECT a.alias_norm FROM aliases a JOIN entities e ON e.id = a.entity_id WHERE e.merged_into IS NULL")
+            .map { $0.string(0) })
+        return terms.filter { known.insert(TextKeys.norm($0)).inserted }
+    }
+
+    /// Adds a name or term the person put in a transcript correction to the glossary, pinned: the custom vocabulary gives it to
+    /// the speech recognizer, and a later meeting that seems to mishear it gets a suggestion. nil when Vauta knows it already.
+    public func addCorrectedTerm(_ term: String) async throws -> CorrectedTerm? {
+        let clean = Self.clean(term, max: 200)
+        guard !clean.isEmpty else { throw KnowledgeError.emptyTerm }
+        let added: CorrectedTerm? = try transaction {
+            guard try !unknownTerms([clean]).isEmpty else { return nil }
+            try run("INSERT INTO glossary(term, pinned) VALUES (?, 1)", [.text(clean)])
+            return CorrectedTerm(id: db.lastInsertRowID, term: clean)
+        }
+        if added != nil { try await commitEdit() }
+        return added
+    }
+
+    /// Takes the term out of the glossary again, unless the person renamed it since.
+    public func undoAddCorrectedTerm(_ t: CorrectedTerm) async throws {
+        try transaction {
+            try run("DELETE FROM glossary WHERE id = ? AND term = ?", [.integer(t.id), .text(t.term)])
+            if db.changes > 0 { try dropFromSuggestions(glossary: t.id) }
         }
         pendingCompaction = true
         try await commitEdit()

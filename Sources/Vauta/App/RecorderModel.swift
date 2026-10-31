@@ -512,6 +512,7 @@ final class RecorderModel {
                 history?.ask.onAsked = { [weak recorder = self] text in recorder?.noteManualQuestion(text) }
                 // An import that finishes while Meetings is closed or locked says so with a notification.
                 history?.onImportedWhileHidden = { [weak recorder = self] id in recorder?.post(.recordingImported(meetingID: id)) }
+                history?.onGlossaryChanged = { [weak recorder = self] in Task { await recorder?.context?.reload() } }
                 history?.onErased = { [weak recorder = self] in
                     // The meetings the list names are gone, and the new database reuses their ids.
                     recorder?.preferences.questionCleanup.clear()

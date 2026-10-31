@@ -1465,6 +1465,13 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "No se ha podido cambiar la línea";
 "Couldn’t correct the line" = "No se ha podido corregir la línea";
+"Add “%@” to Glossary" = "Añadir «%@» al glosario";
+"Added to the glossary" = "Añadido al glosario";
+"Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Fijado en el glosario, entra en el vocabulario personalizado del dictado, y una reunión posterior que parezca oírlo mal recibe una sugerencia.";
+"Also elsewhere in this meeting: %@" = "También en otras partes de esta reunión: %@";
+"Correct Everywhere" = "Corregir en todas partes";
+"Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "Corregir estas palabras también en las demás líneas de la transcripción y en el acta. Deshacer lo revierte.";
+"Corrected in the whole meeting" = "Corregido en toda la reunión";
 "Corrected words" = "Palabras corregidas";
 "Return saves, Esc cancels" = "Retorno guarda, Esc cancela";
 "Corrected" = "Corregida";

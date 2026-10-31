@@ -69,6 +69,10 @@ import Foundation
 /// `transcript[].speaker` is a display string ("Ana", "Speaker 2", "Me") in the language of the Mac that exported. It never
 /// carries a note about doubt: the machine-readable fields are `speakerId`, `confidence` and `overlap`.
 ///
+/// A transcript line whose words the user corrected carries `"corrected": true` (written only when true). Its `text` is the
+/// correction; what the transcriber wrote stays in Vauta and is never exported, since a correction may be there to take a word
+/// out.
+///
 /// Questions heard in the meeting that the person kept are written only when there are some (an optional key, version 1):
 ///
 /// ```
@@ -160,6 +164,7 @@ public enum MeetingExportJSON {
             let translation: String??
             /// Only present when the line has a speaker.
             let tag: SpeakerTag?
+            let corrected: Bool
             func encode(to encoder: Encoder) throws {
                 var c = encoder.container(keyedBy: CodingKeys.self)
                 try c.encode(start, forKey: .start)
@@ -174,8 +179,9 @@ public enum MeetingExportJSON {
                     try c.encodeIfPresent(tag.confidence.map(Document.round), forKey: .confidence)
                     try c.encode(tag.overlap, forKey: .overlap)
                 }
+                if corrected { try c.encode(true, forKey: .corrected) }
             }
-            enum CodingKeys: String, CodingKey { case start, end, channel, speaker, name, text, translation, speakerId, confidence, overlap }
+            enum CodingKeys: String, CodingKey { case start, end, channel, speaker, name, text, translation, speakerId, confidence, overlap, corrected }
         }
         struct Speaker: Encodable {
             let id: Int64
@@ -251,7 +257,7 @@ public enum MeetingExportJSON {
                 ? e.transcript.map { l in
                     Line(start: Self.round(l.start), end: Self.round(l.end), channel: l.channel.rawValue,
                          speaker: options.speaker(of: l, marksDoubt: false), name: l.name, text: l.text,
-                         translation: options.includeTranslation ? .some(l.translation) : nil, tag: l.speaker)
+                         translation: options.includeTranslation ? .some(l.translation) : nil, tag: l.speaker, corrected: l.corrected)
                 }
                 : nil
             pauses = !options.includeTranscript ? [] : e.pauses.map { Pause(start: Self.round($0.start), end: $0.end.map(Self.round)) }
