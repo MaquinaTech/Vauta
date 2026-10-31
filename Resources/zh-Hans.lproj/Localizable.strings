@@ -2155,6 +2155,12 @@
 /* Brief: under the suggested agenda; every line is checked against the lines of the brief it names */
 "Each suggestion cites the lines it comes from." = "每条建议都会标明所依据的条目。";
 
+/* Meetings list: the header of this month's meetings started before this week */
+"Earlier This Month" = "本月";
+
+/* Meetings list: the header of this week's meetings started before yesterday */
+"Earlier This Week" = "本周";
+
 /* Brief: how many earlier meetings the user and this person were in; the argument is a number */
 "Earlier meetings together: %lld" = "此前共同参加的会议：%lld";
 
@@ -6711,6 +6717,9 @@
 /* Settings → Speakers, details in the Learn More popover when it is on: how to save the user’s own voice */
 "To teach Vauta your own voice, import a recording where you speak and choose “This Is My Voice” on your speaker. Later imported recordings can then suggest which speaker is you." = "要让 Vauta 学会你的声音，请导入一段你在其中说话的录音，并在你的发言人上选择“这是我的声音”。之后导入的录音就可以建议哪位发言人是你。";
 
+/* Meetings list: the header of the meetings started today */
+"Today" = "今天";
+
 /* Documents: why a file was skipped; it is bigger than Vauta reads */
 "Too large" = "文件过大";
 
@@ -7554,6 +7563,9 @@
 
 /* VoiceOver: accepts the suggestion that a speaker is the user */
 "Yes, that’s me" = "是的，是我";
+
+/* Meetings list: the header of the meetings started yesterday */
+"Yesterday" = "昨天";
 
 /* Reminder editor: the task was deleted here, its reminder is still there; the argument is a date */
 "You added this to Reminders on %@" = "你已于 %@ 将其添加到“提醒事项”";
