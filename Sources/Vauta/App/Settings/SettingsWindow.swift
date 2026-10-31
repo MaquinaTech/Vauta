@@ -17,33 +17,23 @@ struct SettingsWindow: View {
     @Bindable var recorder: RecorderModel
     @Bindable var preferences: Preferences
     @Bindable var model: SettingsModel
+    /// What the sidebar's search field holds; with text, the sidebar lists what it finds (`SettingsSearch`).
+    @ViewLocalState private var query = ""
+    @ViewLocalState private var chosenResult: SettingsSearchEntry.ID?
 
     var body: some View {
         NavigationSplitView {
-            List(SettingsModel.Pane.allCases, selection: Binding(get: { model.pane }, set: { if let pane = $0 { model.pane = pane } })) { pane in
-                // One fixed icon box for every row, so no glyph's height or baseline moves its label off the rhythm.
-                Label {
-                    Text(pane.title)
-                } icon: {
-                    // As in System Settings: a white symbol on a rounded square in the pane's colour.
-                    Image(systemName: pane.symbol)
-                        .symbolVariant(.fill)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: 20, height: 20)
-                        .background(pane.tint.gradient, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
-                        .accessibilityHidden(true)
-                }
-                .frame(height: 24)
-                .tag(pane)
-            }
-            .environment(\.defaultMinListRowHeight, 28)
-            .navigationSplitViewColumnWidth(235)
+            sidebar
+                .environment(\.defaultMinListRowHeight, 28)
+                .navigationSplitViewColumnWidth(235)
         } detail: {
             detail
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .navigationTitle(model.pane.title)
         }
+        // As in System Settings: the field at the top of the sidebar.
+        .searchable(text: $query, placement: .sidebar,
+                    prompt: Text("Search Settings", comment: "Placeholder of the search field at the top of the Settings sidebar"))
         // On the split view, not on the sidebar list: set on the list it makes the column ignore its width.
         .toolbar(removing: .sidebarToggle)
         // One width for every pane: switching panes never resizes the window.
@@ -62,6 +52,51 @@ struct SettingsWindow: View {
             // Unsaved edits and a half-typed key never outlive the window.
             model.models.discardDraft()
         }
+    }
+
+    /// The panes, or what the search finds: a pane, or a setting with its pane under it. Choosing one opens the pane.
+    @ViewBuilder
+    private var sidebar: some View {
+        if query.trimmingCharacters(in: .whitespaces).isEmpty {
+            List(SettingsModel.Pane.allCases, selection: Binding(get: { model.pane }, set: { if let pane = $0 { model.pane = pane } })) { pane in
+                Label { Text(pane.title) } icon: { Self.icon(of: pane) }
+                    .frame(height: 24)
+                    .tag(pane)
+            }
+        } else {
+            let results = SettingsSearch.results(for: query)
+            if results.isEmpty {
+                ContentUnavailableView.search(text: query)
+            } else {
+                List(results, selection: Binding(get: { chosenResult }, set: { id in
+                    chosenResult = id
+                    if let entry = results.first(where: { $0.id == id }) { model.pane = entry.pane }
+                })) { entry in
+                    Label {
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(verbatim: entry.title)
+                            if entry.key != entry.pane.rawValue {
+                                Text(verbatim: entry.pane.title).font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    } icon: { Self.icon(of: entry.pane) }
+                    .accessibilityElement(children: .combine)
+                    .tag(entry.id)
+                }
+            }
+        }
+    }
+
+    /// As in System Settings: a white symbol on a rounded square in the pane's colour. One fixed box for every row, so no
+    /// glyph's height or baseline moves its label off the rhythm.
+    private static func icon(of pane: SettingsModel.Pane) -> some View {
+        Image(systemName: pane.symbol)
+            .symbolVariant(.fill)
+            .font(.system(size: 11, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 20, height: 20)
+            .background(pane.tint.gradient, in: RoundedRectangle(cornerRadius: 5, style: .continuous))
+            .accessibilityHidden(true)
     }
 
     @ViewBuilder
