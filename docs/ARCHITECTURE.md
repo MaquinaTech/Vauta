@@ -210,7 +210,7 @@ At Stop:
 | `App/Meetings/` | Meetings window, Ask, export, import | `MeetingsModel`, `AskModel`, `MeetingExporter`, `RecordingImportModel` |
 | `App/Context/` | People, projects, glossary and series editor | `ContextModel`, `ContextView` |
 | `App/Network/` | Network Activity window: live list, summary, filter, export | `NetworkActivityModel`, `NetworkActivityView` |
-| `App/Settings/` | Settings window | `SettingsModel`, `ModelsSettingsModel`, `SpeechSettingsModel`, `SearchModelModel`, `IntegratedModelModel` and the panes (`SearchModelSection` and `IntegratedModelSection` are the cards of Models) |
+| `App/Settings/` | Settings window | `SettingsModel`, `ModelsSettingsModel`, `SpeechSettingsModel`, `SearchModelModel`, `IntegratedModelModel` and the panes (`SearchModelSection` and `IntegratedModelSection` are the cards of Models); `SettingsSearch`, the sidebar's search: an index of each pane's settings by their English keys, read in the app's language (a test keeps every key in the strings table) |
 | `App/Onboarding/` | First-run setup | `OnboardingModel`, `OnboardingView` |
 | `App/Shared/` (look: `Brand`, `VautaOrb`, `CardStyle`, `EmptyStateView`) | What the windows share: Vauta's colours, the animated sphere (record button, Welcome, empty states, the small "thinking" sphere), cards and empty states | `Brand`, `VautaOrb`, `ThinkingOrb`, `BrandSymbol` |
 | `App/Notifier.swift`, `GlobalHotKey.swift`, `CalendarWatcher.swift`, `NoCopyText.swift` | Notifications, global shortcuts, calendar matching, copy protection | |

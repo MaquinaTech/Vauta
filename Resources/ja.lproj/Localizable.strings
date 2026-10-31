@@ -5178,6 +5178,7 @@
 
 /* No comment provided by engineer. */
 "Search Meetings" = "ミーティングを検索";
+"Search Settings" = "設定を検索";
 
 /* Ask; under the question: Ask finds passages with the search model
    Network Activity purpose: building the search index with the embedding model
