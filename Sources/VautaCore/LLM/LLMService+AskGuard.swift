@@ -123,7 +123,7 @@ extension VerifiedAnswer {
             return VerifiedAnswer(answer: "", claims: claims, found: false, withheld: answer, notYet: true)
         case .related:
             // The quotes are in the transcript, so the claims stay verified; the answer says on its own that the moments only touch the topic.
-            return VerifiedAnswer(answer: answer, claims: claims, found: true, cutShort: cutShort, touchesOnly: true)
+            return VerifiedAnswer(answer: answer, claims: claims, found: true, cutShort: cutShort, touchesOnly: true, unbackedFigures: unbackedFigures)
         }
     }
 }

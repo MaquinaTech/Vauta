@@ -326,7 +326,7 @@
 			<string>%lld d’entre elles ne sont pas encore dans l’index de recherche par le sens et ont été parcourues par mots-clés.</string>
 		</dict>
 	</dict>
-	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<key>%lld older meetings no longer have a transcript; only their minutes were searched.</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@count@</string>
@@ -337,11 +337,11 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>lld</string>
 			<key>one</key>
-			<string>%lld réunion plus ancienne n’a plus de transcription et n’a pas été parcourue.</string>
+			<string>%lld réunion plus ancienne n’a plus de transcription ; seul son compte rendu a été consulté.</string>
 			<key>many</key>
-			<string>%lld de réunions plus anciennes n’ont plus de transcription et n’ont pas été parcourues.</string>
+			<string>%lld de réunions plus anciennes n’ont plus de transcription ; seuls leurs comptes rendus ont été consultés.</string>
 			<key>other</key>
-			<string>%lld réunions plus anciennes n’ont plus de transcription et n’ont pas été parcourues.</string>
+			<string>%lld réunions plus anciennes n’ont plus de transcription ; seuls leurs comptes rendus ont été consultés.</string>
 		</dict>
 	</dict>
 	<key>%lld to review</key>
