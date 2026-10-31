@@ -77,6 +77,10 @@ final class StubServer: URLProtocol, @unchecked Sendable {
         }
         let reply = handler(received) ?? Reply.json(["error": "not found"], status: 404)
         let response = HTTPURLResponse(url: url, statusCode: reply.status, httpVersion: "HTTP/1.1", headerFields: reply.headers)!
+        // A redirect is offered to the session as a server's would be: its delegate decides whether the new request is made.
+        if (300..<400).contains(reply.status), let location = reply.headers["Location"].flatMap({ URL(string: $0, relativeTo: url) }) {
+            client?.urlProtocol(self, wasRedirectedTo: URLRequest(url: location.absoluteURL), redirectResponse: response)
+        }
         client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
         client?.urlProtocol(self, didLoad: reply.body)
         client?.urlProtocolDidFinishLoading(self)

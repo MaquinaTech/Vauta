@@ -83,6 +83,14 @@ struct PreflightScriptTests {
         #expect(build.contains("${VAUTA_JOBS:+-j \"$VAUTA_JOBS\"}"))
     }
 
+    /// The app is built from the reviewed pins only: the dependency check runs first, and nothing is resolved anew.
+    @Test func theBuildUsesTheReviewedPinsOnly() throws {
+        let build = try String(contentsOf: PackagingTests.root.appendingPathComponent("scripts/build-app.sh"), encoding: .utf8)
+        let check = try #require(build.range(of: "\nscripts/check-dependencies.sh\n")), swift = try #require(build.range(of: "\nswift build "))
+        #expect(check.lowerBound < swift.lowerBound)
+        #expect(build.contains("SWIFT_ARGS=(-c release --arch arm64 --force-resolved-versions "))
+    }
+
     /// posix_spawn with an environment of its own and no descriptor of this process (see `PackagingTests.run`).
     static func spawn(_ argv: [String], environment: [String: String]) throws -> (status: Int32, output: String) {
         var fds: [Int32] = [0, 0]

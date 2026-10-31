@@ -90,19 +90,21 @@ struct SearchModelStoreTests {
         #expect(real.root.lastPathComponent == "Vauta Models" && !real.root.path.contains("/Vauta/"))
     }
 
-    @Test func preparingExcludesFromBackupAndSpotlightAndIsRepeatable() throws {
+    @Test func preparingExcludesFromBackupAndSpotlightAndIsRepeatable() async throws {
         let fixture = ModelFixture(spec: SyntheticModel().spec)
         defer { fixture.cleanup() }
         try fixture.store.prepare()
+        #expect(try await backupExclusion(of: fixture.store.root, settlesAt: true))
         #expect(fixture.store.isExcludedFromBackup)
         // A rename can drop the attribute: preparing again sets it again.
         var url = fixture.store.root
         var values = URLResourceValues()
         values.isExcludedFromBackup = false
         try url.setResourceValues(values)
+        #expect(try await backupExclusion(of: fixture.store.root, settlesAt: false))
         #expect(!fixture.store.isExcludedFromBackup)
         try fixture.store.prepare()
-        #expect(fixture.store.isExcludedFromBackup)
+        #expect(try await backupExclusion(of: fixture.store.root, settlesAt: true))
         let mode = try FileManager.default.attributesOfItem(atPath: fixture.store.modelParent.path)[.posixPermissions] as? Int
         #expect(mode == 0o700)
         #expect(FileManager.default.fileExists(atPath: fixture.store.root.appendingPathComponent(".metadata_never_index").path))

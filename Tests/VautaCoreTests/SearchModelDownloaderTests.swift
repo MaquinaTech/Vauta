@@ -51,7 +51,8 @@ struct SearchModelDownloaderTests {
         let hits = env.behaviour.hits
         #expect(hits.filter { $0.host == "huggingface.co" }.count == 2)
         #expect(env.behaviour.rangeRequests == ["bytes=100-1099", "bytes=1100-2099", "bytes=2100-2599"])
-        #expect(store.isExcludedFromBackup && FileManager.default.fileExists(atPath: store.root.appendingPathComponent(".metadata_never_index").path))
+        #expect(try await backupExclusion(of: store.root, settlesAt: true))
+        #expect(FileManager.default.fileExists(atPath: store.root.appendingPathComponent(".metadata_never_index").path))
     }
 
     @Test func theNetworkActivityListsTheDownloadWithHostsAndPathsOnly() async throws {
@@ -82,6 +83,7 @@ struct SearchModelDownloaderTests {
         defer { env.finish() }
         try await env.run()
         #expect(env.behaviour.hits.allSatisfy { $0.acceptEncoding == "identity" }, "no request leaves it to URLSession's gzip/br default")
+        #expect(env.behaviour.hits.allSatisfy { $0.userAgent == "Vauta" }, "the app's name only, not the build or the system's versions")
 
         let compressed = Env { $0.contentEncoding = "gzip" }
         defer { compressed.finish() }
