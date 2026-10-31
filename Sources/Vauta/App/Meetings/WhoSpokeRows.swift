@@ -93,8 +93,8 @@ private struct WhoSpokeRow: View {
     }
 }
 
-/// “Is this Ana?” under a speaker whose voice resembles a saved voice: one click to accept or reject. A rejection is
-/// remembered for this meeting.
+/// “Is this Ana?” under a speaker whose voice resembles a saved voice, or who said they are Ana: one click to accept or reject. A
+/// rejection is remembered for this meeting.
 struct SpeakerSuggestionRow: View {
     @Bindable var model: MeetingsModel
     let speakerID: Int64
@@ -109,6 +109,8 @@ struct SpeakerSuggestionRow: View {
             }
             .font(.callout)
             .foregroundStyle(.secondary)
+            // Why it is asked: the voice, or what the speaker said.
+            .help(candidate.explanation)
             Button(String(localized: "Yes", comment: "Speaker popover; answer to “Is this Ana?”: the suggested person is right")) { Task { await model.performSpeakerAction(.assign(speaker: speakerID, entity: candidate.entityID)) } }
                 .buttonStyle(.link)
                 .accessibilityLabel(candidate.yesLabel)

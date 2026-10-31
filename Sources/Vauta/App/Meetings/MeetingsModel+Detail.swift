@@ -396,6 +396,8 @@ extension MeetingsModel {
         defer { reanalyzing = false }
         await perform(String(localized: "Couldn’t analyze the meeting", comment: "Alert title")) {
             _ = try await store.analyze(id)
+            // A person added to Context since: a speaker who said they are that person is asked about them now.
+            try await store.suggestSpeakersFromIntroductions(meetingID: id)
         }
         suggestionCounts = (try? await store.openSuggestionCounts()) ?? suggestionCounts
         await loadDetail()
