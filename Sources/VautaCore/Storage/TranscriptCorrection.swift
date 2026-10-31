@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
 import Foundation
+internal import NaturalLanguage
 
 /// What a correction of a transcript line changed, word by word. The words of the line before and after are aligned on their
 /// `TextKeys.norm` forms (the longest common subsequence), so case, accents, punctuation and spacing never count as a change.
@@ -108,6 +109,102 @@ struct TranscriptCorrection {
             let before = (0..<j).reversed().lazy.compactMap { self.newToOld[$0] }.first.map { $0 + 1 } ?? 0
             return (near.lowerBound...(near.upperBound + 1)).contains(before)
         }
+    }
+
+    /// Where the correction put other words in place of some (a misheard name or term), as written in each line: at most
+    /// `maxWords` on each side, with an old word that carries meaning. Words only added or only removed are not replacements.
+    func replacements(maxWords: Int = 3) -> [(from: String, to: String)] {
+        replacedRuns(maxWords: maxWords).map { (Self.text(old, oldTokens[$0.old]), Self.text(new, newTokens[$0.new])) }
+    }
+
+    /// The names and terms a replacement put in, as written in the new line: one or two words (what the speech recognizer's
+    /// vocabulary takes) that all carry meaning, one of them reading as a name or a term the recognizer may not know:
+    /// - an acronym, or a word with a digit or a capital inside ("API", "K8s", "iOS");
+    /// - a capitalized word inside a sentence, where capitals mark names;
+    /// - a name to the language's tagger (a person, place or organization), such as a name that opens the sentence.
+    /// A common word put in place of another ("beach" → "speech") is none.
+    func newTerms() -> [String] {
+        let runs = replacedRuns(maxWords: 2).map { newTokens[$0.new] }.filter { $0.allSatisfy { carriesMeaning($0.norm) } }
+        guard !runs.isEmpty else { return [] }
+        lazy var names = nameRanges(in: new)
+        return runs.filter { words in
+            words.contains { readsAsTerm($0) } || words.contains { word in names.contains { $0.overlaps(word.range) } }
+        }.map { Self.text(new, $0) }
+    }
+
+    /// The runs of words the correction put in place of others (word indices in each line), as `replacements` describes them.
+    private func replacedRuns(maxWords: Int) -> [(old: Range<Int>, new: Range<Int>)] {
+        var out: [(old: Range<Int>, new: Range<Int>)] = []
+        var (i, j) = (0, 0)
+        while i < oldTokens.count || j < newTokens.count {
+            if i < oldTokens.count, j < newTokens.count, oldToNew[i] == j {
+                i += 1
+                j += 1
+                continue
+            }
+            let (i0, j0) = (i, j)
+            while i < oldTokens.count, oldToNew[i] == nil { i += 1 }
+            while j < newTokens.count, newToOld[j] == nil { j += 1 }
+            guard i > i0 || j > j0 else { break }
+            guard i > i0, j > j0, i - i0 <= maxWords, j - j0 <= maxWords,
+                  (i0..<i).contains(where: { carriesMeaning(oldTokens[$0].norm) }) else { continue }
+            out.append((i0..<i, j0..<j))
+        }
+        return out
+    }
+
+    /// The text from the first of `words` to the last, as written in `line`.
+    private static func text(_ line: String, _ words: ArraySlice<TextKeys.Token>) -> String {
+        String(line[words.first!.range.lowerBound..<words.last!.range.upperBound])
+    }
+
+    /// An acronym or a word with a digit or a capital inside, or a capitalized word inside a sentence where capitals mark names.
+    private func readsAsTerm(_ word: TextKeys.Token) -> Bool {
+        let w = word.original
+        guard w.contains(where: \.isLetter) else { return false }
+        return w.contains(where: \.isNumber) || w.dropFirst().contains(where: \.isUppercase) || profile.looksLikeName(word)
+    }
+
+    /// Where the language's tagger finds the name of a person, place or organization in `text`.
+    private func nameRanges(in text: String) -> [Range<String.Index>] {
+        let tagger = NLTagger(tagSchemes: [.nameType])
+        tagger.string = text
+        tagger.setLanguage(NLLanguage(rawValue: profile.languageCode), range: text.startIndex..<text.endIndex)
+        var out: [Range<String.Index>] = []
+        tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word, scheme: .nameType,
+                             options: [.omitWhitespace, .omitPunctuation, .joinNames]) { tag, range in
+            if let tag, [NLTag.personalName, .placeName, .organizationName].contains(tag) { out.append(range) }
+            return true
+        }
+        return out
+    }
+
+    /// `text` with every run of whole words that reads `from` (`TextKeys.norm`) written as `to`; nil when it has none. A place
+    /// that already reads `to` ("Ana María" for "Ana" → "Ana María") is left as it is.
+    static func replacing(_ from: String, with to: String, in text: String, profile: LanguageProfile) -> String? {
+        let words = TextKeys.tokens(from, profile: profile).map(\.norm)
+        let target = TextKeys.tokens(to, profile: profile).map(\.norm)
+        let tokens = TextKeys.tokens(text, profile: profile)
+        guard !words.isEmpty, tokens.count >= words.count else { return nil }
+        func reads(_ phrase: [String], at start: Int) -> Bool {
+            start + phrase.count <= tokens.count && phrase.indices.allSatisfy { tokens[start + $0].norm == phrase[$0] }
+        }
+        var ranges: [Range<String.Index>] = []
+        var start = 0
+        while start + words.count <= tokens.count {
+            if !target.isEmpty, reads(target, at: start) {
+                start += target.count
+            } else if reads(words, at: start) {
+                ranges.append(tokens[start].range.lowerBound..<tokens[start + words.count - 1].range.upperBound)
+                start += words.count
+            } else {
+                start += 1
+            }
+        }
+        guard !ranges.isEmpty else { return nil }
+        var out = text
+        for r in ranges.reversed() { out.replaceSubrange(r, with: to) }
+        return out
     }
 
     private func carriesMeaning(_ norm: String) -> Bool {

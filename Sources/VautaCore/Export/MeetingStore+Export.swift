@@ -47,7 +47,7 @@ extension MeetingStore {
             transcript: try segments(of: meetingID).map { s in
                 MeetingExport.Line(start: s.start, end: s.end, channel: s.channel,
                                    name: s.channel == .me ? myName : othersName, text: s.text,
-                                   translation: translations[s.id], speaker: s.speaker)
+                                   translation: translations[s.id], speaker: s.speaker, corrected: s.originalText != nil)
             },
             pauses: try pauses(of: meetingID),
             speakers: speakerRows.map {

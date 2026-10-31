@@ -91,9 +91,11 @@ public struct MeetingExport: Sendable, Equatable {
         /// Who said it, when the meeting has speaker data (nil = none). JSON writes it as ids; the text formats,
         /// the subtitles and the PDF print the speaker's name with `MeetingExportOptions.SpeakerLabels.names`.
         public var speaker: SpeakerTag?
+        /// The user corrected the words (`text` is the correction; what was transcribed is not exported).
+        public var corrected: Bool
 
         public init(start: Double, end: Double, channel: Channel, name: String? = nil, text: String, translation: String? = nil,
-                    speaker: SpeakerTag? = nil) {
+                    speaker: SpeakerTag? = nil, corrected: Bool = false) {
             self.start = start
             self.end = end
             self.channel = channel
@@ -101,6 +103,7 @@ public struct MeetingExport: Sendable, Equatable {
             self.text = text
             self.translation = translation
             self.speaker = speaker
+            self.corrected = corrected
         }
 
         /// The translation to write, if there is one.
