@@ -228,14 +228,18 @@ public struct MeetingExportOptions: Sendable, Equatable {
     /// JSON always uses ISO 8601.
     public var locale: Locale
     public var timeZone: TimeZone
+    /// Write when the user marked the participants as informed of the recording, if they did (on by default: it is the
+    /// meeting's record of consent; JSON writes null when it is off).
+    public var includeParticipantsInformed: Bool
 
     public init(includeTranscript: Bool = true, includeTranslation: Bool = false, speakerLabels: SpeakerLabels = .channels,
-                locale: Locale = .current, timeZone: TimeZone = .current) {
+                locale: Locale = .current, timeZone: TimeZone = .current, includeParticipantsInformed: Bool = true) {
         self.includeTranscript = includeTranscript
         self.includeTranslation = includeTranslation
         self.speakerLabels = speakerLabels
         self.locale = locale
         self.timeZone = timeZone
+        self.includeParticipantsInformed = includeParticipantsInformed
     }
 
     /// The label shown for a transcript line. A line without speaker data is labelled exactly as before speakers existed.

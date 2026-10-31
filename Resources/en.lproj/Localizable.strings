@@ -4427,8 +4427,14 @@
 /* VoiceOver: the PDF view of the passage viewer */
 "Page %lld of the document" = "Page %lld of the document";
 
+/* Exported minutes: label of the time the user marked that the participants were told the meeting was being recorded; the time follows */
+"Participants informed" = "Participants informed";
+
 /* No comment provided by engineer. */
 "Participants informed at %@" = "Participants informed at %@";
+
+/* PDF export: the time the user marked that the participants were told the meeting was being recorded */
+"Participants informed: %@" = "Participants informed: %@";
 
 /* No comment provided by engineer. */
 "Participants not marked as informed" = "Participants not marked as informed";
@@ -5226,6 +5232,9 @@
 
 /* Microphone test prompt */
 "Say something…" = "Say something…";
+
+/* No comment provided by engineer. */
+"Say when the participants were informed" = "Say when the participants were informed";
 
 /* Remember this voice error: the speaker has no name yet */
 "Say who this speaker is before remembering their voice." = "Say who this speaker is before remembering their voice.";
@@ -6105,6 +6114,9 @@
 /* No comment provided by engineer. */
 "The file contains the summary, topics, decisions, tasks, open questions, notes and the transcript." = "The file contains the summary, topics, decisions, tasks, open questions, notes and the transcript.";
 
+/* Import recording: the file's date is later than now; the argument is that date */
+"The file is dated %@, in the future. The meeting will be dated today." = "The file is dated %@, in the future. The meeting will be dated today.";
+
 /* Consent sheet: what the voice fingerprint is and where it stays */
 "The fingerprint is a list of numbers, not a recording. It stays in your encrypted data and your encrypted backups, is never sent anywhere by Vauta and is never in exports." = "The fingerprint is a list of numbers, not a recording. It stays in your encrypted data and your encrypted backups, is never sent anywhere by Vauta and is never in exports.";
 
@@ -6668,6 +6680,9 @@
 
 /* Error when choosing an entity that was deleted */
 "This person or project no longer exists." = "This person or project no longer exists.";
+
+/* Import recording: the file is older than the transcripts are kept; the argument is its date */
+"This recording is from %@. The meeting will be dated today, so its transcript isn’t deleted for its age." = "This recording is from %@. The meeting will be dated today, so its transcript isn’t deleted for its age.";
 
 /* No comment provided by engineer. */
 "This removes:" = "This removes:";
@@ -7582,6 +7597,9 @@
 
 /* No comment provided by engineer. */
 "Write the stored translation under each line of “Others”" = "Write the stored translation under each line of “Others”";
+
+/* No comment provided by engineer. */
+"Write the time you marked that the participants were told the meeting was being recorded" = "Write the time you marked that the participants were told the meeting was being recorded";
 
 /* Model role help */
 "Writes live notes while you record. A small, quick model works best; it can be the same as the main model." = "Writes live notes while you record. A small, quick model works best; it can be the same as the main model.";

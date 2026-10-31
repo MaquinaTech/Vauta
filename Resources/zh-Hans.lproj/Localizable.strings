@@ -4354,6 +4354,12 @@
 
 /* No comment provided by engineer. */
 "Participants informed at %@" = "%@ 已告知参会者";
+"Participants informed" = "已告知参会者";
+"Participants informed: %@" = "已告知参会者：%@";
+"Say when the participants were informed" = "注明告知参会者的时间";
+"Write the time you marked that the participants were told the meeting was being recorded" = "写入你标记已告知参会者正在录音的时间";
+"This recording is from %@. The meeting will be dated today, so its transcript isn’t deleted for its age." = "此录音来自 %@。为避免转录文本因过旧而被删除，会议将以今天为日期。";
+"The file is dated %@, in the future. The meeting will be dated today." = "文件日期（%@）在未来。会议将以今天为日期。";
 
 /* No comment provided by engineer. */
 "Participants not marked as informed" = "参会者尚未标记为已告知";

@@ -18,6 +18,7 @@ import Foundation
 ///   "durationSeconds": Number | null,
 ///   "language": String | null,         // BCP-47 transcription language
 ///   "participantsInformedAt": String | null,   // ISO 8601, UTC: when the user marked the participants as informed
+///                                              // (null when not marked or left out with includeParticipantsInformed)
 ///   "attendees": [String],
 ///   "summary": String,                 // "" when there is none
 ///   "topics": [String],
@@ -224,7 +225,7 @@ public enum MeetingExportJSON {
             endedAt = e.endedAt
             durationSeconds = e.endedAt.map { Self.round($0.timeIntervalSince(e.startedAt)) }
             language = e.language
-            participantsInformedAt = e.participantsInformedAt
+            participantsInformedAt = options.includeParticipantsInformed ? e.participantsInformedAt : nil
             attendees = e.attendees
             summary = e.summary
             topics = e.topics

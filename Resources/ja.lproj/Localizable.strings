@@ -4354,6 +4354,12 @@
 
 /* No comment provided by engineer. */
 "Participants informed at %@" = "%@に参加者へ周知済み";
+"Participants informed" = "参加者への周知";
+"Participants informed: %@" = "参加者への周知：%@";
+"Say when the participants were informed" = "参加者に周知した時刻を記載";
+"Write the time you marked that the participants were told the meeting was being recorded" = "参加者に録音を周知したと記録した時刻を書き込み";
+"This recording is from %@. The meeting will be dated today, so its transcript isn’t deleted for its age." = "この録音は%@のものです。古いために文字起こしが削除されないよう、会議は今日の日付になります。";
+"The file is dated %@, in the future. The meeting will be dated today." = "ファイルの日付（%@）が未来になっています。会議は今日の日付になります。";
 
 /* No comment provided by engineer. */
 "Participants not marked as informed" = "参加者への周知は記録されていません";

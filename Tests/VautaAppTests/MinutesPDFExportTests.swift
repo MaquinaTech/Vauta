@@ -51,6 +51,24 @@ struct MinutesPDFExportTests {
         for detail in details { #expect(text.contains(detail), "\(detail)") }
     }
 
+    @Test func thePDFSaysWhenTheParticipantsWereInformedUnlessLeftOut() throws {
+        var e = Self.export(speakers: false)
+        #expect(!MinutesPDFRenderer.attributed(e, options: Self.options).string.contains("Participants informed"))
+        e.participantsInformedAt = Self.started + 125
+        #expect(try Self.pdfText(e).contains("Participants informed: 8:02"))
+        var off = Self.options
+        off.includeParticipantsInformed = false
+        #expect(!MinutesPDFRenderer.attributed(e, options: off).string.contains("Participants informed"))
+    }
+
+    @Test func theImportSheetSaysWhyTheMeetingIsDatedToday() {
+        let date = Self.started
+        let shown = date.formatted(date: .abbreviated, time: .omitted)
+        let old = ImportRecordingSheet.text(of: .tooOld(date))
+        let future = ImportRecordingSheet.text(of: .future(date))
+        #expect(old.contains(shown) && future.contains(shown) && old != future)
+    }
+
     @Test func aMeetingWithoutSpeakersPrintsThePlainChannels() throws {
         let attributed = MinutesPDFRenderer.attributed(Self.export(speakers: false), options: Self.options).string
         #expect(attributed.contains("Others: Hi everyone") && attributed.contains("Others: Maybe"))

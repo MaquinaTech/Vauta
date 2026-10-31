@@ -41,6 +41,12 @@ struct ImportRecordingSheet: View {
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
+                // Said before importing: the meeting will not be on the file's date, so it is not looked for there.
+                if let redating = model.redating, !model.isWorking {
+                    Label(Self.text(of: redating), systemImage: "calendar.badge.exclamationmark")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                }
             } else if model.phase == .inspecting {
                 // The same spinner row as every other sheet that works (backup, restore, erase).
                 BusyRow(title: String(localized: "Reading the file…", comment: "Import recording: shown while the chosen file is read"))
@@ -91,6 +97,17 @@ struct ImportRecordingSheet: View {
         Text(key).gridColumnAlignment(.leading)
     }
 
+    static func text(of redating: RecordingImportPlan.Redating) -> String {
+        switch redating {
+        case .tooOld(let date):
+            String(localized: "This recording is from \(date.formatted(date: .abbreviated, time: .omitted)). The meeting will be dated today, so its transcript isn’t deleted for its age.",
+                   comment: "Import recording: the file is older than the transcripts are kept; the argument is its date")
+        case .future(let date):
+            String(localized: "The file is dated \(date.formatted(date: .abbreviated, time: .omitted)), in the future. The meeting will be dated today.",
+                   comment: "Import recording: the file's date is later than now; the argument is that date")
+        }
+    }
+
     @ViewBuilder
     private var status: some View {
         switch model.phase {
@@ -113,6 +130,7 @@ struct ExportSheet: View {
     @AppStorage("exportFormat") private var format: MeetingExportFormat = .markdown
     @AppStorage("exportIncludesTranscript") private var includeTranscript = true
     @AppStorage("exportIncludesTranslation") private var includeTranslation = false
+    @AppStorage("exportIncludesParticipantsInformed") private var includeInformed = true
     @AppStorage("exportSpeakerLabels") private var storedSpeakerLabels: MeetingExportOptions.SpeakerLabels = .channels
     /// The choice for meetings with speaker data, kept apart from the one above: a meeting with speakers starts on
     /// names (the point of separating the speakers) until the user picks otherwise, and that pick is remembered for
@@ -146,7 +164,8 @@ struct ExportSheet: View {
                 Button("Export…") {
                     let options = MeetingExportOptions(includeTranscript: transcriptIncluded,
                                                        includeTranslation: transcriptIncluded && includeTranslation && hasTranslations,
-                                                       speakerLabels: speakerLabels)
+                                                       speakerLabels: speakerLabels,
+                                                       includeParticipantsInformed: includeInformed)
                     let chosen = format
                     dismiss()
                     Task { await model.export(format: chosen, options: options) }
@@ -191,6 +210,13 @@ struct ExportSheet: View {
                               options: MeetingExportOptions.SpeakerLabels.allCases.map { ($0, title(of: $0)) },
                               labelSpacing: 5)
                     .disabled(!transcriptIncluded)
+                // Only a meeting marked "participants informed" offers it; subtitles have no header to write it in.
+                if model.participantsInformedAt != nil {
+                    Toggle("Say when the participants were informed", isOn: $includeInformed)
+                        .toggleStyle(.checkbox)
+                        .disabled(format.isTranscriptOnly)
+                        .help("Write the time you marked that the participants were told the meeting was being recorded")
+                }
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
