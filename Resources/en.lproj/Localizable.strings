@@ -870,6 +870,9 @@
 /* Backup sheet title once the backup file is saved */
 "Backup Saved" = "Backup Saved";
 
+/* Verify sheet title once the backup passed the check */
+"Backup Verified" = "Backup Verified";
+
 /* No comment provided by engineer. */
 "Backup password" = "Backup password";
 
@@ -1106,6 +1109,9 @@
 
 /* Status while the integrated model checks an answer to a question */
 "Checking the answer" = "Checking the answer";
+
+/* Backup sheet after saving, and verify sheet: the backup file is read back and opened as a restore would */
+"Checking the backup…" = "Checking the backup…";
 
 /* Settings → Status; the integrated model is being checked against its checksums */
 "Checking the model" = "Checking the model";
@@ -2046,6 +2052,9 @@
 /* VoiceOver, brief: what a line is; a file or a passage of one */
 "Document" = "Document";
 
+/* Verify sheet: how many folders and files added as knowledge sources the backup holds */
+"Document sources" = "Document sources";
+
 /* Ask scope: only documents
    Meetings sidebar search: the group of passages found in the person's documents
    Settings pane: the folders and files Ask can answer from */
@@ -2312,6 +2321,9 @@
 
 /* Restore sheet: shown under the error after a failed restore, when the password field is empty again */
 "Enter the backup password again to retry." = "Enter the backup password again to retry.";
+
+/* Verify sheet: the sentence under the title */
+"Enter the backup’s password. Vauta opens it as Restore would, without changing anything." = "Enter the backup’s password. Vauta opens it as Restore would, without changing anything.";
 
 /* Server config error */
 "Enter the fast model name exactly as the server lists it." = "Enter the fast model name exactly as the server lists it.";
@@ -2855,6 +2867,9 @@
 
 /* No comment provided by engineer. */
 "Include unconfirmed items" = "Include unconfirmed items";
+
+/* Verify sheet: the backup carries the settings */
+"Included" = "Included";
 
 /* Documents pane: header of the section with the size of the index and its switches */
 "Index" = "Index";
@@ -4069,6 +4084,9 @@
 /* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
 "Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "Not in the transcript or documents the answer was based on: %@. Check before relying on it.";
 
+/* Verify sheet: the backup carries no settings (made by an earlier version) */
+"Not included" = "Not included";
+
 /* No comment provided by engineer. */
 "Not installed" = "Not installed";
 
@@ -4477,6 +4495,9 @@
 
 /* Model guide note; the argument is a website host */
 "Opens %@ in your browser. Vauta doesn’t download anything." = "Opens %@ in your browser. Vauta doesn’t download anything.";
+
+/* Settings → Privacy; explanation of Verify Backup */
+"Opens a backup with its password, as Restore would, and shows what it holds. Nothing on this Mac changes. Each backup is also checked right after it’s saved." = "Opens a backup with its password, as Restore would, and shows what it holds. Nothing on this Mac changes. Each backup is also checked right after it’s saved.";
 
 /* VoiceOver hint of an icon button that opens a menu */
 "Opens a menu" = "Opens a menu";
@@ -5588,6 +5609,9 @@
 /* Model provider recovery */
 "Set up a model server for better minutes, or choose “Apple Intelligence on this Mac”." = "Set up a model server for better minutes, or choose “Apple Intelligence on this Mac”.";
 
+/* Verify sheet: whether the backup carries the app's settings */
+"Settings" = "Settings";
+
 /* No comment provided by engineer. */
 "Settings…" = "Settings…";
 
@@ -6205,8 +6229,14 @@
 /* Capture error */
 "The audio devices couldn’t be read." = "The audio devices couldn’t be read.";
 
+/* Backup sheet: title when the saved file failed the check that reads it back */
+"The backup couldn’t be read back" = "The backup couldn’t be read back";
+
 /* Backup error: restore failed before replacing anything */
 "The backup couldn’t be restored. Your current meetings were left unchanged." = "The backup couldn’t be restored. Your current meetings were left unchanged.";
+
+/* Backup and verify sheets: the backup file was read back, decrypted and checked as a restore would */
+"The backup opens with this password, and nothing in it is damaged." = "The backup opens with this password, and nothing in it is damaged.";
 
 /* Meetings, Brief tab of a recorded meeting: heading */
 "The brief you had when this meeting started" = "The brief you had when this meeting started";
@@ -6572,6 +6602,12 @@
 
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded.";
+
+/* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
+"The saved file is damaged: don’t rely on it. Choose another location and try again." = "The saved file is damaged: don’t rely on it. Choose another location and try again.";
+
+/* Backup sheet: advice when the saved file failed the check and was deleted */
+"The saved file was damaged, so it was deleted. Choose another location and try again." = "The saved file was damaged, so it was deleted. Choose another location and try again.";
 
 /* Settings → Models; shown when the server address or trust was edited */
 "The saved key won’t be sent to a different server." = "The saved key won’t be sent to a different server.";
@@ -7626,6 +7662,18 @@
 
 /* No comment provided by engineer. */
 "Verified: the quote appears word for word in your document" = "Verified: the quote appears word for word in your document";
+
+/* Verify sheet: the button that opens and checks the backup */
+"Verify" = "Verify";
+
+/* No comment provided by engineer. */
+"Verify Backup…" = "Verify Backup…";
+
+/* Verify sheet title: check a backup file without restoring it */
+"Verify a Backup" = "Verify a Backup";
+
+/* Settings → Privacy; title of the row that checks a backup file without restoring it */
+"Verify a backup" = "Verify a backup";
 
 /* About; arguments are the version and build numbers */
 "Version %@ (%@)" = "Version %@ (%@)";

@@ -62,7 +62,9 @@ struct BackUpSheet: View {
                     .accessibilityHidden(true)
                     .allowsHitTesting(false)
                     VStack(alignment: .leading, spacing: 4) {
-                        if model.stage == .working {
+                        if model.stage == .working && model.work == .checking {
+                            BusyRow(title: model.workingMessage)
+                        } else if model.stage == .working {
                             WorkingLabel(meetings: model.meetingsToBackUp, encrypting: true)
                         } else {
                             // A failed save takes the place of the mismatch line, under the strength.
@@ -80,9 +82,12 @@ struct BackUpSheet: View {
                 if let file = model.savedFile {
                     BackupFileCard(file: file, date: model.backupDate ?? BackupFileCard.creationDate(of: file))
                 }
-                // A caution, not a result: a neutral icon (the green check is for "Restored …").
-                NoticeLabel(Text(verbatim: text), symbol: "key", tint: .secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                // The check that read it back is the result; the password is a caution, with a neutral icon.
+                VStack(alignment: .leading, spacing: 8) {
+                    FeedbackLabel(feedback: .init(kind: .success, text: BackupModel.checkedMessage))
+                    NoticeLabel(Text(verbatim: text), symbol: "key", tint: .secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             HStack {
                 Spacer()
@@ -124,7 +129,9 @@ struct BackUpSheet: View {
             // A failed save is about the place, not the password: the keyboard moves to "Choose Location…" (which
             // also clears the selection left in the field), so Return tries again and a keystroke can't replace the password.
             if stage == .form { focus = model.error == nil ? .password : .location }
-            BackupAnnouncement.post(for: stage) { doneFocused = true }
+            if case .done(let text) = stage {
+                BackupAnnouncement.announceResult(BackupModel.checkedMessage + " " + text) { doneFocused = true }
+            }
             BackupAnnouncement.postWorking(stage, model: model)
         }
         .onChange(of: model.error) { _, error in BackupAnnouncement.post(error: error, hint: model.errorHint) }

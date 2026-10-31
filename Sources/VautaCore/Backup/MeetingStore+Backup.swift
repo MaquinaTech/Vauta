@@ -39,6 +39,15 @@ public final class OpenedBackup: @unchecked Sendable {
     }
 }
 
+/// What a backup holds, counted in the backup itself, from a check that keeps nothing (`MeetingStore.checkBackup`).
+public struct BackupContents: Sendable, Equatable {
+    public let createdAt: Date
+    public let meetings: Int
+    public let savedVoices: Int
+    public let documentSources: Int
+    public let hasSettings: Bool
+}
+
 public struct RestoreSummary: Sendable, Equatable {
     /// Meetings the store had before the restore.
     public let replacedMeetings: Int
@@ -106,6 +115,16 @@ extension MeetingStore {
             let preferences = encodedPreferences.map(BackupPreferences.init(decoding:)).flatMap { $0.isEmpty ? nil : $0 }
             return OpenedBackup(manifest: manifest, meetings: meetings, savedVoices: savedVoices, documentSources: documentSources, preferences: preferences, database: db)
         }.value
+    }
+
+    /// Opens a backup exactly as a restore would (`openBackup`: the password, every byte of the file, the schema, the
+    /// indexes and the database's integrity, and the migrations of an older one) and keeps nothing: the database it decrypted
+    /// is dropped, and its memory zeroed, before this returns. A backup that passes is one Restore can open.
+    public static func checkBackup(_ file: Data, password: String) async throws -> BackupContents {
+        let backup = try await openBackup(file, password: password)
+        defer { _ = backup.take() }
+        return BackupContents(createdAt: backup.manifest.createdAt, meetings: backup.meetings, savedVoices: backup.savedVoices,
+                              documentSources: backup.documentSources, hasSettings: !(backup.preferences?.isEmpty ?? true))
     }
 
     /// The full-text indexes of the store, each a binary format of its own that SQLite parses whenever the table is read.
