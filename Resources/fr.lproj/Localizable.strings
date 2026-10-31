@@ -839,6 +839,9 @@
 /* Backup sheet title once the backup file is saved */
 "Backup Saved" = "Sauvegarde terminée";
 
+/* Verify sheet title once the backup passed the check */
+"Backup Verified" = "Sauvegarde vérifiée";
+
 /* No comment provided by engineer. */
 "Backup password" = "Mot de passe de la sauvegarde";
 
@@ -1069,6 +1072,9 @@
 
 /* Status while the integrated model checks an answer to a question */
 "Checking the answer" = "Vérification de la réponse";
+
+/* Backup sheet after saving, and verify sheet: the backup file is read back and opened as a restore would */
+"Checking the backup…" = "Vérification de la sauvegarde…";
 
 /* Settings → Status; the integrated model is being checked against its checksums */
 "Checking the model" = "Vérification du modèle";
@@ -1967,6 +1973,9 @@
 /* VoiceOver, brief: what a line is; a file or a passage of one */
 "Document" = "Document";
 
+/* Verify sheet: how many folders and files added as knowledge sources the backup holds */
+"Document sources" = "Sources de documents";
+
 /* Ask scope: only documents
    Meetings sidebar search: the group of passages found in the person's documents
    Settings pane: the folders and files Ask can answer from */
@@ -2217,6 +2226,9 @@
 
 /* Restore sheet: shown under the error after a failed restore, when the password field is empty again */
 "Enter the backup password again to retry." = "Saisissez à nouveau le mot de passe de la sauvegarde pour réessayer.";
+
+/* Verify sheet: the sentence under the title */
+"Enter the backup’s password. Vauta opens it as Restore would, without changing anything." = "Saisissez le mot de passe de la sauvegarde. Vauta l’ouvre comme le ferait Restaurer, sans rien modifier.";
 
 /* Server config error */
 "Enter the fast model name exactly as the server lists it." = "Saisissez le nom du modèle rapide exactement comme le serveur l’affiche.";
@@ -2756,6 +2768,9 @@
 
 /* No comment provided by engineer. */
 "Include unconfirmed items" = "Inclure les éléments non confirmés";
+
+/* Verify sheet: the backup carries the settings */
+"Included" = "Inclus";
 
 /* Documents pane: header of the section with the size of the index and its switches */
 "Index" = "Index";
@@ -4322,6 +4337,9 @@
 /* Model guide note; the argument is a website host */
 "Opens %@ in your browser. Vauta doesn’t download anything." = "Ouvre %@ dans votre navigateur. Vauta ne télécharge rien.";
 
+/* Settings → Privacy; explanation of Verify Backup */
+"Opens a backup with its password, as Restore would, and shows what it holds. Nothing on this Mac changes. Each backup is also checked right after it’s saved." = "Ouvre une sauvegarde avec son mot de passe, comme le ferait Restaurer, et montre ce qu’elle contient. Rien ne change sur ce Mac. Chaque sauvegarde est aussi vérifiée dès son enregistrement.";
+
 /* VoiceOver hint of an icon button that opens a menu */
 "Opens a menu" = "Ouvre un menu";
 
@@ -5352,6 +5370,9 @@
 /* Model provider recovery */
 "Set up a model server for better minutes, or choose “Apple Intelligence on this Mac”." = "Configurez un serveur de modèles pour de meilleurs comptes rendus ou choisissez « Apple Intelligence sur ce Mac ».";
 
+/* Verify sheet: whether the backup carries the app's settings */
+"Settings" = "Réglages";
+
 /* No comment provided by engineer. */
 "Settings…" = "Réglages…";
 
@@ -5519,6 +5540,9 @@
 
 /* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
 "Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "Absent de la transcription et des documents sur lesquels repose la réponse : %@. Vérifiez avant de vous y fier.";
+
+/* Verify sheet: the backup carries no settings (made by an earlier version) */
+"Not included" = "Non inclus";
 
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "Des voix mémorisées ne sont pas utilisées";
@@ -5980,8 +6004,14 @@
 /* Capture error */
 "The audio devices couldn’t be read." = "Impossible de lire les périphériques audio.";
 
+/* Backup sheet: title when the saved file failed the check that reads it back */
+"The backup couldn’t be read back" = "Impossible de relire la sauvegarde";
+
 /* Backup error: restore failed before replacing anything */
 "The backup couldn’t be restored. Your current meetings were left unchanged." = "La sauvegarde n’a pas pu être restaurée. Vos réunions actuelles n’ont pas été modifiées.";
+
+/* Backup and verify sheets: the backup file was read back, decrypted and checked as a restore would */
+"The backup opens with this password, and nothing in it is damaged." = "La sauvegarde s’ouvre avec ce mot de passe, et rien n’y est endommagé.";
 
 /* Meetings, Brief tab of a recorded meeting: heading */
 "The brief you had when this meeting started" = "La fiche dont vous disposiez au début de cette réunion";
@@ -6329,6 +6359,12 @@
 
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "L’enregistrement est transcrit sur ce Mac. Le fichier n’est ni modifié, ni copié, ni envoyé.";
+
+/* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
+"The saved file is damaged: don’t rely on it. Choose another location and try again." = "Le fichier enregistré est endommagé : ne vous y fiez pas. Choisissez un autre emplacement, puis réessayez.";
+
+/* Backup sheet: advice when the saved file failed the check and was deleted */
+"The saved file was damaged, so it was deleted. Choose another location and try again." = "Le fichier enregistré était endommagé, il a donc été supprimé. Choisissez un autre emplacement, puis réessayez.";
 
 /* Settings → Models; shown when the server address or trust was edited */
 "The saved key won’t be sent to a different server." = "La clé enregistrée ne sera pas envoyée à un autre serveur.";
@@ -7321,6 +7357,18 @@
 
 /* No comment provided by engineer. */
 "Verified: the quote appears word for word in your document" = "Vérifiée : la citation apparaît mot pour mot dans votre document";
+
+/* Verify sheet: the button that opens and checks the backup */
+"Verify" = "Vérifier";
+
+/* No comment provided by engineer. */
+"Verify Backup…" = "Vérifier une sauvegarde…";
+
+/* Verify sheet title: check a backup file without restoring it */
+"Verify a Backup" = "Vérifier une sauvegarde";
+
+/* Settings → Privacy; title of the row that checks a backup file without restoring it */
+"Verify a backup" = "Vérifier une sauvegarde";
 
 /* About; arguments are the version and build numbers */
 "Version %@ (%@)" = "Version %@ (%@)";

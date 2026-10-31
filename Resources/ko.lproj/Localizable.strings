@@ -839,6 +839,9 @@
 /* Backup sheet title once the backup file is saved */
 "Backup Saved" = "백업 저장됨";
 
+/* Verify sheet title once the backup passed the check */
+"Backup Verified" = "백업 확인됨";
+
 /* No comment provided by engineer. */
 "Backup password" = "백업 암호";
 
@@ -1069,6 +1072,9 @@
 
 /* Status while the integrated model checks an answer to a question */
 "Checking the answer" = "답변을 확인하는 중";
+
+/* Backup sheet after saving, and verify sheet: the backup file is read back and opened as a restore would */
+"Checking the backup…" = "백업을 확인하는 중…";
 
 /* Settings → Status; the integrated model is being checked against its checksums */
 "Checking the model" = "모델 확인 중";
@@ -1967,6 +1973,9 @@
 /* VoiceOver, brief: what a line is; a file or a passage of one */
 "Document" = "문서";
 
+/* Verify sheet: how many folders and files added as knowledge sources the backup holds */
+"Document sources" = "문서 소스";
+
 /* Ask scope: only documents
    Meetings sidebar search: the group of passages found in the person's documents
    Settings pane: the folders and files Ask can answer from */
@@ -2217,6 +2226,9 @@
 
 /* Restore sheet: shown under the error after a failed restore, when the password field is empty again */
 "Enter the backup password again to retry." = "다시 시도하려면 백업 암호를 다시 입력하세요.";
+
+/* Verify sheet: the sentence under the title */
+"Enter the backup’s password. Vauta opens it as Restore would, without changing anything." = "백업 암호를 입력하세요. Vauta는 복원할 때와 같은 방식으로 열며 아무것도 바꾸지 않습니다.";
 
 /* Server config error */
 "Enter the fast model name exactly as the server lists it." = "서버에 표시된 그대로 빠른 모델 이름을 입력하세요.";
@@ -2756,6 +2768,9 @@
 
 /* No comment provided by engineer. */
 "Include unconfirmed items" = "확인되지 않은 항목 포함";
+
+/* Verify sheet: the backup carries the settings */
+"Included" = "포함됨";
 
 /* Documents pane: header of the section with the size of the index and its switches */
 "Index" = "색인";
@@ -4322,6 +4337,9 @@
 /* Model guide note; the argument is a website host */
 "Opens %@ in your browser. Vauta doesn’t download anything." = "브라우저에서 %@ 페이지를 엽니다. Vauta는 아무것도 다운로드하지 않습니다.";
 
+/* Settings → Privacy; explanation of Verify Backup */
+"Opens a backup with its password, as Restore would, and shows what it holds. Nothing on this Mac changes. Each backup is also checked right after it’s saved." = "백업을 암호로 복원할 때와 같은 방식으로 열고 담긴 내용을 보여 줍니다. 이 Mac에서는 아무것도 바뀌지 않습니다. 모든 백업은 저장 직후에도 확인됩니다.";
+
 /* VoiceOver hint of an icon button that opens a menu */
 "Opens a menu" = "메뉴를 엽니다";
 
@@ -5352,6 +5370,9 @@
 /* Model provider recovery */
 "Set up a model server for better minutes, or choose “Apple Intelligence on this Mac”." = "더 나은 회의록을 원하면 모델 서버를 설정하거나 “이 Mac의 Apple Intelligence”를 선택하세요.";
 
+/* Verify sheet: whether the backup carries the app's settings */
+"Settings" = "설정";
+
 /* No comment provided by engineer. */
 "Settings…" = "설정…";
 
@@ -5519,6 +5540,9 @@
 
 /* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
 "Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "답변의 근거가 된 녹취록이나 문서에 없는 수치입니다: %@. 의존하기 전에 확인하세요.";
+
+/* Verify sheet: the backup carries no settings (made by an earlier version) */
+"Not included" = "포함되지 않음";
 
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "사용되지 않는 저장된 목소리가 있습니다";
@@ -5980,8 +6004,14 @@
 /* Capture error */
 "The audio devices couldn’t be read." = "오디오 기기를 읽을 수 없습니다.";
 
+/* Backup sheet: title when the saved file failed the check that reads it back */
+"The backup couldn’t be read back" = "백업을 다시 읽을 수 없습니다";
+
 /* Backup error: restore failed before replacing anything */
 "The backup couldn’t be restored. Your current meetings were left unchanged." = "백업을 복원할 수 없습니다. 현재 회의는 변경되지 않았습니다.";
+
+/* Backup and verify sheets: the backup file was read back, decrypted and checked as a restore would */
+"The backup opens with this password, and nothing in it is damaged." = "이 암호로 백업이 열리며 손상된 부분이 없습니다.";
 
 /* Meetings, Brief tab of a recorded meeting: heading */
 "The brief you had when this meeting started" = "이 회의가 시작될 때 보았던 브리핑";
@@ -6329,6 +6359,12 @@
 
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "녹음은 이 Mac에서 텍스트로 변환됩니다. 파일은 변경, 복사 또는 업로드되지 않습니다.";
+
+/* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
+"The saved file is damaged: don’t rely on it. Choose another location and try again." = "저장된 파일이 손상되었으니 사용하지 마세요. 다른 위치를 선택한 다음 다시 시도하세요.";
+
+/* Backup sheet: advice when the saved file failed the check and was deleted */
+"The saved file was damaged, so it was deleted. Choose another location and try again." = "저장된 파일이 손상되어 삭제했습니다. 다른 위치를 선택한 다음 다시 시도하세요.";
 
 /* Settings → Models; shown when the server address or trust was edited */
 "The saved key won’t be sent to a different server." = "저장된 키는 다른 서버로 전송되지 않습니다.";
@@ -7321,6 +7357,18 @@
 
 /* No comment provided by engineer. */
 "Verified: the quote appears word for word in your document" = "확인됨: 인용문이 문서에 그대로 나타납니다";
+
+/* Verify sheet: the button that opens and checks the backup */
+"Verify" = "확인";
+
+/* No comment provided by engineer. */
+"Verify Backup…" = "백업 확인…";
+
+/* Verify sheet title: check a backup file without restoring it */
+"Verify a Backup" = "백업 확인";
+
+/* Settings → Privacy; title of the row that checks a backup file without restoring it */
+"Verify a backup" = "백업 확인";
 
 /* About; arguments are the version and build numbers */
 "Version %@ (%@)" = "버전 %@ (%@)";

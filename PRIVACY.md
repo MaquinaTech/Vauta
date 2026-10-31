@@ -678,6 +678,11 @@ copy, use **Settings → Privacy & Security → Back Up…** and **Restore…**.
   the file somewhere you trust.
 - **Plaintext:** the database is read from memory and encrypted; no unencrypted copy is written to disk. The file is written only where you
   choose in the Save dialog.
+- **Checked after saving.** Once written, the file is read back from the disk and opened with the password exactly as a
+  restore would (every byte authenticated, the database checked), in memory, and nothing is kept. A file that fails is
+  deleted and the sheet says so. **Settings → Privacy & Security → Verify Backup…** runs the same check on any backup
+  file without restoring it and shows what it holds (meetings, saved voices, document sources, and whether it has your
+  settings); it reads nothing of this Mac's data, so it asks for no Touch ID.
 - **Restoring replaces everything.** If the store has meetings, Vauta shows "This replaces N meetings with M from
   the backup" and waits for your confirmation. The settings in the backup replace the same settings on this Mac; a
   setting the backup does not hold, or cannot read, is left as it is. A newer backup than the app understands is refused; an older one is

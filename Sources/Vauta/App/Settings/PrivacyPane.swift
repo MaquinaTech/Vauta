@@ -58,7 +58,7 @@ struct PrivacyPane: View {
             }
             .labelStyle(PromiseLabelStyle())
 
-            // One card for the three actions on the user's data (a section per row repeated its header in the row title
+            // One card for the actions on the user's data (a section per row repeated its header in the row title
             // and the button): a title with its description, and the control at the trailing edge.
             Section {
                 LabeledContent {
@@ -95,6 +95,14 @@ struct PrivacyPane: View {
                 }
 
                 LabeledContent {
+                    Button("Verify Backup…") { Task { await model.backup.beginRestore(verifying: true) } }
+                } label: {
+                    Text("Verify a backup", comment: "Settings → Privacy; title of the row that checks a backup file without restoring it")
+                    Text(description: String(localized: "Opens a backup with its password, as Restore would, and shows what it holds. Nothing on this Mac changes. Each backup is also checked right after it’s saved.",
+                         comment: "Settings → Privacy; explanation of Verify Backup"))
+                }
+
+                LabeledContent {
                     Button("Erase Meetings and Context…", role: .destructive) { Task { if await recorder.authorizeHistory(for: .erase) { await model.presentErase(recorder) } } }
                         .disabled(!recorder.storeAvailable || recorder.blocksDataReplacement)
                 } label: {
@@ -126,11 +134,13 @@ struct PrivacyPane: View {
             switch sheet {
             case .backUp: BackUpSheet(recorder: recorder, model: model.backup)
             case .restore: RestoreSheet(recorder: recorder, model: model.backup, showContext: { model.pane = .context }, showModels: { model.pane = .models })
+            case .verify: VerifyBackupSheet(model: model.backup)
             }
         }
         // The sheets are only reachable after Touch ID: when Meetings relock they close, and a running restore finishes.
+        // Verifying reads nothing of this Mac's data, so it needs no Touch ID and stays open.
         .onChange(of: recorder.historyUnlocked) { _, unlocked in
-            guard !unlocked else { return }
+            guard !unlocked, model.backup.sheet != .verify else { return }
             switch model.backup.stage {
             case .form, .confirm: model.backup.reset()
             case .working, .done: break
