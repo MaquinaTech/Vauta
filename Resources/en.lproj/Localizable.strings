@@ -2244,6 +2244,12 @@
 /* Brief: under the suggested agenda; every line is checked against the lines of the brief it names */
 "Each suggestion cites the lines it comes from." = "Each suggestion cites the lines it comes from.";
 
+/* Meetings list: the header of this month's meetings started before this week */
+"Earlier This Month" = "Earlier This Month";
+
+/* Meetings list: the header of this week's meetings started before yesterday */
+"Earlier This Week" = "Earlier This Week";
+
 /* VoiceOver, in the brief: the text of the older decision that a decision the person confirmed replaces; the argument is that text */
 "Earlier decision: %@" = "Earlier decision: %@";
 
@@ -6990,6 +6996,9 @@
 /* Settings → Speakers, details in the Learn More popover when it is on: how to save the user’s own voice */
 "To teach Vauta your own voice, import a recording where you speak and choose “This Is My Voice” on your speaker. Later imported recordings can then suggest which speaker is you." = "To teach Vauta your own voice, import a recording where you speak and choose “This Is My Voice” on your speaker. Later imported recordings can then suggest which speaker is you.";
 
+/* Meetings list: the header of the meetings started today */
+"Today" = "Today";
+
 /* Documents: why a file was skipped; it is bigger than Vauta reads */
 "Too large" = "Too large";
 
@@ -7893,6 +7902,9 @@
 
 /* VoiceOver: accepts the suggestion that a speaker is the user */
 "Yes, that’s me" = "Yes, that’s me";
+
+/* Meetings list: the header of the meetings started yesterday */
+"Yesterday" = "Yesterday";
 
 /* Reminder editor: the task was deleted here, its reminder is still there; the argument is a date */
 "You added this to Reminders on %@" = "You added this to Reminders on %@";

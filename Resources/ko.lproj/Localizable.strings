@@ -2164,6 +2164,12 @@
 /* Brief: under the suggested agenda; every line is checked against the lines of the brief it names */
 "Each suggestion cites the lines it comes from." = "각 제안에는 근거가 된 항목이 표시됩니다.";
 
+/* Meetings list: the header of this month's meetings started before this week */
+"Earlier This Month" = "이번 달";
+
+/* Meetings list: the header of this week's meetings started before yesterday */
+"Earlier This Week" = "이번 주";
+
 /* Brief: how many earlier meetings the user and this person were in; the argument is a number */
 "Earlier meetings together: %lld" = "이전에 함께한 회의: %lld";
 
@@ -6747,6 +6753,9 @@
 /* Settings → Speakers, details in the Learn More popover when it is on: how to save the user’s own voice */
 "To teach Vauta your own voice, import a recording where you speak and choose “This Is My Voice” on your speaker. Later imported recordings can then suggest which speaker is you." = "Vauta에 내 목소리를 알려 주려면 내가 말하는 녹음을 가져온 다음, 내 화자에서 “내 목소리입니다”⁠를 선택하세요. 이후 가져온 녹음에서는 어느 화자가 나인지 제안할 수 있습니다.";
 
+/* Meetings list: the header of the meetings started today */
+"Today" = "오늘";
+
 /* Documents: why a file was skipped; it is bigger than Vauta reads */
 "Too large" = "너무 큼";
 
@@ -7602,6 +7611,9 @@
 
 /* VoiceOver: accepts the suggestion that a speaker is the user */
 "Yes, that’s me" = "예, 나입니다";
+
+/* Meetings list: the header of the meetings started yesterday */
+"Yesterday" = "어제";
 
 /* Reminder editor: the task was deleted here, its reminder is still there; the argument is a date */
 "You added this to Reminders on %@" = "%@에 미리 알림에 추가했습니다";
