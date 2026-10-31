@@ -306,6 +306,14 @@ struct StatusChecks {
             let detail = config.mode == .local
                 ? String(localized: "Connected to \(name) on this Mac.", comment: "Status detail; argument is a server name")
                 : String(localized: "Connected to \(name) on your network over HTTPS.", comment: "Status detail; argument is a server name")
+            // Ahead of the end, while there is time to renew it: the day it ends the connection is refused.
+            if let certificate = s.certificate, certificate.state() == .expiresSoon {
+                let date = certificate.notAfter.formatted(date: .long, time: .omitted)
+                let renew = String(localized: "Its certificate expires on \(date). Renew it before then: make-server-cert.sh renews one it made and keeps the pin.",
+                                   comment: "Status detail after the connected line; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate")
+                return StatusItem(kind: .models, level: .attention, title: title, detail: detail + " " + renew,
+                                  action: .showPane(.models), diagnostic: "\(facts) reachable, certificate ends within \(CertificateValidity.warningDays) days, \(search)")
+            }
             return StatusItem(kind: .models, level: .ok, title: title, detail: detail,
                               diagnostic: "\(facts) reachable, \(s.models.count) models, \(search)")
         }

@@ -52,6 +52,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     private var _primary: LLMServerConfig.Endpoint?
     /// Set when a host name resolved outside the allowed network.
     private var _peerViolation: String?
+    private var _certificate: CertificateValidity?
 
     var config: LLMServerConfig? { lock.withLock { _config } }
     private var primary: LLMServerConfig.Endpoint? { lock.withLock { _primary } }
@@ -74,6 +75,12 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     var peerViolation: String? { lock.withLock { _peerViolation } }
 
     func recordPeerViolation(_ address: String) { lock.withLock { _peerViolation = address } }
+
+    /// How long the server's certificates stay valid, as the last TLS connection to a configured endpoint presented them;
+    /// nil over HTTP or before the first connection, and again after a new configuration.
+    public var certificate: CertificateValidity? { lock.withLock { _certificate } }
+
+    func recordCertificate(_ validity: CertificateValidity) { lock.withLock { _certificate = validity } }
 
     private func makeSession() -> AuditedSession {
         let c = URLSessionConfiguration.ephemeral
@@ -131,6 +138,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
             _primary = valid ? primary : nil
             _endpoints = valid ? endpoints : [:]
             _peerViolation = nil
+            _certificate = nil
             _session?.invalidateAndCancel()
             _session = nil
         }

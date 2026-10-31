@@ -52,6 +52,8 @@ public actor LLMService {
         public var lastCacheHit: Int?
         /// Configured models the server does not list (misspelled or not downloaded).
         public var missingModels: [String] = []
+        /// How long the server's TLS certificates stay valid, from the last check (nil over HTTP or unchecked).
+        public var certificate: CertificateValidity?
         /// The server keeps answering "busy": background work resumes at this time.
         public var busyUntil: Date?
         /// How much of the library is indexed for search by meaning with the search model (nil when it is not in use).
@@ -457,6 +459,7 @@ public actor LLMService {
                 status.models = models
                 status.reachable = true
                 status.lastError = nil
+                status.certificate = server.client.certificate
                 let wanted = ((useServerChat ? [LLMRole.fast, .deep] : []) + (useServerEmbeddings ? [.embedding] : []))
                     .map { server.config.model(for: $0) }.filter { !$0.isEmpty }
                 status.missingModels = Array(Set(wanted.filter { !models.contains($0) })).sorted()
@@ -468,13 +471,17 @@ public actor LLMService {
                 }
             } catch {
                 status.reachable = (error as? LLMError).map { if case .network = $0 { false } else { true } } ?? false
-                failure = error.localizedDescription
+                status.certificate = server.client.certificate
+                // The TLS failure of an expired certificate is general; what to do about it is not.
+                failure = status.certificate.flatMap { $0.state() == .expired ? Self.expiredCertificateMessage($0) : nil }
+                    ?? error.localizedDescription
                 status.lastError = failure
             }
         } else {
             status.reachable = providers.settings.chat == .onDevice ? true : nil
             status.models = []
             status.missingModels = []
+            status.certificate = nil
         }
         publish()
         if failure == nil { kick() }
@@ -489,5 +496,14 @@ final class LiveAnswerGate: @unchecked Sendable {
     var enforced: Bool {
         get { lock.withLock { value } }
         set { lock.withLock { value = newValue } }
+    }
+}
+
+extension LLMService {
+    /// The model server refused for a certificate that expired: when, and how it is renewed.
+    static func expiredCertificateMessage(_ validity: CertificateValidity) -> String {
+        let date = validity.notAfter.formatted(date: .long, time: .omitted)
+        return String(localized: "The model server’s certificate expired on \(date). Renew it on the server: make-server-cert.sh renews one it made and keeps the pin.",
+                      comment: "Model server check result; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate")
     }
 }

@@ -2911,6 +2911,9 @@
 /* VoiceOver hint of the collapsed group of other possible items in the minutes */
 "Items the model proposed that are less certain than the main ones. Open the group to review them." = "Itens que o modelo propôs e que são menos certos que os principais. Abra o grupo para revisá-los.";
 
+/* Status detail after the connected line; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"Its certificate expires on %@. Renew it before then: make-server-cert.sh renews one it made and keeps the pin." = "O certificado dele expira em %@. Renove antes disso: make-server-cert.sh renova um que tenha criado e mantém o pin.";
+
 /* No comment provided by engineer. */
 "Its email address %@ is discarded; “%@” keeps its own." = "O endereço de e‑mail %@ é descartado; “%@” mantém o seu.";
 
@@ -6331,6 +6334,9 @@
 
 /* Model job error */
 "The model server was busy for too long." = "O servidor de modelos ficou ocupado por tempo demais.";
+
+/* Model server check result; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"The model server’s certificate expired on %@. Renew it on the server: make-server-cert.sh renews one it made and keeps the pin." = "O certificado do servidor de modelos expirou em %@. Renove no servidor: make-server-cert.sh renova um que tenha criado e mantém o pin.";
 
 /* Model error */
 "The model server’s response is too large." = "A resposta do servidor de modelos é grande demais.";
