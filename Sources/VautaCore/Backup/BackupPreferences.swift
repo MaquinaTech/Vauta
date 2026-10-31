@@ -36,6 +36,7 @@ public struct BackupPreferences: Sendable, Equatable {
         "consentReminder": .string, "knowledgeRetentionDays": .int,
         // Shortcuts (JSON of the key code and modifiers)
         "recordHotKey": .data, "markHotKey": .data, "translationHotKey": .data, "noteHotKey": .data,
+        "pauseHotKey": .data,
         // The notepad opens by itself when a recording starts
         "openNotepadOnStart": .bool,
         // Live Translation

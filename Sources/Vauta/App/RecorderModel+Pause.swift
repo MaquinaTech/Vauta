@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
 import VautaCore
+import AppKit
 import SwiftUI
 
 /// Pausing a recording (`MeetingCapture.pause`): the microphone and the meeting's sound stop being captured and macOS turns the
@@ -14,6 +15,16 @@ extension RecorderModel {
 
     func togglePause() {
         if isPaused { resumeRecording() } else { pauseRecording() }
+    }
+
+    /// The pause shortcut from another app: the menu-bar icon shows the pause and VoiceOver says it; a press that can't act
+    /// (the recording is starting or stopping) beeps.
+    func togglePauseFromShortcut() {
+        guard canTogglePause else {
+            NSSound.beep()
+            return
+        }
+        togglePause()
     }
 
     func pauseRecording() {

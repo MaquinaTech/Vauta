@@ -129,7 +129,10 @@ enum SnapshotEnvelope {
     static func unpack(_ plain: Data, maxSize: Int = maximumStoreImageSize) throws -> (UnsafeMutableRawPointer, Int) {
         try plain.withUnsafeBytes { raw in
             guard raw.count >= 9 else { throw StoreError(.unreadableStore, detail: "truncated v2 payload") }
-            let size = Int(UInt64(littleEndian: raw.loadUnaligned(as: UInt64.self)))
+            // A declared size beyond `Int` (a crafted backup) is refused, not trapped on.
+            guard let size = Int(exactly: UInt64(littleEndian: raw.loadUnaligned(as: UInt64.self))) else {
+                throw StoreError(.unreadableStore, detail: "invalid declared size")
+            }
             let method = raw[8]
             let payload = UnsafeRawBufferPointer(rebasing: raw[9...])
             // Checked before anything is allocated: a stored image is exactly its payload, an LZ4 one cannot expand without bound.

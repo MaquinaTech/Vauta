@@ -216,7 +216,7 @@ La copia contiene tus reuniones, tu contexto y tus ajustes (idiomas, plantillas,
    - **Modelo de voz**: descarga una vez el modelo de Apple para tu idioma. **Descargar y continuar** inicia la descarga, que sigue mientras configuras el resto.
    - **Actas**: *Inicio rápido · Calidad básica* (Apple Intelligence), o **Configurar un servidor de modelos**, una guía que te dice qué instalar y qué modelo encaja con tu Mac. Puedes saltarte este paso y configurarlo después en **Ajustes → Modelos**.
 2. **Elige la fuente de audio.** En el panel de la barra de menús, elige **Automático** para seguir a la app de la llamada, o las apps que usas para reunirte.
-3. **Graba.** Entra en la llamada y pulsa **⌃⌥R**, o haz clic en **Iniciar grabación** en el panel de la barra de menús. Mientras grabas, pulsa **⌃⌥M** para marcar un momento, **⌃⌥T** para ver los subtítulos traducidos, escribe notas rápidas y dile a Vauta quiénes son «Otros».
+3. **Graba.** Entra en la llamada y pulsa **⌃⌥R**, o haz clic en **Iniciar grabación** en el panel de la barra de menús. Mientras grabas, pulsa **⌃⌥M** para marcar un momento, **⌃⌥P** para pausar y reanudar, **⌃⌥T** para ver los subtítulos traducidos, escribe notas rápidas y dile a Vauta quiénes son «Otros».
 4. **Para.** Vuelve a pulsar **⌃⌥R**. Vauta también se detiene sola tras unos minutos sin audio del otro lado (5 por defecto).
 5. **Lee el acta.** Vauta la redacta en segundo plano y te avisa con una notificación cuando está lista. Abre **Reuniones…** desde el panel y desbloquea con Touch ID o tu contraseña.
 
