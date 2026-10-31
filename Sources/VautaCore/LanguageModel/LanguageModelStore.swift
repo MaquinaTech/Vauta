@@ -91,8 +91,11 @@ public struct LanguageModelStore: Sendable {
         try url.setResourceValues(values)
     }
 
+    /// Read from the disk each time, as `SearchModelStore.isExcludedFromBackup` is: a URL keeps the resource values it read.
     public var isExcludedFromBackup: Bool {
-        (try? root.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup) == true
+        var url = root
+        url.removeAllCachedResourceValues()
+        return (try? url.resourceValues(forKeys: [.isExcludedFromBackupKey]).isExcludedFromBackup) == true
     }
 
     func createStaging() throws {
