@@ -17,6 +17,11 @@ import Foundation
 ///   Others line is the echo, heard after the user, and the user's line is what was said;
 /// - it has at least `minWords` words that carry meaning: "okay", "yes, exactly" are never marked.
 ///
+/// The other way round (`farEchoes`): a participant on speakers whose call app doesn't cancel the echo sends the user's voice back,
+/// a call's round trip later, and the transcriber writes it in Others as if they had said it. An Others line is that echo when most
+/// of its words and pairs are in the Me lines it overlaps, it lies within them allowing for the trip, and it says their words at
+/// least `minLag` after the user did: a line that says them sooner is the original that the user's microphone picked up.
+///
 /// Nothing is removed: the lines found are marked, and the person can take a mark back.
 public enum EchoDetection {
     public struct Line: Sendable, Equatable {
@@ -63,6 +68,36 @@ public enum EchoDetection {
         evidence(lines, locale: locale, maxDelay: settings.maxDelay).filter { $0.isEcho(settings) }.map(\.id)
     }
 
+    /// The far side's echo of the user, in Others (see the type's description). The thresholds are the speakers' echo's: on the 24
+    /// public DEV meetings (`llm-eval --tasks echo`, every own line sent back 0.25 or 0.5 s later with 20 % of its words changed) they
+    /// find 80.8 % of the echo's words (61.7 % of its lines) and mark 0.05 % of the others' own lines where the participant's speakers
+    /// echo them (110 of 207,675) and 2 of 46,150 with the far side's echo. The best of the sweep at most 0.5 % found 84.6 % of the
+    /// words for 0.10 % (3 words, pairs 0.2, covered 0.8). Without the rule on matched edges, 0.24 % of the others' lines were marked.
+    public struct FarSettings: Sendable, Equatable {
+        /// How much later than the user the far side's echo may be heard: the call there and back, with the far side's speakers.
+        public var maxDelay = 1.0
+        /// How much later than the user it must be heard: sooner, the Others line is the original and the Me line the echo.
+        public var minLag = 0.15
+        public var minWords = 4
+        public var words = 0.6
+        public var pairs = 0.3
+        public var covered = 0.6
+
+        public init() {}
+
+        /// The lag must come from edges the two lines share: the start of the first line still being said (`Evidence.lag` without
+        /// one) is often the speakers' echo of the line before, which would make an original look sent back.
+        func admits(_ e: Evidence) -> Bool {
+            e.words >= minWords && e.wordShare >= words && e.pairShare >= pairs && e.covered >= covered && e.edgesMatched
+                && e.lag >= minLag && e.lag <= maxDelay
+        }
+    }
+
+    /// The ids of the Others lines that are the user's voice sent back by the far side, in the order of `lines`.
+    public static func farEchoes(_ lines: [Line], locale: String, settings: FarSettings = FarSettings()) -> [Int64] {
+        evidence(lines, locale: locale, maxDelay: settings.maxDelay, judging: .others).filter { settings.admits($0) }.map(\.id)
+    }
+
     /// What decides whether a Me line is an echo, measured once (the evaluation sweeps the thresholds over it).
     struct Evidence: Sendable, Equatable {
         let id: Int64
@@ -70,30 +105,36 @@ public enum EchoDetection {
         let wordShare: Double
         let pairShare: Double
         let covered: Double
-        /// How much earlier the line starts or ends than the Others line that starts or ends with the same words (the mean of
-        /// the two); without one, how long it starts before the first Others line it overlaps that had not ended by then. 0
-        /// when it is later.
-        let lead: Double
+        /// How much later the line starts or ends than the line of the other channel that starts or ends with the same words (the
+        /// mean of the two); without one, how much later it starts than the first line it overlaps that had not ended by then.
+        /// Negative when it is earlier.
+        let lag: Double
+        /// `lag` comes from an edge both lines share, not from the first line still being said.
+        let edgesMatched: Bool
+        /// How much earlier it is (0 when it is later).
+        var lead: Double { max(0, -lag) }
 
         func isEcho(_ s: Settings) -> Bool {
             words >= s.minWords && wordShare >= s.words && pairShare >= s.pairs && covered >= s.covered && lead <= s.maxLead
         }
     }
 
-    /// The evidence of every Me line that overlaps an Others line, in the order of `lines`.
-    static func evidence(_ lines: [Line], locale: String, maxDelay: Double) -> [Evidence] {
+    /// The evidence of every line of `judging` (Me: the speakers' echo; Others: the far side's) that overlaps a line of the other
+    /// channel, in the order of `lines`.
+    static func evidence(_ lines: [Line], locale: String, maxDelay: Double, judging channel: Channel = .me) -> [Evidence] {
         let profile = LanguageProfile(identifier: locale)
-        let others = lines.filter { $0.channel == .others }.map { Said($0, locale: locale, profile: profile) }
-        guard !others.isEmpty else { return [] }
+        let source = lines.filter { $0.channel != channel }.map { Said($0, locale: locale, profile: profile) }
+        guard !source.isEmpty else { return [] }
         var out: [Evidence] = []
-        for line in lines where line.channel == .me {
-            let heard = others.filter { $0.line.start <= line.end && $0.line.end + maxDelay >= line.start }
+        for line in lines where line.channel == channel {
+            let heard = source.filter { $0.line.start <= line.end && $0.line.end + maxDelay >= line.start }
             guard !heard.isEmpty else { continue }
-            let me = Said(line, locale: locale, profile: profile)
+            let said = Said(line, locale: locale, profile: profile)
             let words = Set(heard.flatMap(\.words)), pairs = Set(heard.flatMap(\.pairs))
-            out.append(Evidence(id: line.id, words: me.words.count, wordShare: share(me.words, in: words), pairShare: share(me.pairs, in: pairs),
+            let lag = lag(of: said, behind: heard)
+            out.append(Evidence(id: line.id, words: said.words.count, wordShare: share(said.words, in: words), pairShare: share(said.pairs, in: pairs),
                                 covered: coverage(of: line, by: heard.map { ($0.line.start, $0.line.end + maxDelay) }),
-                                lead: max(0, -lag(of: me, behind: heard))))
+                                lag: lag.value, edgesMatched: lag.matched))
         }
         return out
     }
@@ -122,17 +163,17 @@ public enum EchoDetection {
     /// as the mean of the two. Without either, how much later it starts than the first line still being said then. Both lines
     /// are the same speech, so their edges are the same words: no word times to estimate, and a line cut differently has
     /// only the edge they share.
-    private static func lag(of me: Said, behind heard: [Said]) -> Double {
+    private static func lag(of me: Said, behind heard: [Said]) -> (value: Double, matched: Bool) {
         func edge(_ pairs: KeyPath<Said, [String]>, _ time: KeyPath<Line, Double>) -> Double? {
             heard.filter { o in zip(me[keyPath: pairs], o[keyPath: pairs]).contains { $0 == $1 } }
                 .map { me.line[keyPath: time] - $0.line[keyPath: time] }
                 .min { abs($0) < abs($1) }
         }
         let lags = [edge(\.head, \.start), edge(\.tail, \.end)].compactMap { $0 }
-        if !lags.isEmpty { return lags.reduce(0, +) / Double(lags.count) }
+        if !lags.isEmpty { return (lags.reduce(0, +) / Double(lags.count), true) }
         // A line that ended before this one started can only be repeated, never sent back after it.
         let first = heard.filter { $0.line.end > me.line.start }.map(\.line.start).min()
-        return me.line.start - (first ?? me.line.start)
+        return (me.line.start - (first ?? me.line.start), false)
     }
 
     private static func share(_ part: Set<String>, in whole: Set<String>) -> Double {

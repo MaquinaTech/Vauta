@@ -79,7 +79,8 @@ extension MeetingStore {
     /// the disk before the VACUUM. Even if the UPDATE fails, the meeting stops
     /// being the active one and whatever there is gets saved.
     /// Returns whether the meeting was kept (false: it was empty and has been removed). `marksEchoes` is false when the
-    /// microphone was measured never to hear the other participants (headphones, `SpeakerEcho.neverHeard`).
+    /// microphone was measured never to hear the other participants (headphones, `SpeakerEcho.neverHeard`): then only the far
+    /// side's echo of the user is looked for, which comes from the other participants' speakers.
     @discardableResult
     public func endMeeting(_ id: Int64, at date: Date, marksEchoes: Bool = true) async throws -> Bool {
         if activeMeetingID == id { activeMeetingID = nil }
@@ -95,7 +96,7 @@ extension MeetingStore {
         // The speakers' echo in the microphone, then context mentions (both deterministic, local; echoes first, so they
         // name no one). If either fails the meeting is saved anyway; mentions can be re-analyzed from the review screen.
         if failure == nil, kept {
-            if marksEchoes { _ = try? transaction { try markEchoes(id) } }
+            _ = try? transaction { try markEchoes(id, nearSide: marksEchoes) }
             _ = try? transaction { try analyzeInTransaction(id) }
         }
         do { try await snapshot(compacting: false) } catch { failure = failure ?? error }
