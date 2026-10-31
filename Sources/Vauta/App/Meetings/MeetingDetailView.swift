@@ -117,6 +117,8 @@ struct TimeButton: View {
     let t: Double
     /// With no transcript to go to, the time is plain text.
     var plain = false
+    /// The line at that moment, previewed without leaving the tab (`passagePreview`); nil: a plain link.
+    var passage: PreviewedPassage?
     let action: () -> Void
 
     var body: some View {
@@ -127,6 +129,7 @@ struct TimeButton: View {
                 .buttonStyle(.link)
                 .font(.callout.monospacedDigit())
                 .accessibilityLabel(Text("Go to \(ElapsedTime.stamp(t)) in Transcript"))
+                .passagePreview(ElapsedTime.stamp(t), passage: passage, open: action)
         }
     }
 }
