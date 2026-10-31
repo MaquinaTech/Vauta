@@ -289,7 +289,7 @@ struct TranscriptTab: View {
                 ProtectedText(matched(segment))
                     .foregroundStyle(segment.isEcho ? .secondary : .primary)
                 if segment.isEcho {
-                    EchoNote { Task { await model.setEcho(segment, false) } }
+                    EchoNote(channel: segment.channel) { Task { await model.setEcho(segment, false) } }
                 }
                 if let translation {
                     FilledText(text: translation, selectable: !copyProtection)
@@ -304,7 +304,7 @@ struct TranscriptTab: View {
         .onTapGesture { if copyProtection { model.highlight(segment) } }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(SpeakerLabel.spoken(segment, time: time))
-        .accessibilityValue(Text(verbatim: [segment.isEcho ? EchoNote.title : nil, SpeakerLabel.spokenNotes(segment, translation: translation)]
+        .accessibilityValue(Text(verbatim: [segment.isEcho ? EchoNote.title(for: segment.channel) : nil, SpeakerLabel.spokenNotes(segment, translation: translation)]
             .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")))
         .accessibilityAddTraits(isHighlighted ? [.isButton, .isSelected] : .isButton)
         .accessibilityAction { model.highlight(segment) }
@@ -314,7 +314,7 @@ struct TranscriptTab: View {
                 Button("Speaker options") { model.speakerPopover = .line(segment.id) }
             }
             if segment.isEcho {
-                Button(EchoNote.restore) { Task { await model.setEcho(segment, false) } }
+                Button(EchoNote.restore(for: segment.channel)) { Task { await model.setEcho(segment, false) } }
             }
         }
         .accessibilityHint(Text("Highlights the passage to cite it"))

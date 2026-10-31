@@ -56,6 +56,13 @@ enum EchoEvaluation {
         var ownLines = 0
         var echoWords = 0
         var ownWords = 0
+        /// Judged as Others (`farEchoes`): the far side's echoes of the participant (only with the far side's echo) and the other
+        /// participants' own lines, which must never be marked.
+        var backs: [EchoDetection.Evidence] = []
+        var othersOwn: [EchoDetection.Evidence] = []
+        var backLines = 0
+        var backWords = 0
+        var othersLines = 0
     }
 
     struct Score: Equatable {
@@ -94,6 +101,10 @@ enum EchoEvaluation {
         log("echo: \(files.count) meetings, \(near.count) replays and \(replays.count - near.count) with the far side's echo, \(echoLines) echo lines, \(ownLines) own lines")
         for s in best(scores).prefix(10) { log("echo: " + line(s)) }
         if let release = scores.first(where: { $0.settings == EchoDetection.Settings() }) { log("echo: release " + line(release)) }
+        let far = EchoFarSweep.sweep(replays)
+        try EchoFarSweep.table(far).write(to: dir.appendingPathComponent("far_sweep.tsv"), atomically: true, encoding: .utf8)
+        for s in EchoFarSweep.best(far).prefix(10) { log("echo far: " + EchoFarSweep.line(s)) }
+        if let release = far.first(where: { $0.settings == EchoDetection.FarSettings() }) { log("echo far: release " + EchoFarSweep.line(release)) }
     }
 
     /// The replays of one meeting: each participant with at least 20 lines as Me, in every condition.
@@ -117,21 +128,31 @@ enum EchoEvaluation {
                 let words = Dictionary((echoes + own).map { ($0.id, $0.text.split(separator: " ").count) }, uniquingKeysWith: { a, _ in a })
                 var replay = Replay(condition: condition, words: words, echoLines: echoes.count, ownLines: own.count,
                                     echoWords: echoes.reduce(0) { $0 + (words[$1.id] ?? 0) }, ownWords: own.reduce(0) { $0 + (words[$1.id] ?? 0) })
-                for e in EchoDetection.evidence((others + own + echoes).sorted { $0.start < $1.start }, locale: locale, maxDelay: EchoDetection.Settings().maxDelay) {
+                let all = (others + own + echoes).sorted { $0.start < $1.start }
+                for e in EchoDetection.evidence(all, locale: locale, maxDelay: EchoDetection.Settings().maxDelay) {
                     if echoIDs.contains(e.id) { replay.echoes.append(e) } else if ownIDs.contains(e.id) { replay.own.append(e) }
                 }
+                // The others' lines that the participant's speakers echo must never be taken for the far side's echo.
+                replay.othersOwn = EchoDetection.evidence(all, locale: locale, maxDelay: EchoDetection.FarSettings().maxDelay, judging: .others)
+                replay.othersLines = others.count
                 out.append(replay)
             }
             for (condition, delay) in farDelays.enumerated() {
                 var rng = Generator(seed: seed ^ fnv(name) ^ fnv(speaker) &+ UInt64(100 + condition))
                 let back = simulatedEchoes(of: own, avoiding: others, rate: farErrorRate, delay: delay, vocabulary: vocabulary, rng: &rng)
                     .map { EchoDetection.Line(id: $0.id, channel: .others, start: $0.start, end: $0.end, text: $0.text) }
-                let words = Dictionary(own.map { ($0.id, $0.text.split(separator: " ").count) }, uniquingKeysWith: { a, _ in a })
+                let words = Dictionary((own + back).map { ($0.id, $0.text.split(separator: " ").count) }, uniquingKeysWith: { a, _ in a })
                 var replay = Replay(condition: condition, farSide: true, words: words, ownLines: own.count,
                                     ownWords: own.reduce(0) { $0 + (words[$1.id] ?? 0) })
-                let ownIDs = Set(own.map(\.id))
-                replay.own = EchoDetection.evidence((others + back + own).sorted { $0.start < $1.start }, locale: locale,
-                                                    maxDelay: EchoDetection.Settings().maxDelay).filter { ownIDs.contains($0.id) }
+                let ownIDs = Set(own.map(\.id)), backIDs = Set(back.map(\.id))
+                let all = (others + back + own).sorted { $0.start < $1.start }
+                replay.own = EchoDetection.evidence(all, locale: locale, maxDelay: EchoDetection.Settings().maxDelay).filter { ownIDs.contains($0.id) }
+                for e in EchoDetection.evidence(all, locale: locale, maxDelay: EchoDetection.FarSettings().maxDelay, judging: .others) {
+                    if backIDs.contains(e.id) { replay.backs.append(e) } else { replay.othersOwn.append(e) }
+                }
+                replay.backLines = back.count
+                replay.backWords = back.reduce(0) { $0 + (words[$1.id] ?? 0) }
+                replay.othersLines = others.count
                 out.append(replay)
             }
         }

@@ -8030,6 +8030,10 @@
 
 /* Transcript: under a line of the user's channel that repeats what the other participants said, because the microphone heard them from the speakers */
 "Echo of your speakers" = "Echo deiner Lautsprecher";
+"Your voice, sent back" = "Deine Stimme, zurückgeschickt";
+"Not an Echo" = "Kein Echo";
+"A participant’s speakers sent your voice back into the call, so this line repeats what you said. It is kept here, but left out of the minutes, answers, owners, search and exports." = "Die Lautsprecher einer teilnehmenden Person haben deine Stimme in den Anruf zurückgeschickt, daher wiederholt diese Zeile, was du gesagt hast. Sie bleibt hier erhalten, fließt aber nicht in Protokolle, Antworten, Verantwortliche, Suche und Exporte ein.";
+"Another participant said this: count it in answers, search and exports, and in the minutes the next time they are written" = "Das hat eine andere teilnehmende Person gesagt: Sie zählt für Antworten, Suche und Exporte und für das Protokoll, wenn es das nächste Mal erstellt wird";
 "Mark as Done" = "Als erledigt markieren";
 
 /* Edit menu: the action Undo takes back, marking a transcript line as an echo of the speakers again */
