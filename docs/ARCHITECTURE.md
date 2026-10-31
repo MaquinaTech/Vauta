@@ -559,8 +559,9 @@ changed.
   in later meetings; `undoAddCorrectedTerm` takes it out unless it was renamed since.
 - **Interface.** `MeetingsModel.lineDraft` is the line being corrected (Return on the highlighted line, the pencil, the
   context menu, Edit › Correct Highlighted Passage); it is saved when the person leaves the meeting or the window locks,
-  like a note. `TranscriptLineEditor` uses `NoCopyText`, so copy protection applies. Afterwards the meeting is read again
-  and `LLMService.speakersChanged` re-checks owner marks and re-embeds stale chunks.
+  like a note. `TranscriptLineEditor` uses `NoCopyText`, so copy protection applies. Afterwards the meeting is read again,
+  `LLMService.speakersChanged` re-checks owner marks and re-embeds stale chunks, and `redetectFollowUps` runs the
+  deterministic `FollowUpDetector` again when the meeting's follow-ups had been looked for (only suggestions are replaced).
 
 ### Migrations
 
