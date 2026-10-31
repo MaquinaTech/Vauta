@@ -399,6 +399,12 @@ notes, answers, owners), search and its chunks, mentions, quotes, talk time, fol
 `segments(of:echoes:)` gives it to the transcript and the speaker tools only. The person can say a line is theirs (2), and
 it is never marked again.
 
+The other way round, a participant on speakers whose call app doesn't cancel the echo sends the user's voice back into Others
+a call's round trip later (`EchoDetection.farEchoes`). Such an Others line is marked (1) by the same measures, judged against
+the Me lines, when it says their words between 0.15 s and 1 s after the user, measured on edges the two lines share. It is
+looked for also when the microphone never heard the speakers (headphones), since it comes from the far side. Its note in the
+transcript says so ("Your voice, sent back", **Not an Echo**). Meetings checked before it existed are not checked again.
+
 `echo_pending` (schema 33) lists the meetings never checked: those recorded before schema 31 and, added by the crash
 recovery when the store opens, one a crash left open (it never reached `endMeeting`). At launch, after the crashed
 recording's speakers and before the language model service starts, `markPendingEchoes` checks them newest first, one

@@ -64,6 +64,14 @@ struct EchoEvaluationTests {
         }
         let unlimited = try farMarked(lead: "inf"), limited = try farMarked(lead: "0.15")
         #expect(unlimited > 50 && limited < unlimited / 2, "\(limited) of \(unlimited)")
+
+        // The far side's echo of the participant, judged in Others: most are found, and the other participant's lines (which the
+        // participant's speakers echo in the other replays) are not.
+        let far = try String(contentsOf: o.out.appendingPathComponent("echo/far_sweep.tsv"), encoding: .utf8).split(separator: "\n")
+        #expect(far.count == 1 + 3 * 3 * 3 * 3 * 4 && far[0].hasPrefix("words\tpairs\tcovered\tmin_words\tmin_lag\trecall"))
+        let farRelease = try #require(log.all.first { $0.hasPrefix("echo far: release ") })
+        let farRecall = try #require(farRelease.firstMatch(of: #/recall ([0-9.]+) /#).flatMap { Double($0.1) })
+        #expect(farRecall > 0.7 && farRelease.contains("others marked 0 of"), "\(farRelease)")
     }
 }
 

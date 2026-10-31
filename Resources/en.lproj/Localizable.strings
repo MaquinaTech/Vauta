@@ -281,6 +281,9 @@
 /* Setup model choice title: the guided set-up of a new model server, as opposed to the card that looks for one already running */
 "A new model server on this Mac" = "A new model server on this Mac";
 
+/* Transcript: tooltip of the note under a line of the other participants marked as the user's own voice sent back by the call */
+"A participant’s speakers sent your voice back into the call, so this line repeats what you said. It is kept here, but left out of the minutes, answers, owners, search and exports." = "A participant’s speakers sent your voice back into the call, so this line repeats what you said. It is kept here, but left out of the minutes, answers, owners, search and exports.";
+
 /* Server config error */
 "A private certificate authority only applies to https:// addresses." = "A private certificate authority only applies to https:// addresses.";
 
@@ -606,6 +609,9 @@
 
 /* Storage error: a new recording cannot start while another one is active */
 "Another meeting is already being recorded." = "Another meeting is already being recorded.";
+
+/* Transcript: tooltip of the button that makes a line marked as the user's voice sent back the other participant's own again */
+"Another participant said this: count it in answers, search and exports, and in the minutes the next time they are written" = "Another participant said this: count it in answers, search and exports, and in the minutes the next time they are written";
 
 /* Error when saving a person whose email belongs to someone else; the argument is the email address */
 "Another person already uses %@. Merge them instead." = "Another person already uses %@. Merge them instead.";
@@ -3923,6 +3929,9 @@
 
 /* Permission state */
 "Not allowed" = "Not allowed";
+
+/* Transcript: button under a line marked as the user's voice sent back by the call; the line becomes the other participant's own again */
+"Not an Echo" = "Not an Echo";
 
 /* Meeting page, Questions: the question was heard but no answer was worked out for it (the card limits were reached, or the recording or live answers stopped first) */
 "Not answered" = "Not answered";
@@ -7859,6 +7868,9 @@
 
 /* Confirmation message when deleting the user’s own saved voice */
 "Your voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. Imported recordings will no longer suggest which speaker is you. Meetings and the names already in them stay as they are." = "Your voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. Imported recordings will no longer suggest which speaker is you. Meetings and the names already in them stay as they are.";
+
+/* Transcript: under a line of the other participants' channel that repeats what the user said, because a participant's speakers sent the user's voice back into the call */
+"Your voice, sent back" = "Your voice, sent back";
 
 /* Confirmation of discarding a paused download of the integrated model: the next download starts over */
 "You’ll start from the beginning next time." = "You’ll start from the beginning next time.";

@@ -8017,6 +8017,10 @@
 
 /* Transcript: under a line of the user's channel that repeats what the other participants said, because the microphone heard them from the speakers */
 "Echo of your speakers" = "Eco dei tuoi altoparlanti";
+"Your voice, sent back" = "La tua voce, rimandata";
+"Not an Echo" = "Non è un’eco";
+"A participant’s speakers sent your voice back into the call, so this line repeats what you said. It is kept here, but left out of the minutes, answers, owners, search and exports." = "Gli altoparlanti di un partecipante hanno rimandato la tua voce nella chiamata, quindi questa riga ripete ciò che hai detto. Resta qui, ma viene esclusa da verbali, risposte, responsabili, ricerca ed esportazioni.";
+"Another participant said this: count it in answers, search and exports, and in the minutes the next time they are written" = "L’ha detto un altro partecipante: conta per risposte, ricerca ed esportazioni, e per il verbale la prossima volta che viene scritto";
 "Mark as Done" = "Segna come completata";
 
 /* Edit menu: the action Undo takes back, marking a transcript line as an echo of the speakers again */
