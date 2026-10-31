@@ -2354,6 +2354,11 @@
 
 /* No comment provided by engineer. */
 "Find Names in This Meeting" = "在此会议中查找名称";
+"Find in Meeting" = "在会议中查找";
+"Find Next" = "查找下一个";
+"Find Previous" = "查找上一个";
+"Find only in what one speaker said" = "仅在一位发言人所说的内容中查找";
+"find.done" = "完成";
 
 /* Model server activity in the menu bar panel while it answers a question heard in the meeting */
 "Finding an answer" = "正在查找答案";

@@ -41,8 +41,21 @@ struct MeetingsCommands: Commands {
                 .disabled(model?.shownMeeting == nil || model?.mode != .meetings)
         }
         CommandGroup(after: .textEditing) {
-            Button("Search Meetings") { model?.searchFocusRequest += 1 }
+            // ⌘F finds in the transcript of the meeting shown, as in a document; with none it searches the meetings, which
+            // ⌥⌘F always does (as Mail's Mailbox Search).
+            Button(model?.canFindInMeeting == true
+                   ? String(localized: "Find in Meeting", comment: "Edit menu (⌘F) and placeholder of its field: finds a text in the transcript of the meeting shown")
+                   : String(localized: "Search Meetings")) { model?.showFind() }
                 .keyboardShortcut("f", modifiers: .command)
+                .disabled(model == nil)
+            Button("Find Next") { model?.findNext() }
+                .keyboardShortcut("g", modifiers: .command)
+                .disabled(model?.canFindNext != true)
+            Button("Find Previous") { model?.findNext(forward: false) }
+                .keyboardShortcut("g", modifiers: [.command, .shift])
+                .disabled(model?.canFindNext != true)
+            Button("Search Meetings") { model?.searchFocusRequest += 1 }
+                .keyboardShortcut("f", modifiers: [.command, .option])
                 .disabled(model == nil)
             // The keyboard way into the speaker popover: the highlighted passage (arrow keys) is the one it is about.
             Button("Speaker Options for Highlighted Passage") { model?.openSpeakerOptionsOfHighlight() }

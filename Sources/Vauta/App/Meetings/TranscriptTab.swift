@@ -41,7 +41,17 @@ struct TranscriptTab: View {
     var body: some View {
         // Measured once per update, not once per row.
         let cols = columns
-        return ScrollViewReader { proxy in
+        return VStack(spacing: 0) {
+            if model.findShown {
+                TranscriptFindBar(model: model)
+                Divider()
+            }
+            transcript(cols)
+        }
+    }
+
+    private func transcript(_ cols: Columns) -> some View {
+        ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
                     header
@@ -211,14 +221,24 @@ struct TranscriptTab: View {
         .accessibilityLabel(Text("Note at \(ElapsedTime.stamp(n.t)): \(n.text)"))
     }
 
-    /// The text with the search words found in it marked, when the meeting was opened from a search.
-    private func matched(_ text: String) -> Text {
-        let ranges = MeetingStore.matchedRanges(of: model.query, in: text)
+    /// The text with the places of Find in Meeting marked while its bar is open (the chosen one solid), else the search
+    /// words found in it, when the meeting was opened from a search.
+    private func matched(_ segment: MeetingStore.StoredSegment) -> Text {
+        let text = segment.text
+        let found = model.findRanges(of: segment.id)
+        let ranges = model.findShown ? found.all : MeetingStore.matchedRanges(of: model.query, in: text)
         guard !ranges.isEmpty else { return Text(text) }
         var out = AttributedString(text)
         for range in ranges {
             if let lower = AttributedString.Index(range.lowerBound, within: out), let upper = AttributedString.Index(range.upperBound, within: out) {
-                out.markMatch(lower..<upper, dark: colorScheme == .dark)
+                if range == found.current {
+                    // The place ⌘G is on: a solid marker with dark text in both appearances, as in other apps' Find.
+                    out[lower..<upper].inlinePresentationIntent = .stronglyEmphasized
+                    out[lower..<upper].backgroundColor = Color(nsColor: .systemYellow)
+                    out[lower..<upper].swiftUI.foregroundColor = .black
+                } else {
+                    out.markMatch(lower..<upper, dark: colorScheme == .dark)
+                }
             }
         }
         return Text(out)
@@ -235,7 +255,7 @@ struct TranscriptTab: View {
             SpeakerLabel(model: model, segment: segment, width: cols.speaker)
             VStack(alignment: .leading, spacing: 2) {
                 // Not by color alone: an echo is dimmed and says what it is, with the way to take the mark back.
-                ProtectedText(matched(segment.text))
+                ProtectedText(matched(segment))
                     .foregroundStyle(segment.isEcho ? .secondary : .primary)
                 if segment.isEcho {
                     EchoNote { Task { await model.setEcho(segment, false) } }

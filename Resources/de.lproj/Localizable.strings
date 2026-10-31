@@ -2354,6 +2354,11 @@
 
 /* No comment provided by engineer. */
 "Find Names in This Meeting" = "Namen in diesem Meeting suchen";
+"Find in Meeting" = "Im Meeting suchen";
+"Find Next" = "Weitersuchen";
+"Find Previous" = "Rückwärts suchen";
+"Find only in what one speaker said" = "Nur in dem suchen, was ein Sprecher gesagt hat";
+"find.done" = "Fertig";
 
 /* Model server activity in the menu bar panel while it answers a question heard in the meeting */
 "Finding an answer" = "Antwort wird gesucht";

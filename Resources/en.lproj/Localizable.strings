@@ -2405,6 +2405,18 @@
 /* No comment provided by engineer. */
 "Find Names in This Meeting" = "Find Names in This Meeting";
 
+/* Find in Meeting: goes to the next place (⌘G) */
+"Find Next" = "Find Next";
+
+/* Find in Meeting: goes to the previous place (⇧⌘G) */
+"Find Previous" = "Find Previous";
+
+/* Edit menu (⌘F) and placeholder of its field: finds a text in the transcript of the meeting shown */
+"Find in Meeting" = "Find in Meeting";
+
+/* Find in Meeting: help on the menu that limits the places to one speaker */
+"Find only in what one speaker said" = "Find only in what one speaker said";
+
 /* Model server activity in the menu bar panel while it answers a question heard in the meeting */
 "Finding an answer" = "Finding an answer";
 
@@ -7890,6 +7902,9 @@
 
 /* VoiceOver: a document source is a file */
 "file" = "file";
+
+/* Find in Meeting: the button that closes its bar, as in other apps' Find bars (not the state of a task) */
+"find.done" = "Done";
 
 /* Brief: mark on a decision the person confirmed is the same as an earlier one; the argument is the date of the first */
 "first decided on %@" = "first decided on %@";
