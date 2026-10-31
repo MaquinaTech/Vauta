@@ -2917,6 +2917,9 @@
 /* VoiceOver hint of the collapsed group of other possible items in the minutes */
 "Items the model proposed that are less certain than the main ones. Open the group to review them." = "모델이 제안한 항목 중 주요 항목보다 확실성이 낮은 항목입니다. 그룹을 열어 검토하세요.";
 
+/* Status detail after the connected line; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"Its certificate expires on %@. Renew it before then: make-server-cert.sh renews one it made and keeps the pin." = "인증서가 %@에 만료됩니다. 그 전에 갱신하세요. make-server-cert.sh는 직접 만든 인증서를 고정 값을 유지한 채 갱신합니다.";
+
 /* No comment provided by engineer. */
 "Its email address %@ is discarded; “%@” keeps its own." = "이 항목의 이메일 주소(%@)는 삭제되고, “%@” 항목은 자체 이메일 주소를 유지합니다.";
 
@@ -6349,6 +6352,9 @@
 
 /* Model job error */
 "The model server was busy for too long." = "모델 서버가 너무 오랫동안 사용 중이었습니다.";
+
+/* Model server check result; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"The model server’s certificate expired on %@. Renew it on the server: make-server-cert.sh renews one it made and keeps the pin." = "모델 서버의 인증서가 %@에 만료되었습니다. 서버에서 갱신하세요. make-server-cert.sh는 직접 만든 인증서를 고정 값을 유지한 채 갱신합니다.";
 
 /* Model error */
 "The model server’s response is too large." = "모델 서버의 응답이 너무 큽니다.";

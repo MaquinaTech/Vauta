@@ -78,6 +78,7 @@ final class ModelStub: URLProtocol, @unchecked Sendable {
         let range: String?
         let hasQuery: Bool
         var acceptEncoding: String?
+        var userAgent: String?
     }
 
     final class Behaviour: @unchecked Sendable {
@@ -172,7 +173,8 @@ final class ModelStub: URLProtocol, @unchecked Sendable {
             client?.urlProtocolDidFinishLoading(self)
             return
         }
-        b.record(Hit(host: host, path: path, range: range, hasQuery: url.query != nil, acceptEncoding: request.value(forHTTPHeaderField: "Accept-Encoding")))
+        b.record(Hit(host: host, path: path, range: range, hasQuery: url.query != nil, acceptEncoding: request.value(forHTTPHeaderField: "Accept-Encoding"),
+                        userAgent: request.value(forHTTPHeaderField: "User-Agent")))
         let spec = b.model.spec
         let file = path.hasSuffix(spec.tokenizerFile) ? spec.tokenizerFile : spec.sourceFile
         if host == "huggingface.co" {

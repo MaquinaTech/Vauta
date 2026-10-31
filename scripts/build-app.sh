@@ -91,8 +91,13 @@ else
   fail "Vauta's signing keychain is missing. Run ./scripts/setup-signing.sh first (or set VAUTA_SIGN_IDENTITY / VAUTA_ALLOW_ADHOC=1)"
 fi
 
+# --- Dependencies --------------------------------------------------------------------------
+# The one allowed package at its reviewed pin (no network), and the build resolves nothing anew: a Package.resolved
+# that doesn't match Package.swift stops it instead of being rewritten.
+scripts/check-dependencies.sh
+
 # --- Build ---------------------------------------------------------------------------------
-SWIFT_ARGS=(-c release --arch arm64 ${VAUTA_JOBS:+-j "$VAUTA_JOBS"} ${VAUTA_SWIFT_FLAG_ARRAY[@]+"${VAUTA_SWIFT_FLAG_ARRAY[@]}"})
+SWIFT_ARGS=(-c release --arch arm64 --force-resolved-versions ${VAUTA_JOBS:+-j "$VAUTA_JOBS"} ${VAUTA_SWIFT_FLAG_ARRAY[@]+"${VAUTA_SWIFT_FLAG_ARRAY[@]}"})
 swift build "${SWIFT_ARGS[@]}"
 BIN_DIR="$(swift build "${SWIFT_ARGS[@]}" --show-bin-path)"
 

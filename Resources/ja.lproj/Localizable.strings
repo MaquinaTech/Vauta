@@ -2917,6 +2917,9 @@
 /* VoiceOver hint of the collapsed group of other possible items in the minutes */
 "Items the model proposed that are less certain than the main ones. Open the group to review them." = "モデルが提案した、主要な項目より確度の低い項目です。グループを開いて確認してください。";
 
+/* Status detail after the connected line; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"Its certificate expires on %@. Renew it before then: make-server-cert.sh renews one it made and keeps the pin." = "証明書の有効期限は%@です。それまでに更新してください。make-server-cert.shは自分で作成した証明書を、ピンを変えずに更新します。";
+
 /* No comment provided by engineer. */
 "Its email address %@ is discarded; “%@” keeps its own." = "メールアドレス%@は破棄され、「%@」は自身のメールアドレスを保持します。";
 
@@ -6349,6 +6352,9 @@
 
 /* Model job error */
 "The model server was busy for too long." = "モデルサーバのビジー状態が長すぎました。";
+
+/* Model server check result; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"The model server’s certificate expired on %@. Renew it on the server: make-server-cert.sh renews one it made and keeps the pin." = "モデルサーバの証明書は%@に期限が切れました。サーバで更新してください。make-server-cert.shは自分で作成した証明書を、ピンを変えずに更新します。";
 
 /* Model error */
 "The model server’s response is too large." = "モデルサーバの応答が大きすぎます。";
