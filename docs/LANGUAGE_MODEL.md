@@ -136,6 +136,15 @@ tied 4-bit output head with `tanh(x/30)*30`, bf16 activations and bf16 key/value
   looked at every 0.3 to 0.4 s, not after a 512-token chunk (2.3 to 2.7 s). Measured on the real model (release, 4,000 tokens,
   interleaved, load1 4 to 6): 512-token chunks 219 tokens/s, 256 218, 128 215, time-sized 205, so the guarantee costs 6 to 7% of
   prefill speed. Cancelling a 12,000-token prefill 30 s in was seen after 0.25 s (the GPU was shared at the time).
+- **The layers that share keys and values run on one position.** Layers 24 to 41 write no keys or values, and only the last
+  position's hidden state is ever read (the next token's logits). A chunk of the prompt whose hidden state is not wanted evaluates the
+  caches alone: MLX is lazy, so layers 0 to 22 and the keys and values of layer 23 run, and the rest of layer 23 and the 18 shared
+  layers do not. The last chunk, and a run of forced tokens while decoding, send only the last position through layers 24 to 41 (its
+  query at its own place, over every key of a full layer and the last 512 of a sliding one, with no mask). On the tiny model (9
+  layers, 3 of them sharing) a 4,096-token prompt in 256-token chunks went from 0.179 to 0.116 s (median of 7, debug build) with the
+  same logits, and the mlx-lm goldens and the chunked-against-one-shot test pass unchanged. On the real model 18 of the 42 layers
+  share; its prefill speed has not been measured again yet. Reading the meeting while it records (no hidden state wanted) gains the
+  most.
 - **Kept prefix** (live answers and Ask): the state after `prefix - 16` tokens is kept (the last 16 are re-run so a token that merges
   across the boundary is right); the next request with the same ids up to there continues from it, the question and the answer are
   never kept. The tiny-model test shows identical text with and without it. There are two slots, **Ask** (interactive priority) and
