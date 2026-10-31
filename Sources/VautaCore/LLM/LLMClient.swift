@@ -76,6 +76,12 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     func recordPeerViolation(_ address: String) { lock.withLock { _peerViolation = address } }
 
     private func makeSession() -> AuditedSession {
+        AuditedSession(configuration: Self.sessionConfiguration(protocolClasses: protocolClasses), delegate: self, log: log)
+    }
+
+    /// The model server session's rules (tests read them back): TLS 1.3, no proxy of any kind, nothing kept (cache, cookies,
+    /// credentials). Redirects are refused by the delegate, and the trust by `ServerTrust`.
+    static func sessionConfiguration(protocolClasses: [AnyClass]? = nil) -> URLSessionConfiguration {
         let c = URLSessionConfiguration.ephemeral
         c.tlsMinimumSupportedProtocolVersion = .TLSv13
         c.urlCache = nil
@@ -93,7 +99,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         c.timeoutIntervalForRequest = 900
         c.timeoutIntervalForResource = 3 * 3600
         if let protocolClasses { c.protocolClasses = protocolClasses }
-        return AuditedSession(configuration: c, delegate: self, log: log)
+        return c
     }
 
     public convenience init(config: LLMServerConfig? = nil,
