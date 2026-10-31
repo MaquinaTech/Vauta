@@ -4354,6 +4354,12 @@
 
 /* No comment provided by engineer. */
 "Participants informed at %@" = "Informiert um %@";
+"Participants informed" = "Teilnehmende informiert";
+"Participants informed: %@" = "Teilnehmende informiert: %@";
+"Say when the participants were informed" = "Angeben, wann die Teilnehmenden informiert wurden";
+"Write the time you marked that the participants were told the meeting was being recorded" = "Die Uhrzeit schreiben, zu der du markiert hast, dass die Teilnehmenden über die Aufnahme informiert wurden";
+"This recording is from %@. The meeting will be dated today, so its transcript isn’t deleted for its age." = "Diese Aufnahme ist vom %@. Das Meeting wird auf heute datiert, damit sein Transkript nicht wegen seines Alters gelöscht wird.";
+"The file is dated %@, in the future. The meeting will be dated today." = "Die Datei ist auf den %@ datiert, also in der Zukunft. Das Meeting wird auf heute datiert.";
 
 /* No comment provided by engineer. */
 "Participants not marked as informed" = "Teilnehmende nicht als informiert markiert";

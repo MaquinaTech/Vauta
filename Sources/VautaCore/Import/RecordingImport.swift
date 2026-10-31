@@ -44,6 +44,24 @@ public struct RecordingImportPlan: Sendable, Equatable {
         endedAt = startedAt.addingTimeInterval(length)
     }
 
+    /// Why a recording will not keep its own date, known before it is transcribed, so the sheet can say so.
+    public enum Redating: Sendable, Equatable {
+        /// Recorded on that date, too long ago: its transcript would be deleted at once.
+        case tooOld(Date)
+        /// Dated in the future (a wrong clock or metadata).
+        case future(Date)
+    }
+
+    /// nil when the recording keeps its date (or has none, and is dated now as always).
+    public static func redating(recordedAt: Date?, duration: Double, now: Date = .now,
+                                retentionDays: Int = MeetingStore.retentionDays) -> Redating? {
+        guard let recordedAt,
+              RecordingImportPlan(fileName: "", recordedAt: recordedAt, duration: duration, now: now, retentionDays: retentionDays).redated
+        else { return nil }
+        let oldest = now.addingTimeInterval(-Double(max(0, retentionDays - retentionMargin)) * 86_400)
+        return recordedAt < oldest ? .tooOld(recordedAt) : .future(recordedAt)
+    }
+
     /// Final, non-empty segments in time order, as `.others`, with times
     /// clamped to the recording (`duration`, when known).
     public static func transcript(from raw: [Segment], duration: Double? = nil) -> [Segment] {

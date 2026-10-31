@@ -41,6 +41,10 @@ final class RecordingImportModel {
         }
     }
     var selectedLanguage: SpeechLanguage? { languages.first { $0.id == languageID } }
+    /// The file's date will not be the meeting's (`RecordingImportPlan`): the sheet says so before the import starts.
+    var redating: RecordingImportPlan.Redating? {
+        file.flatMap { RecordingImportPlan.redating(recordedAt: $0.recordedAt, duration: $0.duration) }
+    }
 
     @ObservationIgnored var llm: LLMService?
     @ObservationIgnored var preferences: Preferences?

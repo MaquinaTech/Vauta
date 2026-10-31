@@ -15,6 +15,9 @@ public enum MeetingExportRenderer {
         if !e.attendees.isEmpty {
             meta.append("- **\(Labels.attendees):** " + Markdown.inline(e.attendees.joined(separator: ", ")))
         }
+        if let informed = informedTime(e, options: options) {
+            meta.append("- **\(Labels.participantsInformed):** " + Markdown.inline(informed))
+        }
         blocks.append(meta.joined(separator: "\n"))
 
         if !e.notes.isEmpty {
@@ -97,6 +100,7 @@ public enum MeetingExportRenderer {
         var blocks: [String] = []
         var head = [e.title, "\(Labels.date): \(dateLine(e, options: options))"]
         if !e.attendees.isEmpty { head.append("\(Labels.attendees): \(e.attendees.joined(separator: ", "))") }
+        if let informed = informedTime(e, options: options) { head.append("\(Labels.participantsInformed): \(informed)") }
         blocks.append(head.joined(separator: "\n"))
 
         func section(_ heading: String, _ lines: [String]) {
@@ -154,6 +158,17 @@ public enum MeetingExportRenderer {
                       comment: "Meeting date line in exports: start date and time, end time, duration in minutes")
     }
 
+    /// When the user marked the participants as informed of the recording: the time, with the date when it is not the day the
+    /// meeting started. nil when they did not, or the options leave it out.
+    public static func informedTime(_ e: MeetingExport, options: MeetingExportOptions) -> String? {
+        guard options.includeParticipantsInformed, let at = e.participantsInformedAt else { return nil }
+        var calendar = options.locale.calendar
+        calendar.timeZone = options.timeZone
+        let sameDay = calendar.isDate(at, inSameDayAs: e.startedAt)
+        return at.formatted(Date.FormatStyle(date: sameDay ? .omitted : .abbreviated, time: .shortened, locale: options.locale,
+                                             calendar: calendar, timeZone: options.timeZone))
+    }
+
     /// " — Not confirmed in the transcript" after a decision the transcript does not back; nothing otherwise.
     public static func decisionNote(_ item: MeetingExport.Item) -> String {
         item.unconfirmed ? " — " + Labels.unconfirmed : ""
@@ -187,6 +202,10 @@ public enum MeetingExportRenderer {
     enum Labels {
         static var date: String { String(localized: "Date", comment: "Exported minutes: label of the meeting date") }
         static var attendees: String { String(localized: "Attendees", comment: "Exported minutes: label of the attendee list") }
+        static var participantsInformed: String {
+            String(localized: "Participants informed",
+                   comment: "Exported minutes: label of the time the user marked that the participants were told the meeting was being recorded; the time follows")
+        }
         static var summary: String { String(localized: "Summary", comment: "Exported minutes: section title") }
         static var topics: String { String(localized: "Topics", comment: "Exported minutes: section title") }
         static var decisions: String { String(localized: "Decisions", comment: "Exported minutes: section title") }

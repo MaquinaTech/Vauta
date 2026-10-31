@@ -4354,6 +4354,12 @@
 
 /* No comment provided by engineer. */
 "Participants informed at %@" = "%@에 참가자에게 안내함";
+"Participants informed" = "참가자 안내";
+"Participants informed: %@" = "참가자 안내: %@";
+"Say when the participants were informed" = "참가자에게 안내한 시각 표시";
+"Write the time you marked that the participants were told the meeting was being recorded" = "참가자에게 녹음 사실을 안내했다고 표시한 시각을 기록";
+"This recording is from %@. The meeting will be dated today, so its transcript isn’t deleted for its age." = "이 녹음은 %@의 녹음입니다. 오래되어 녹취록이 삭제되지 않도록 회의 날짜는 오늘로 지정됩니다.";
+"The file is dated %@, in the future. The meeting will be dated today." = "파일 날짜(%@)가 미래로 되어 있습니다. 회의 날짜는 오늘로 지정됩니다.";
 
 /* No comment provided by engineer. */
 "Participants not marked as informed" = "참가자가 안내 완료로 표시되지 않음";
