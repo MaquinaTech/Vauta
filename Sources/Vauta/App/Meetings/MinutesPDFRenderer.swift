@@ -145,7 +145,18 @@ enum MinutesPDFRenderer {
             heading(String(localized: "Transcript", comment: "Exported minutes: section title"))
             let small = NSFont.systemFont(ofSize: 10)
             let bold = NSFont.boldSystemFont(ofSize: 10)
-            for line in e.transcript {
+            let paused = MeetingPause.places(of: e.pauses, among: e.transcript.map(\.start))
+            // Where the recording was paused: nothing was captured, so the gap in the times is not a silence.
+            func pauses(at i: Int) {
+                for pause in paused[i] ?? [] {
+                    let p = NSMutableAttributedString(string: "— " + pause.text(clock: ExportTimestamp.clock) + " —\n",
+                                                      attributes: [.font: NSFont.systemFont(ofSize: 10), .foregroundColor: secondary])
+                    p.addAttribute(.paragraphStyle, value: paragraph(spacingBefore: 0, after: 4), range: NSRange(location: 0, length: p.length))
+                    out.append(p)
+                }
+            }
+            for (i, line) in e.transcript.enumerated() {
+                pauses(at: i)
                 let p = NSMutableAttributedString(string: "[\(ExportTimestamp.clock(line.start))] ",
                                                   attributes: [.font: NSFont.monospacedDigitSystemFont(ofSize: 10, weight: .regular),
                                                                .foregroundColor: secondary])
@@ -157,6 +168,7 @@ enum MinutesPDFRenderer {
                 p.addAttribute(.paragraphStyle, value: paragraph(spacingBefore: 0, after: 4), range: NSRange(location: 0, length: p.length))
                 out.append(p)
             }
+            pauses(at: e.transcript.count)
         }
         return out
     }

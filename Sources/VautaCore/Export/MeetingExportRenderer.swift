@@ -49,12 +49,15 @@ public enum MeetingExportRenderer {
 
         if options.includeTranscript && !e.transcript.isEmpty {
             blocks.append("## \(Labels.transcript)")
-            for line in e.transcript {
+            let paused = MeetingPause.places(of: e.pauses, among: e.transcript.map(\.start))
+            for (i, line) in e.transcript.enumerated() {
+                blocks += (paused[i] ?? []).map { "*— " + Markdown.inline($0.text(clock: ExportTimestamp.clock)) + " —*" }
                 let who = Markdown.inline(options.speaker(of: line))
                 var entry = "**[\(ExportTimestamp.clock(line.start))] \(who):** " + Markdown.inline(line.text)
                 if let translation = line.translation(options) { entry += "  \n> " + Markdown.inline(SingleLineText.flatten(translation)) }
                 blocks.append(entry)
             }
+            blocks += (paused[e.transcript.count] ?? []).map { "*— " + Markdown.inline($0.text(clock: ExportTimestamp.clock)) + " —*" }
         }
         return blocks.joined(separator: "\n\n") + "\n"
     }
@@ -134,11 +137,13 @@ public enum MeetingExportRenderer {
             return lines
         })
         if options.includeTranscript && !e.transcript.isEmpty {
-            section(Labels.transcript, e.transcript.map { line in
+            let paused = MeetingPause.places(of: e.pauses, among: e.transcript.map(\.start))
+            func pauses(at i: Int) -> [String] { (paused[i] ?? []).map { "— " + $0.text(clock: ExportTimestamp.clock) + " —" } }
+            section(Labels.transcript, e.transcript.enumerated().flatMap { i, line in
                 var entry = "[\(ExportTimestamp.clock(line.start))] \(SingleLineText.flatten(options.speaker(of: line))): \(SingleLineText.flatten(line.text))"
                 if let translation = line.translation(options) { entry += "\n    " + SingleLineText.flatten(translation) }
-                return entry
-            })
+                return pauses(at: i) + [entry]
+            } + pauses(at: e.transcript.count))
         }
         return blocks.joined(separator: "\n\n") + "\n"
     }
