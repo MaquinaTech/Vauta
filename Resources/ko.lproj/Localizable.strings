@@ -4291,6 +4291,20 @@
 /* Brief: heading of the open tasks of the people coming to the meeting
    Heading of the Tasks mode and section of the People card (a heading inside the window: sentence case) */
 "Open tasks" = "미완료 할 일";
+"Copy protection is on, so meeting text can’t be exported." = "복사 방지가 켜져 있어 회의 텍스트를 내보낼 수 없습니다.";
+"Couldn’t export the week" = "주를 내보낼 수 없음";
+"Export Week" = "주 내보내기";
+"Next Week" = "다음 주";
+"Nothing This Week" = "이번 주에는 아무것도 없음";
+"Nothing was recorded this week." = "이번 주에는 녹음된 것이 없습니다.";
+"Open Tasks" = "미완료 할 일";
+"Overdue tasks" = "기한 지난 할 일";
+"Previous Week" = "이전 주";
+"Save this week as a Markdown file" = "이번 주를 Markdown 파일로 저장";
+"Tasks added" = "추가된 할 일";
+"Tasks done" = "완료된 할 일";
+"This Week" = "이번 주";
+"Week of %@" = "%@ 주";
 
 /* Heading of the Tasks mode filtered by person (a heading inside the window: sentence case) */
 "Open tasks for %@" = "%@의 미완료 할 일";

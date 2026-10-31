@@ -181,7 +181,7 @@ struct MeetingsWindow: View {
                                     onImport: importRecording)
             }
         case .ask: AskView(model: model.ask, meetings: model, recorder: recorder, onOpenSettings: openModelsSettings, onOpenDocuments: openDocumentsSettings)
-        case .tasks: OpenTasksView(model: model)
+        case .tasks: TasksModeView(model: model)
         case .people: EntityCardView(model: model, onOpenSettings: openContextSettings, onEdit: editInContext)
         }
     }

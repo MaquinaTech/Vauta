@@ -358,7 +358,7 @@ extension MeetingStore {
         try await commitEdit()
     }
 
-    private static let taskColumns = """
+    static let taskColumns = """
         SELECT t.id, t.meeting_id, t.segment_id, t.t, t.text, t.owner_id, e.name, t.due, t.status, t.source, t.created_at, mt.title, mt.started_at,
                t.owner_id IS (SELECT v FROM store_meta WHERE k = 'self_entity'), t.unconfirmed, t.owner_uncertain,
                CASE WHEN t.owner_id IS NULL THEN t.owner_speaker_id END, ms.channel, ms.ordinal, t.due_day, t.unconfirmed_reason
@@ -385,7 +385,7 @@ extension MeetingStore {
         return try db.query(sql, owner.map { [.integer($0)] } ?? []).map(Self.task)
     }
 
-    private static func task(_ r: Row) -> TaskItem {
+    static func task(_ r: Row) -> TaskItem {
         let title: String? = r.optionalDouble(12).map { started in
             Meeting.displayTitle(r.optionalString(11), startedAt: Date(timeIntervalSince1970: started))
         }
