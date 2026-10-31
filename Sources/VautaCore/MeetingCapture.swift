@@ -145,6 +145,47 @@ public final class MeetingCapture: @unchecked Sendable {
 
     private func reached(_ next: StartStage) { stageLock.withLock { stage = next } }
 
+    /// Whether the capture is paused (`pause`).
+    public var isPaused: Bool { stageLock.withLock { paused } }
+    private var paused = false
+
+    /// Pauses a capture that is running: from now on no audio reaches the transcribers, the diarizer or the meters, and the
+    /// microphone and the system-audio tap stop, so macOS turns the microphone indicator off. What the channels' chunks held was
+    /// captured before and is transcribed. The transcribers stay open: `resume` goes on in the same transcript, and the time
+    /// paused stays a gap on its clock. Returns whether it paused (not when the capture isn't running or is already paused).
+    @discardableResult
+    public func pause() -> Bool {
+        guard let micPipe, let systemPipe, stageLock.withLock({ stage == .started && !paused }) else { return false }
+        micPipe.setAccepting(false)
+        systemPipe.setAccepting(false)
+        mic.stop()
+        system.stop()
+        stageLock.withLock { paused = true }
+        return true
+    }
+
+    /// Starts the microphone and the system-audio tap again, in the order `start` uses. When one of them can't start, the capture
+    /// stays paused with both stopped, and the error is the one `start` would give.
+    public func resume() throws {
+        guard let micPipe, let systemPipe, isPaused else { return }
+        micPipe.setAccepting(true)
+        systemPipe.setAccepting(true)
+        do {
+            try mic.start { micPipe.push($0, hostTime: $1) }
+            do {
+                try system.start { systemPipe.push($0, hostTime: $1) }
+            } catch {
+                mic.stop()
+                throw error
+            }
+        } catch {
+            micPipe.setAccepting(false)
+            systemPipe.setAccepting(false)
+            throw error
+        }
+        stageLock.withLock { paused = false }
+    }
+
     /// What a `start` that has not finished waits for, as the error the panel shows, with the Settings pane that fixes it: the
     /// system audio its permission (macOS asks for it again after an update re-signs an ad-hoc build), the microphone its
     /// permission or its device, the analyzers the speech model.
@@ -165,6 +206,7 @@ public final class MeetingCapture: @unchecked Sendable {
     public func stop() async throws {
         mic.stop()
         system.stop()
+        stageLock.withLock { paused = false }
         // Whatever was left in the 100 ms accumulator.
         micPipe?.flush()
         systemPipe?.flush()

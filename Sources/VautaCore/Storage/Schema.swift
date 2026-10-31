@@ -506,6 +506,17 @@ enum Schema {
                 UPDATE meeting_speakers SET suggested_by_segment = NULL WHERE id = new.id;
             END;
             """)),
+        // The recording was paused (`MeetingCapture.pause`): nothing was captured from `start` to `end`, seconds on the transcript's
+        // clock. Times only, no content. `end` is NULL while the pause lasts, and stays NULL when the app quit during it.
+        Migration(35, .sql("""
+            CREATE TABLE meeting_pauses (
+                id INTEGER PRIMARY KEY,
+                meeting_id INTEGER NOT NULL REFERENCES meetings(id) ON DELETE CASCADE,
+                start REAL NOT NULL CHECK(start >= 0),
+                end REAL CHECK(end IS NULL OR end >= start)
+            );
+            CREATE INDEX meeting_pauses_meeting ON meeting_pauses(meeting_id, start);
+            """)),
     ]
 
     /// The schema version this build writes.

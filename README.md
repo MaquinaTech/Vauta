@@ -216,7 +216,7 @@ The backup holds your meetings, your context and your settings (languages, templ
    - **Minutes**: *Quick start · Basic quality* (Apple Intelligence), or **Set Up a Model Server**, a guide that shows what to install and which model fits your Mac. You can skip this and set it up later in **Settings → Models**.
 2. **Pick the audio source.** **Auto** (the default on a new install) follows the app in the call. In the menu-bar panel you can choose the apps you use for meetings instead, or all system audio.
 3. **Record.** Join your call and press **⌃⌥R**, or click **Start Recording** in the menu-bar panel. While recording, press **⌃⌥M** to mark a moment, **⌃⌥T** to show your translated captions, type quick notes, and tell Vauta who "Others" are.
-4. **Stop.** Press **⌃⌥R** again. Vauta also stops by itself after a few minutes with no audio from the other side (5 by default).
+4. **Pause or stop.** Click **Pause** under the timer when part of the conversation shouldn't be recorded: the microphone and the meeting's sound stop being captured (macOS turns off the microphone indicator), the meeting stays open, and **Resume** goes on in the same transcript, which shows the pause. Press **⌃⌥R** again to stop. Vauta also stops by itself after a few minutes with no audio from the other side (5 by default), never while paused.
 5. **Read the minutes.** Vauta writes them in the background and sends a notification when they are ready. Open **Meetings…** from the panel and unlock with Touch ID or your password.
 
 Both shortcuts can be changed in **Settings → General**.

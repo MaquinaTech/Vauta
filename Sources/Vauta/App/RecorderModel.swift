@@ -67,6 +67,8 @@ final class RecorderModel {
     var isReplacingData: Bool { isRestoring || isErasing }
     var startedAt: Date?
     var elapsedSeconds = 0
+    /// The recording is paused (`+Pause`): nothing is captured, the meeting stays open.
+    var isPaused = false
     /// Final segments, in time order.
     var segments: [LiveSegment] = []
     /// The latest provisional result of each channel, in time order.

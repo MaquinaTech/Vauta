@@ -273,6 +273,7 @@ extension RecorderModel {
 
     func resetSession() {
         capture = nil
+        isPaused = false
         diarizer = nil
         _ = windowSpool.take()
         meetingID = nil
