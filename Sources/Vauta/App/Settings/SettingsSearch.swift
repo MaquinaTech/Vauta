@@ -20,7 +20,7 @@ enum SettingsSearch {
     /// The settings of each pane, in the order the pane shows them: section titles and the names of the settings in them.
     static let index: [SettingsModel.Pane: [String]] = [
         .general: ["Startup", "Open Vauta at login", "Keyboard shortcuts", "Start or stop recording", "Mark a moment", "Take a note",
-                   "Turn Live Translation on or off", "Open the notepad when recording starts", "Notifications", "When minutes are ready",
+                   "Pause or resume recording", "Turn Live Translation on or off", "Open the notepad when recording starts", "Notifications", "When minutes are ready",
                    "When something needs your attention", "Show meeting titles in notifications", "Show follow-up after meetings"],
         .recording: ["Live answers", "Answer questions asked in the meeting", "Keep detected questions with the meeting",
                      "Hide answers when someone answers aloud", "Starting and stopping", "Suggest recording when a call starts",
