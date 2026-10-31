@@ -29,6 +29,8 @@ final class AskModel {
     var answeredQuestion = ""
     var passages: [RetrievedPassage] = []
     var note: String?
+    /// Across the library: what the answer's search looked at and what reached the model (the line under the answer).
+    var coverage: AskCoverage?
     /// The answer on screen is one found during the recording and stored with the meeting (no model ran for it).
     var showsStored = false
     /// There is no model to answer: the passages that match are all there is.
@@ -113,6 +115,37 @@ final class AskModel {
                comment: "Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year")
     }
 
+    /// The line under an answer over the library: the meetings searched and their days, those searched by keywords alone, what reached
+    /// the model, and the older meetings whose transcript is gone. Nil when there is nothing to say.
+    static func coverageText(_ c: AskCoverage) -> String? {
+        var parts: [String] = []
+        if c.searched > 0, let days = c.days() {
+            parts.append(String(localized: "Searched \(c.searched) meetings (\(days)).",
+                                comment: "Ask: under an answer; the arguments are how many meetings' transcripts were searched and their dates (a day or a range)"))
+            if c.keywordsOnly > 0 {
+                parts.append(String(localized: "\(c.keywordsOnly) of them aren’t indexed for search by meaning yet and were searched by keywords.",
+                                    comment: "Ask: under an answer, after the number of meetings searched; the argument is how many of those meetings were searched by keywords only"))
+            }
+        }
+        switch (c.sentMeetings, c.sentDocuments) {
+        case (0, 0): break
+        case (let meetings, 0):
+            parts.append(String(localized: "Passages from \(meetings) meetings were sent to the model.",
+                                comment: "Ask: under an answer; the argument is how many meetings had passages in the request to the model"))
+        case (0, let documents):
+            parts.append(String(localized: "Passages from \(documents) documents were sent to the model.",
+                                comment: "Ask: under an answer; the argument is how many of the person's documents had passages in the request to the model"))
+        case (let meetings, let documents):
+            parts.append(String(localized: "Passages from \(meetings) meetings and \(documents) documents were sent to the model.",
+                                comment: "Ask: under an answer; the arguments are how many meetings and how many of the person's documents had passages in the request to the model"))
+        }
+        if c.purged > 0 {
+            parts.append(String(localized: "\(c.purged) older meetings no longer have a transcript and weren’t searched.",
+                                comment: "Ask: under an answer; the argument is how many meetings had their transcript deleted by the retention setting (their minutes stay), so Ask could not search them"))
+        }
+        return parts.isEmpty ? nil : ClaimProse.join(parts)
+    }
+
     /// A live question about something that has not happened yet in the meeting.
     static var notYetText: String {
         String(localized: "That hasn’t come up yet in this meeting.", comment: "Ask: the answer to a question about something that has not happened yet in the meeting being recorded")
@@ -155,6 +188,7 @@ final class AskModel {
         answer = nil
         showsStored = false
         note = nil
+        coverage = nil
         needsModel = false
         failure = nil
         passages = []
@@ -209,6 +243,7 @@ final class AskModel {
                 }
                 if !result.documentPassages.isEmpty { documentPassages = result.documentPassages }
                 if result.widenedScope, let period { note = Self.nothingThenNote(period) }
+                coverage = result.coverage
                 answer = result.answer
             } catch is CancellationError {
             } catch where Task.isCancelled {
@@ -260,6 +295,7 @@ final class AskModel {
         passages = []
         documentPassages = []
         note = nil
+        coverage = nil
         failure = nil
         needsModel = false
         // What a dropped claim said must not stay in the prose.
@@ -367,6 +403,7 @@ final class AskModel {
         passages = []
         documentPassages = []
         note = nil
+        coverage = nil
         needsModel = false
         failure = nil
         segmentMeeting = [:]

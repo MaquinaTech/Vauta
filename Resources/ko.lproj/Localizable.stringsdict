@@ -239,6 +239,34 @@
 			<string>메모 %lld개 더 보기</string>
 		</dict>
 	</dict>
+	<key>%lld of them aren’t indexed for search by meaning yet and were searched by keywords.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>그중 %lld개는 아직 의미 검색 색인에 없어 키워드 검색으로 검색했습니다.</string>
+		</dict>
+	</dict>
+	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>오래된 회의 %lld개는 녹취록이 더 이상 없어 검색하지 않았습니다.</string>
+		</dict>
+	</dict>
 	<key>%lld to review</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -461,6 +489,71 @@
 			<string>lld</string>
 			<key>other</key>
 			<string>기타 가능한 항목, %lld개</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>문서 %lld개의 구간을 모델에 보냈습니다.</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings and %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>회의 %1$#@meetings@와 문서 %2$#@documents@의 구간을 모델에 보냈습니다.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld개</string>
+		</dict>
+		<key>documents</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%2$lld개</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>회의 %lld개의 구간을 모델에 보냈습니다.</string>
+		</dict>
+	</dict>
+	<key>Searched %lld meetings (%@).</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>회의 %1$#@meetings@에서 검색했습니다(%2$@).</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld개</string>
 		</dict>
 	</dict>
 	<key>Spoke in %lld meetings</key>

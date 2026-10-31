@@ -239,6 +239,34 @@
 			<string>还有 %lld 条笔记</string>
 		</dict>
 	</dict>
+	<key>%lld of them aren’t indexed for search by meaning yet and were searched by keywords.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>其中 %lld 个尚未建立按语义搜索的索引，已改用关键词搜索。</string>
+		</dict>
+	</dict>
+	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%lld 个较早的会议已没有转录文本，未被搜索。</string>
+		</dict>
+	</dict>
 	<key>%lld to review</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -461,6 +489,71 @@
 			<string>lld</string>
 			<key>other</key>
 			<string>其他可能的事项，共%lld项</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>已将 %lld 个文档的片段发送给模型。</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings and %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>已将 %1$#@meetings@和 %2$#@documents@的片段发送给模型。</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld 个会议</string>
+		</dict>
+		<key>documents</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%2$lld 个文档</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>已将 %lld 个会议的片段发送给模型。</string>
+		</dict>
+	</dict>
+	<key>Searched %lld meetings (%@).</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>已搜索 %1$#@meetings@（%2$@）。</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld 个会议</string>
 		</dict>
 	</dict>
 	<key>Spoke in %lld meetings</key>

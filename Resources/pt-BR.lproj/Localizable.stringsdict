@@ -304,6 +304,38 @@
 			<string>mais %lld notas</string>
 		</dict>
 	</dict>
+	<key>%lld of them aren’t indexed for search by meaning yet and were searched by keywords.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld delas ainda não está no índice de busca por significado e foi pesquisada por palavras-chave.</string>
+			<key>other</key>
+			<string>%lld delas ainda não estão no índice de busca por significado e foram pesquisadas por palavras-chave.</string>
+		</dict>
+	</dict>
+	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld reunião mais antiga não tem mais transcrição e não foi pesquisada.</string>
+			<key>other</key>
+			<string>%lld reuniões mais antigas não têm mais transcrição e não foram pesquisadas.</string>
+		</dict>
+	</dict>
 	<key>%lld to review</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
@@ -590,6 +622,81 @@
 			<string>Outros itens possíveis, %lld de itens</string>
 			<key>other</key>
 			<string>Outros itens possíveis, %lld itens</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Trechos de %lld documento foram enviados ao modelo.</string>
+			<key>other</key>
+			<string>Trechos de %lld documentos foram enviados ao modelo.</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings and %lld documents were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Trechos de %1$#@meetings@ e %2$#@documents@ foram enviados ao modelo.</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld reunião</string>
+			<key>other</key>
+			<string>%1$lld reuniões</string>
+		</dict>
+		<key>documents</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%2$lld documento</string>
+			<key>other</key>
+			<string>%2$lld documentos</string>
+		</dict>
+	</dict>
+	<key>Passages from %lld meetings were sent to the model.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>Trechos de %lld reunião foram enviados ao modelo.</string>
+			<key>other</key>
+			<string>Trechos de %lld reuniões foram enviados ao modelo.</string>
+		</dict>
+	</dict>
+	<key>Searched %lld meetings (%@).</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Busca em %1$#@meetings@ (%2$@).</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld reunião</string>
+			<key>other</key>
+			<string>%1$lld reuniões</string>
 		</dict>
 	</dict>
 	<key>Spoke in %lld meetings</key>
