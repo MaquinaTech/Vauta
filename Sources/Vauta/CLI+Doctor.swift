@@ -59,13 +59,22 @@ func doctor() async -> Int32 {
         if let config = try LLMServerConfig.load() {
             line(nil, "Configured: \(config.baseURL) (\(config.mode.rawValue))")
             let bearer = try? ServerCredentials.readBearer()
-            switch await reachability(config, bearer: bearer ?? nil) {
+            let client = LLMClient(config: config, bearer: { bearer ?? nil })
+            switch await reachability(client) {
             case .success(let models):
                 let missing = LLMRole.allCases.map(config.model).filter { !$0.isEmpty && !models.contains($0) }
                 line(true, "Reachable · \(models.count) models listed")
                 if !missing.isEmpty { line(false, "Not listed by the server: \(missing.joined(separator: ", "))") }
             case .failure(let error):
                 line(false, "Not reachable: \(error.localizedDescription)")
+            }
+            if let certificate = client.certificate {
+                let date = certificate.notAfter.formatted(date: .long, time: .omitted)
+                switch certificate.state() {
+                case .valid: line(true, "Certificate valid until \(date)")
+                case .expiresSoon: line(nil, "Certificate expires on \(date): renew it (make-server-cert.sh renews one it made and keeps the pin)")
+                case .expired: line(false, "Certificate expired on \(date): renew it (make-server-cert.sh renews one it made and keeps the pin)")
+                }
             }
         } else {
             line(nil, "Not configured (minutes use Apple Intelligence when available).")
@@ -100,8 +109,7 @@ private func describe(_ status: AVAuthorizationStatus) -> String {
 }
 
 /// The server's model list, within 10 s.
-private func reachability(_ config: LLMServerConfig, bearer: String?) async -> Result<[String], Error> {
-    let client = LLMClient(config: config, bearer: { bearer })
+private func reachability(_ client: LLMClient) async -> Result<[String], Error> {
     return await withTaskGroup(of: Result<[String], Error>?.self) { group in
         group.addTask {
             do { return .success(try await client.allModels(purpose: .connectionTest)) } catch { return .failure(error) }

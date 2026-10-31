@@ -372,7 +372,7 @@ tell the user: never edit `.github/allowed_signers` or the script to make it pas
 |---|---|
 | Can't reach the model server | The server is running and the URL matches the one that passed `server-check`. For a remote server: System Settings › Privacy & Security › Local Network › Vauta. |
 | The server doesn't list the models | Names must match `/v1/models` exactly, including the tag (`:8b`). |
-| Certificate rejected | The IP or name in the URL isn't in the certificate's SAN; the CA isn't the one that signed the certificate; the pin doesn't match (`Vauta cert-pin server.crt`); or the certificate is valid for more than 825 days. |
+| Certificate rejected | The IP or name in the URL isn't in the certificate's SAN; the CA isn't the one that signed the certificate; the pin doesn't match (`Vauta cert-pin server.crt`); or the certificate is valid for more than 825 days, or it has expired (Status warns 30 days before; `doctor` prints the date; run `make-server-cert.sh` again with the same arguments to renew it and keep the pin). |
 | A name-based host is refused | Add the private CA or a pin, or use the IP address. |
 | Slow minutes | Normal with large models on modest machines. Use a smaller main model, or raise the context only if memory allows. |
 | The model answers with text instead of JSON | Use a more capable instruct model, or set the server type in Settings › Models › Advanced so Vauta can request structured output. Vauta strips leading `<think>…</think>` reasoning blocks. |

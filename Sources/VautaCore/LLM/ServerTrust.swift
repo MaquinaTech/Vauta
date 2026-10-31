@@ -13,17 +13,25 @@ import Security
 /// server must therefore send its full chain (leaf and intermediates), which
 /// `tailscale cert`, Caddy and Let's Encrypt's `fullchain.pem` do.
 enum ServerTrust {
-    /// Evaluates a server-trust challenge against the configured endpoints.
+    /// Evaluates a server-trust challenge against the configured endpoints, with how long the chain it presented stays valid
+    /// (also when it was refused, so an expired certificate can be named; nil for a challenge no endpoint expects).
     static func evaluate(_ challenge: URLAuthenticationChallenge, _ targets: [LLMServerConfig.Endpoint])
-        -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        -> (URLSession.AuthChallengeDisposition, URLCredential?, CertificateValidity?) {
         let space = challenge.protectionSpace
         let host = space.host.lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "[]"))
         guard space.authenticationMethod == NSURLAuthenticationMethodServerTrust,
               let target = targets.first(where: { $0.secure && $0.host == host && $0.port == space.port }),
-              let trust = space.serverTrust, evaluate(trust, target) else {
-            return (.cancelAuthenticationChallenge, nil)
+              let trust = space.serverTrust else {
+            return (.cancelAuthenticationChallenge, nil, nil)
         }
-        return (.useCredential, URLCredential(trust: trust))
+        let trusted = evaluate(trust, target)
+        let validity = validity(of: trust)
+        return trusted ? (.useCredential, URLCredential(trust: trust), validity) : (.cancelAuthenticationChallenge, nil, validity)
+    }
+
+    /// How long the chain an evaluation built stays valid (after `evaluate`, so offline: no fetches are allowed by then).
+    static func validity(of trust: SecTrust) -> CertificateValidity? {
+        CertificateValidity.earliest(SecTrustCopyCertificateChain(trust) as? [SecCertificate] ?? [])
     }
 
     /// `date` is only for tests (fixture certificates have fixed validity).
