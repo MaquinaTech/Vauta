@@ -338,6 +338,7 @@ Swift 6 language mode with strict concurrency checking. The rules:
 | `LLMService` | `actor`. One model request at a time through a priority lane: Ask > live notes > background jobs. Background jobs wait while recording; Ask interrupts a background job, which goes back to the queue. The queue is persistent |
 | Capture (`MicrophoneCapture`, `SystemAudioTap`, `ChannelPipe`, `ChannelTranscriber`) | `final class … @unchecked Sendable`, with `NSLock` around state shared with Core Audio callbacks, which run on private serial dispatch queues. Segments reach the main actor through callbacks |
 | `LLMClient`, `SystemModelProviders` | `@unchecked Sendable`, state behind `NSLock` / `Mutex` |
+| Small state shared between threads (`RaceBox` and `ExtractionTracker` in `Deadline.swift`, `TokenCounter`, `QueryTranslator.Finish`, counters and caches) | `final class …: Sendable` with its state in a `Mutex<State>`, so the compiler checks every access; a continuation is resumed and a callback called outside the lock. New code follows this, not `NSLock` with `@unchecked Sendable` |
 | `SearchModelController`, `SearchModelEngine`, `SearchModelDownloader` | `actor`s. MLX work runs on the engine's own serial queue (utility QoS), never on the cooperative pool or the main actor; an MLX `eval` cannot be interrupted, so each batch yields and checks cancellation |
 
 Cancelling minutes, Ask or a re-analysis cancels the Swift task that runs it, and with it the model request. Long

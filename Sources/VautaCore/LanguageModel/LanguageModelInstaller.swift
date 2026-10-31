@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
 import Foundation
+import Synchronization
 internal import VautaMLX
 
 /// The install operations behind `Vauta llm-install` (hidden, for testing and release checks): status, download, import,
@@ -59,15 +60,16 @@ public enum LanguageModelInstaller {
 }
 
 /// Prints a progress line at most every 5 percent.
-private final class ProgressThrottle: @unchecked Sendable {
-    private let lock = NSLock()
-    private var step = -1
+private final class ProgressThrottle: Sendable {
+    private let step = Mutex(-1)
     func line(for p: LanguageModelProgress) -> String? { line(fraction: Double(p.received) / Double(max(p.total, 1)), phase: "\(p.phase)") }
     func line(fraction: Double, phase: String = "import") -> String? {
-        lock.lock(); defer { lock.unlock() }
         let s = Int(fraction * 20)
-        guard s != step else { return nil }
-        step = s
-        return "\(phase) \(s * 5)%"
+        let moved = step.withLock { step in
+            guard s != step else { return false }
+            step = s
+            return true
+        }
+        return moved ? "\(phase) \(s * 5)%" : nil
     }
 }
