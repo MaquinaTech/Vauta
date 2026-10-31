@@ -133,7 +133,7 @@ extension AskView {
             // About the whole answer, not one more claim: set apart by a rule, no glyph, on the card's text edge.
             if answer.kind == .partlyVerified || answer.kind == .related {
                 Divider().padding(.top, 2)
-                Text(answer.kind == .related ? AskModel.relatedNote : AskModel.partlyVerifiedNote)
+                Text(answer.kind == .related ? AskModel.relatedNote : AskModel.partlyVerifiedNote(for: answer))
                     .font(.callout).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }

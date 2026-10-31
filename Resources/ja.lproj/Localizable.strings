@@ -5456,6 +5456,9 @@
 /* Ask: shown under the claims of an answer when some of them are verified and some are not */
 "Some points couldn’t be found word for word. Check the ones marked before relying on them." = "一部の項目は一字一句そのままでは見つかりませんでした。信頼する前に、印のついたものを確認してください。";
 
+/* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
+"Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "回答の根拠になった文字起こしや書類にない数値です: %@。頼る前に確認してください。";
+
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "使われていない保存済みの声があります";
 

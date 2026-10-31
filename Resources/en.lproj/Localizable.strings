@@ -3952,6 +3952,9 @@
 /* Task row: its reminder was deleted or moved in Reminders */
 "Not in Reminders any more" = "Not in Reminders any more";
 
+/* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
+"Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "Not in the transcript or documents the answer was based on: %@. Check before relying on it.";
+
 /* No comment provided by engineer. */
 "Not installed" = "Not installed";
 

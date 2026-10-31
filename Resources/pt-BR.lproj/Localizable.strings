@@ -5456,6 +5456,9 @@
 /* Ask: shown under the claims of an answer when some of them are verified and some are not */
 "Some points couldn’t be found word for word. Check the ones marked before relying on them." = "Alguns pontos não foram encontrados palavra por palavra. Confira os marcados antes de confiar neles.";
 
+/* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
+"Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "Não está na transcrição nem nos documentos em que a resposta se baseia: %@. Confira antes de confiar nela.";
+
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "Algumas vozes salvas não estão em uso";
 

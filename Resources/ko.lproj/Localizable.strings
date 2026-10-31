@@ -5456,6 +5456,9 @@
 /* Ask: shown under the claims of an answer when some of them are verified and some are not */
 "Some points couldn’t be found word for word. Check the ones marked before relying on them." = "일부 항목은 문구 그대로 찾을 수 없었습니다. 믿기 전에 표시된 항목을 확인하세요.";
 
+/* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
+"Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "답변의 근거가 된 녹취록이나 문서에 없는 수치입니다: %@. 의존하기 전에 확인하세요.";
+
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "사용되지 않는 저장된 목소리가 있습니다";
 

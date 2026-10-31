@@ -93,6 +93,16 @@ final class AskModel {
                comment: "Ask: shown under the claims of an answer when some of them are verified and some are not")
     }
 
+    /// Under a partly verified answer: the claims that could not be checked, and the figures of its sentence that are in nothing the
+    /// model read (`VerifiedAnswer.unbackedFigures`).
+    static func partlyVerifiedNote(for answer: VerifiedAnswer) -> String {
+        guard !answer.unbackedFigures.isEmpty else { return partlyVerifiedNote }
+        let figures = answer.unbackedFigures.formatted(.list(type: .and))
+        let note = String(localized: "Not in the transcript or documents the answer was based on: \(figures). Check before relying on it.",
+                          comment: "Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350)")
+        return answer.claims.allSatisfy(\.verified) ? note : ClaimProse.join([partlyVerifiedNote, note])
+    }
+
     /// Under the claims of an answer whose quoted moments were judged to only touch the topic.
     static var relatedNote: String {
         String(localized: "These moments only touch the topic; they may not answer the question.",
@@ -478,7 +488,7 @@ final class AskModel {
     func copyableAnswer() -> AnswerExport? {
         guard let answer else { return nil }
         return AnswerExport(question: answeredQuestion, answer: answer, unverifiedNote: answer.cutShort && answer.claims.isEmpty ? Self.cutShortNote : Self.unverifiedNote(for: answeredScope),
-                            partlyVerifiedNote: Self.partlyVerifiedNote, relatedNote: Self.relatedNote, endsIncompleteNote: Self.endsIncompleteNote, source: { [self] id in
+                            partlyVerifiedNote: Self.partlyVerifiedNote(for: answer), relatedNote: Self.relatedNote, endsIncompleteNote: Self.endsIncompleteNote, source: { [self] id in
             segments[id] == nil ? nil : citationLabel(id)
         })
     }

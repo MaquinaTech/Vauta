@@ -490,6 +490,11 @@ extension LLMService {
                 adopt(better, found)
             }
         }
+        // The sentence's figures must be in what the model read (the request after the system prompt: the passages with their headings
+        // and times, the documents, the question and its rules, which hold no figures): one that is in none of them leaves the answer
+        // partly verified.
+        answer = answer.checkingFigures(against: messages.dropFirst().map(\.content).joined(separator: "\n"),
+                                        languages: Array(Set(segmentLanguages.values).union([transcriptLanguage, language.identifier].compactMap { $0 })))
         // Live, on the integrated model: a verified answer is read once more against the moment of the question. Quotes that only
         // announce something that has not happened yet turn it into "that hasn't come up yet"; quotes that only touch the topic mark
         // it unverified. It fails open: on an error or after 3 seconds the answer stands.

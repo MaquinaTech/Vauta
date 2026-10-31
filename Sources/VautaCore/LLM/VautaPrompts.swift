@@ -166,6 +166,9 @@ public struct VerifiedAnswer: Sendable, Equatable {
     /// How many of the model's claims were dropped before checking (no words in the sentence or in the quote, the grammar's closing
     /// filler, or past the twelfth). The prose may still carry what they said, so a live answer with any is not shown.
     public let droppedClaims: Int
+    /// Figures of the sentence that are in nothing the model was given (`checkingFigures`), as the sentence writes them: the answer is
+    /// then only partly verified, whatever its claims say.
+    public let unbackedFigures: [String]
 
     /// How the answer stands, for the card: verified (every claim), partly verified, unverified (found, nothing could be checked), cut
     /// short, not yet, or not found.
@@ -177,13 +180,14 @@ public struct VerifiedAnswer: Sendable, Equatable {
         if cutShort, !hasEvidence { return .cutShort }
         if touchesOnly { return .related }
         if claims.isEmpty || !hasEvidence { return .unverified }
-        return claims.allSatisfy(\.verified) ? .verified : .partlyVerified
+        return claims.allSatisfy(\.verified) && unbackedFigures.isEmpty ? .verified : .partlyVerified
     }
 
     /// `found` nil: the answer is a refusal when it has no claims (an answer built without the model's own word on it).
     public init(answer: String, claims: [Claim], found: Bool? = nil, withheld: String = "", cutShort: Bool = false, notYet: Bool = false,
-                touchesOnly: Bool = false, droppedClaims: Int = 0) {
+                touchesOnly: Bool = false, droppedClaims: Int = 0, unbackedFigures: [String] = []) {
         self.droppedClaims = droppedClaims
+        self.unbackedFigures = unbackedFigures
         self.notYet = notYet
         self.touchesOnly = touchesOnly
         self.answer = answer
@@ -197,7 +201,7 @@ public struct VerifiedAnswer: Sendable, Equatable {
     func markedCutShort() -> VerifiedAnswer {
         guard found, !notYet, !cutShort else { return self }
         return VerifiedAnswer(answer: answer, claims: claims, found: found, withheld: withheld, cutShort: true, notYet: notYet, touchesOnly: touchesOnly,
-                              droppedClaims: droppedClaims)
+                              droppedClaims: droppedClaims, unbackedFigures: unbackedFigures)
     }
 }
 
