@@ -1290,6 +1290,9 @@
 /* No comment provided by engineer. */
 "Click a time or use ↑↓ to highlight a passage." = "Click a time or use ↑↓ to highlight a passage.";
 
+/* Ask: help on the follow-up toggle when it is off */
+"Click to read this question together with the one before." = "Click to read this question together with the one before.";
+
 /* Ask: help on the time toggle when it is off */
 "Click to search only the meetings held then." = "Click to search only the meetings held then.";
 
@@ -2461,6 +2464,9 @@
 
 /* Default title of a calendar event for the next meeting; the argument is the meeting’s name */
 "Follow-up: %@" = "Follow-up: %@";
+
+/* Ask: a toggle under the question that reads it together with the question asked before it; the argument is that earlier question */
+"Following up on “%@”" = "Following up on “%@”";
 
 /* Recommendation shown next to the Apple on-device model */
 "For better minutes, set up a model server." = "For better minutes, set up a model server.";
@@ -6668,6 +6674,9 @@
 
 /* Error when choosing an entity that was deleted */
 "This person or project no longer exists." = "This person or project no longer exists.";
+
+/* Ask: help on the follow-up toggle when it is on */
+"This question is read together with the one before. Click to ask it on its own." = "This question is read together with the one before. Click to ask it on its own.";
 
 /* No comment provided by engineer. */
 "This removes:" = "This removes:";

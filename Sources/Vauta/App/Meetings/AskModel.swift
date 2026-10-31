@@ -25,6 +25,14 @@ final class AskModel {
     private(set) var placeMeetings: [MeetingStore.Meeting]?
     /// The person turned that control off or on again (nil: on). Forgotten when the question names another place.
     private(set) var placeChoice: Bool?
+    /// The question before, for a question that goes on from it (`AskFollowUp`, `AskModel+FollowUp`): in memory only, cleared with
+    /// Ask. `answeredFollowUp` is the one that was offered when the question on screen was asked.
+    var followUp: AskFollowUp?
+    var answeredFollowUp: AskFollowUp?
+    /// The question reads as going on from the one before (`AskFollowUp.continues`): the control starts on.
+    var followUpSuggested = false
+    /// The person turned that control on or off, for the question they turned it for.
+    var followUpChoice: (question: String, on: Bool)?
     /// About one meeting (its whole transcript) instead of all of them.
     var thisMeeting = false
     /// The meeting "this meeting" refers to.
@@ -34,6 +42,8 @@ final class AskModel {
     var answer: VerifiedAnswer?
     /// The question the answer belongs to (the field may have changed since).
     var answeredQuestion = ""
+    /// What search and the model read for it: the question, after the earlier one when it followed up (its words are marked).
+    var answeredReading = ""
     var passages: [RetrievedPassage] = []
     var note: String?
     /// Across the library: what the answer's search looked at and what reached the model (the line under the answer).
@@ -208,7 +218,7 @@ final class AskModel {
         askAgainIfAnswered()
     }
 
-    private func askAgainIfAnswered() {
+    func askAgainIfAnswered() {
         let current = SingleLineText.flatten(question).trimmingCharacters(in: .whitespacesAndNewlines)
         if !busy, current == answeredQuestion, answer != nil || !passages.isEmpty || needsModel || failure != nil { ask() }
     }
@@ -226,12 +236,16 @@ final class AskModel {
 
     /// The question's language when it can be told, else the person's: the words of the other languages are not looked for
     /// (German "hier" is "here").
-    private func readQuestion() {
+    ///
+    /// A question that follows up takes the time and the place of the one before when it names none of its own ("And who owns it?").
+    func readQuestion() {
         let languages = OutputLanguage.confident(question).map { [$0.identifier] } ?? Locale.preferredLanguages
-        let read = AskTimeScope.read(question, languages: languages)
+        followUpSuggested = AskFollowUp.continues(question, languages: languages)
+        let earlier = usesFollowUp ? offeredFollowUp?.context : nil
+        let read = AskTimeScope.read(question, languages: languages) ?? earlier.flatMap { AskTimeScope.read($0, languages: languages) }
         if read?.interval != timeScope?.interval { timeChoice = nil }
         timeScope = read
-        let named = AskMeetingPlace.read(question, languages: languages)
+        let named = AskMeetingPlace.read(question, languages: languages) ?? earlier.flatMap { AskMeetingPlace.read($0, languages: languages) }
         if named != place {
             placeChoice = nil
             placeMeetings = nil
@@ -244,7 +258,7 @@ final class AskModel {
     private func resolvePlace() {
         placeTask?.cancel()
         guard let place else { placeMeetings = nil; return }
-        let question = question, period = usesTimeScope ? timeScope : nil
+        let question = readingOfQuestion, period = usesTimeScope ? timeScope : nil
         placeTask = Task {
             try? await Task.sleep(for: .milliseconds(250))
             guard !Task.isCancelled else { return }
@@ -274,6 +288,10 @@ final class AskModel {
         let scope = thisMeeting && self.scope != .documents ? meetingID : nil
         let period = usesTimeScope ? timeScope : nil
         let place = usesPlace ? self.place : nil
+        // Read after the question before when it follows up: search and the model see both; the answer is this question's.
+        let thread = offeredFollowUp
+        let follows = usesFollowUp && thread != nil
+        let reading = follows ? (thread?.reading(question) ?? question) : question
         task?.cancel()
         onAsked?(question)
         busy = true
@@ -289,6 +307,10 @@ final class AskModel {
         segmentMeeting = [:]
         segments = [:]
         answeredQuestion = question
+        answeredReading = reading
+        answeredFollowUp = thread
+        // The next question may go on from this one (with what this one went on from).
+        followUp = AskFollowUp.after(question, previous: follows ? thread : nil)
         answeredScope = self.scope
         answeredThisMeeting = scope != nil
         generation += 1
@@ -304,7 +326,7 @@ final class AskModel {
             var meetings: [Int64]?
             var widenedNote: String?
             var placed = false
-            if let place, kind != .documents, let found = await self.meetings(at: place, question: question, period: period), !found.isEmpty {
+            if let place, kind != .documents, let found = await self.meetings(at: place, question: reading, period: period), !found.isEmpty {
                 if found.count == 1 { within = found[0].id } else { meetings = found.map(\.id) }
                 placed = true
             } else if let period, kind != .documents {
@@ -313,13 +335,13 @@ final class AskModel {
                 if ids.isEmpty { widenedNote = Self.noMeetingsThenNote(period) } else { meetings = ids }
             }
             let widened = placed ? Self.nothingThereNote : period.map(Self.nothingThenNote)
-            var local = kind == .documents ? [] : ((try? await store.retrieve(question, queryVector: nil, within: within, meetings: meetings)) ?? [])
+            var local = kind == .documents ? [] : ((try? await store.retrieve(reading, queryVector: nil, within: within, meetings: meetings)) ?? [])
             if local.isEmpty, meetings != nil, kind != .documents {
-                local = (try? await store.retrieve(question, queryVector: nil, within: within)) ?? []
+                local = (try? await store.retrieve(reading, queryVector: nil, within: within)) ?? []
                 // Without a model these passages are all there is: say they come from all the meetings.
                 if !local.isEmpty, await llm?.isConfigured != true { widenedNote = widened }
             }
-            let localDocuments = kind == .meetings ? [] : (await llm?.documentPassages(for: question, meetingID: within) ?? [])
+            let localDocuments = kind == .meetings ? [] : (await llm?.documentPassages(for: reading, meetingID: within) ?? [])
             guard !Task.isCancelled else { return }
             if let widenedNote { note = widenedNote }
             show(local)
@@ -329,7 +351,7 @@ final class AskModel {
                 return
             }
             do {
-                let result = try await llm.ask(question, meetingID: within, meetings: meetings, scope: kind) { n in
+                let result = try await llm.ask(reading, meetingID: within, meetings: meetings, scope: kind) { n in
                     Task { @MainActor in if self.generation == current { self.progressTokens = n } }
                 }
                 guard !Task.isCancelled else { return }
@@ -387,6 +409,9 @@ final class AskModel {
         }
         self.question = question
         answeredQuestion = question
+        answeredReading = question
+        answeredFollowUp = nil
+        followUp = AskFollowUp.after(question, previous: nil)
         answeredThisMeeting = content.usesOnlyThisMeeting
         thisMeeting = content.usesOnlyThisMeeting
         meetingID = live
@@ -505,6 +530,12 @@ final class AskModel {
         cancel()
         question = ""
         answeredQuestion = ""
+        answeredReading = ""
+        // Nothing of the questions before is kept (Ask from Scratch, locking).
+        followUp = nil
+        answeredFollowUp = nil
+        followUpChoice = nil
+        followUpSuggested = false
         answer = nil
         showsStored = false
         passages = []

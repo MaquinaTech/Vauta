@@ -37,4 +37,21 @@ extension AskView {
                  : Text("Click to search only the meetings the question names.",
                         comment: "Ask: help on the toggle of the meetings the question names by their place, when it is off"))
     }
+
+    /// "Following up on “What did we decide about the launch?”", under the question once one was asked: on when the question reads as
+    /// going on from it ("And who owns it?"), off but there to turn on otherwise. Changing it asks again.
+    func followUpToggle(_ thread: AskFollowUp) -> some View {
+        let on = model.usesFollowUp
+        return Toggle(isOn: Binding(get: { model.usesFollowUp }, set: { model.chooseFollowUp($0) })) {
+            Label(AskModel.followUpLabel(thread), systemImage: "arrowshape.turn.up.left")
+                .lineLimit(1)
+        }
+        .toggleStyle(.button)
+        .controlSize(.small)
+        .disabled(model.busy)
+        .help(on ? Text("This question is read together with the one before. Click to ask it on its own.",
+                        comment: "Ask: help on the follow-up toggle when it is on")
+                 : Text("Click to read this question together with the one before.",
+                        comment: "Ask: help on the follow-up toggle when it is off"))
+    }
 }
