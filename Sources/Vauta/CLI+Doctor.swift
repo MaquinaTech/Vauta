@@ -52,6 +52,7 @@ func doctor() async -> Int32 {
     line(nil, MeetingStore.existsAtDefaultLocation
          ? "Encrypted store found (not opened)."
          : "No encrypted store here. Run this from inside Vauta.app to check the app’s own store.")
+    line(nil, "SQLite \(SQLiteLibrary.version) (the system’s)")
 
     print("\nModel server")
     do {
