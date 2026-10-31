@@ -131,6 +131,15 @@ extension LLMService {
         await queueChanged()
     }
 
+    /// A line of the meeting was deleted (`MeetingStore.deleteSegment`), and with it the meeting's search vectors: the meeting is
+    /// embedded again from what is left.
+    public func lineDeleted(meetingID: Int64) async {
+        _ = try? await store.refreshOwnerMarks(meetingID)
+        guard case .available = providers.embeddings(), let meeting = try? await store.meeting(meetingID), meeting.endedAt != nil else { return }
+        try? await store.enqueueJob(.embed, meeting: meetingID)
+        await queueChanged()
+    }
+
     /// A person was renamed, merged or deleted: the names inside the chunks of the meetings where they speak may have
     /// changed, so those meetings are looked at again.
     public func peopleChanged() async {

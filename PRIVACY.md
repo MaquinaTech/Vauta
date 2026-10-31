@@ -25,7 +25,7 @@ Builds from source use the bundle ID `local.vauta.app` unless `VAUTA_BUNDLE_ID` 
 
 | File | Contents |
 |---|---|
-| `vauta.db.enc` | The whole database, encrypted: meetings, transcripts (for a line you corrected, also what was transcribed, until you restore it), minutes (summary, topics, decisions, tasks, open questions), your notes and marks, when a recording was paused (times only), live notes, the questions heard in your meetings and their answers, search vectors, people, projects, glossary and series, the queue of pending model jobs, and the calendar title and attendees of meetings you recorded, and, only while a recording runs or after a crash until the next launch or the end of the meeting, the voice measurements used to separate speakers (see [Speaker separation](#speaker-separation)), and, only if you turn on recognizing voices and choose to save a voice, the voice fingerprints and the voice summaries described in [Voice data](#voice-data); for a meeting recorded after a brief was prepared, references to what the brief showed and its verified suggested agenda lines, with no reminder or invitation text (see [The pre-meeting brief](#the-pre-meeting-brief)), and, for the actions after a meeting, the day each task is due, the time zone a meeting was recorded in, the next meetings found in it, and a ledger of the reminders and events Vauta added for you (identifiers and a hash of the title; never their text; see [After a meeting](#after-a-meeting-reminders-events-and-email)) |
+| `vauta.db.enc` | The whole database, encrypted: meetings, transcripts (for a line you corrected, also what was transcribed, until you restore it or delete the line), minutes (summary, topics, decisions, tasks, open questions), your notes and marks, when a recording was paused (times only), live notes, the questions heard in your meetings and their answers, search vectors, people, projects, glossary and series, the queue of pending model jobs, and the calendar title and attendees of meetings you recorded, and, only while a recording runs or after a crash until the next launch or the end of the meeting, the voice measurements used to separate speakers (see [Speaker separation](#speaker-separation)), and, only if you turn on recognizing voices and choose to save a voice, the voice fingerprints and the voice summaries described in [Voice data](#voice-data); for a meeting recorded after a brief was prepared, references to what the brief showed and its verified suggested agenda lines, with no reminder or invitation text (see [The pre-meeting brief](#the-pre-meeting-brief)), and, for the actions after a meeting, the day each task is due, the time zone a meeting was recorded in, the next meetings found in it, and a ledger of the reminders and events Vauta added for you (identifiers and a hash of the title; never their text; see [After a meeting](#after-a-meeting-reminders-events-and-email)) |
 | `vauta.journal.enc` | Encrypted changes since the last full save (written every 10 seconds while recording) |
 | `vauta.docs.enc` | The index of the folders and files you added as document sources, encrypted with its own key (see [Your documents](#your-documents)): their text in passages, search terms and search vectors. It is derived data and is never in the journal or in backups |
 | `vauta.docs.extracting` | A few bytes, present only while one document is being read: its source, a hash of its relative path, its size and date (never a name). If Vauta quits while reading a file, the next launch skips that file |
@@ -614,6 +614,17 @@ Recording stops when the Mac sleeps or you switch users, and, if **Stop recordin
 default), when the screen locks. Everything transcribed up to that point is saved.
 
 The lock protects the interface. While Vauta runs, the decrypted database is in its memory.
+
+## Deleting a line of a transcript
+
+In a meeting's **Transcript**, **Delete Line…** (in the line's menu, or ⌫ on the highlighted line) deletes a line for good,
+after asking. Its words go with what was transcribed (when you had corrected it), its translation, the questions heard in it
+and the follow-ups found in it; stored answers drop what they said from it; and the meeting's search vectors are deleted and
+made again from what is left. As when a meeting is deleted, the search indexes are merged, the freed space is overwritten and
+the encrypted store is written at once. What the minutes wrote from the line is not rewritten: those decisions, tasks and note
+sentences are marked for you to check, and **Rewrite Minutes** writes the minutes without the line. It can't be undone. A
+backup or a copy of the encrypted file made before still contains the line, and so does anything you exported, or a reminder
+or event created from it.
 
 ## Retention
 

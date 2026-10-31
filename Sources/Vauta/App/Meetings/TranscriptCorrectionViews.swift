@@ -150,3 +150,8 @@ struct CorrectEverywhereNote: View {
         .accessibilityElement(children: .contain)
     }
 }
+
+/// Deleting a line of the transcript for good (the context menu, ⌫ and Edit ▸ Delete on the highlighted line, VoiceOver).
+enum DeleteLineLabel {
+    static let title = String(localized: "Delete Line", comment: "Transcript: confirms deleting a line of the transcript for good; with an ellipsis, the context menu item and VoiceOver action that ask first")
+}

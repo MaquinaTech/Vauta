@@ -1467,6 +1467,13 @@
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "无法更改此行";
 "Couldn’t correct the line" = "无法修正此行";
+"Couldn’t delete the line" = "无法删除这一行";
+"Delete Line" = "删除此行";
+"Delete this line for good?" = "要永久删除这一行吗？";
+"Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "这一行的文字会连同转录时的原文和译文，一起从转录文本、搜索和“提问”中删除。会议纪要中根据它写下的内容会被标记，供你核对；“重新生成会议纪要”会在没有这一行的情况下重写。此操作无法撤销，之前制作的备份仍会保留这一行。";
+"Line deleted" = "已删除这一行";
+"Line deleted. What the minutes wrote from it is marked for you to check." = "已删除这一行。会议纪要中根据它写下的内容已被标记，供你核对。";
+"You deleted the transcript line this was written from. Check that it still belongs in the minutes." = "你删除了写出这项内容所依据的转录文本行。请确认它是否仍应保留在会议纪要中。";
 "Add “%@” to Glossary" = "将“%@”添加到术语表";
 "Added to the glossary" = "已添加到术语表";
 "Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "置顶到术语表后，它会进入听写的自定义词汇；之后的会议中疑似听错的地方会收到建议。";

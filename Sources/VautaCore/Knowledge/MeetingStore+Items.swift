@@ -62,6 +62,9 @@ public enum UnconfirmedReason {
     /// The user corrected the line the item cites after the minutes were written, where the item relied on it
     /// (`MeetingStore.correctSegment`).
     public static let edited = "edited"
+
+    /// The user deleted the line the item cites (`MeetingStore.deleteSegment`): nothing in the transcript backs it any more.
+    public static let deleted = "deleted"
 }
 
 public struct TaskItem: Sendable, Identifiable, Hashable {
