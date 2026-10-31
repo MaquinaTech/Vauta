@@ -220,7 +220,8 @@ final class SettingsModel {
             appVersion: info?["CFBundleShortVersionString"] as? String ?? "dev",
             build: info?["CFBundleVersion"] as? String ?? "0",
             system: "macOS " + ProcessInfo.processInfo.operatingSystemVersionString,
-            entries: statusItems.map { DiagnosticsReport.Entry($0.kind.rawValue, $0.diagnostic) })
+            entries: statusItems.map { DiagnosticsReport.Entry($0.kind.rawValue, $0.diagnostic) }
+                + [DiagnosticsReport.Entry("sqlite", SQLiteLibrary.version)])
         return report.text
     }
 }

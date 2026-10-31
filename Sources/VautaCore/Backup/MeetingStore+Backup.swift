@@ -93,17 +93,12 @@ extension MeetingStore {
             let db = try SQLiteDatabase(image: image, size: size)
             // The image is untrusted: nothing in it runs until its schema is proven to be Vauta's own.
             try BackupSchemaGuard.validate(db)
+            try rebuildFullTextIndexes(db)
             let integrity = try db.query("PRAGMA integrity_check")
             guard integrity.count == 1, integrity[0].string(0) == "ok" else {
                 throw StoreError(.backupInvalid, detail: "integrity check failed")
             }
             try Schema.migrate(db)
-            // The full-text indexes are shadow tables the integrity check above does not compare with their content.
-            do {
-                for table in ["segments_fts", "names_fts", "knowledge_fts"] { try db.execute("INSERT INTO \(table)(\(table)) VALUES('integrity-check')") }
-            } catch {
-                throw StoreError(.backupInvalid, detail: "full-text index check failed")
-            }
             let meetings = Int(try db.query("SELECT COUNT(*) FROM meetings")[0].int(0))
             let savedVoices = Int(try db.query("SELECT COUNT(*) FROM voice_profiles")[0].int(0))
             let documentSources = Int(try db.query("SELECT COUNT(*) FROM doc_sources WHERE attached_meeting_id IS NULL")[0].int(0))
@@ -111,6 +106,36 @@ extension MeetingStore {
             let preferences = encodedPreferences.map(BackupPreferences.init(decoding:)).flatMap { $0.isEmpty ? nil : $0 }
             return OpenedBackup(manifest: manifest, meetings: meetings, savedVoices: savedVoices, documentSources: documentSources, preferences: preferences, database: db)
         }.value
+    }
+
+    /// The full-text indexes of the store, each a binary format of its own that SQLite parses whenever the table is read.
+    static let fullTextIndexes = ["segments_fts", "names_fts", "knowledge_fts"]
+
+    /// Builds the full-text indexes of an untrusted image again from their text, before anything reads them (the integrity
+    /// check does): `rebuild` drops what an index holds without parsing it, then indexes the text again (`segments` for the
+    /// transcripts, the table's own copy of the text for the others). A crafted index is never interpreted, and the rebuilt
+    /// one matches its text by construction. An image older than an index doesn't have it yet; its migration creates it.
+    ///
+    /// The settings FTS5 keeps beside each index are read as plain rows first: Vauta only ever has the format version and
+    /// `secure-delete` on, so anything else (another ranking, page size or merge setting, `secure-delete` off) is not one of
+    /// its backups. `secure-delete` is then turned on for every index, as the store's own are.
+    static func rebuildFullTextIndexes(_ db: SQLiteDatabase) throws {
+        let present = Set(try db.query("SELECT name FROM sqlite_schema WHERE type = 'table'").map { $0.string(0) })
+        let tables = fullTextIndexes.filter(present.contains)
+        for table in tables {
+            let foreign = try db.query("""
+                SELECT COUNT(*) FROM "\(table)_config" WHERE NOT (typeof(v) = 'integer' AND (k = 'version' AND v IN (4, 5) OR k = 'secure-delete' AND v = 1))
+                """)
+            guard foreign.first?.int(0) == 0 else { throw StoreError(.backupInvalid, detail: "full-text index settings differ from Vauta's") }
+        }
+        do {
+            for table in tables {
+                try db.execute("INSERT INTO \(table)(\(table)) VALUES('rebuild')")
+                try db.execute("INSERT INTO \(table)(\(table), rank) VALUES('secure-delete', 1)")
+            }
+        } catch {
+            throw StoreError(.backupInvalid, detail: "full-text index rebuild failed")
+        }
     }
 
     /// Replaces the store with a backup. The old data is only dropped once the

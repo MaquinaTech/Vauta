@@ -223,5 +223,10 @@ struct Row {
     var count: Int { values.count }
 }
 
+/// The system SQLite the store runs on, for `doctor` and Copy Diagnostics: its fixes come with macOS updates.
+public enum SQLiteLibrary {
+    public static var version: String { String(cString: sqlite3_libversion()) }
+}
+
 // SQLITE_TRANSIENT is not imported into Swift: SQLite copies the value when binding.
 private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
