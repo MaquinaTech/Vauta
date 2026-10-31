@@ -47,9 +47,9 @@ import Testing
         fx.files.write("b.txt", "Beta document about the quarterly marketing plan and its launch.")
         await fx.indexer.changed(source.id)
         #expect(await fx.indexer.rescan[source.id] == false, "the change waits for the scan in flight instead of being dropped")
-        // That scan ends; its owner lists the folder again.
+        // That scan ends and its owner lists the folder again; reading the files starts after it, as after any change.
         await fx.indexer.releaseScan(source.id)
-        await fx.indexer.sync(source.id)
+        await fx.indexer.changed(source.id)
         try await fx.settle()
         #expect(await fx.indexer.rescan.isEmpty)
         #expect(try await fx.search("marketing plan launch").first?.fileName == "b.txt")
