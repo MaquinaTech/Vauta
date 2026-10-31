@@ -61,6 +61,9 @@
 /* Settings → General; argument is a shortcut */
 "%@ is used by another app. Choose a different shortcut to open the notepad." = "%@ is used by another app. Choose a different shortcut to open the notepad.";
 
+/* Settings → General; argument is a shortcut */
+"%@ is used by another app. Choose a different shortcut to pause and resume." = "%@ is used by another app. Choose a different shortcut to pause and resume.";
+
 /* Settings → General; argument is a shortcut
    Status detail; argument is a shortcut */
 "%@ is used by another app. Choose a different shortcut to start and stop recording." = "%@ is used by another app. Choose a different shortcut to start and stop recording.";
@@ -4580,6 +4583,9 @@
 /* No comment provided by engineer. */
 "Pause Translation" = "Pause Translation";
 
+/* Shortcut name */
+"Pause or resume recording" = "Pause or resume recording";
+
 /* No comment provided by engineer. */
 "Pause the translation" = "Pause the translation";
 
@@ -6660,7 +6666,7 @@
 "These names haven’t been checked on this server. Test the connection to choose from its models." = "These names haven’t been checked on this server. Test the connection to choose from its models.";
 
 /* Settings → General */
-"These shortcuts work in any app. Marking a moment, taking a note and Live Translation work only while recording." = "These shortcuts work in any app. Marking a moment, taking a note and Live Translation work only while recording.";
+"These shortcuts work in any app. Marking a moment, taking a note, pausing and Live Translation work only while recording." = "These shortcuts work in any app. Marking a moment, taking a note, pausing and Live Translation work only while recording.";
 
 /* No comment provided by engineer. */
 "These stay, without the link:" = "These stay, without the link:";

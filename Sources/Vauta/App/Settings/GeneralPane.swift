@@ -58,19 +58,23 @@ struct GeneralPane: View {
             Section {
                 HotKeyRecorder(recorder: recorder, label: String(localized: "Start or stop recording", comment: "Shortcut name"),
                                spec: $preferences.recordHotKey,
-                               others: [preferences.markHotKey, preferences.noteHotKey, preferences.translationHotKey],
+                               others: [preferences.markHotKey, preferences.noteHotKey, preferences.pauseHotKey, preferences.translationHotKey],
                                defaultSpec: Preferences.defaultRecordHotKey)
                 HotKeyRecorder(recorder: recorder, label: String(localized: "Mark a moment", comment: "Shortcut name"),
                                spec: $preferences.markHotKey,
-                               others: [preferences.recordHotKey, preferences.noteHotKey, preferences.translationHotKey],
+                               others: [preferences.recordHotKey, preferences.noteHotKey, preferences.pauseHotKey, preferences.translationHotKey],
                                defaultSpec: Preferences.defaultMarkHotKey)
                 HotKeyRecorder(recorder: recorder, label: String(localized: "Take a note", comment: "Shortcut name: opens the floating notepad to type a short note during a recording"),
                                spec: $preferences.noteHotKey,
-                               others: [preferences.recordHotKey, preferences.markHotKey, preferences.translationHotKey],
+                               others: [preferences.recordHotKey, preferences.markHotKey, preferences.pauseHotKey, preferences.translationHotKey],
                                defaultSpec: Preferences.defaultNoteHotKey)
+                HotKeyRecorder(recorder: recorder, label: String(localized: "Pause or resume recording", comment: "Shortcut name"),
+                               spec: $preferences.pauseHotKey,
+                               others: [preferences.recordHotKey, preferences.markHotKey, preferences.noteHotKey, preferences.translationHotKey],
+                               defaultSpec: Preferences.defaultPauseHotKey)
                 HotKeyRecorder(recorder: recorder, label: String(localized: "Turn Live Translation on or off", comment: "Shortcut name"),
                                spec: $preferences.translationHotKey,
-                               others: [preferences.recordHotKey, preferences.markHotKey, preferences.noteHotKey],
+                               others: [preferences.recordHotKey, preferences.markHotKey, preferences.noteHotKey, preferences.pauseHotKey],
                                defaultSpec: Preferences.defaultTranslationHotKey)
                 if !recorder.hotKeyAvailable {
                     NoticeLabel(Text("\(recorder.recordHotKeyText) is used by another app. Choose a different shortcut to start and stop recording.", comment: "Settings → General; argument is a shortcut"), status: .warning)
@@ -81,10 +85,13 @@ struct GeneralPane: View {
                 if recorder.isRecording && !recorder.noteHotKeyAvailable {
                     NoticeLabel(Text("\(recorder.noteHotKeyText) is used by another app. Choose a different shortcut to open the notepad.", comment: "Settings → General; argument is a shortcut"), status: .warning)
                 }
+                if recorder.isRecording && !recorder.pauseHotKeyAvailable {
+                    NoticeLabel(Text("\(recorder.pauseHotKeyText) is used by another app. Choose a different shortcut to pause and resume.", comment: "Settings → General; argument is a shortcut"), status: .warning)
+                }
             } header: {
                 Text("Keyboard shortcuts")
             } footer: {
-                SettingsNote(String(localized: "These shortcuts work in any app. Marking a moment, taking a note and Live Translation work only while recording.",
+                SettingsNote(String(localized: "These shortcuts work in any app. Marking a moment, taking a note, pausing and Live Translation work only while recording.",
                                     comment: "Settings → General"))
             }
 

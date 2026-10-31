@@ -60,6 +60,8 @@
 
 /* Settings → General; argument is a shortcut */
 "%@ is used by another app. Choose a different shortcut to open the notepad." = "%@ é usado por outro app. Escolha outro atalho para abrir o bloco de notas.";
+"%@ is used by another app. Choose a different shortcut to pause and resume." = "%@ é usado por outro app. Escolha outro atalho para pausar e retomar.";
+"Pause or resume recording" = "Pausar ou retomar a gravação";
 
 /* Settings → General; argument is a shortcut
    Status detail; argument is a shortcut */
@@ -6470,7 +6472,7 @@
 "These names haven’t been checked on this server. Test the connection to choose from its models." = "Esses nomes não foram verificados neste servidor. Teste a conexão para escolher entre os modelos dele.";
 
 /* Settings → General */
-"These shortcuts work in any app. Marking a moment, taking a note and Live Translation work only while recording." = "Esses atalhos funcionam em qualquer app. Marcar um momento, tomar nota e a tradução ao vivo só funcionam durante a gravação.";
+"These shortcuts work in any app. Marking a moment, taking a note, pausing and Live Translation work only while recording." = "Esses atalhos funcionam em qualquer app. Marcar um momento, tomar nota, pausar e a tradução ao vivo só funcionam durante a gravação.";
 
 /* No comment provided by engineer. */
 "These stay, without the link:" = "Estes permanecem, sem o vínculo:";

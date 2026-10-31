@@ -121,6 +121,7 @@ final class RecorderModel {
     var hotKeyAvailable = false
     var markHotKeyAvailable = false
     var noteHotKeyAvailable = false
+    var pauseHotKeyAvailable = false
     var translationHotKeyAvailable = false
     var history: MeetingsModel?
     /// Meetings whose minutes are ready and have not been reviewed (identifiers, counts and a time only): the panel's Follow-up card.
@@ -357,6 +358,7 @@ final class RecorderModel {
     @ObservationIgnored var hotKey: GlobalHotKey?
     @ObservationIgnored var markHotKey: GlobalHotKey?
     @ObservationIgnored var noteHotKey: GlobalHotKey?
+    @ObservationIgnored var pauseHotKey: GlobalHotKey?
     @ObservationIgnored var translationHotKey: GlobalHotKey?
     /// Store row of each final segment of the recording (by `LiveSegment.id`), so translations can refer to it.
     @ObservationIgnored var segmentRowIDs: [Int: Int64] = [:]
@@ -482,6 +484,7 @@ final class RecorderModel {
         hotKeyAvailable = true
         markHotKeyAvailable = true
         noteHotKeyAvailable = true
+        pauseHotKeyAvailable = true
         translationHotKeyAvailable = true
     }
     #endif

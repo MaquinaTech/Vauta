@@ -297,6 +297,8 @@ extension RecorderModel {
         markHotKeyAvailable = false
         noteHotKey = nil
         noteHotKeyAvailable = false
+        pauseHotKey = nil
+        pauseHotKeyAvailable = false
         notifier.remove(.autoStopWarning)
         notifier.remove(.hangup)
         allowSuddenTermination()
