@@ -194,6 +194,11 @@ extension MeetingsModel {
         }
     }
 
+    /// The line of the open meeting at second `t`, as `open(meeting:at:)` finds it: for the preview of a time in the minutes.
+    func passage(at t: Double) -> PreviewedPassage? {
+        (transcript.last { $0.start <= t + 0.5 } ?? transcript.first).map(PreviewedPassage.init)
+    }
+
     /// Ask about the selected meeting (or about all of them).
     func askAboutSelection() {
         ask.thisMeeting = selected != nil

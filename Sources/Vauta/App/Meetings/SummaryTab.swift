@@ -359,7 +359,7 @@ struct SummaryTab: View {
                             .accessibilityLabel(Text(decisionSpoken(d)))
                             .help(decisionHelp(d))
                         Spacer()
-                        if let t = d.t { TimeButton(t: t) { model.open(meeting: meeting.id, at: t) } }
+                        if let t = d.t { TimeButton(t: t, passage: model.passage(at: t)) { model.open(meeting: meeting.id, at: t) } }
                         if d.unconfirmed {
                             IconButton(label: String(localized: "Mark as Checked", comment: "Button on an item the model proposed and nobody has confirmed: the user has checked it"), systemImage: "checkmark.circle") {
                                 Task { await model.markDecisionChecked(d) }
@@ -396,7 +396,7 @@ struct SummaryTab: View {
                             .frame(width: SourceBadge.columnWidth).accessibilityHidden(true)
                         Text("Mark")
                         Spacer()
-                        TimeButton(t: m.t, plain: model.transcript.isEmpty) { model.open(meeting: meeting.id, at: m.t) }
+                        TimeButton(t: m.t, plain: model.transcript.isEmpty, passage: model.passage(at: m.t)) { model.open(meeting: meeting.id, at: m.t) }
                         IconButton(label: String(localized: "Delete Mark…", comment: "Button; a confirmation follows"), systemImage: "minus.circle") {
                             model.pendingDeletion = .mark(m)
                         }
@@ -492,8 +492,8 @@ private struct LiveNotesSection: View {
                 .frame(width: SourceBadge.columnWidth).accessibilityHidden(true)
             ProtectedText(text).accessibilityLabel(Text(spoken))
             Spacer()
-            if let segment, let start = model.transcript.first(where: { $0.id == segment })?.start {
-                TimeButton(t: start) { model.open(meeting: meeting.id, segment: segment) }
+            if let segment, let line = model.transcript.first(where: { $0.id == segment }) {
+                TimeButton(t: line.start, passage: PreviewedPassage(line)) { model.open(meeting: meeting.id, segment: segment) }
             }
             // Live notes can't be deleted, but their times end on the same column as the lists above and below.
             IconButton(label: "", systemImage: "minus.circle") {}

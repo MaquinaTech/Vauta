@@ -17,9 +17,18 @@ struct CitationPreviewTests {
     @Test func theLinkOffersThePreviewToThePointerTheKeyboardAndVoiceOver() throws {
         let link = try Self.source("Sources/Vauta/App/Meetings/CitationLink.swift")
         #expect(link.contains(".onHover") && link.contains(".onKeyPress(.space)") && link.contains(".popover(isPresented: $previewing"))
-        #expect(link.contains(#".accessibilityAction(named: Text("Preview Passage""#))
+        #expect(link.contains(".accessibilityActions {") && link.contains(#"Text("Preview Passage""#), "a named action, only on a link with a passage")
+        #expect(link.contains(".passagePreview(label, passage: segment.map(PreviewedPassage.init)"), "a citation of Ask has the preview")
         #expect(link.contains("ProtectedText("), "copy protection holds in the preview")
         #expect(CitationLink.restDelay >= .milliseconds(400), "the preview does not open on the way to something else")
+    }
+
+    @Test func theTimesOfTheMinutesPreviewTheirLine() throws {
+        let time = try Self.source("Sources/Vauta/App/Meetings/MeetingDetailView.swift")
+        #expect(time.contains(".passagePreview(ElapsedTime.stamp(t), passage: passage, open: action)"))
+        let minutes = try Self.source("Sources/Vauta/App/Meetings/SummaryTab.swift")
+        #expect(minutes.components(separatedBy: "TimeButton(").count - 1 == 3, "decisions, marks and the lines with a cited moment")
+        #expect(minutes.components(separatedBy: "passage:").count - 1 == 3, "each of them previews its line")
     }
 
     @Test func everyCitationOfAnAnswerIsALink() throws {
