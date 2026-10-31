@@ -221,18 +221,7 @@ struct TranscriptTab: View {
     }
 
     /// "Paused 12:03 – 12:10 (7 min)"; "Paused from 12:03 to the end" when the recording stopped during the pause.
-    static func pauseText(_ p: MeetingPause) -> String {
-        let from = ElapsedTime.stamp(p.start)
-        guard let end = p.end else {
-            return String(localized: "Paused from \(from) to the end", comment: "Transcript: the recording was paused at this time and not resumed before it ended; the argument is a time in the meeting (12:03)")
-        }
-        let minutes = Int(((end - p.start) / 60).rounded())
-        let to = ElapsedTime.stamp(end)
-        if minutes < 1 {
-            return String(localized: "Paused \(from) – \(to)", comment: "Transcript: nothing was captured between these two times of the meeting because the recording was paused (12:03 – 12:04)")
-        }
-        return String(localized: "Paused \(from) – \(to) (\(minutes) min)", comment: "Transcript: nothing was captured between these two times of the meeting because the recording was paused; the last argument is how many minutes (12:03 – 12:10 (7 min))")
-    }
+    static func pauseText(_ p: MeetingPause) -> String { p.text() }
 
     /// A note in the same columns, tinted so it stands out from the speech.
     private func noteRow(_ n: MeetingNote, _ cols: Columns) -> some View {

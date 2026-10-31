@@ -35,6 +35,8 @@ import Foundation
 ///                    "name": String | null, "text": String,
 ///                    "translation": String | null }] | null   // "translation" only with includeTranslation;
 ///                                                              // the array is null when not included
+///   "pauses": [{ "start": Number, "end": Number | null }]   // only with the transcript, and only when the recording was
+///                                                         // paused: nothing was captured then (end null: to the end)
 /// }
 /// ```
 ///
@@ -215,6 +217,8 @@ public enum MeetingExportJSON {
         let notes: [Note]
         let transcript: [Line]?
         /// Empty = not written.
+        let pauses: [Pause]
+        /// Empty = not written.
         let speakers: [Speaker]
         /// The questions the person kept; empty = not written.
         let questions: [Question]
@@ -250,6 +254,7 @@ public enum MeetingExportJSON {
                          translation: options.includeTranslation ? .some(l.translation) : nil, tag: l.speaker)
                 }
                 : nil
+            pauses = !options.includeTranscript ? [] : e.pauses.map { Pause(start: Self.round($0.start), end: $0.end.map(Self.round)) }
             // Speakers are listed with the transcript they label: without it, no names or talk time leave.
             speakers = !options.includeTranscript ? [] : e.speakers.map {
                 Speaker(id: $0.id, label: $0.label, name: $0.name, channel: $0.channel.rawValue, talkSeconds: Self.round($0.talkSeconds))
@@ -275,13 +280,27 @@ public enum MeetingExportJSON {
             try c.encode(tasks, forKey: .tasks)
             try c.encode(notes, forKey: .notes)
             try c.encode(transcript, forKey: .transcript)
+            if !pauses.isEmpty { try c.encode(pauses, forKey: .pauses) }
             if !speakers.isEmpty { try c.encode(speakers, forKey: .speakers) }
             if !questions.isEmpty { try c.encode(questions, forKey: .questions) }
         }
 
         enum CodingKeys: String, CodingKey {
             case format, version, title, startedAt, endedAt, durationSeconds, language, participantsInformedAt, attendees, summary, topics,
-                 openQuestions, decisions, tasks, notes, transcript, speakers, questions
+                 openQuestions, decisions, tasks, notes, transcript, pauses, speakers, questions
+        }
+
+        struct Pause: Encodable {
+            let start: Double
+            let end: Double?
+
+            func encode(to encoder: Encoder) throws {
+                var c = encoder.container(keyedBy: CodingKeys.self)
+                try c.encode(start, forKey: .start)
+                try c.encode(end, forKey: .end)
+            }
+
+            enum CodingKeys: String, CodingKey { case start, end }
         }
 
         static func round(_ t: Double) -> Double { (t * 1000).rounded() / 1000 }

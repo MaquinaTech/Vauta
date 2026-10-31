@@ -49,6 +49,7 @@ extension MeetingStore {
                                    name: s.channel == .me ? myName : othersName, text: s.text,
                                    translation: translations[s.id], speaker: s.speaker)
             },
+            pauses: try pauses(of: meetingID),
             speakers: speakerRows.map {
                 MeetingExport.Speaker(id: $0.id, channel: $0.channel, label: $0.stableLabel, name: $0.exportName, talkSeconds: $0.talkSeconds)
             },
