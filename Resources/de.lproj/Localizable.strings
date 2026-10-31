@@ -1467,11 +1467,11 @@
 "Couldn’t correct the line" = "Die Zeile konnte nicht korrigiert werden";
 "Add “%@” to Glossary" = "„%@“ zum Glossar hinzufügen";
 "Added to the glossary" = "Zum Glossar hinzugefügt";
-"Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Im Glossar angeheftet, kommt es ins eigene Vokabular des Diktats, und eine spätere Besprechung, die es falsch zu verstehen scheint, bekommt einen Vorschlag.";
-"Also elsewhere in this meeting: %@" = "Auch an anderen Stellen dieser Besprechung: %@";
+"Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "Im Glossar angeheftet, kommt es ins eigene Vokabular des Diktats, und ein späteres Meeting, das es falsch zu verstehen scheint, bekommt einen Vorschlag.";
+"Also elsewhere in this meeting: %@" = "Auch an anderen Stellen dieses Meetings: %@";
 "Correct Everywhere" = "Überall korrigieren";
 "Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "Diese Wörter auch in den anderen Zeilen des Transkripts und im Protokoll korrigieren. Widerrufen nimmt es zurück.";
-"Corrected in the whole meeting" = "In der ganzen Besprechung korrigiert";
+"Corrected in the whole meeting" = "Im ganzen Meeting korrigiert";
 "Corrected words" = "Korrigierte Wörter";
 "Return saves, Esc cancels" = "Return sichert, Esc bricht ab";
 "Corrected" = "Korrigiert";

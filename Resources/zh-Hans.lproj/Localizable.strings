@@ -1470,18 +1470,18 @@
 "Pinned in the glossary, it goes in the custom vocabulary for dictation, and a later meeting that seems to mishear it gets a suggestion." = "置顶到术语表后，它会进入听写的自定义词汇；之后的会议中疑似听错的地方会收到建议。";
 "Also elsewhere in this meeting: %@" = "本次会议的其他地方也有：%@";
 "Correct Everywhere" = "全部修正";
-"Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "同时修正转写其他行和会议纪要中的这些文字。撤销即可恢复。";
+"Correct these words in the other lines of the transcript and in the minutes too. Undo takes it back." = "同时修正转录文本其他行和会议纪要中的这些文字。撤销即可恢复。";
 "Corrected in the whole meeting" = "已在整个会议中修正";
 "Corrected words" = "修正后的文字";
 "Return saves, Esc cancels" = "按 Return 存储，按 Esc 取消";
 "Corrected" = "已修正";
 "Restore Original" = "恢复原文";
-"Transcribed as: “%@”" = "转写为：“%@”";
-"Put back the words as they were transcribed" = "恢复为转写时的文字";
+"Transcribed as: “%@”" = "转录为：“%@”";
+"Put back the words as they were transcribed" = "恢复为转录时的文字";
 "Correct Line" = "修正此行";
 "Correct the words of this line (Return)" = "修正此行的文字（Return）";
 "Correct Highlighted Passage" = "修正高亮片段";
-"You corrected the transcript here after the minutes were written. Check that this still says what was said." = "会议纪要生成后，你在这里修正了转写。请确认这项内容仍与所说的话一致。";
+"You corrected the transcript here after the minutes were written. Check that this still says what was said." = "会议纪要生成后，你在这里修正了转录文本。请确认这项内容仍与所说的话一致。";
 
 /* Alert title */
 "Couldn’t change the note" = "无法更改笔记";
