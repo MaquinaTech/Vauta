@@ -37,6 +37,24 @@ import Testing
         #expect(hits.first?.fileName == "b.txt")
     }
 
+    @Test func aChangeDuringAScanIsNotDropped() async throws {
+        let fx = try DocsFixture()
+        fx.files.write("a.txt", "Alpha document about apples and oranges for the fruit stand.")
+        try await fx.open()
+        let source = try await fx.add()
+        // A scan in flight (the folder's watcher started it) that listed the folder before the new file was written.
+        await fx.indexer.holdScan(source.id)
+        fx.files.write("b.txt", "Beta document about the quarterly marketing plan and its launch.")
+        await fx.indexer.changed(source.id)
+        #expect(await fx.indexer.rescan[source.id] == false, "the change waits for the scan in flight instead of being dropped")
+        // That scan ends and its owner lists the folder again; reading the files starts after it, as after any change.
+        await fx.indexer.releaseScan(source.id)
+        await fx.indexer.changed(source.id)
+        try await fx.settle()
+        #expect(await fx.indexer.rescan.isEmpty)
+        #expect(try await fx.search("marketing plan launch").first?.fileName == "b.txt")
+    }
+
     @Test func aTouchedFileIsNotReadAgainButAChangedOneIs() async throws {
         let fx = try DocsFixture()
         let file = fx.files.write("a.txt", "Original text about the migration timeline and rollout owners.")

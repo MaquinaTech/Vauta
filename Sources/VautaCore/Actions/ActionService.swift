@@ -220,7 +220,7 @@ public actor ActionService {
         for row in rows where pending[Self.key(row.source, row.sourceID, row.target)] == nil {
             if row.target == .ics {
                 // Nothing outside Vauta was touched before the file was written, so a dead hand-off is simply taken back; no access is needed.
-                if !handingOff.contains(Self.key(row.source, row.sourceID, row.target)), Date.now.timeIntervalSince(row.writtenAt) > Self.handOffGrace {
+                if !handingOff.contains(Self.key(row.source, row.sourceID, row.target)), AppClock.now.timeIntervalSince(row.writtenAt) > Self.handOffGrace {
                     try? await store.abortAction(ActionIntent(action: row, restoreSource: nil))
                 }
                 continue
