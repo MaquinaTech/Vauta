@@ -38,6 +38,10 @@ struct RecorderPanel: View {
         VStack(spacing: Self.spacing) {
             VStack(spacing: Self.spacing) {
                 PanelHeader(model: model)
+                // Hidden for presenting: the one way back is always at the top.
+                if model.concealer.isOn {
+                    WindowsHiddenBanner(model: model)
+                }
                 if hasProblem {
                     PanelWarnings(model: model, scope: .problem)
                 }
