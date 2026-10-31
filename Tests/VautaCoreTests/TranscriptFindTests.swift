@@ -42,14 +42,15 @@ struct TranscriptFindTests {
 
     @Test func aTwoHourTranscriptIsSearchedWhileTyping() {
         // Two hours of a busy meeting: a line every 4 seconds, about 20 words each, the word in every line (the worst case:
-        // about 40 ms in a debug build on an M-series Mac). The best of three runs, so a busy test machine does not fail it;
-        // a search that grew with the square of the lines would take seconds.
+        // about 40 ms in a debug build on an M2). The best of three runs, so a busy test machine does not fail it; a CI runner, a
+        // virtual machine running the parallel suite with coverage, took 137 ms, so there the bound is half a second. A search that
+        // grew with the square of the lines would take seconds.
         let words = "so the budget for the next quarter depends on what the client signs and on the hiring plan we agreed".split(separator: " ")
         let lines: [(id: Int64, text: String)] = (0..<1_800).map { i in (Int64(i), (0..<20).map { String(words[(i + $0) % words.count]) }.joined(separator: " ")) }
         let clock = ContinuousClock()
         var found: [TranscriptFind.Match] = []
         let elapsed = (0..<3).map { _ in clock.measure { found = TranscriptFind.matches(of: "budget", in: lines) } }.min()!
         #expect(found.count >= 1_800)
-        #expect(elapsed < .milliseconds(100), "\(elapsed)")
+        #expect(elapsed < .milliseconds(TestMachine.isVirtual ? 500 : 100), "\(elapsed)")
     }
 }
