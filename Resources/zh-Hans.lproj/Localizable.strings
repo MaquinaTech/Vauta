@@ -4289,6 +4289,20 @@
 /* Brief: heading of the open tasks of the people coming to the meeting
    Heading of the Tasks mode and section of the People card (a heading inside the window: sentence case) */
 "Open tasks" = "未完成任务";
+"Copy protection is on, so meeting text can’t be exported." = "复制保护已开启，因此无法导出会议文本。";
+"Couldn’t export the week" = "无法导出本周";
+"Export Week" = "导出本周";
+"Next Week" = "下一周";
+"Nothing This Week" = "本周没有内容";
+"Nothing was recorded this week." = "本周没有录制任何内容。";
+"Open Tasks" = "未完成任务";
+"Overdue tasks" = "已逾期任务";
+"Previous Week" = "上一周";
+"Save this week as a Markdown file" = "将本周存储为 Markdown 文件";
+"Tasks added" = "新增的任务";
+"Tasks done" = "已完成的任务";
+"This Week" = "本周";
+"Week of %@" = "%@ 这一周";
 
 /* Heading of the Tasks mode filtered by person (a heading inside the window: sentence case) */
 "Open tasks for %@" = "%@的未完成任务";

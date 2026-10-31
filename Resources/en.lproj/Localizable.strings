@@ -1450,6 +1450,9 @@
 /* Help of the Copy button of the email draft */
 "Copy as plain text. Hold Shift to copy as Markdown." = "Copy as plain text. Hold Shift to copy as Markdown.";
 
+/* Tooltip of a disabled Export button */
+"Copy protection is on, so meeting text can’t be exported." = "Copy protection is on, so meeting text can’t be exported.";
+
 /* Editor, with copy protection on: the text goes to another app; the argument is the app's name, Reminders or Calendar */
 "Copy protection is on. This text will leave Vauta for %@." = "Copy protection is on. This text will leave Vauta for %@.";
 
@@ -1605,6 +1608,9 @@
 
 /* Alert title */
 "Couldn’t export the meeting" = "Couldn’t export the meeting";
+
+/* Alert title: saving the This Week export failed */
+"Couldn’t export the week" = "Couldn’t export the week";
 
 /* Alert title: searching the context names in all meetings failed */
 "Couldn’t find names again" = "Couldn’t find names again";
@@ -2394,6 +2400,9 @@
 
 /* Save panel title */
 "Export Network Activity" = "Export Network Activity";
+
+/* Save panel title for the This Week export */
+"Export Week" = "Export Week";
 
 /* Documents: why a Pages, Numbers, Keynote or old Office file was skipped */
 "Export it as PDF to add it" = "Export it as PDF to add it";
@@ -3749,6 +3758,9 @@
 /* No comment provided by engineer. */
 "Next Meeting" = "Next Meeting";
 
+/* This Week: button that shows the week after */
+"Next Week" = "Next Week";
+
 /* Menu-bar panel: heading of the card about the meeting that is about to start */
 "Next meeting" = "Next meeting";
 
@@ -4141,6 +4153,9 @@
 /* No comment provided by engineer. */
 "Notes you add are saved with the meeting." = "Notes you add are saved with the meeting.";
 
+/* This Week: title when the week has no meetings and no tasks */
+"Nothing This Week" = "Nothing This Week";
+
 /* Merge summary when nothing moves */
 "Nothing else: this entry isn’t used yet." = "Nothing else: this entry isn’t used yet.";
 
@@ -4179,6 +4194,9 @@
 
 /* Panel notice under “No meeting saved”: what happened and what to check */
 "Nothing was heard during the recording. Check the microphone and the meeting app’s sound." = "Nothing was heard during the recording. Check the microphone and the meeting app’s sound.";
+
+/* This Week: when the week has no meetings and no tasks */
+"Nothing was recorded this week." = "Nothing was recorded this week.";
 
 /* VoiceOver announcement and panel notice after a recording with no speech, notes or marks */
 "Nothing was recorded, so no meeting was saved." = "Nothing was recorded, so no meeting was saved.";
@@ -4365,6 +4383,9 @@
    Status action button */
 "Open System Settings" = "Open System Settings";
 
+/* Tasks mode: the segment that shows the open tasks */
+"Open Tasks" = "Open Tasks";
+
 /* Alert button */
 "Open Users & Groups Settings" = "Open Users & Groups Settings";
 
@@ -4492,6 +4513,9 @@
 
 /* Brief: mark of a task whose due day has already passed */
 "Overdue" = "Overdue";
+
+/* This Week: section of the open tasks whose day has passed, and its title in the export */
+"Overdue tasks" = "Overdue tasks";
 
 /* No comment provided by engineer. */
 "Owner" = "Owner";
@@ -4699,6 +4723,9 @@
 
 /* VoiceOver: action on a citation of an Ask answer that shows the passage it cites */
 "Preview Passage" = "Preview Passage";
+
+/* This Week: button that shows the week before */
+"Previous Week" = "Previous Week";
 
 /* About */
 "Privacy" = "Privacy";
@@ -5312,6 +5339,9 @@
 /* No comment provided by engineer. */
 "Save this meeting as Markdown, text, PDF, subtitles or JSON" = "Save this meeting as Markdown, text, PDF, subtitles or JSON";
 
+/* Tooltip of the This Week Export button */
+"Save this week as a Markdown file" = "Save this week as a Markdown file";
+
 /* Alert when closing Settings or quitting with unsaved Models changes */
 "Save your model server changes?" = "Save your model server changes?";
 
@@ -5563,7 +5593,8 @@
 /* No comment provided by engineer. */
 "Shortcut: %@" = "Shortcut: %@";
 
-/* Button on a link to an earlier meeting: opens that meeting at the item the link is about */
+/* Button on a link to an earlier meeting: opens that meeting at the item the link is about
+   Tasks mode: label of the control that switches between the open tasks and This Week */
 "Show" = "Show";
 
 /* Button that goes to a pane of Vauta's own Settings; the argument is the pane name, e.g. Calendar, so it reads "Show Calendar Pane". Not System Settings, whose buttons read "Open Sound Settings" */
@@ -6029,6 +6060,12 @@
 
 /* No comment provided by engineer. */
 "Tasks (%lld)" = "Tasks (%lld)";
+
+/* This Week: section of the tasks added in the week, and its title in the export */
+"Tasks added" = "Tasks added";
+
+/* This Week: section of the tasks marked done in the week, and its title in the export */
+"Tasks done" = "Tasks done";
 
 /* No comment provided by engineer. */
 "Tasks from your meetings appear here until they’re done." = "Tasks from your meetings appear here until they’re done.";
@@ -6704,6 +6741,9 @@
 
 /* Documents pane: what to do about files that are not downloaded from iCloud or another cloud service; the options named in brackets are those of iCloud Drive, Google Drive and Dropbox, described and not quoted */
 "This Mac holds only a placeholder for files and folders kept online only. The skipped files list shows which ones. In Finder, Control-click one and choose Download Now, or set the folder to stay downloaded (in iCloud Drive: keep downloaded; in Google Drive or Dropbox: make available offline). Vauta adds each one on its own once it’s on this Mac. It never downloads files or connects to online services itself." = "This Mac holds only a placeholder for files and folders kept online only. The skipped files list shows which ones. In Finder, Control-click one and choose Download Now, or set the folder to stay downloaded (in iCloud Drive: keep downloaded; in Google Drive or Dropbox: make available offline). Vauta adds each one on its own once it’s on this Mac. It never downloads files or connects to online services itself.";
+
+/* Tasks mode: the segment that shows what a week held (meetings, decisions, tasks) */
+"This Week" = "This Week";
 
 /* Ask footer under an answer opened from a card of the recording: it is the stored answer, no model ran, and it stays with the meeting if the setting Keep detected questions is on when the recording ends or when the person keeps it */
 "This answer was found during the recording; no model was asked again. It stays with the meeting if “Keep detected questions” is on when the recording ends, or if you keep it." = "This answer was found during the recording; no model was asked again. It stays with the meeting if “Keep detected questions” is on when the recording ends, or if you keep it.";
@@ -7609,6 +7649,9 @@
 
 /* Settings → Recording audio source */
 "Web meetings such as Google Meet are recorded through the browser that runs them, including all its tabs." = "Web meetings such as Google Meet are recorded through the browser that runs them, including all its tabs.";
+
+/* Title of the This Week view and of its export; the argument is the first and last day of the week, such as 26 Oct – 1 Nov 2026 */
+"Week of %@" = "Week of %@";
 
 /* Placeholder of the recurring meeting title field */
 "Weekly team meeting" = "Weekly team meeting";

@@ -580,7 +580,8 @@ screen, which is why they are kept this short.
 ## Export and import
 
 - **Export** (Markdown, plain text, PDF, SRT, WebVTT, JSON) writes only to the file you pick in the save panel.
-  Exported files are **not encrypted**: once saved, they are yours to protect.
+  Exported files are **not encrypted**: once saved, they are yours to protect. **Tasks › This Week › Export…** does the
+  same with a week (Markdown), and copy protection blocks it like every export.
 - **Copy Minutes** and the Copy button of an Ask answer put text on the clipboard, marked so that clipboard managers and history skip it, and kept on this Mac.
 - **Import Recording** reads only the audio or video file you pick. The file is read in place, transcribed on this
   Mac and never copied or changed.

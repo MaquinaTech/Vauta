@@ -329,6 +329,10 @@ final class MeetingsModel {
     }
     var taskDraft: TaskDraft?
     var taskSort: [KeyPathComparator<TaskItem>] = [KeyPathComparator(\TaskItem.dueSortKey)]
+    /// Tasks mode shows the open tasks or a week (`+Week`): a day of the week shown, and what it held once read.
+    var tasksPane: TasksPane = .open
+    var weekShown = Date.now
+    var weekDigest: WeekDigest?
 
     // MARK: Minutes
 
