@@ -37,7 +37,7 @@ enum SettingsSearch {
                   "Test Connection", "Find Model Servers", "Set Up a Model Server…", "Paste Configuration", "Certificate pins (optional)",
                   "Private certificate authority (optional)"],
         .privacy: ["Keeping meetings", "Minutes, decisions, notes and tasks", "Protect meeting text from copying", "Lock Meetings again",
-                   "Back up or restore", "Back Up…", "Restore…", "Erase meetings and context", "Network activity",
+                   "Back up or restore", "Back Up…", "Restore…", "Verify a backup", "Verify Backup…", "Erase meetings and context", "Network activity",
                    "How Vauta protects your meetings"],
         .context: ["People", "Projects", "Clients", "Systems", "Glossary", "Recurring Meetings"],
         .documents: ["Sources", "Index"],

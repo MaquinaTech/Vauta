@@ -839,6 +839,9 @@
 /* Backup sheet title once the backup file is saved */
 "Backup Saved" = "バックアップを保存しました";
 
+/* Verify sheet title once the backup passed the check */
+"Backup Verified" = "バックアップを確認しました";
+
 /* No comment provided by engineer. */
 "Backup password" = "バックアップのパスワード";
 
@@ -1069,6 +1072,9 @@
 
 /* Status while the integrated model checks an answer to a question */
 "Checking the answer" = "回答を確認中";
+
+/* Backup sheet after saving, and verify sheet: the backup file is read back and opened as a restore would */
+"Checking the backup…" = "バックアップを確認しています…";
 
 /* Settings → Status; the integrated model is being checked against its checksums */
 "Checking the model" = "モデルを確認中";
@@ -1967,6 +1973,9 @@
 /* VoiceOver, brief: what a line is; a file or a passage of one */
 "Document" = "書類";
 
+/* Verify sheet: how many folders and files added as knowledge sources the backup holds */
+"Document sources" = "書類のソース";
+
 /* Ask scope: only documents
    Meetings sidebar search: the group of passages found in the person's documents
    Settings pane: the folders and files Ask can answer from */
@@ -2217,6 +2226,9 @@
 
 /* Restore sheet: shown under the error after a failed restore, when the password field is empty again */
 "Enter the backup password again to retry." = "もう一度試すには、バックアップのパスワードを再入力してください。";
+
+/* Verify sheet: the sentence under the title */
+"Enter the backup’s password. Vauta opens it as Restore would, without changing anything." = "バックアップのパスワードを入力してください。Vautaは復元と同じ方法で開き、何も変更しません。";
 
 /* Server config error */
 "Enter the fast model name exactly as the server lists it." = "サーバに表示されているとおりに高速モデル名を正確に入力してください。";
@@ -2756,6 +2768,9 @@
 
 /* No comment provided by engineer. */
 "Include unconfirmed items" = "未確認の項目を含める";
+
+/* Verify sheet: the backup carries the settings */
+"Included" = "含まれています";
 
 /* Documents pane: header of the section with the size of the index and its switches */
 "Index" = "インデックス";
@@ -4336,6 +4351,9 @@
 /* Model guide note; the argument is a website host */
 "Opens %@ in your browser. Vauta doesn’t download anything." = "ブラウザで%@を開きます。Vauta自身は何もダウンロードしません。";
 
+/* Settings → Privacy; explanation of Verify Backup */
+"Opens a backup with its password, as Restore would, and shows what it holds. Nothing on this Mac changes. Each backup is also checked right after it’s saved." = "バックアップをそのパスワードで復元と同じ方法で開き、中身を表示します。このMacでは何も変わりません。バックアップは保存した直後にも確認されます。";
+
 /* VoiceOver hint of an icon button that opens a menu */
 "Opens a menu" = "メニューを開きます";
 
@@ -5366,6 +5384,9 @@
 /* Model provider recovery */
 "Set up a model server for better minutes, or choose “Apple Intelligence on this Mac”." = "議事録の品質を上げるには、モデルサーバをセットアップするか、「この⁠Mac⁠の⁠Apple Intelligence」を選択してください。";
 
+/* Verify sheet: whether the backup carries the app's settings */
+"Settings" = "設定";
+
 /* No comment provided by engineer. */
 "Settings…" = "設定…";
 
@@ -5533,6 +5554,9 @@
 
 /* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
 "Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "回答の根拠になった文字起こしや書類にない数値です: %@。頼る前に確認してください。";
+
+/* Verify sheet: the backup carries no settings (made by an earlier version) */
+"Not included" = "含まれていません";
 
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "使われていない保存済みの声があります";
@@ -5994,8 +6018,14 @@
 /* Capture error */
 "The audio devices couldn’t be read." = "オーディオデバイスを読み取れませんでした。";
 
+/* Backup sheet: title when the saved file failed the check that reads it back */
+"The backup couldn’t be read back" = "バックアップを読み直せませんでした";
+
 /* Backup error: restore failed before replacing anything */
 "The backup couldn’t be restored. Your current meetings were left unchanged." = "バックアップを復元できませんでした。現在のミーティングは変更されていません。";
+
+/* Backup and verify sheets: the backup file was read back, decrypted and checked as a restore would */
+"The backup opens with this password, and nothing in it is damaged." = "このパスワードでバックアップを開けます。中に破損はありません。";
 
 /* Meetings, Brief tab of a recorded meeting: heading */
 "The brief you had when this meeting started" = "このミーティングの開始時に見ていたブリーフィング";
@@ -6343,6 +6373,12 @@
 
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "録音はこのMac上で文字起こしされます。ファイルが変更、コピー、アップロードされることはありません。";
+
+/* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
+"The saved file is damaged: don’t rely on it. Choose another location and try again." = "保存したファイルは破損しています。使わないでください。別の保存先を選んで、もう一度お試しください。";
+
+/* Backup sheet: advice when the saved file failed the check and was deleted */
+"The saved file was damaged, so it was deleted. Choose another location and try again." = "保存したファイルが破損していたため、削除しました。別の保存先を選んで、もう一度お試しください。";
 
 /* Settings → Models; shown when the server address or trust was edited */
 "The saved key won’t be sent to a different server." = "保存されているキーは別のサーバには送信されません。";
@@ -7335,6 +7371,18 @@
 
 /* No comment provided by engineer. */
 "Verified: the quote appears word for word in your document" = "確認済み：引用が書類にそのまま含まれています";
+
+/* Verify sheet: the button that opens and checks the backup */
+"Verify" = "確認";
+
+/* No comment provided by engineer. */
+"Verify Backup…" = "バックアップを確認…";
+
+/* Verify sheet title: check a backup file without restoring it */
+"Verify a Backup" = "バックアップを確認";
+
+/* Settings → Privacy; title of the row that checks a backup file without restoring it */
+"Verify a backup" = "バックアップを確認";
 
 /* About; arguments are the version and build numbers */
 "Version %@ (%@)" = "バージョン%@（%@）";

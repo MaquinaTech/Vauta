@@ -6,13 +6,13 @@ import AppKit
 import Observation
 import UniformTypeIdentifiers
 
-/// State of the "Back Up…" and "Restore…" sheets in Settings → Privacy & Security.
+/// State of the "Back Up…", "Restore…" and "Verify Backup…" sheets in Settings → Privacy & Security.
 @MainActor
 @Observable
 final class BackupModel {
-    enum Sheet: Identifiable {
-        case backUp, restore
-        var id: Int { self == .backUp ? 0 : 1 }
+    enum Sheet: Int, Identifiable {
+        case backUp, restore, verify
+        var id: Int { rawValue }
     }
 
     enum Stage: Equatable {
@@ -26,8 +26,9 @@ final class BackupModel {
         case done(String)
     }
 
-    /// What the working stage is doing, so the sheet can say it.
-    enum Work { case encrypting, opening, restoring }
+    /// What the working stage is doing, so the sheet can say it. `checking` reads a backup back as a restore would: the one
+    /// just saved, or the one the verify sheet is about.
+    enum Work { case encrypting, checking, opening, restoring }
 
     var sheet: Sheet?
     var stage: Stage = .form
@@ -49,6 +50,8 @@ final class BackupModel {
     private(set) var backupDate: Date?
     /// The meetings being encrypted, for the sheet while it works.
     private(set) var meetingsToBackUp: Int?
+    /// What the backup the verify sheet checked holds; nil until it passed.
+    private(set) var verified: BackupContents?
     /// How many meetings the finished restore brought in; nil until one finished.
     private(set) var restoredMeetings: Int?
     /// The opened backup carries settings, so the confirmation says they are replaced too.
@@ -123,6 +126,7 @@ final class BackupModel {
         backupDate = nil
         meetingsToBackUp = nil
         restoredMeetings = nil
+        verified = nil
         backupHasSettings = false
         backupHasVoices = false
         backupDocumentSources = 0
@@ -224,19 +228,22 @@ final class BackupModel {
         stage = .working
         meetingsToBackUp = try? await store.stats().meetings
         do {
-            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
-            // The settings go inside the encrypted file with the meetings; the server key stays in the Keychain.
-            let data = try await store.createBackup(password: password, appVersion: version, preferences: BackupPreferences(from: .standard))
-            guard !Task.isCancelled else { return }
-            let replaces = FileManager.default.fileExists(atPath: url.path)
-            // Off the main actor: a large backup would freeze the spinner and the Cancel button while it is written.
-            try await Task.detached(priority: .userInitiated) { try Self.write(data, to: url) }.value
-            guard !Task.isCancelled else {
-                // A cancel during the write removes the new file only when it replaced nothing: a backup it replaced is
-                // already gone, and the new one is complete.
-                if !replaces { try? FileManager.default.removeItem(at: url) }
+            let written = try await save(store, to: url)
+            guard !Task.isCancelled else { return discard(written, at: url) }
+            // Read back from the disk and opened as a restore would: a backup that couldn't be restored is worse than none.
+            work = .checking
+            do {
+                _ = try await Self.check(url, password: password)
+            } catch {
+                guard !Task.isCancelled else { return discard(written, at: url) }
+                // The file is useless and would look like a backup: it goes, and the sheet says so.
+                let removed = (try? FileManager.default.removeItem(at: url)) != nil
+                self.error = Self.uncheckedMessage
+                errorHint = removed ? Self.uncheckedRemovedHint : Self.uncheckedKeptHint
+                stage = .form
                 return
             }
+            guard !Task.isCancelled else { return discard(written, at: url) }
             savedFile = url
             // The passwords are kept after a failure (the user only has to choose another place); gone once it worked.
             password = ""
@@ -248,6 +255,49 @@ final class BackupModel {
             errorHint = Self.hint(for: error)
             stage = .form
         }
+    }
+
+    /// The file a backup wrote: whether it replaced one, and its file number, which another backup written there since would
+    /// not have (an atomic write makes a new file).
+    private struct Written {
+        let replaced: Bool
+        let fileNumber: Int?
+    }
+
+    /// Encrypts the store and writes the backup to `url`. The encrypted bytes are let go when this returns, before the check
+    /// reads the file back.
+    private func save(_ store: MeetingStore, to url: URL) async throws -> Written {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
+        // The settings go inside the encrypted file with the meetings; the server key stays in the Keychain.
+        let data = try await store.createBackup(password: password, appVersion: version, preferences: BackupPreferences(from: .standard))
+        try Task.checkCancellation()
+        let replaces = FileManager.default.fileExists(atPath: url.path)
+        // Off the main actor: a large backup would freeze the spinner and the Cancel button while it is written.
+        try await Task.detached(priority: .userInitiated) { try Self.write(data, to: url) }.value
+        return Written(replaced: replaces, fileNumber: Self.fileNumber(url))
+    }
+
+    /// A cancel once the file is written removes it only when it replaced nothing: a backup it replaced is already gone, and
+    /// the new one is complete (though not checked). A file another backup wrote there since the cancel is left alone.
+    private func discard(_ written: Written, at url: URL) {
+        guard !written.replaced, let number = written.fileNumber, Self.fileNumber(url) == number else { return }
+        try? FileManager.default.removeItem(at: url)
+    }
+
+    private nonisolated static func fileNumber(_ url: URL) -> Int? {
+        (try? FileManager.default.attributesOfItem(atPath: url.path))?[.systemFileNumber] as? Int
+    }
+
+    /// Reads a backup from the disk and opens it as a restore would, keeping nothing (`MeetingStore.checkBackup`).
+    nonisolated static func check(_ url: URL, password: String) async throws -> BackupContents {
+        try await MeetingStore.checkBackup(read(url), password: password)
+    }
+
+    /// Reads a backup file (one chosen in a file panel, or just saved), off the main actor: a large backup would freeze the
+    /// spinner and the Cancel button. Only a file on this Mac is read.
+    nonisolated static func read(_ url: URL) async throws -> Data {
+        guard url.isFileURL else { throw CocoaError(.fileReadUnsupportedScheme) }
+        return try await Task.detached(priority: .userInitiated) { try Data(contentsOf: url, options: .uncached) }.value
     }
 
     /// Writes the backup atomically (a temporary file, then a rename), so a file it replaces is either kept whole or
@@ -289,14 +339,14 @@ final class BackupModel {
 
     // MARK: Restore
 
-    /// Asks which backup to restore; the sheet then asks for its password.
-    func beginRestore() async {
+    /// Asks which backup to restore, or only to verify (`verifying`); the sheet then asks for its password.
+    func beginRestore(verifying: Bool = false) async {
         reset()
         let resetsBefore = resets
         guard let url = await chooseBackupFile(), resets == resetsBefore else { return }
         file = url
         backupDate = (try? url.resourceValues(forKeys: [.contentModificationDateKey]))?.contentModificationDate
-        sheet = .restore
+        sheet = verifying ? .verify : .restore
     }
 
     /// From the password step: picks another file without leaving the sheet (a wrong file, or a damaged one). The
@@ -333,11 +383,42 @@ final class BackupModel {
         }
     }
 
-    /// Cancel while opening: back to the form with the password typed; nothing was changed.
+    /// Starts the verify sheet's check as a task the sheet can cancel. It needs no store: nothing of this Mac is read.
+    func startVerify() {
+        guard openTask == nil, stage == .form else { return }
+        openTask = Task { [weak self] in
+            await self?.verify()
+            self?.openTask = nil
+        }
+    }
+
+    /// Cancel while opening or checking: back to the form with the password typed; nothing was changed.
     func cancelOpen() {
         openTask?.cancel()
         openTask = nil
-        if stage == .working && work == .opening { stage = .form }
+        if stage == .working && (work == .opening || work == .checking) { stage = .form }
+    }
+
+    /// The verify sheet: opens the chosen backup as a restore would and keeps nothing; the sheet shows what it holds.
+    private func verify() async {
+        guard let file, !password.isEmpty else { return }
+        error = nil
+        errorHint = nil
+        work = .checking
+        stage = .working
+        do {
+            let contents = try await Self.check(file, password: password)
+            guard !Task.isCancelled else { return }
+            verified = contents
+            backupDate = contents.createdAt
+            password = ""
+            stage = .done(Self.checkedMessage)
+        } catch {
+            guard !Task.isCancelled else { return }
+            self.error = Self.message(error)
+            errorHint = Self.hint(for: error)
+            stage = .form
+        }
     }
 
     /// Decrypts and checks the chosen backup (nothing is replaced yet).
@@ -348,8 +429,7 @@ final class BackupModel {
         work = .opening
         stage = .working
         do {
-            // Off the main actor: reading a large backup would freeze the spinner and the Cancel button.
-            let data = try await Task.detached(priority: .userInitiated) { try Data(contentsOf: file) }.value
+            let data = try await Self.read(file)
             let backup = try await MeetingStore.openBackup(data, password: password)
             let current = try await store.stats().meetings
             let context = try await store.contextEntryCount()
@@ -445,78 +525,6 @@ final class BackupModel {
                      comment: "Backup sheet: under the restore result when the backup carried the settings")
             : String(localized: "Your settings were restored too.", comment: "Backup sheet: under the restore result when the backup carried the settings and no model server")
         return true
-    }
-
-    /// What the restore sheet says under its title once it worked. The restore replaces the context too, so the result
-    /// says it; the settings sentence is the note under it (`restoredNote`), never joined to this one.
-    static func restoredMessage(meetings: Int) -> String {
-        meetings > 0
-            ? String(localized: "Restored \(meetings) meetings and your context from the backup.",
-                     comment: "Backup sheet: shown after a successful restore; argument is a number of meetings")
-            : String(localized: "Restored your context from the backup.",
-                     comment: "Backup sheet: shown after a successful restore of a backup with no meetings")
-    }
-
-    /// What the working stage is doing, in words: the label on screen and what VoiceOver hears when it starts.
-    var workingMessage: String {
-        switch work {
-        case .encrypting:
-            if let meetings = meetingsToBackUp, meetings > 0 {
-                return String(localized: "Encrypting \(meetings) meetings…", comment: "Backup sheet while working; the argument is a number of meetings")
-            }
-            return String(localized: "Encrypting the backup…")
-        case .opening:
-            return String(localized: "Opening the backup…", comment: "Restore sheet while checking the backup")
-        case .restoring:
-            if let meetings = counts?.backup, meetings > 0 {
-                return String(localized: "Restoring \(meetings) meetings…", comment: "Restore sheet while replacing the meetings; the argument is a number of meetings")
-            }
-            return String(localized: "Restoring meetings…", comment: "Restore sheet while replacing the meetings")
-        }
-    }
-
-    static var stopRecordingMessage: String {
-        String(localized: "Stop the recording to restore.", comment: "Restore sheet: a recording is running")
-    }
-
-    /// The title of a failure: short, with the advice in `hint(for:)`. The system's own sentences ("The file couldn’t be
-    /// saved because there isn’t enough space") are explanations that would take two bold lines.
-    static func message(_ error: Error) -> String {
-        if (error as? StoreError)?.code == .backupAuthentication {
-            return String(localized: "Couldn’t open the backup", comment: "Restore sheet: title when the password is wrong or the file was changed or damaged")
-        }
-        if isOutOfSpace(error) {
-            return String(localized: "Not enough space", comment: "Backup sheet: title when the disk is full")
-        }
-        return error.localizedDescription
-    }
-
-    private static func isOutOfSpace(_ error: Error) -> Bool {
-        let ns = error as NSError
-        return ns.domain == NSCocoaErrorDomain && ns.code == CocoaError.fileWriteOutOfSpace.rawValue
-            || ns.domain == NSPOSIXErrorDomain && ns.code == Int(ENOSPC)
-    }
-
-    /// What to do about a failure: the error's own suggestion, else the one that fits a failed write.
-    /// Nothing for an error that has no useful advice (never "free up space" for a permission error).
-    static func hint(for error: Error) -> String? {
-        if (error as? StoreError)?.code == .backupAuthentication {
-            return String(localized: "The password is wrong, or the file was changed or damaged. Check the password, or choose another file.",
-                          comment: "Restore sheet: advice when the backup can't be opened")
-        }
-        if let suggestion = (error as? LocalizedError)?.recoverySuggestion { return suggestion }
-        let ns = error as NSError
-        if isOutOfSpace(error) {
-            return String(localized: "Choose another location, or free up space and try again.", comment: "Backup sheet: the disk is full")
-        }
-        let writeErrors: Set<Int> = [CocoaError.fileWriteNoPermission.rawValue, CocoaError.fileWriteVolumeReadOnly.rawValue,
-                                     CocoaError.fileWriteInvalidFileName.rawValue, CocoaError.fileWriteFileExists.rawValue,
-                                     CocoaError.fileWriteUnknown.rawValue]
-        if ns.domain == NSCocoaErrorDomain && writeErrors.contains(ns.code)
-            || ns.domain == NSPOSIXErrorDomain && [Int(EACCES), Int(EPERM), Int(EROFS)].contains(ns.code) {
-            return String(localized: "Choose another location and try again.", comment: "Backup sheet: the file couldn't be written there")
-        }
-        return nil
     }
 
     static func dayStamp() -> String {

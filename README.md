@@ -294,7 +294,7 @@ Yes. Everything the microphone picks up is transcribed as *Me*.
 Delete single meetings in the Meetings window, or erase meetings and context in **Settings → Privacy & Security**.
 
 **Can I back up my meetings?**
-Yes: **Settings → Privacy & Security → Back Up…** saves everything to one file encrypted with a password you choose. Keep the password: Vauta cannot recover it.
+Yes: **Settings → Privacy & Security → Back Up…** saves everything to one file encrypted with a password you choose, and checks the file once it is written. Keep the password: Vauta cannot recover it. **Verify Backup…** checks a backup file later without restoring it.
 
 ## Troubleshooting
 
