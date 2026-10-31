@@ -6624,6 +6624,7 @@
 
 /* Speaker popover, under “Is this Ana?”: why the speaker is not named yet */
 "This voice resembles a saved voice. Vauta never names a speaker from a voice alone." = "저장된 목소리와 비슷합니다. Vauta는 목소리만으로 화자에게 이름을 붙이지 않습니다.";
+"They said: “%@”. Vauta never names a speaker from what they say alone." = "발언: “%@”. Vauta는 발언만으로 화자에게 이름을 붙이지 않습니다.";
 
 /* Speaker popover, under “Is this you?”: why the speaker is not named yet */
 "This voice resembles your saved voice. Vauta never names a speaker from a voice alone." = "저장된 내 목소리와 비슷합니다. Vauta는 목소리만으로 화자에게 이름을 붙이지 않습니다.";

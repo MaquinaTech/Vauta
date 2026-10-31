@@ -6551,6 +6551,9 @@
 /* Settings → Live answers, under Keep detected questions with the meeting when it is on */
 "They are stored encrypted with the meeting and listed on its page. Only the ones you keep are exported or searched." = "They are stored encrypted with the meeting and listed on its page. Only the ones you keep are exported or searched.";
 
+/* Speaker popover, under “Is this Ana?” when the speaker said who they are; the argument is what they said */
+"They said: “%@”. Vauta never names a speaker from what they say alone." = "They said: “%@”. Vauta never names a speaker from what they say alone.";
+
 /* Settings → Models advanced */
 "Thinking control" = "Thinking control";
 

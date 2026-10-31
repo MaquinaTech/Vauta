@@ -6624,6 +6624,7 @@
 
 /* Speaker popover, under “Is this Ana?”: why the speaker is not named yet */
 "This voice resembles a saved voice. Vauta never names a speaker from a voice alone." = "Esta voz se parece com uma voz salva. Vauta nunca nomeia um falante apenas pela voz.";
+"They said: “%@”. Vauta never names a speaker from what they say alone." = "Disse: “%@”. Vauta nunca nomeia um falante apenas pelo que diz.";
 
 /* Speaker popover, under “Is this you?”: why the speaker is not named yet */
 "This voice resembles your saved voice. Vauta never names a speaker from a voice alone." = "Esta voz se parece com a sua voz salva. Vauta nunca nomeia um falante apenas pela voz.";

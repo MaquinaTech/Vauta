@@ -23,7 +23,7 @@ extension MeetingStore {
 
     private static let speakerSelect = """
         SELECT sp.id, sp.meeting_id, sp.channel, sp.ordinal, sp.entity_id, e.name,
-               e.id IS (SELECT v FROM store_meta WHERE k = 'self_entity'), sp.source, sp.confidence, sp.talk_seconds
+               e.id IS (SELECT v FROM store_meta WHERE k = 'self_entity'), sp.source, sp.confidence, sp.talk_seconds, sp.suggested_by_segment
         FROM meeting_speakers sp LEFT JOIN entities e ON e.id = sp.entity_id
         """
 
@@ -31,7 +31,7 @@ extension MeetingStore {
         MeetingSpeaker(id: row.int(0), meetingID: row.int(1), channel: Channel(storedSpeaker: row.string(2)), ordinal: Int(row.int(3)),
                        entityID: row.optionalInt(4), entityName: row.optionalString(5), entityIsSelf: row.int(6) != 0,
                        source: MeetingSpeaker.Source(rawValue: row.string(7)) ?? .auto,
-                       confidence: row.optionalDouble(8), talkSeconds: row.double(9))
+                       confidence: row.optionalDouble(8), talkSeconds: row.double(9), suggestedBySegment: row.optionalInt(10))
     }
 
     /// The speakers of a meeting: the user's channel first, then Others, each by ordinal. Empty

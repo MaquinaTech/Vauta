@@ -494,6 +494,18 @@ enum Schema {
             INSERT INTO echo_pending (meeting_id) SELECT id FROM meetings WHERE ended_at IS NOT NULL AND raw_purged_at IS NULL
                 AND NOT EXISTS (SELECT 1 FROM segments WHERE meeting_id = meetings.id AND echo <> 0);
             """)),
+        // A speaker who said who they are ("Hi, I'm Ana"): the line that said it, for a suggestion that came from it (`source` stays
+        // 'suggested', so it is only "Is this Ana?" until the person accepts it). Gone with the line; and when the speaker's person or
+        // source changes any other way (a voice, the person's answer), the line no longer explains it and is forgotten.
+        Migration(34, .sql("""
+            ALTER TABLE meeting_speakers ADD COLUMN suggested_by_segment INTEGER REFERENCES segments(id) ON DELETE SET NULL;
+            CREATE TRIGGER meeting_speakers_suggestion_reason AFTER UPDATE OF entity_id, source ON meeting_speakers
+            WHEN new.suggested_by_segment IS NOT NULL AND new.suggested_by_segment IS old.suggested_by_segment
+                 AND (new.entity_id IS NOT old.entity_id OR new.source <> 'suggested')
+            BEGIN
+                UPDATE meeting_speakers SET suggested_by_segment = NULL WHERE id = new.id;
+            END;
+            """)),
     ]
 
     /// The schema version this build writes.

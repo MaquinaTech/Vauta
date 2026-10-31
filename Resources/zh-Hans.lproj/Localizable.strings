@@ -6624,6 +6624,7 @@
 
 /* Speaker popover, under “Is this Ana?”: why the speaker is not named yet */
 "This voice resembles a saved voice. Vauta never names a speaker from a voice alone." = "这个声音与已存储的声音相似。Vauta 绝不会仅凭声音为发言人命名。";
+"They said: “%@”. Vauta never names a speaker from what they say alone." = "其发言：“%@”。Vauta 绝不会仅凭发言为发言人命名。";
 
 /* Speaker popover, under “Is this you?”: why the speaker is not named yet */
 "This voice resembles your saved voice. Vauta never names a speaker from a voice alone." = "这个声音与你已存储的声音相似。Vauta 绝不会仅凭声音为发言人命名。";

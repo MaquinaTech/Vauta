@@ -5,16 +5,16 @@ import Foundation
 
 /// One speaker of one meeting (`meeting_speakers`).
 public struct MeetingSpeaker: Sendable, Identifiable, Hashable {
-    /// Who named the speaker: the user, or nobody ("Speaker k"); a saved voice only suggests (`suggested`).
-    /// Calendar attendees are suggestions shown by the UI; they are never stored as an assignment.
-    /// Nothing names a speaker from what the transcript says.
+    /// Who named the speaker: the user, or nobody ("Speaker k"); a saved voice, or the speaker saying who they are, only suggests
+    /// (`suggested`). Calendar attendees are suggestions shown by the UI; they are never stored as an assignment.
+    /// Nothing names a speaker from what the transcript says: it can only suggest (`suggestedBySegment`).
     public enum Source: String, Sendable, CaseIterable {
         /// Found by the diarizer; not named.
         case auto
         /// The user chose the person. Ground truth: never overwritten.
         case user
-        /// A saved voice resembles this person ("Is this Ana?"): `entityID` is only a candidate and is never shown as
-        /// a name. Accepting it is a user assignment.
+        /// A saved voice resembles this person, or the speaker said they are this person (`suggestedBySegment`): "Is this
+        /// Ana?". `entityID` is only a candidate and is never shown as a name. Accepting it is a user assignment.
         case suggested
     }
 
@@ -32,9 +32,13 @@ public struct MeetingSpeaker: Sendable, Identifiable, Hashable {
     public let source: Source
     public let confidence: Double?
     public let talkSeconds: Double
+    /// The line in which the speaker said who they are ("Hi, I'm Ana"), when that is where the suggestion comes from
+    /// (`MeetingStore.suggestSpeakersFromIntroductions`); nil for a voice's suggestion and once the person answered it.
+    public let suggestedBySegment: Int64?
 
     public init(id: Int64, meetingID: Int64, channel: Channel, ordinal: Int, entityID: Int64? = nil, entityName: String? = nil,
-                entityIsSelf: Bool = false, source: Source = .auto, confidence: Double? = nil, talkSeconds: Double = 0) {
+                entityIsSelf: Bool = false, source: Source = .auto, confidence: Double? = nil, talkSeconds: Double = 0,
+                suggestedBySegment: Int64? = nil) {
         self.id = id
         self.meetingID = meetingID
         self.channel = channel
@@ -45,6 +49,7 @@ public struct MeetingSpeaker: Sendable, Identifiable, Hashable {
         self.source = source
         self.confidence = confidence
         self.talkSeconds = talkSeconds
+        self.suggestedBySegment = suggestedBySegment
     }
 
     /// The person's name when the user named the speaker
