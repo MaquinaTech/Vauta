@@ -612,6 +612,24 @@
 			<string>Chaque langue se télécharge une seule fois depuis Apple. La transcription s’exécute ensuite sur ce Mac, et l’audio ne le quitte jamais. macOS permet à Vauta de garder jusqu’à %lld langues : en télécharger une autre libère celle que vous avez utilisée le moins récemment.</string>
 		</dict>
 	</dict>
+	<key>Only %lld meetings (%@)</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>Seulement %1$#@meetings@ (%2$@)</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%1$lld réunion</string>
+			<key>many</key>
+			<string>%1$lld de réunions</string>
+			<key>other</key>
+			<string>%1$lld réunions</string>
+		</dict>
+	</dict>
 	<key>Other possible items, %lld items</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

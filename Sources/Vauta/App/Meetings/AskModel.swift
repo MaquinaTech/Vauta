@@ -12,12 +12,19 @@ import Observation
 @Observable
 final class AskModel {
     var question = "" {
-        didSet { if question != oldValue { readTime() } }
+        didSet { if question != oldValue { readQuestion() } }
     }
     /// The time the question names (`AskTimeScope`): applied, or offered as a control under the question.
     private(set) var timeScope: AskTimeScope?
     /// The person turned that control on or off (nil: as `timeScope.applies` says). Forgotten when the question names another time.
     private(set) var timeChoice: Bool?
+    /// The meetings the question names by their place (`AskMeetingPlace`: "the last meeting"), applied with a control under the question.
+    private(set) var place: AskMeetingPlace?
+    /// The meetings that place names now, newest first, for the control (`ask()` looks them up again); nil while unknown, or when the
+    /// question names no person or project the place needs.
+    private(set) var placeMeetings: [MeetingStore.Meeting]?
+    /// The person turned that control off or on again (nil: on). Forgotten when the question names another place.
+    private(set) var placeChoice: Bool?
     /// About one meeting (its whole transcript) instead of all of them.
     var thisMeeting = false
     /// The meeting "this meeting" refers to.
@@ -58,6 +65,7 @@ final class AskModel {
     @ObservationIgnored var meetingTitle: ((Int64) -> String?)?
     @ObservationIgnored private let store: MeetingStore
     @ObservationIgnored private var task: Task<Void, Never>?
+    @ObservationIgnored private var placeTask: Task<Void, Never>?
     @ObservationIgnored private var generation = 0
 
     init(store: MeetingStore) {
@@ -115,6 +123,12 @@ final class AskModel {
                comment: "Ask: shown under the answer when no passage of the meetings of the time the question names matched; the argument is a date, a range of dates, a month, a quarter or a year")
     }
 
+    /// The meetings the question names by their place ("the last three meetings") have nothing that matches it.
+    static var nothingThereNote: String {
+        String(localized: "Nothing in those meetings matched, so all meetings were searched.",
+               comment: "Ask: shown under the answer when no passage of the meetings the question names by their place (the last three meetings) matched")
+    }
+
     /// The line under an answer over the library: the meetings searched and their days, those searched by keywords alone, what reached
     /// the model, and the older meetings whose transcript is gone. Nil when there is nothing to say.
     static func coverageText(_ c: AskCoverage) -> String? {
@@ -162,17 +176,83 @@ final class AskModel {
     /// Turns the time control on or off; the answer on screen, if it is this question's, is asked again.
     func chooseTimeScope(_ on: Bool) {
         timeChoice = on
+        // "The last meeting" of that time, or of all time.
+        resolvePlace()
+        askAgainIfAnswered()
+    }
+
+    /// The place control under the question: as the time one, once its meetings are known.
+    var offeredPlace: [MeetingStore.Meeting]? {
+        guard !thisMeeting, scope != .documents, place != nil, let found = placeMeetings, !found.isEmpty else { return nil }
+        return found
+    }
+
+    /// Whether the next question looks only in the meetings it names by their place.
+    var usesPlace: Bool { offeredPlace != nil && placeChoice != false }
+
+    /// Turns the place control on or off; the answer on screen, if it is this question's, is asked again.
+    func choosePlace(_ on: Bool) {
+        placeChoice = on
+        askAgainIfAnswered()
+    }
+
+    private func askAgainIfAnswered() {
         let current = SingleLineText.flatten(question).trimmingCharacters(in: .whitespacesAndNewlines)
         if !busy, current == answeredQuestion, answer != nil || !passages.isEmpty || needsModel || failure != nil { ask() }
     }
 
+    /// "Only “Weekly sync” (Oct 28, 2026)", "Only 3 meetings (Oct 14 – 28, 2026)": the label of the place control.
+    static func placeLabel(_ found: [MeetingStore.Meeting]) -> String {
+        let days = AskCoverage(searched: found.count, first: found.map(\.startedAt).min(), last: found.map(\.startedAt).max()).days() ?? ""
+        if found.count == 1, let meeting = found.first {
+            return String(localized: "Only “\(meeting.displayTitle)” (\(days))",
+                          comment: "Ask: a toggle under the question that limits the search to the one meeting the question names by its place (the last meeting, the first meeting with someone); the arguments are its title and its date")
+        }
+        return String(localized: "Only \(found.count) meetings (\(days))",
+                      comment: "Ask: a toggle under the question that limits the search to the meetings the question names by their place (the last three meetings); the arguments are how many and their dates")
+    }
+
     /// The question's language when it can be told, else the person's: the words of the other languages are not looked for
     /// (German "hier" is "here").
-    private func readTime() {
+    private func readQuestion() {
         let languages = OutputLanguage.confident(question).map { [$0.identifier] } ?? Locale.preferredLanguages
         let read = AskTimeScope.read(question, languages: languages)
         if read?.interval != timeScope?.interval { timeChoice = nil }
         timeScope = read
+        let named = AskMeetingPlace.read(question, languages: languages)
+        if named != place {
+            placeChoice = nil
+            placeMeetings = nil
+        }
+        place = named
+        resolvePlace()
+    }
+
+    /// Looks up the meetings of the place for its control, a moment after the typing stops.
+    private func resolvePlace() {
+        placeTask?.cancel()
+        guard let place else { placeMeetings = nil; return }
+        let question = question, period = usesTimeScope ? timeScope : nil
+        placeTask = Task {
+            try? await Task.sleep(for: .milliseconds(250))
+            guard !Task.isCancelled else { return }
+            let found = await meetings(at: place, question: question, period: period)
+            guard !Task.isCancelled else { return }
+            placeMeetings = found
+        }
+    }
+
+    /// The meetings `place` names, newest first, within `period`; nil when it needs a person or project and the question names none.
+    private func meetings(at place: AskMeetingPlace, question: String, period: AskTimeScope?) async -> [MeetingStore.Meeting]? {
+        var entities: [Int64] = []
+        if place.ofNamed {
+            entities = (try? await store.entitiesNamed(in: question)) ?? []
+            guard !entities.isEmpty else { return nil }
+        }
+        guard let ids = try? await store.meetingIDs(at: place.which, entities: entities, from: period?.interval.start, to: period?.interval.end) else { return nil }
+        var found: [MeetingStore.Meeting] = []
+        for id in ids { if let meeting = try? await store.meeting(id) { found.append(meeting) } }
+        return found
     }
 
     func ask() {
@@ -181,6 +261,7 @@ final class AskModel {
         // "Only documents" looks in the whole library: a meeting's materials are a narrower search, which the meeting picker (hidden then) asks for.
         let scope = thisMeeting && self.scope != .documents ? meetingID : nil
         let period = usesTimeScope ? timeScope : nil
+        let place = usesPlace ? self.place : nil
         task?.cancel()
         onAsked?(question)
         busy = true
@@ -205,20 +286,28 @@ final class AskModel {
             defer { if generation == current { busy = false } }
             // At once: passages from local search (BM25 + graph), no server needed.
             let kind = answeredScope
-            // The meetings of the time the question names; none (a day without meetings) is the whole library, and said so.
+            // The meetings the question names by their place, within its time: one is read whole, as when the question is about it,
+            // several are searched like the meetings of a time.
+            var within = scope
             var meetings: [Int64]?
             var widenedNote: String?
-            if let period, kind != .documents {
+            var placed = false
+            if let place, kind != .documents, let found = await self.meetings(at: place, question: question, period: period), !found.isEmpty {
+                if found.count == 1 { within = found[0].id } else { meetings = found.map(\.id) }
+                placed = true
+            } else if let period, kind != .documents {
+                // The meetings of the time the question names; none (a day without meetings) is the whole library, and said so.
                 let ids = (try? await store.meetingIDs(matching: MeetingFilter(from: period.interval.start, to: period.interval.end))) ?? []
                 if ids.isEmpty { widenedNote = Self.noMeetingsThenNote(period) } else { meetings = ids }
             }
-            var local = kind == .documents ? [] : ((try? await store.retrieve(question, queryVector: nil, within: scope, meetings: meetings)) ?? [])
+            let widened = placed ? Self.nothingThereNote : period.map(Self.nothingThenNote)
+            var local = kind == .documents ? [] : ((try? await store.retrieve(question, queryVector: nil, within: within, meetings: meetings)) ?? [])
             if local.isEmpty, meetings != nil, kind != .documents {
-                local = (try? await store.retrieve(question, queryVector: nil, within: scope)) ?? []
+                local = (try? await store.retrieve(question, queryVector: nil, within: within)) ?? []
                 // Without a model these passages are all there is: say they come from all the meetings.
-                if !local.isEmpty, await llm?.isConfigured != true, let period { widenedNote = Self.nothingThenNote(period) }
+                if !local.isEmpty, await llm?.isConfigured != true { widenedNote = widened }
             }
-            let localDocuments = kind == .meetings ? [] : (await llm?.documentPassages(for: question, meetingID: scope) ?? [])
+            let localDocuments = kind == .meetings ? [] : (await llm?.documentPassages(for: question, meetingID: within) ?? [])
             guard !Task.isCancelled else { return }
             if let widenedNote { note = widenedNote }
             show(local)
@@ -228,12 +317,12 @@ final class AskModel {
                 return
             }
             do {
-                let result = try await llm.ask(question, meetingID: scope, meetings: meetings, scope: kind) { n in
+                let result = try await llm.ask(question, meetingID: within, meetings: meetings, scope: kind) { n in
                     Task { @MainActor in if self.generation == current { self.progressTokens = n } }
                 }
                 guard !Task.isCancelled else { return }
-                if let scope {
-                    for id in result.sent.keys { segmentMeeting[id] = scope }
+                if let within {
+                    for id in result.sent.keys { segmentMeeting[id] = within }
                     segments.merge(result.sent) { _, new in new }
                 } else if !result.passages.isEmpty {
                     show(result.passages)
@@ -242,7 +331,7 @@ final class AskModel {
                     for (id, segment) in result.sent where segments[id] == nil { segments[id] = segment }
                 }
                 if !result.documentPassages.isEmpty { documentPassages = result.documentPassages }
-                if result.widenedScope, let period { note = Self.nothingThenNote(period) }
+                if result.widenedScope, let widened { note = widened }
                 coverage = result.coverage
                 answer = result.answer
             } catch is CancellationError {

@@ -477,6 +477,20 @@
 			<string>各言語はAppleから一度だけダウンロードされます。その後、文字起こしはこのMac上で実行され、音声がMacの外に出ることはありません。macOSでVautaが保持できる言語は最大%lld個⁠です。別の言語をダウンロードすると、最も長く使っていない言語が解放されます。</string>
 		</dict>
 	</dict>
+	<key>Only %lld meetings (%@)</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%1$#@meetings@のみ(%2$@)</string>
+		<key>meetings</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>%1$lld⁠件のミーティング</string>
+		</dict>
+	</dict>
 	<key>Other possible items, %lld items</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

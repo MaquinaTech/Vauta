@@ -1293,6 +1293,9 @@
 /* Ask: help on the time toggle when it is off */
 "Click to search only the meetings held then." = "Click to search only the meetings held then.";
 
+/* Ask: help on the toggle of the meetings the question names by their place, when it is off */
+"Click to search only the meetings the question names." = "Click to search only the meetings the question names.";
+
 /* Model guide: what the last button does; the argument is the title of the button below */
 "Click “%@”. Vauta tests the server, saves it and uses it for minutes." = "Click “%@”. Vauta tests the server, saves it and uses it for minutes.";
 
@@ -4060,6 +4063,9 @@
 /* Help of the mark on a task owner; also the note in the task editor */
 "Nothing in the passage the model cited confirms this owner." = "Nothing in the passage the model cited confirms this owner.";
 
+/* Ask: shown under the answer when no passage of the meetings the question names by their place (the last three meetings) matched */
+"Nothing in those meetings matched, so all meetings were searched." = "Nothing in those meetings matched, so all meetings were searched.";
+
 /* No comment provided by engineer. */
 "Nothing is being translated." = "Nothing is being translated.";
 
@@ -4183,6 +4189,9 @@
 /* Ask: help on the time toggle when it is on */
 "Only the meetings held then are searched. Click to search all meetings." = "Only the meetings held then are searched. Click to search all meetings.";
 
+/* Ask: help on the toggle of the meetings the question names by their place, when it is on */
+"Only the meetings the question names are searched. Click to search all meetings." = "Only the meetings the question names are searched. Click to search all meetings.";
+
 /* Settings → Translation: privacy note about the model server */
 "Only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. Nothing is sent anywhere else." = "Only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. Nothing is sent anywhere else.";
 
@@ -4194,6 +4203,9 @@
 
 /* Ask scope: only this meeting */
 "Only “%@”" = "Only “%@”";
+
+/* Ask: a toggle under the question that limits the search to the one meeting the question names by its place (the last meeting, the first meeting with someone); the arguments are its title and its date */
+"Only “%@” (%@)" = "Only “%@” (%@)";
 
 /* Task status */
 "Open" = "Open";
