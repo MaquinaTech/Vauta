@@ -8,12 +8,19 @@ extension LLMClient {
 
     public func urlSession(_ session: URLSession, didReceive challenge: URLAuthenticationChallenge) async
         -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        ServerTrust.evaluate(challenge, allEndpoints)
+        trust(challenge)
     }
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, didReceive challenge: URLAuthenticationChallenge) async
         -> (URLSession.AuthChallengeDisposition, URLCredential?) {
-        ServerTrust.evaluate(challenge, allEndpoints)
+        trust(challenge)
+    }
+
+    /// The configured endpoints' trust, keeping how long the presented certificates stay valid for Status.
+    private func trust(_ challenge: URLAuthenticationChallenge) -> (URLSession.AuthChallengeDisposition, URLCredential?) {
+        let (disposition, credential, validity) = ServerTrust.evaluate(challenge, allEndpoints)
+        if let validity { recordCertificate(validity) }
+        return (disposition, credential)
     }
 
     public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse,

@@ -50,6 +50,17 @@ struct MeetingsSidebar: View {
                     }
                 }
                 .onDeleteCommand { model.confirmDeleteSelected() }
+                // A right click on a row: the File and Edit menus' commands for that meeting (in Ask the list chooses meetings).
+                .contextMenu(forSelectionType: Int64.self) { ids in
+                    if model.mode == .meetings, ids.count == 1, let id = ids.first {
+                        Button("Export…") { Task { await model.perform(.export, onMeeting: id) } }
+                        Button("Copy Minutes") { Task { await model.perform(.copyMinutes(markdown: true), onMeeting: id) } }
+                        Button("Copy Minutes as Plain Text") { Task { await model.perform(.copyMinutes(markdown: false), onMeeting: id) } }
+                        Divider()
+                        Button("Delete Meeting…", role: .destructive) { Task { await model.perform(.delete, onMeeting: id) } }
+                            .disabled(!model.canDeleteFromMenu(id))
+                    }
+                }
                 .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged).receive(on: RunLoop.main)) { _ in now = .now }
                 .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in now = .now }
                 .overlay {
