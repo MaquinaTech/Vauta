@@ -342,7 +342,7 @@ struct SummaryTab: View {
     }
 
     private func decisionHelp(_ d: Decision) -> String {
-        if d.unconfirmed { return VerificationText.unconfirmedHelp }
+        if d.unconfirmed { return VerificationText.help(reason: d.unconfirmedReason) }
         return d.source == "llm" ? String(localized: "Proposed by the model: review it") : ""
     }
 

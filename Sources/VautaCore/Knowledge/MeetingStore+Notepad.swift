@@ -27,12 +27,12 @@ extension MeetingStore {
 
     static let expansionColumns = "note_id, meeting_id, state, pass, sentences, plain, source_key, upto_segment, user_edited, previous, error_code, updated_at"
 
-    private static func decodeSentences(_ json: String?) -> [NoteExpansion.Sentence] {
+    static func decodeSentences(_ json: String?) -> [NoteExpansion.Sentence] {
         guard let json, let list = try? JSONDecoder().decode([NoteExpansion.Sentence].self, from: Data(json.utf8)) else { return [] }
         return list
     }
 
-    private static func encode<T: Encodable>(_ value: T) -> String {
+    static func encode<T: Encodable>(_ value: T) -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         return String(decoding: (try? encoder.encode(value)) ?? Data("[]".utf8), as: UTF8.self)

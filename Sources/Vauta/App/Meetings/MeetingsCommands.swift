@@ -60,6 +60,8 @@ struct MeetingsCommands: Commands {
             // The keyboard way into the speaker popover: the highlighted passage (arrow keys) is the one it is about.
             Button("Speaker Options for Highlighted Passage") { model?.openSpeakerOptionsOfHighlight() }
                 .disabled(model?.canOpenSpeakerOptionsOfHighlight != true)
+            Button("Correct Highlighted Passage") { model?.correctHighlight() }
+                .disabled(model?.canCorrectHighlight != true)
             Button("Delete Meeting…") {
                 // The ⌘⌫ key in a text field still deletes to the start of the line; choosing the menu item
                 // with the mouse or VoiceOver always asks to delete the meeting.

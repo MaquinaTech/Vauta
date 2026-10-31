@@ -57,7 +57,7 @@ struct StorageSpeakerTests {
         }
         let store = try fx.open()
         #expect(try await store.pragma("user_version") == Schema.currentVersion)
-        #expect(try await store.columnNames("segments").suffix(5) == ["speaker_id", "speaker_confidence", "overlap", "speaker_locked", "echo"])
+        #expect(try await store.columnNames("segments").suffix(7) == ["speaker_id", "speaker_confidence", "overlap", "speaker_locked", "echo", "original_text", "edited_at"])
         let segments = try await store.segments(of: 1)
         #expect(segments.map(\.text) == ["texto heredado", "respuesta"])
         #expect(segments.map(\.channel) == [.me, .others])

@@ -248,7 +248,7 @@ struct NoteLine: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             // The user's own version carries no verification marks.
-            if s.unconfirmed && row.expansion?.userEdited != true { UnconfirmedBadge() }
+            if s.unconfirmed && row.expansion?.userEdited != true { UnconfirmedBadge(reason: s.edited ? UnconfirmedReason.edited : nil) }
         }
         .font(large ? .callout : .caption)
         .foregroundStyle(status == .stale ? AnyShapeStyle(.tertiary) : AnyShapeStyle(.secondary))

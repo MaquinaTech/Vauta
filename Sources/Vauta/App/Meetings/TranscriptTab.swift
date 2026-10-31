@@ -78,6 +78,12 @@ struct TranscriptTab: View {
                 default: break
                 }
             }
+            // Return corrects the highlighted line, as it renames in Finder.
+            .onKeyPress(.return) {
+                guard model.canCorrectHighlight else { return .ignored }
+                model.correctHighlight()
+                return .handled
+            }
             .onChange(of: model.highlighted, initial: true) {
                 if let h = model.highlighted { withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo(h, anchor: .center) } }
             }
@@ -268,15 +274,24 @@ struct TranscriptTab: View {
 
     private func row(_ segment: MeetingStore.StoredSegment, _ cols: Columns) -> some View {
         let isHighlighted = segment.id == model.highlighted
+        let isEditing = model.lineDraft?.segmentID == segment.id
+        let canCorrect = model.canCorrect(segment)
         let translation = showsTranslations ? model.translations[segment.id] : nil
         let time = ElapsedTime.stamp(segment.start)
         return HStack(alignment: .firstTextBaseline, spacing: 8) {
             TranscriptTime(text: time, width: cols.time, help: "Highlight this passage") { model.highlight(segment) }
             SpeakerLabel(model: model, segment: segment, width: cols.speaker)
             VStack(alignment: .leading, spacing: 2) {
-                // Not by color alone: an echo is dimmed and says what it is, with the way to take the mark back.
-                ProtectedText(matched(segment))
-                    .foregroundStyle(segment.isEcho ? .secondary : .primary)
+                if isEditing {
+                    TranscriptLineEditor(model: model)
+                } else {
+                    // Not by color alone: an echo is dimmed and says what it is, with the way to take the mark back.
+                    ProtectedText(matched(segment))
+                        .foregroundStyle(segment.isEcho ? .secondary : .primary)
+                }
+                if let original = segment.originalText {
+                    CorrectedNote(original: original) { Task { await model.restoreOriginal(segment) } }
+                }
                 if segment.isEcho {
                     EchoNote(channel: segment.channel) { Task { await model.setEcho(segment, false) } }
                 }
@@ -285,15 +300,24 @@ struct TranscriptTab: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            if isHighlighted, canCorrect, !isEditing {
+                CorrectLineButton { model.beginCorrecting(segment) }
+            }
         }
         // Not by color alone: a bar marks the highlighted passage.
         .rowInset(fill: isHighlighted ? Color.accentColor.opacity(0.18) : nil, bar: isHighlighted ? Color.accentColor : nil)
         .contentShape(Rectangle())
-        // With copy protection off, clicks select text; the time highlights.
-        .onTapGesture { if copyProtection { model.highlight(segment) } }
-        .accessibilityElement(children: .ignore)
+        // With copy protection off, clicks select text; the time highlights. A click in the line being corrected places the caret.
+        .onTapGesture { if copyProtection, !isEditing { model.highlight(segment) } }
+        .contextMenu {
+            if canCorrect, !isEditing { Button(CorrectLineButton.title + "…") { model.beginCorrecting(segment) } }
+            if segment.originalText != nil { Button(CorrectedNote.restoreTitle) { Task { await model.restoreOriginal(segment) } } }
+        }
+        // The field of the line being corrected stays reachable.
+        .accessibilityElement(children: isEditing ? .contain : .ignore)
         .accessibilityLabel(SpeakerLabel.spoken(segment, time: time))
-        .accessibilityValue(Text(verbatim: [segment.isEcho ? EchoNote.title(for: segment.channel) : nil, SpeakerLabel.spokenNotes(segment, translation: translation)]
+        .accessibilityValue(Text(verbatim: [segment.originalText.map { CorrectedNote.title + ". " + CorrectedNote.transcribed($0) },
+                                            segment.isEcho ? EchoNote.title(for: segment.channel) : nil, SpeakerLabel.spokenNotes(segment, translation: translation)]
             .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")))
         .accessibilityAddTraits(isHighlighted ? [.isButton, .isSelected] : .isButton)
         .accessibilityAction { model.highlight(segment) }
@@ -305,6 +329,8 @@ struct TranscriptTab: View {
             if segment.isEcho {
                 Button(EchoNote.restore(for: segment.channel)) { Task { await model.setEcho(segment, false) } }
             }
+            if canCorrect { Button(CorrectLineButton.title) { model.beginCorrecting(segment) } }
+            if segment.originalText != nil { Button(CorrectedNote.restoreTitle) { Task { await model.restoreOriginal(segment) } } }
         }
         .accessibilityHint(Text("Highlights the passage to cite it"))
     }

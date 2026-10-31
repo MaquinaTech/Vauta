@@ -185,7 +185,7 @@ struct TaskTextCell: View {
     private var help: Text {
         var sentences: [String] = []
         if task.source == "llm" { sentences.append(String(localized: "Proposed by the model: review it", comment: "Help of the sparkles badge on a task the model proposed")) }
-        if task.unconfirmed { sentences.append(VerificationText.unconfirmedHelp) }
+        if task.unconfirmed { sentences.append(VerificationText.help(reason: task.unconfirmedReason)) }
         if ownerMarked { sentences.append(VerificationText.ownerHelp) }
         return Text(verbatim: sentences.joined(separator: " "))
     }

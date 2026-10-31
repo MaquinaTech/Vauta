@@ -517,6 +517,13 @@ enum Schema {
             );
             CREATE INDEX meeting_pauses_meeting ON meeting_pauses(meeting_id, start);
             """)),
+        // A line the user corrected: `text` is the corrected line, which search, Ask, the minutes and the exports read;
+        // `original_text` is what the transcriber wrote, for Restore Original (NULL = never corrected, or restored); `edited_at`
+        // is when the line first stopped being what was transcribed (unix time). Both live and die with the segment.
+        Migration(36, .sql("""
+            ALTER TABLE segments ADD COLUMN original_text TEXT;
+            ALTER TABLE segments ADD COLUMN edited_at REAL;
+            """)),
     ]
 
     /// The schema version this build writes.

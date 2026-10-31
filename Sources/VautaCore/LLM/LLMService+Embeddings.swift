@@ -118,7 +118,8 @@ extension LLMService {
         if changed { await reconcileEmbeddings() }
     }
 
-    /// A meeting's speakers were named, renamed or changed: the marks on its tasks' owners are recomputed, and its
+    /// A meeting's speakers were named, renamed or changed, or a line of its transcript was corrected or marked as an echo: the
+    /// marks on its tasks' owners are recomputed, and its
     /// chunks are embedded again when their text no longer matches the transcript (nothing happens without embeddings, without chunks or without a change).
     public func speakersChanged(meetingID: Int64) async {
         // Owners are marked "not confirmed" against the speakers as they were when the minutes were written.

@@ -177,6 +177,8 @@ public struct SpeakerUndo: Sendable {
         var leftText: String, rightText: String, at: Double
         var leftSpeaker: Int64?, rightSpeaker: Int64?
         var translations: [(language: String, text: String)]
+        /// What the transcriber wrote and since when, for a split of a corrected line.
+        var original: String? = nil, editedAt: Double? = nil
     }
 
     /// A task whose owner changed because its speaker was named or unnamed (before and after, a person or nil).

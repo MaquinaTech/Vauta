@@ -63,6 +63,8 @@ extension MeetingStore {
         public let speaker: SpeakerTag?
         /// A Me line marked as the speakers' echo (the other participants' words, picked up by the microphone).
         public var isEcho = false
+        /// What the transcriber wrote, when the user corrected the line (`text` is the correction); nil for a line as transcribed.
+        public var originalText: String?
 
         public init(id: Int64, meetingID: Int64, channel: Channel, start: Double, end: Double, text: String, speaker: SpeakerTag? = nil) {
             self.id = id

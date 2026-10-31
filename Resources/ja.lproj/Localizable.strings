@@ -1464,6 +1464,17 @@
 
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "行を変更できませんでした";
+"Couldn’t correct the line" = "行を修正できませんでした";
+"Corrected words" = "修正した語句";
+"Return saves, Esc cancels" = "Returnで保存、Escでキャンセル";
+"Corrected" = "修正済み";
+"Restore Original" = "文字起こしに戻す";
+"Transcribed as: “%@”" = "文字起こし:「%@」";
+"Put back the words as they were transcribed" = "文字起こしされたとおりの語句に戻します";
+"Correct Line" = "行を修正";
+"Correct the words of this line (Return)" = "この行の語句を修正(Return)";
+"Correct Highlighted Passage" = "強調表示した箇所を修正";
+"You corrected the transcript here after the minutes were written. Check that this still says what was said." = "議事録の作成後に、ここで文字起こしを修正しました。発言内容と今も一致しているか確認してください。";
 
 /* Alert title */
 "Couldn’t change the note" = "メモを変更できませんでした";

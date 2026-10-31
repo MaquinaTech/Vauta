@@ -103,6 +103,8 @@ final class MeetingsModel {
     var alert: MeetingsAlert?
     /// Segment to highlight (when arriving from a result, a mention or a mark).
     var highlighted: Int64?
+    /// The transcript line whose words are being corrected, with what was typed so far.
+    var lineDraft: LineDraft?
     /// The meeting being recorded (it can't be deleted).
     var activeMeetingID: Int64?
     /// Meetings matching the tokens (nil = no filter).
@@ -130,6 +132,7 @@ final class MeetingsModel {
             saveDraftsInBackground()
             // Words being edited and a note not yet added belong to the meeting being left: they are saved there.
             notepad.commitPendingBeforeLeaving()
+            saveLineDraft()
             if findShown { closeFind() }
             highlighted = pendingHighlight
             pendingHighlight = nil
@@ -493,6 +496,7 @@ final class MeetingsModel {
     func purgeVisible() {
         isShowing = false
         forgetSpeakerEdits()
+        saveLineDraft()
         saveDraftsInBackground(refreshList: false)
         autosaveTask?.cancel()
         searchTask?.cancel()

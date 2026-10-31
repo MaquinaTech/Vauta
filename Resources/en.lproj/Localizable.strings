@@ -1462,6 +1462,21 @@
 /* Technical detail of a capture error */
 "Core Audio error %lld." = "Core Audio error %lld.";
 
+/* No comment provided by engineer. */
+"Correct Highlighted Passage" = "Correct Highlighted Passage";
+
+/* Transcript: button, context menu item and VoiceOver action that corrects the words of a line; also the action Edit ▸ Undo takes back */
+"Correct Line" = "Correct Line";
+
+/* Transcript: tooltip of the pencil at the end of the highlighted line */
+"Correct the words of this line (Return)" = "Correct the words of this line (Return)";
+
+/* Transcript: under a line whose words the user corrected */
+"Corrected" = "Corrected";
+
+/* Accessibility label of the field where the user corrects a transcript line */
+"Corrected words" = "Corrected words";
+
 /* Documents pane: adding a source failed */
 "Couldn’t add it. Try again." = "Couldn’t add it. Try again.";
 
@@ -1518,6 +1533,9 @@
 
 /* Alert title: confirming a person suggested by the calendar failed */
 "Couldn’t confirm the person" = "Couldn’t confirm the person";
+
+/* Alert title: saving the corrected words of a transcript line failed */
+"Couldn’t correct the line" = "Couldn’t correct the line";
 
 /* Alert title: deleting a person or project failed */
 "Couldn’t delete" = "Couldn’t delete";
@@ -4695,6 +4713,9 @@
    Network Activity filter label */
 "Purpose" = "Purpose";
 
+/* Transcript: tooltip of the button under a corrected line */
+"Put back the words as they were transcribed" = "Put back the words as they were transcribed";
+
 /* Accessibility label of the Ask field
    Search result kind: a question heard in a meeting that the person kept, with its answer */
 "Question" = "Question";
@@ -5114,6 +5135,9 @@
 /* Accessibility label of the shortcut recorder's reset button */
 "Restore Default Shortcut" = "Restore Default Shortcut";
 
+/* Transcript: button under a corrected line that puts back the words the transcriber wrote; also the action Edit ▸ Undo takes back */
+"Restore Original" = "Restore Original";
+
 /* No comment provided by engineer. */
 "Restore from a Backup" = "Restore from a Backup";
 
@@ -5167,6 +5191,9 @@
 
 /* No comment provided by engineer. */
 "Resume the translation" = "Resume the translation";
+
+/* Transcript: hint under the field where the user corrects a line */
+"Return saves, Esc cancels" = "Return saves, Esc cancels";
 
 /* Settings → Models activity */
 "Reused from the server cache" = "Reused from the server cache";
@@ -6874,6 +6901,9 @@
 /* No comment provided by engineer. */
 "Transcribe an audio or video recording into a new meeting" = "Transcribe an audio or video recording into a new meeting";
 
+/* Transcript: tooltip and VoiceOver value of a corrected line; the argument is the words the transcriber wrote */
+"Transcribed as: “%@”" = "Transcribed as: “%@”";
+
 /* Settings → Recording, consent helper */
 "Transcribing on your Mac doesn’t remove your duty to tell people they are being transcribed, and some places require everyone’s consent. This isn’t legal advice." = "Transcribing on your Mac doesn’t remove your duty to tell people they are being transcribed, and some places require everyone’s consent. This isn’t legal advice.";
 
@@ -7772,6 +7802,9 @@
 
 /* No comment provided by engineer. */
 "You changed this reminder in Reminders after Vauta added it." = "You changed this reminder in Reminders after Vauta added it.";
+
+/* Help of the mark on a decision or task whose cited transcript line the user corrected after the minutes were written; also the note in the task editor */
+"You corrected the transcript here after the minutes were written. Check that this still says what was said." = "You corrected the transcript here after the minutes were written. Check that this still says what was said.";
 
 /* Event editor: no writable calendar */
 "You have no calendar Vauta can add to." = "You have no calendar Vauta can add to.";
