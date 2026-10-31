@@ -289,10 +289,14 @@ public actor LanguageModelEngine {
                 }
                 verifiedThisLaunch = true
             }
-            do { _ = try loadedTokenizer() } catch {
+            let tokenizer: GemmaTokenizer
+            do { tokenizer = try loadedTokenizer() } catch {
                 markDamaged()
                 throw error
             }
+            // The token index of the grammars (about 2 s on the 262k-token vocabulary) is built while the weights load and the first
+            // prompt is read, not before its first token: a constraint made meanwhile waits for this one.
+            Task.detached(priority: .utility) { _ = TokenIndexCache.shared.index(for: tokenizer) }
             let url = store.weightsURL
             try await gate.run(.interactive) {
                 guard LanguageModelKernelCheck.passed else { throw IntegratedModelError.unsupported("The GPU self-test failed.") }
@@ -307,8 +311,12 @@ public actor LanguageModelEngine {
 
     /// Drops the weights and the kept prefixes. The allocator's limits and cache are changed under the gate, so they never change
     /// while the search model's encoder (or a generation, which stops at its next checkpoint) is running.
-    public func unload() async {
-        dropState()
+    ///
+    /// `keepingTokenizer`: unloaded for being idle, the tokenizer, its chat template and its token index (about 2 s to build, tens of
+    /// MB) stay, so the next question after a quiet spell does not build them again. Memory pressure and an unload asked for (the model
+    /// deleted or replaced) drop them too.
+    public func unload(keepingTokenizer: Bool = false) async {
+        dropState(keepingTokenizer: keepingTokenizer)
         let gate = gate
         try? await gate.run(.interactive) {
             MLXRuntime.setCacheLimit(for: .encoderOnly)
@@ -316,7 +324,7 @@ public actor LanguageModelEngine {
         }
     }
 
-    private func dropState() {
+    private func dropState(keepingTokenizer: Bool = false) {
         askDropTask?.cancel()
         askDropTask = nil
         idleTask?.cancel()
@@ -324,9 +332,10 @@ public actor LanguageModelEngine {
         pressure?.cancel()
         pressure = nil
         engine = nil
+        epoch += 1
+        guard !keepingTokenizer else { return }
         tokenizer = nil
         template = nil
-        epoch += 1
         TokenIndexCache.shared.clear()
     }
 
@@ -343,7 +352,7 @@ public actor LanguageModelEngine {
     /// The idle timer fired. While a recording keeps the model warm it never unloads for being idle (memory pressure still does).
     func unloadIfIdle() async {
         guard !keepWarm else { return }
-        if inFlight == 0 { await unload() } else { armIdle() }
+        if inFlight == 0 { await unload(keepingTokenizer: true) } else { armIdle() }
     }
 
     private func begin() { inFlight += 1; idleTask?.cancel(); askDropTask?.cancel() }
