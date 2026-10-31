@@ -574,6 +574,12 @@ meeting's chunks are deleted (`LLMService.lineDeleted` embeds the meeting again 
 every FTS index is merged and the database vacuumed (or that is left pending while recording), and a full snapshot replaces
 the file and removes the journal before it returns. There is no undo: the app drops its undo steps, which may need the line.
 
+`deleteSegments` does the same for a highlighted stretch (`MeetingsModel.highlightedStretch`, from `highlighted` to
+`highlightExtent`) in that one transaction. The lines' ids go in as one JSON array read through `json_each`, so a stretch of
+any length takes one statement per step, whatever SQLite's limit on bound parameters, and one merge, vacuum and snapshot for
+all of them. It refuses lines of two meetings and a line that is already gone before changing anything; `deleteSegment` is a
+stretch of one.
+
 ### Migrations
 
 `Schema.migrations` in `Storage/Schema.swift` is the single, ordered registry. Versions are strictly increasing and

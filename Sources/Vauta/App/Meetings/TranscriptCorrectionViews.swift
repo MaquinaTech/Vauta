@@ -151,7 +151,17 @@ struct CorrectEverywhereNote: View {
     }
 }
 
-/// Deleting a line of the transcript for good (the context menu, ⌫ and Edit ▸ Delete on the highlighted line, VoiceOver).
+/// Deleting a line of the transcript for good (the context menu, ⌫ and Edit ▸ Delete on the highlighted line, VoiceOver), or a
+/// highlighted stretch of lines.
 enum DeleteLineLabel {
     static let title = String(localized: "Delete Line", comment: "Transcript: confirms deleting a line of the transcript for good; with an ellipsis, the context menu item and VoiceOver action that ask first")
+    static let plural = String(localized: "Delete Lines", comment: "Transcript: confirms deleting a highlighted stretch of the transcript for good")
+
+    /// The context menu item and VoiceOver action on a line of a highlighted stretch; `count` is 2 or more.
+    static func lines(_ count: Int) -> String {
+        String(localized: "Delete \(count) Lines…", comment: "Transcript: menu item and VoiceOver action on a highlighted stretch of lines, which asks first; the argument is how many (2 or more)")
+    }
+
+    /// The VoiceOver action that makes a stretch: from the highlighted line through this one.
+    static let highlightThrough = String(localized: "Highlight Through This Line", comment: "Transcript: VoiceOver action on a line, highlighting the stretch from the highlighted line through this one")
 }

@@ -221,6 +221,12 @@
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "%lld identical requests: the first at %@, the latest at %@.";
 
+/* Confirmation after deleting a highlighted stretch of transcript lines; the argument is how many (2 or more) */
+"%lld lines deleted" = "%lld lines deleted";
+
+/* Confirmation after deleting a stretch of transcript lines that decisions, tasks or note expansions were written from; the argument is how many (2 or more) */
+"%lld lines deleted. What the minutes wrote from them is marked for you to check." = "%lld lines deleted. What the minutes wrote from them is marked for you to check.";
+
 /* VoiceOver: how many of a source's skipped files are Google Drive shortcuts or kept online only by a cloud service */
 "%lld not on this Mac" = "%lld not on this Mac";
 
@@ -1579,6 +1585,9 @@
 /* Alert title: deleting a transcript line failed */
 "Couldn’t delete the line" = "Couldn’t delete the line";
 
+/* Alert title: deleting a highlighted stretch of transcript lines failed */
+"Couldn’t delete the lines" = "Couldn’t delete the lines";
+
 /* Alert title */
 "Couldn’t delete the mark" = "Couldn’t delete the mark";
 
@@ -1784,6 +1793,9 @@
 /* No comment provided by engineer. */
 "Delete" = "Delete";
 
+/* Transcript: menu item and VoiceOver action on a highlighted stretch of lines, which asks first; the argument is how many (2 or more) */
+"Delete %lld Lines…" = "Delete %lld Lines…";
+
 /* No comment provided by engineer. */
 "Delete %lld Meetings…" = "Delete %lld Meetings…";
 
@@ -1816,6 +1828,9 @@
 
 /* Transcript: confirms deleting a line of the transcript for good; with an ellipsis, the context menu item and VoiceOver action that ask first */
 "Delete Line" = "Delete Line";
+
+/* Transcript: confirms deleting a highlighted stretch of the transcript for good */
+"Delete Lines" = "Delete Lines";
 
 /* Button: confirm deleting a mark */
 "Delete Mark" = "Delete Mark";
@@ -1944,6 +1959,9 @@
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "Delete the unused voices?";
+
+/* Confirmation title when deleting a highlighted stretch of a meeting’s transcript; the argument is how many lines (2 or more) */
+"Delete these %lld lines for good?" = "Delete these %lld lines for good?";
 
 /* Confirmation title */
 "Delete this decision?" = "Delete this decision?";
@@ -2721,6 +2739,9 @@
 
 /* VoiceOver hint of the Brief row while recording, when it is open */
 "Hides the brief" = "Hides the brief";
+
+/* Transcript: VoiceOver action on a line, highlighting the stretch from the highlighted line through this one */
+"Highlight Through This Line" = "Highlight Through This Line";
 
 /* No comment provided by engineer. */
 "Highlight the passage at this moment" = "Highlight the passage at this moment";
@@ -6747,6 +6768,9 @@
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting.";
+
+/* Confirmation message when deleting a highlighted stretch of transcript lines, under the times it starts and ends */
+"Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines." = "Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines.";
 
 /* Model guide: reminder in the download step of Ollama once the app runs; the context part of its first step is folded */
 "Then set Context length to 32K in Ollama’s Settings." = "Then set Context length to 32K in Ollama’s Settings.";

@@ -217,6 +217,12 @@
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "%lld solicitudes idénticas: la primera a las %@, la última a las %@.";
 
+/* Confirmation after deleting a highlighted stretch of transcript lines; the argument is how many (2 or more) */
+"%lld lines deleted" = "%lld líneas eliminadas";
+
+/* Confirmation after deleting a stretch of transcript lines that decisions, tasks or note expansions were written from; the argument is how many (2 or more) */
+"%lld lines deleted. What the minutes wrote from them is marked for you to check." = "%lld líneas eliminadas. Lo que el acta escribió a partir de ellas queda marcado para que lo revises.";
+
 /* VoiceOver: how many of a source's skipped files are Google Drive shortcuts or kept online only by a cloud service */
 "%lld not on this Mac" = "%lld fuera de este Mac";
 
@@ -1477,7 +1483,13 @@
 "Couldn’t change the line" = "No se ha podido cambiar la línea";
 "Couldn’t correct the line" = "No se ha podido corregir la línea";
 "Couldn’t delete the line" = "No se ha podido eliminar la línea";
+
+/* Alert title: deleting a highlighted stretch of transcript lines failed */
+"Couldn’t delete the lines" = "No se han podido eliminar las líneas";
 "Delete Line" = "Eliminar línea";
+
+/* Transcript: confirms deleting a highlighted stretch of the transcript for good */
+"Delete Lines" = "Eliminar líneas";
 "Delete this line for good?" = "¿Eliminar esta línea para siempre?";
 "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "Sus palabras se borran de la transcripción, la búsqueda y Preguntar, junto con lo que se transcribió y su traducción. Lo que el acta escribió a partir de ella queda marcado para que lo revises, y «Volver a redactar el acta» la redacta sin esa línea. No se puede deshacer, y una copia de seguridad anterior conserva la línea.";
 "Line deleted" = "Línea eliminada";
@@ -1717,6 +1729,9 @@
 /* No comment provided by engineer. */
 "Delete" = "Eliminar";
 
+/* Transcript: menu item and VoiceOver action on a highlighted stretch of lines, which asks first; the argument is how many (2 or more) */
+"Delete %lld Lines…" = "Eliminar %lld líneas…";
+
 /* No comment provided by engineer. */
 "Delete %lld Meetings…" = "Eliminar %lld reuniones…";
 
@@ -1874,6 +1889,9 @@
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "¿Eliminar las voces sin usar?";
+
+/* Confirmation title when deleting a highlighted stretch of a meeting’s transcript; the argument is how many lines (2 or more) */
+"Delete these %lld lines for good?" = "¿Eliminar estas %lld líneas para siempre?";
 
 /* Confirmation title */
 "Delete this decision?" = "¿Eliminar esta decisión?";
@@ -2628,6 +2646,9 @@
 
 /* VoiceOver hint of the Brief row while recording, when it is open */
 "Hides the brief" = "Oculta el resumen previo";
+
+/* Transcript: VoiceOver action on a line, highlighting the stretch from the highlighted line through this one */
+"Highlight Through This Line" = "Resaltar hasta esta línea";
 
 /* No comment provided by engineer. */
 "Highlight the passage at this moment" = "Resaltar el fragmento de este momento";
@@ -6521,6 +6542,9 @@
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "Sus huellas de voz se eliminan del almacén cifrado, junto con los resúmenes de voz guardados en las reuniones. Puedes volver a guardar una voz desde una reunión posterior.";
+
+/* Confirmation message when deleting a highlighted stretch of transcript lines, under the times it starts and ends */
+"Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines." = "Sus palabras se borran de la transcripción, la búsqueda y Preguntar, junto con lo que se transcribió y sus traducciones. Lo que el acta escribió a partir de ellas queda marcado para que lo revises, y «Volver a redactar el acta» la redacta sin esas líneas. No se puede deshacer, y una copia de seguridad anterior conserva las líneas.";
 
 /* Model guide: reminder in the download step of Ollama once the app runs; the context part of its first step is folded */
 "Then set Context length to 32K in Ollama’s Settings." = "Después, ajusta «Context length» a 32K en «Settings» de Ollama.";
