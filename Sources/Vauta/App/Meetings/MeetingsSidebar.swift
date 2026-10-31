@@ -38,21 +38,25 @@ struct MeetingsSidebar: View {
             if model.query.trimmingCharacters(in: .whitespaces).count < 2 {
                 // Sections by the day each meeting started, in the user's calendar: Today, Yesterday, Earlier This Week,
                 // Earlier This Month, then one per month. The list is newest first, so the sections are too.
-                List(selection: $model.selectedID) {
+                List(selection: Binding(get: { model.selection }, set: { model.selection = model.listSelection(for: $0) })) {
                     ForEach(MeetingDateSection.group(model.visibleMeetings, now: now, calendar: .autoupdatingCurrent) { $0.startedAt }) { group in
                         Section(group.section.title(now: now, calendar: .autoupdatingCurrent)) {
                             ForEach(group.items) { meeting in
                                 MeetingRow(meeting: meeting, section: group.section, suggestions: model.suggestionCounts[meeting.id] ?? 0,
-                                           recording: meeting.id == model.activeMeetingID, isSelected: meeting.id == model.selectedID)
+                                           recording: meeting.id == model.activeMeetingID, isSelected: model.selection.contains(meeting.id))
                                     .tag(meeting.id)
                             }
                         }
                     }
                 }
-                .onDeleteCommand { model.confirmDeleteSelected() }
+                .onDeleteCommand { model.choosesSeveral ? model.confirmDeleteChosen() : model.confirmDeleteSelected() }
                 // A right click on a row: the File and Edit menus' commands for that meeting (in Ask the list chooses meetings).
                 .contextMenu(forSelectionType: Int64.self) { ids in
-                    if model.mode == .meetings, ids.count == 1, let id = ids.first {
+                    if model.mode == .meetings, ids.count > 1 {
+                        // On the chosen meetings: what can be done to all of them.
+                        Button("Delete \(ids.count) Meetings…", role: .destructive) { model.confirmDeleteChosen() }
+                            .disabled(!model.canDeleteChosen || ids != model.selection)
+                    } else if model.mode == .meetings, ids.count == 1, let id = ids.first {
                         Button("Export…") { Task { await model.perform(.export, onMeeting: id) } }
                         Button("Copy Minutes") { Task { await model.perform(.copyMinutes(markdown: true), onMeeting: id) } }
                         Button("Copy Minutes as Plain Text") { Task { await model.perform(.copyMinutes(markdown: false), onMeeting: id) } }

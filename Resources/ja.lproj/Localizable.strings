@@ -211,6 +211,9 @@
 /* Model guide status title when a model has too little context; arguments are a model name and a token count like “4K” */
 "%@’s context is too short (%@)" = "%@のコンテキスト長が短すぎます（%@）";
 
+/* Meetings detail when several meetings are chosen in the list; the argument is how many (2 or more) */
+"%lld Meetings Selected" = "%lld件のミーティングを選択中";
+
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "同一のリクエスト%lld⁠件：最初は%@、最後は%@。";
 
@@ -1713,6 +1716,12 @@
 
 /* No comment provided by engineer. */
 "Delete" = "削除";
+
+/* No comment provided by engineer. */
+"Delete %lld Meetings…" = "%lld件のミーティングを削除…";
+
+/* Confirmation title when deleting several meetings chosen in the list; the argument is how many (2 or more) */
+"Delete %lld meetings?" = "%lld件のミーティングを削除しますか？";
 
 /* Settings → Speakers; confirm button: delete every saved voice */
 "Delete All Saved Voices" = "保存した声をすべて削除";
@@ -4168,6 +4177,9 @@
 /* Settings → Privacy backup */
 "One encrypted file with all your meetings, context and settings, protected by a password. Use it to move to a new Mac or keep an offline copy: Time Machine doesn’t include Vauta’s data." = "すべてのミーティング、コンテキスト、設定を、パスワード付きの暗号化ファイル1つにまとめます。新しいMacへの移行やオフラインのコピーの保管に使えます。Time Machineでは、Vautaのデータはバックアップされません。";
 
+/* Meetings detail with several meetings chosen, one of them being recorded */
+"One of them is being recorded. Stop the recording to delete them." = "そのうち1件は録音中です。削除するには録音を停止してください。";
+
 /* No comment provided by engineer. */
 "One per owner" = "担当者ごとに1通";
 
@@ -6380,6 +6392,9 @@
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "録音はこのMac上で文字起こしされます。ファイルが変更、コピー、アップロードされることはありません。";
 
+/* Confirmation message when deleting several meetings, some with reminders or events Vauta created; deleting the meetings does not remove them */
+"The reminders and events Vauta created from them stay in Reminders and Calendar." = "Vautaがこれらから作成したリマインダーとイベントは、リマインダーとカレンダーに残ります。";
+
 /* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
 "The saved file is damaged: don’t rely on it. Choose another location and try again." = "保存したファイルは破損しています。使わないでください。別の保存先を選んで、もう一度お試しください。";
 
@@ -6500,6 +6515,9 @@
 
 /* Placeholder: who the other participants are; Return names the match or adds the typed name as a new person */
 "Their name (press Return to add)" = "名前を入力（Returnキーで追加）";
+
+/* Confirmation message when deleting several meetings chosen in the list */
+"Their transcripts, decisions, tasks, notes and marks are removed from the encrypted store. You can’t undo this." = "文字起こし、決定事項、タスク、メモ、マークが暗号化されたストアから削除されます。この操作は取り消せません。";
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "これらの声紋は、ミーティングに保持されている声の要約と⁠と⁠も⁠に暗号化されたストアから削除されます。あとのミーティングから、あらためて声を保存できます。";

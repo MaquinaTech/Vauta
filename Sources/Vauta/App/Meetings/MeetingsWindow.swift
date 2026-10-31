@@ -160,7 +160,9 @@ struct MeetingsWindow: View {
     private var detailContent: some View {
         switch model.mode {
         case .meetings:
-            if model.showingUpcoming {
+            if model.choosesSeveral {
+                ChosenMeetingsView(model: model)
+            } else if model.showingUpcoming {
                 UpcomingBriefView(model: model, brief: recorder.brief, openSettings: { settings.pane = $0; openSettings() },
                                   openSystemSettings: { Permissions.open(.calendars) })
             } else if let meeting = model.shownMeeting {
@@ -310,6 +312,22 @@ private struct MeetingsEmptyDetail: View {
                            message: String(localized: "Select a meeting in the sidebar to review its minutes, tasks and transcript.")) {
                 Button("Ask About Your Meetings") { model.askAboutSelection() }
             }
+        }
+    }
+}
+
+/// The detail while several meetings are chosen in the list: how many, and what can be done to all of them.
+private struct ChosenMeetingsView: View {
+    let model: MeetingsModel
+
+    var body: some View {
+        let count = model.selection.count
+        EmptyStateView(Text("\(count) Meetings Selected", comment: "Meetings detail when several meetings are chosen in the list; the argument is how many (2 or more)"),
+                       symbol: "square.stack",
+                       message: model.canDeleteChosen ? nil : String(localized: "One of them is being recorded. Stop the recording to delete them.",
+                                                                       comment: "Meetings detail with several meetings chosen, one of them being recorded")) {
+            Button("Delete \(count) Meetings…", role: .destructive) { model.confirmDeleteChosen() }
+                .disabled(!model.canDeleteChosen)
         }
     }
 }

@@ -211,6 +211,9 @@
 /* Model guide status title when a model has too little context; arguments are a model name and a token count like “4K” */
 "%@’s context is too short (%@)" = "%@의 컨텍스트 길이가 너무 짧습니다(%@)";
 
+/* Meetings detail when several meetings are chosen in the list; the argument is how many (2 or more) */
+"%lld Meetings Selected" = "회의 %lld개 선택됨";
+
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "동일한 요청 %lld건: 처음은 %@, 마지막은 %@.";
 
@@ -1713,6 +1716,12 @@
 
 /* No comment provided by engineer. */
 "Delete" = "삭제";
+
+/* No comment provided by engineer. */
+"Delete %lld Meetings…" = "회의 %lld개 삭제…";
+
+/* Confirmation title when deleting several meetings chosen in the list; the argument is how many (2 or more) */
+"Delete %lld meetings?" = "회의 %lld개를 삭제하시겠습니까?";
 
 /* Settings → Speakers; confirm button: delete every saved voice */
 "Delete All Saved Voices" = "저장된 목소리 모두 삭제";
@@ -4168,6 +4177,9 @@
 /* Settings → Privacy backup */
 "One encrypted file with all your meetings, context and settings, protected by a password. Use it to move to a new Mac or keep an offline copy: Time Machine doesn’t include Vauta’s data." = "모든 회의, 컨텍스트, 설정을 하나의 암호화된 파일로 묶고 암호로 보호합니다. 새 Mac으로 옮기거나 오프라인 사본을 보관할 때 사용하세요. Time Machine에는 Vauta의 데이터가 포함되지 않습니다.";
 
+/* Meetings detail with several meetings chosen, one of them being recorded */
+"One of them is being recorded. Stop the recording to delete them." = "그중 하나가 녹음 중입니다. 삭제하려면 녹음을 중지하세요.";
+
 /* No comment provided by engineer. */
 "One per owner" = "담당자별로 하나씩";
 
@@ -6380,6 +6392,9 @@
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "녹음은 이 Mac에서 텍스트로 변환됩니다. 파일은 변경, 복사 또는 업로드되지 않습니다.";
 
+/* Confirmation message when deleting several meetings, some with reminders or events Vauta created; deleting the meetings does not remove them */
+"The reminders and events Vauta created from them stay in Reminders and Calendar." = "Vauta가 이 회의에서 만든 미리 알림과 이벤트는 미리 알림과 캘린더에 남습니다.";
+
 /* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
 "The saved file is damaged: don’t rely on it. Choose another location and try again." = "저장된 파일이 손상되었으니 사용하지 마세요. 다른 위치를 선택한 다음 다시 시도하세요.";
 
@@ -6500,6 +6515,9 @@
 
 /* Placeholder: who the other participants are; Return names the match or adds the typed name as a new person */
 "Their name (press Return to add)" = "이름 입력(Return 키를 눌러 추가)";
+
+/* Confirmation message when deleting several meetings chosen in the list */
+"Their transcripts, decisions, tasks, notes and marks are removed from the encrypted store. You can’t undo this." = "녹취록, 결정 사항, 할 일, 메모, 표시가 암호화된 저장소에서 삭제됩니다. 이 작업은 실행 취소할 수 없습니다.";
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "이 목소리 지문들이 회의에 보관된 목소리 요약과 함께 암호화된 저장소에서 삭제됩니다. 나중 회의에서 목소리를 다시 저장할 수 있습니다.";
