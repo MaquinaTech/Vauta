@@ -90,17 +90,23 @@ extension AskView {
                 notYetMoments(answer)
             }
             ForEach(Array((answer.kind == .notYet ? [] : answer.claims).enumerated()), id: \.offset) { _, claim in
+                // From the minutes of a meeting whose transcript is gone: the quote is in the minutes, which are not the words said.
+                let fromMinutes = claim.verified && claim.isFromMinutes
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     // Only related: the quote is in the transcript but may not answer the question, so no green seal.
-                    Image(systemName: answer.kind == .related && claim.verified ? "text.quote" : claim.verified ? "checkmark.seal.fill" : "questionmark.circle")
-                        .foregroundStyle(answer.kind == .related && claim.verified ? Color.secondary : claim.verified ? .green : .orange)
-                        .help(claim.figureMissing
+                    Image(systemName: fromMinutes ? "doc.text" : answer.kind == .related && claim.verified ? "text.quote" : claim.verified ? "checkmark.seal.fill" : "questionmark.circle")
+                        .foregroundStyle(fromMinutes || answer.kind == .related && claim.verified ? Color.secondary : claim.verified ? .green : .orange)
+                        .help(fromMinutes
+                              ? Text("From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words.",
+                                     comment: "Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted")
+                              : claim.figureMissing
                               ? Text("Not verified: the quote is there, but a figure in this sentence isn’t",
                                      comment: "Ask: help on a claim whose quote was found, while a number it states is not in the quoted words")
                               : claim.isFromDocumentsOnly
                               ? (claim.verified ? Text("Verified: the quote appears word for word in your document") : Text("Not verified: the quote doesn’t appear as such"))
                               : (claim.verified ? Text("Verified: the quote appears word for word in the transcript") : Text("Not verified: the quote doesn’t appear as such")))
-                        .accessibilityLabel(answer.kind == .related && claim.verified
+                        .accessibilityLabel(fromMinutes ? Text("From the minutes", comment: "VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript")
+                                            : answer.kind == .related && claim.verified
                                             ? Text("Quote found", comment: "VoiceOver: a quote of an answer that is in the transcript while the answer may not answer the question")
                                             : claim.verified ? Text("Verified") : Text("Not verified"))
                     VStack(alignment: .leading, spacing: 4) {
@@ -108,14 +114,17 @@ extension AskView {
                         if claim.isFromDocumentsOnly && claim.verified {
                             Text("From your documents").font(.caption).foregroundStyle(.secondary)
                         }
+                        if fromMinutes {
+                            Text("From the minutes of an older meeting", comment: "Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted")
+                                .font(.caption).foregroundStyle(.secondary)
+                        }
                         // Wraps to new lines: a claim can cite several passages with long meeting titles.
                         let labels = model.citationLabels(claim.citations)
                         TokenFlowLayout(spacing: 10) {
                             ForEach(Array(claim.citations.enumerated()), id: \.offset) { index, segment in
-                                Button(labels[index]) { model.open(citation: segment) }
-                                    .buttonStyle(.link)
-                                    .lineLimit(1)
-                                    .accessibilityHint(Text("Opens the transcript at this moment"))
+                                CitationLink(label: labels[index], segment: model.segments[segment], question: model.answeredQuestion) {
+                                    model.open(citation: segment)
+                                }
                             }
                             ForEach(claim.documents) { citation in
                                 Button { meetings.openDocument(citation) } label: {
@@ -133,7 +142,7 @@ extension AskView {
             // About the whole answer, not one more claim: set apart by a rule, no glyph, on the card's text edge.
             if answer.kind == .partlyVerified || answer.kind == .related {
                 Divider().padding(.top, 2)
-                Text(answer.kind == .related ? AskModel.relatedNote : AskModel.partlyVerifiedNote)
+                Text(answer.kind == .related ? AskModel.relatedNote : AskModel.partlyVerifiedNote(for: answer))
                     .font(.callout).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -160,10 +169,9 @@ extension AskView {
         let labels = model.citationLabels(segments)
         return TokenFlowLayout(spacing: 10) {
             ForEach(Array(segments.enumerated()), id: \.offset) { index, segment in
-                Button(labels[index]) { model.open(citation: segment) }
-                    .buttonStyle(.link)
-                    .lineLimit(1)
-                    .accessibilityHint(Text("Opens the transcript at this moment"))
+                CitationLink(label: labels[index], segment: model.segments[segment], question: model.answeredQuestion) {
+                    model.open(citation: segment)
+                }
             }
         }
     }

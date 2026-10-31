@@ -429,6 +429,7 @@ final class MeetingsModel {
         actions = ActionsModel(store: store)
         actions.host = self
         ask.openCitation = { [weak self] meeting, segment in self?.open(meeting: meeting, segment: segment) }
+        ask.openMinutes = { [weak self] meeting in self?.open(meeting: meeting, tab: .summary) }
         notepad.store = store
         notepad.addedAfter = true
         notepad.report = { [weak self] title, error in self?.present(title, error) }

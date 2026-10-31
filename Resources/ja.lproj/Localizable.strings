@@ -2478,6 +2478,24 @@
 /* No comment provided by engineer. */
 "From your documents" = "書類より";
 
+/* VoiceOver: action on a citation of an Ask answer that shows the passage it cites */
+"Preview Passage" = "箇所をプレビュー";
+
+/* Ask: button of the preview of a citation of an older meeting's minutes, which opens them */
+"Open Minutes" = "議事録を開く";
+
+/* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
+"From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "議事録より: 引用は文字起こしが削除されたミーティングの議事録にあります。議事録は発言の要約で、発言そのものではありません。";
+
+/* VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript */
+"From the minutes" = "議事録より";
+
+/* Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted */
+"From the minutes of an older meeting" = "古いミーティングの議事録より";
+
+/* VoiceOver: hint of a citation of the minutes of an older meeting */
+"Opens the meeting’s minutes" = "ミーティングの議事録を開きます";
+
 /* Placeholder of the name field of a person or project */
 "Full name" = "正式名";
 
@@ -5455,6 +5473,9 @@
 
 /* Ask: shown under the claims of an answer when some of them are verified and some are not */
 "Some points couldn’t be found word for word. Check the ones marked before relying on them." = "一部の項目は一字一句そのままでは見つかりませんでした。信頼する前に、印のついたものを確認してください。";
+
+/* Ask: shown under an answer whose text gives figures that are in nothing the model was given; the argument lists them (55, 60 and 350) */
+"Not in the transcript or documents the answer was based on: %@. Check before relying on it." = "回答の根拠になった文字起こしや書類にない数値です: %@。頼る前に確認してください。";
 
 /* Notification title: saved voices that have had no suggestion accepted in a year */
 "Some saved voices are unused" = "使われていない保存済みの声があります";

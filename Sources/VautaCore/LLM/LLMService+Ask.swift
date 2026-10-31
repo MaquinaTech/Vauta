@@ -263,12 +263,19 @@ extension LLMService {
                                            limit: passageLimit, maxChars: passageCharacters, locale: keywordQuery.locale,
                                            mode: meetingMode, windows: windowed ? .standard : nil)
                 : []
-            if useMeetings, found.isEmpty, limited != nil {
+            // The meetings of the scope whose transcript retention deleted: the lines of their minutes that match (`MinutesEvidence`).
+            let readsOlder = useMeetings && auto == nil && meetingID == nil
+            var older = readsOlder ? (try? await store.minutesPassages(question, scope: limited, locale: locale)) ?? [] : []
+            if useMeetings, found.isEmpty, older.isEmpty, limited != nil {
                 widened = true
                 meetingMode = liveNotEmbedded && onDevice ? .keyword : await meetingRankingMode(space: query?.space, within: nil)
                 found = try await store.retrieve(keywordQuery.text, queryVector: query?.vector, space: query?.space, limit: passageLimit,
                                                  maxChars: passageCharacters, locale: keywordQuery.locale, mode: meetingMode, windows: windowed ? .standard : nil)
+                if readsOlder { older = (try? await store.minutesPassages(question, scope: nil, locale: locale)) ?? [] }
             }
+            // After the transcripts' passages: what was said comes first, the minutes fill what room is left.
+            let lowest = (found.map(\.score).min() ?? 1) / 2
+            found += older.enumerated().map { RetrievedPassage(meeting: $1.meeting, start: $1.start, end: $1.end, segments: $1.segments, score: lowest / Double($0 + 2)) }
             if let auto {
                 found = auto.passages(limit: passageLimit)
                 // The evidence check leaves out the question's own line and the two before it (a question matches itself); the answer
@@ -455,7 +462,8 @@ extension LLMService {
             // Found with citations of segments that were never sent (Apple's guided numbers, a server's slip) may still quote a
             // segment the model could see: the quote is looked for there before the reply is given up on.
             poolCache = await buildAnchorPool(meetingID: meetingID, visible: visibleSegments, meetings: passages.map(\.meeting.id),
-                                              liveAtQuestion: liveAtQuestion, language: transcriptLanguage, languages: segmentLanguages, alsoPast: auto != nil)
+                                              liveAtQuestion: liveAtQuestion, language: transcriptLanguage, languages: segmentLanguages, alsoPast: auto != nil,
+                                              older: passages.filter { !VautaPrompts.minutesNote($0).isEmpty })
             if let found = poolCache, let rescued = try? verify(content, pool: found.pool) {
                 verified = rescued
                 adopt(rescued, found)
@@ -483,13 +491,19 @@ extension LLMService {
         if answer.found, answer.claims.contains(where: { !$0.verified && $0.documents.isEmpty }) {
             if poolCache == nil {
                 poolCache = await buildAnchorPool(meetingID: meetingID, visible: visibleSegments, meetings: passages.map(\.meeting.id),
-                                                  liveAtQuestion: liveAtQuestion, language: transcriptLanguage, languages: segmentLanguages, alsoPast: auto != nil)
+                                                  liveAtQuestion: liveAtQuestion, language: transcriptLanguage, languages: segmentLanguages, alsoPast: auto != nil,
+                                                  older: passages.filter { !VautaPrompts.minutesNote($0).isEmpty })
             }
             if let found = poolCache, let better = try? verify(content, pool: found.pool) {
                 answer = better
                 adopt(better, found)
             }
         }
+        // The sentence's figures must be in what the model read (the request after the system prompt: the passages with their headings
+        // and times, the documents, the question and its rules, which hold no figures): one that is in none of them leaves the answer
+        // partly verified.
+        answer = answer.checkingFigures(against: messages.dropFirst().map(\.content).joined(separator: "\n"),
+                                        languages: Array(Set(segmentLanguages.values).union([transcriptLanguage, language.identifier].compactMap { $0 })))
         // Live, on the integrated model: a verified answer is read once more against the moment of the question. Quotes that only
         // announce something that has not happened yet turn it into "that hasn't come up yet"; quotes that only touch the topic mark
         // it unverified. It fails open: on an error or after 3 seconds the answer stands.
@@ -511,9 +525,11 @@ extension LLMService {
     }
 
     /// The segments a quote may be moved to: the ones visible when the question was asked (one meeting), or the meetings of the
-    /// passages (the library: at most 8, the one being recorded only up to the question). With the owner of each segment.
+    /// passages (the library: at most 8, the one being recorded only up to the question), and the minutes' lines of `older`. With the
+    /// owner of each segment.
     func buildAnchorPool(meetingID: Int64?, visible: [CitableSegment], meetings: [Int64], liveAtQuestion: (meeting: Int64, lastSegment: Int64, start: Double)?,
-                         language: String?, languages known: [Int64: String] = [:], alsoPast: Bool = false) async -> (pool: QuoteAnchor.Pool, owner: [Int64: Int64])? {
+                         language: String?, languages known: [Int64: String] = [:], alsoPast: Bool = false,
+                         older: [RetrievedPassage] = []) async -> (pool: QuoteAnchor.Pool, owner: [Int64: Int64])? {
         var segments = visible
         var owner: [Int64: Int64] = [:]
         var languages = known
@@ -542,6 +558,8 @@ extension LLMService {
                 }
                 segments += more
             }
+            // The minutes' lines of meetings whose transcript is gone (`MinutesEvidence`): a quote moves only within its meeting.
+            for p in older { for line in p.segments { owner[line.id] = p.meeting.id }; segments += p.segments }
         }
         guard !segments.isEmpty else { return nil }
         return (QuoteAnchor.Pool(segments, language: language, groups: meetingID == nil || alsoPast ? owner : [:], languages: languages), owner)
