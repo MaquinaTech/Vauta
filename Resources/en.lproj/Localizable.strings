@@ -2516,6 +2516,15 @@
 /* Notes of a reminder Vauta adds: the first argument is the meeting’s name, the second its date */
 "From the meeting “%@”, %@" = "From the meeting “%@”, %@";
 
+/* VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript */
+"From the minutes" = "From the minutes";
+
+/* Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted */
+"From the minutes of an older meeting" = "From the minutes of an older meeting";
+
+/* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
+"From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words.";
+
 /* Answers card: the answer was verified in the meeting being recorded */
 "From this meeting" = "From this meeting";
 
@@ -4357,6 +4366,9 @@
 
 /* No comment provided by engineer. */
 "Opens the meeting at this moment" = "Opens the meeting at this moment";
+
+/* VoiceOver: hint of a citation of the minutes of an older meeting */
+"Opens the meeting’s minutes" = "Opens the meeting’s minutes";
 
 /* No comment provided by engineer. */
 "Opens the passage in the document" = "Opens the passage in the document";

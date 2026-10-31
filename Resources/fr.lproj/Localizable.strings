@@ -2478,6 +2478,18 @@
 /* No comment provided by engineer. */
 "From your documents" = "De vos documents";
 
+/* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
+"From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "Du compte rendu : la citation se trouve dans le compte rendu d’une réunion dont la transcription a été supprimée. Le compte rendu résume ce qui a été dit, ce ne sont pas ses mots.";
+
+/* VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript */
+"From the minutes" = "Du compte rendu";
+
+/* Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted */
+"From the minutes of an older meeting" = "Du compte rendu d’une réunion plus ancienne";
+
+/* VoiceOver: hint of a citation of the minutes of an older meeting */
+"Opens the meeting’s minutes" = "Ouvre le compte rendu de la réunion";
+
 /* Placeholder of the name field of a person or project */
 "Full name" = "Nom complet";
 

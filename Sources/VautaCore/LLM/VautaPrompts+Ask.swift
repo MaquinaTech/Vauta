@@ -4,13 +4,18 @@
 import Foundation
 
 extension VautaPrompts {
+    /// A passage of the minutes of a meeting whose transcript is gone (`MinutesEvidence`) says so in its heading.
+    static func minutesNote(_ p: RetrievedPassage) -> String {
+        !p.segments.isEmpty && p.segments.allSatisfy { MinutesEvidence.isMinutes($0.id) } ? MinutesEvidence.headingNote : ""
+    }
+
     /// Passages retrieved from several meetings, as delimited material.
     /// `ordered` (`AskHarness.order`): oldest first, and with two or more meetings each heading says the place of its meeting among
     /// them ("Meeting 2 of 3"), so "the first meeting" and "the last one" can be counted.
     public static func passagesMessage(_ passages: [RetrievedPassage], timeZone: TimeZone = .current, ordered: Bool = false) -> ChatMessage {
         guard ordered else {
             return .user("<<<EXCERPTS FROM YOUR MEETINGS\n" + passages.map { p in
-                "## \(PromptText.defang(p.meeting.displayTitle)) (\(PromptText.day(p.meeting.startedAt, timeZone: timeZone)))\n"
+                "## \(PromptText.defang(p.meeting.displayTitle)) (\(PromptText.day(p.meeting.startedAt, timeZone: timeZone)))\(minutesNote(p))\n"
                     + p.segments.map(line).joined(separator: "\n")
             }.joined(separator: "\n\n") + "\n>>>")
         }
@@ -21,7 +26,7 @@ extension VautaPrompts {
         func heading(_ p: RetrievedPassage) -> String {
             let place = several ? (order.firstIndex(of: p.meeting.id) ?? 0) + 1 : 0
             let label = !several ? "" : "Meeting \(place) of \(order.count)\(place == 1 ? ", the oldest" : place == order.count ? ", the most recent" : ""): "
-            return "## \(label)\(PromptText.defang(p.meeting.displayTitle)) (\(PromptText.day(p.meeting.startedAt, timeZone: timeZone)))"
+            return "## \(label)\(PromptText.defang(p.meeting.displayTitle)) (\(PromptText.day(p.meeting.startedAt, timeZone: timeZone)))\(minutesNote(p))"
         }
         return .user("<<<EXCERPTS FROM YOUR MEETINGS" + (several ? " (oldest meeting first)" : "") + "\n" + sorted.map { p in
             heading(p) + "\n" + p.segments.map(line).joined(separator: "\n")

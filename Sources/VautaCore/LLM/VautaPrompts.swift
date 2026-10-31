@@ -272,7 +272,9 @@ public enum VautaPrompts {
     }
 
     public static func line(_ s: CitableSegment) -> String {
-        "[S\(s.id) · \(PromptText.clock(s.start)) · \(speakerLabel(s))] \(PromptText.defang(s.text))"
+        // A line of the minutes of a meeting whose transcript is gone: what kind of item it is, not who said it or when.
+        if let kind = MinutesEvidence.kind(of: s.id) { return "[S\(s.id) · from the minutes · \(kind.promptLabel)] \(PromptText.defang(s.text))" }
+        return "[S\(s.id) · \(PromptText.clock(s.start)) · \(speakerLabel(s))] \(PromptText.defang(s.text))"
     }
 
     /// Who said the segment as the prompt prints it: "Me", "Ana (remote)", "Speaker 2 (remote)", "Me 2 (in the

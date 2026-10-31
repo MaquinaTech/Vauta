@@ -2478,6 +2478,18 @@
 /* No comment provided by engineer. */
 "From your documents" = "Dos seus documentos";
 
+/* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
+"From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "Da ata: a citação está na ata de uma reunião cuja transcrição foi excluída. A ata resume o que foi dito; não são as palavras ditas.";
+
+/* VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript */
+"From the minutes" = "Da ata";
+
+/* Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted */
+"From the minutes of an older meeting" = "Da ata de uma reunião mais antiga";
+
+/* VoiceOver: hint of a citation of the minutes of an older meeting */
+"Opens the meeting’s minutes" = "Abre a ata da reunião";
+
 /* Placeholder of the name field of a person or project */
 "Full name" = "Nome completo";
 

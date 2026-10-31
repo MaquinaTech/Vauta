@@ -289,7 +289,7 @@
 			<string>%lld di queste non sono ancora nell’indice di ricerca per significato e sono state consultate con la ricerca per parole chiave.</string>
 		</dict>
 	</dict>
-	<key>%lld older meetings no longer have a transcript and weren’t searched.</key>
+	<key>%lld older meetings no longer have a transcript; only their minutes were searched.</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>
 		<string>%#@count@</string>
@@ -300,9 +300,9 @@
 			<key>NSStringFormatValueTypeKey</key>
 			<string>lld</string>
 			<key>one</key>
-			<string>%lld riunione meno recente non ha più la trascrizione e non è stata consultata.</string>
+			<string>%lld riunione meno recente non ha più la trascrizione; è stato consultato solo il suo verbale.</string>
 			<key>other</key>
-			<string>%lld riunioni meno recenti non hanno più la trascrizione e non sono state consultate.</string>
+			<string>%lld riunioni meno recenti non hanno più la trascrizione; sono stati consultati solo i loro verbali.</string>
 		</dict>
 	</dict>
 	<key>%lld to review</key>

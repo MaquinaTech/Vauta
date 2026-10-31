@@ -2478,6 +2478,18 @@
 /* No comment provided by engineer. */
 "From your documents" = "Dai tuoi documenti";
 
+/* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
+"From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "Dal verbale: la citazione è nel verbale di una riunione la cui trascrizione è stata eliminata. Il verbale riassume ciò che è stato detto; non sono le sue parole.";
+
+/* VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript */
+"From the minutes" = "Dal verbale";
+
+/* Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted */
+"From the minutes of an older meeting" = "Dal verbale di una riunione meno recente";
+
+/* VoiceOver: hint of a citation of the minutes of an older meeting */
+"Opens the meeting’s minutes" = "Apre il verbale della riunione";
+
 /* Placeholder of the name field of a person or project */
 "Full name" = "Nome completo";
 

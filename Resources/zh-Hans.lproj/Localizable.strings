@@ -2478,6 +2478,18 @@
 /* No comment provided by engineer. */
 "From your documents" = "来自你的文档";
 
+/* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
+"From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "来自会议纪要：引文出自一场转录文本已删除的会议的会议纪要。会议纪要是对发言的总结，并非原话。";
+
+/* VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript */
+"From the minutes" = "来自会议纪要";
+
+/* Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted */
+"From the minutes of an older meeting" = "来自较早会议的会议纪要";
+
+/* VoiceOver: hint of a citation of the minutes of an older meeting */
+"Opens the meeting’s minutes" = "打开该会议的会议纪要";
+
 /* Placeholder of the name field of a person or project */
 "Full name" = "全名";
 

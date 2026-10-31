@@ -2478,6 +2478,18 @@
 /* No comment provided by engineer. */
 "From your documents" = "내 문서에서";
 
+/* Ask: help on a claim whose quote is in the minutes of an older meeting whose transcript retention deleted */
+"From the minutes: the quote is in the minutes of a meeting whose transcript was deleted. Minutes summarize what was said; they aren’t its words." = "회의록에서: 인용문은 녹취록이 삭제된 회의의 회의록에 있습니다. 회의록은 말한 내용을 요약한 것으로, 실제로 한 말은 아닙니다.";
+
+/* VoiceOver: a claim of an answer whose quote is in the minutes of an older meeting, not in its transcript */
+"From the minutes" = "회의록에서";
+
+/* Ask: under a claim whose quote is in the minutes of a meeting whose transcript was deleted */
+"From the minutes of an older meeting" = "오래된 회의의 회의록에서";
+
+/* VoiceOver: hint of a citation of the minutes of an older meeting */
+"Opens the meeting’s minutes" = "회의의 회의록을 엽니다";
+
 /* Placeholder of the name field of a person or project */
 "Full name" = "전체 이름";
 

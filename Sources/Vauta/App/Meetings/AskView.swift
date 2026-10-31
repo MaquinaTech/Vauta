@@ -448,7 +448,9 @@ struct AskView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     // The same "title · time" as the citations above; the date follows as secondary text.
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Button("\(p.meeting.displayTitle) · \(ElapsedTime.stamp(p.segments.first?.start ?? p.start))") {
+                        // The minutes of a meeting whose transcript is gone have no moment: they are named as the minutes.
+                        let older = p.segments.first.map { MinutesEvidence.isMinutes($0.id) } ?? false
+                        Button("\(p.meeting.displayTitle) · \(older ? AskModel.minutesWord : ElapsedTime.stamp(p.segments.first?.start ?? p.start))") {
                             if let first = p.segments.first { model.open(citation: first.id) }
                         }
                         .buttonStyle(.link)
@@ -470,7 +472,9 @@ struct AskView: View {
 
     /// "Ana: text" with the speaker in bold and its color, as in the transcript.
     private func line(of segment: CitableSegment) -> AttributedString {
-        let who = segment.channel.quotePrefix(for: segment.speaker, tint: segment.channel.tint(ordinal: segment.speaker?.ordinal ?? 1))
+        // A line of the minutes was said by nobody: no speaker.
+        let who = MinutesEvidence.isMinutes(segment.id) ? AttributedString()
+            : segment.channel.quotePrefix(for: segment.speaker, tint: segment.channel.tint(ordinal: segment.speaker?.ordinal ?? 1))
         // The words the search matched (whole words, no function words) are marked like the sidebar search.
         var body = AttributedString(segment.text)
         for range in MeetingStore.matchedRanges(of: model.answeredQuestion, in: segment.text) {
