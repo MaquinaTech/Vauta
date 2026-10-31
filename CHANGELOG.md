@@ -46,6 +46,7 @@ Developer tools:
 - `Vauta llm-eval` can write the minutes of public transcripts and answer their questions on a model server (`--providers server --server <config.json> [--ask-key]`), through the app's own client and address rules, and runs several minutes variants of one backend interleaved in one run (`--variants old,new`).
 - Ask on a model server can reason briefly before an answer after the meeting (`low` effort, with its own room and no schema over it). It stays off in this release until it is measured: `llm-eval --tasks live-answer --providers server --after-meeting --ask-reasoning on,off` asks each question both ways in one run.
 - The statistics the evaluation gates use (Wilson intervals, exact sign and McNemar tests, meeting-cluster bootstrap, kappa, Jeffreys gates, paired TOST, Holm and BH) are in `tools/llm-eval/stats.py`, standard library only, with tests that CI runs.
+- **A model server's certificate is renewed in time.** **Settings → Status** turns yellow 30 days before the HTTPS certificate of a server on your network ends (the server's own, an intermediate or your private CA, whichever ends first), says the date and that `make-server-cert.sh` renews one it made and keeps the pin. When it has ended, the connection error says so and how to renew it, instead of a general TLS failure. `Vauta doctor` prints until when the certificate is valid.
 
 ### Changed
 

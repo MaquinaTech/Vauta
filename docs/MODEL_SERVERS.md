@@ -348,7 +348,9 @@ Settings. The script writes to `./vauta-server-tls/` (or `$VAUTA_TLS_DIR`):
 | `server.crt` | Copy it to the server. Valid 800 days |
 
 The script also prints the server's **pin** (SHA-256 of its public key). To renew, run it again with the same
-arguments: it reuses the CA and the server key, so the pin doesn't change.
+arguments: it reuses the CA and the server key, so the pin doesn't change. Vauta tells you when it is time:
+**Settings → Status** turns yellow 30 days before the server's certificate (or its CA, or an intermediate) ends, with the
+date, and `Vauta doctor` prints it; a connection refused because it has ended says so, instead of a general TLS error.
 
 ### 3. Put Caddy in front of the model server
 
