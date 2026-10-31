@@ -60,6 +60,8 @@
 
 /* Settings → General; argument is a shortcut */
 "%@ is used by another app. Choose a different shortcut to open the notepad." = "%@ 已被其他 App 占用。请选择其他快捷键来打开记事本。";
+"%@ is used by another app. Choose a different shortcut to pause and resume." = "%@ 已被其他 App 占用。请选择其他快捷键来暂停和继续录音。";
+"Pause or resume recording" = "暂停或继续录音";
 
 /* Settings → General; argument is a shortcut
    Status detail; argument is a shortcut */
@@ -6463,7 +6465,7 @@
 "These names haven’t been checked on this server. Test the connection to choose from its models." = "这些名称尚未在此服务器上核实。测试连接后即可从其模型中选择。";
 
 /* Settings → General */
-"These shortcuts work in any app. Marking a moment, taking a note and Live Translation work only while recording." = "这些快捷键在任何 App 中都有效。标记时刻、记笔记和实时翻译仅在录制时可用。";
+"These shortcuts work in any app. Marking a moment, taking a note, pausing and Live Translation work only while recording." = "这些快捷键在任何 App 中都有效。标记时刻、记笔记、暂停和实时翻译仅在录制时可用。";
 
 /* No comment provided by engineer. */
 "These stay, without the link:" = "以下内容会保留，但不再关联：";

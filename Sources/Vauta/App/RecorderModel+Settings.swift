@@ -115,6 +115,11 @@ extension RecorderModel {
         return GlobalHotKey.displayString(preferences.noteHotKey)
     }
 
+    var pauseHotKeyText: String {
+        _ = keyboardLayoutRevision
+        return GlobalHotKey.displayString(preferences.pauseHotKey)
+    }
+
     var translationHotKeyText: String {
         _ = keyboardLayoutRevision
         return GlobalHotKey.displayString(preferences.translationHotKey)
@@ -128,6 +133,7 @@ extension RecorderModel {
         hotKey = nil
         markHotKey = nil
         noteHotKey = nil
+        pauseHotKey = nil
         translationHotKey = nil
         guard !hotKeysSuspended else { return }
         hotKey = GlobalHotKey(preferences.recordHotKey, id: 1) { [weak self] in self?.toggleFromShortcut() }
@@ -136,10 +142,10 @@ extension RecorderModel {
             translationHotKey = GlobalHotKey(preferences.translationHotKey, id: 3) { [weak self] in self?.toggleTranslationFromShortcut() }
         }
         translationHotKeyAvailable = translationHotKey?.isRegistered ?? false
-        if Self.takesInMeetingKeys(recording: phase == .recording) { registerMarkHotKey(); registerNoteHotKey() }
+        if Self.takesInMeetingKeys(recording: phase == .recording) { registerMarkHotKey(); registerNoteHotKey(); registerPauseHotKey() }
     }
 
-    /// The shortcuts for use during a meeting (Mark a Moment, Take a Note) are taken only while recording, so the rest of the
+    /// The shortcuts for use during a meeting (Mark a Moment, Take a Note, Pause) are taken only while recording, so the rest of the
     /// time the combinations belong to the other apps.
     static func takesInMeetingKeys(recording: Bool) -> Bool { recording }
 
@@ -213,7 +219,8 @@ extension RecorderModel {
 
     func registerMarkHotKey() {
         markHotKey = nil
-        guard Self.mayRegister(preferences.markHotKey, besides: [preferences.recordHotKey, preferences.translationHotKey, preferences.noteHotKey],
+        guard Self.mayRegister(preferences.markHotKey, besides: [preferences.recordHotKey, preferences.translationHotKey, preferences.noteHotKey,
+                                                                 preferences.pauseHotKey],
                                suspended: hotKeysSuspended) else {
             markHotKeyAvailable = false
             return
@@ -225,13 +232,27 @@ extension RecorderModel {
     /// "Take a Note": opens the floating notepad. Taken only while recording, like the mark shortcut.
     func registerNoteHotKey() {
         noteHotKey = nil
-        guard Self.mayRegister(preferences.noteHotKey, besides: [preferences.recordHotKey, preferences.translationHotKey, preferences.markHotKey],
+        guard Self.mayRegister(preferences.noteHotKey, besides: [preferences.recordHotKey, preferences.translationHotKey, preferences.markHotKey,
+                                                                 preferences.pauseHotKey],
                                suspended: hotKeysSuspended) else {
             noteHotKeyAvailable = false
             return
         }
         noteHotKey = GlobalHotKey(preferences.noteHotKey, id: 4) { [weak self] in self?.toggleNotepadFromShortcut() }
         noteHotKeyAvailable = noteHotKey?.isRegistered ?? false
+    }
+
+    /// Pause and Resume. Taken only while recording, like the mark shortcut.
+    func registerPauseHotKey() {
+        pauseHotKey = nil
+        guard Self.mayRegister(preferences.pauseHotKey, besides: [preferences.recordHotKey, preferences.translationHotKey, preferences.markHotKey,
+                                                                  preferences.noteHotKey],
+                               suspended: hotKeysSuspended) else {
+            pauseHotKeyAvailable = false
+            return
+        }
+        pauseHotKey = GlobalHotKey(preferences.pauseHotKey, id: 5) { [weak self] in self?.togglePauseFromShortcut() }
+        pauseHotKeyAvailable = pauseHotKey?.isRegistered ?? false
     }
 
     /// While a shortcut field records a new combination, the current ones
@@ -250,6 +271,7 @@ extension RecorderModel {
             _ = preferences.recordHotKey
             _ = preferences.markHotKey
             _ = preferences.noteHotKey
+            _ = preferences.pauseHotKey
             _ = preferences.translationHotKey
             _ = preferences.relockPolicy
         } onChange: { [weak self] in
@@ -258,6 +280,7 @@ extension RecorderModel {
                 if self.hotKey?.combo != self.preferences.recordHotKey
                     || (Self.takesInMeetingKeys(recording: self.phase == .recording) && self.markHotKey?.combo != self.preferences.markHotKey)
                     || (Self.takesInMeetingKeys(recording: self.phase == .recording) && self.noteHotKey?.combo != self.preferences.noteHotKey)
+                    || (Self.takesInMeetingKeys(recording: self.phase == .recording) && self.pauseHotKey?.combo != self.preferences.pauseHotKey)
                     || self.translationHotKey?.combo != self.preferences.translationHotKey {
                     self.applyHotKeys()
                 }
