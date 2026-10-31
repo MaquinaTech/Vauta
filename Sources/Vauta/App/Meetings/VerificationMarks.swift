@@ -17,6 +17,16 @@ enum VerificationText {
         String(localized: "This isn’t confirmed in the transcript. Check it before relying on it.", comment: "Help of the mark on a decision or task the transcript does not back: a name, date or figure that does not match the passage the model cited, or an item less certain than the main ones of the meeting; also the note in the task editor")
     }
 
+    /// The help of an unconfirmed item: why it is marked, when that is something other than a check of its words.
+    static func help(reason: String?) -> String {
+        reason == UnconfirmedReason.edited ? editedHelp : unconfirmedHelp
+    }
+
+    static var editedHelp: String {
+        String(localized: "You corrected the transcript here after the minutes were written. Check that this still says what was said.",
+               comment: "Help of the mark on a decision or task whose cited transcript line the user corrected after the minutes were written; also the note in the task editor")
+    }
+
     static var ownerHelp: String {
         String(localized: "Nothing in the passage the model cited confirms this owner.", comment: "Help of the mark on a task owner; also the note in the task editor")
     }
@@ -28,6 +38,8 @@ enum VerificationText {
 
 /// The word "Unconfirmed" with its glyph, after the text of a decision.
 struct UnconfirmedBadge: View {
+    /// Why it is unconfirmed (`UnconfirmedReason`), for the help.
+    var reason: String?
     @Environment(\.backgroundProminence) private var prominence
 
     var body: some View {
@@ -39,7 +51,7 @@ struct UnconfirmedBadge: View {
                 .foregroundStyle(.secondary)
         }
         .fixedSize()
-        .help(VerificationText.unconfirmedHelp)
+        .help(VerificationText.help(reason: reason))
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(VerificationText.unconfirmed))
     }
@@ -102,7 +114,7 @@ struct VerificationNote: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            if task.unconfirmed { line(VerificationText.unconfirmedHelp) }
+            if task.unconfirmed { line(VerificationText.help(reason: task.unconfirmedReason)) }
             if task.ownerMarked { line(VerificationText.ownerHelp) }
         }
         .font(.callout)

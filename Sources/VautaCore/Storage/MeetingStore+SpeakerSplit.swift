@@ -19,6 +19,9 @@ import Foundation
 /// finalization, BEFORE translations are refined, so it keeps what exists: each translation is cut
 /// at the space nearest to the same proportion of its text, which is approximate and is replaced
 /// when the segments are translated again.
+///
+/// Corrected lines. What the transcriber wrote (`original_text`) is cut at the same word as the correction
+/// (`TranscriptCorrection.oldCut`), so each part can still be restored on its own.
 extension MeetingStore {
     static let cannotSplit = StoreError(.cannotSplit)
 
@@ -68,7 +71,8 @@ extension MeetingStore {
     func splitInTransaction(_ segmentID: Int64, atCharacter offset: Int, time: Double?, rightSpeaker: Int64?,
                             byUser: Bool) throws -> (rightID: Int64, undo: SpeakerUndo) {
         guard let seg = try db.query("""
-            SELECT meeting_id, speaker, start, end, text, speaker_id, speaker_confidence, overlap, speaker_locked FROM segments WHERE id = ?
+            SELECT meeting_id, speaker, start, end, text, speaker_id, speaker_confidence, overlap, speaker_locked, original_text, edited_at
+            FROM segments WHERE id = ?
             """, [.integer(segmentID)]).first else { throw Self.segmentGone }
         let (meeting, code, start, end, text) = (seg.int(0), seg.string(1), seg.double(2), seg.double(3), seg.string(4))
         if byUser { guard meeting != activeMeetingID else { throw StoreError.meetingInProgress } }
@@ -83,23 +87,34 @@ extension MeetingStore {
                 throw StoreError(.speakerMismatch)
             }
         }
+        // A corrected line: what the transcriber wrote is cut at the same word, so each part keeps its own (none when it reads the same).
+        var originals: (left: String?, right: String?) = (nil, nil)
+        if let original = seg.optionalString(9) {
+            let correction = TranscriptCorrection(from: original, to: text, profile: LanguageProfile(locale: try meetingLocale(meeting)))
+            let cut = correction.oldCut(atNew: text.index(text.startIndex, offsetBy: offset))
+            let (l, r) = (String(original[..<cut]).trimmingCharacters(in: .whitespacesAndNewlines),
+                          String(original[cut...]).trimmingCharacters(in: .whitespacesAndNewlines))
+            originals = (l.isEmpty || l == left ? nil : l, r.isEmpty || r == right ? nil : r)
+        }
+        let editedAt = { (original: String?) in original == nil ? nil : seg.optionalDouble(10).map { SQLiteValue.real($0) } }
         var undo = SpeakerUndo(segments: try segmentStates("WHERE id = ?", [.integer(segmentID)]))
         let translations = try db.query("SELECT lang, text FROM segment_translations WHERE segment_id = ?", [.integer(segmentID)])
             .map { ($0.string(0), $0.string(1)) }
         // External-content FTS5: the index is told what it held and what it holds now.
         try run("INSERT INTO segments_fts(segments_fts, rowid, text) VALUES ('delete', ?, ?)", [.integer(segmentID), .text(text)])
-        try run("UPDATE segments SET end = ?, text = ?, speaker_locked = ? WHERE id = ?",
-                [.real(at), .text(left), .integer(byUser ? 1 : seg.int(8)), .integer(segmentID)])
+        try run("UPDATE segments SET end = ?, text = ?, speaker_locked = ?, original_text = ?, edited_at = ? WHERE id = ?",
+                [.real(at), .text(left), .integer(byUser ? 1 : seg.int(8)), originals.left.map { .text($0) }, editedAt(originals.left),
+                 .integer(segmentID)])
         try run("INSERT INTO segments_fts(rowid, text) VALUES (?, ?)", [.integer(segmentID), .text(left)])
         try run("DELETE FROM segment_translations WHERE segment_id = ?", [.integer(segmentID)])
         let rightSpeakerID = rightSpeaker ?? seg.optionalInt(5)
         // Inserted last so the trigger indexes the right part.
         try run("""
-            INSERT INTO segments(meeting_id, speaker, start, end, text, speaker_id, speaker_confidence, overlap, speaker_locked)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO segments(meeting_id, speaker, start, end, text, speaker_id, speaker_confidence, overlap, speaker_locked, original_text, edited_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, [.integer(meeting), .text(code), .real(at), .real(end), .text(right),
                   rightSpeakerID.map { .integer($0) }, seg.optionalDouble(6).map { .real($0) }, .integer(seg.int(7)),
-                  .integer(byUser ? 1 : seg.int(8))])
+                  .integer(byUser ? 1 : seg.int(8)), originals.right.map { .text($0) }, editedAt(originals.right)])
         let id = db.lastInsertRowID
         if !byUser {
             for (language, whole) in translations {
@@ -115,7 +130,8 @@ extension MeetingStore {
         try moveCitations(from: segmentID, to: id, leftText: left, rightText: right, at: at)
         undo.split = .init(left: segmentID, right: id, text: text, end: end, leftText: left, rightText: right, at: at,
                            leftSpeaker: seg.optionalInt(5), rightSpeaker: rightSpeakerID,
-                           translations: translations.map { (language: $0.0, text: $0.1) })
+                           translations: translations.map { (language: $0.0, text: $0.1) },
+                           original: seg.optionalString(9), editedAt: seg.optionalDouble(10))
         try recomputeTalkTimeInTransaction(meeting)
         return (id, undo)
     }

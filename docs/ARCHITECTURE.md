@@ -515,6 +515,33 @@ changed.
   and `translationModel` (empty = fast model). `RefinementTest` backs the Test button (real latency of one sample sentence).
 - **Measuring.** `Vauta translate-bench` (diagnostics build only) reports latency, CPU and main-thread cost.
 
+### Transcript corrections
+
+- **Storage.** `segments.text` is the corrected line, so every reader (search, Ask, chunks, the graph, the minutes, the
+  exports) reads it with no change; `original_text` keeps what the transcriber wrote (NULL = never corrected, or restored)
+  and `edited_at` when the line first differed from it (migration 36). `segments_fts` is external-content, so
+  `MeetingStore.correctSegment` tells it the old text and the new one. Translations stay stored and `translations(of:)`
+  leaves out corrected lines: they translate what was transcribed and come back with Restore Original.
+- **What the model wrote.** `TranscriptCorrection` aligns the words of two versions of a line (LCS on `TextKeys.norm`, the
+  same words at both ends first, a cap of 2 M cells beyond which the middle counts as replaced). `touches(_:)` says whether
+  an item written from the old line may no longer say what the line says: a figure gone (`MinutesVerifier`), a change other
+  than a hesitation among or within two words of the words the item shares with the line, or, for an item that shares no
+  word (minutes in another language), any change of a word that carries meaning. The model's confirmed decisions and tasks
+  it touches get `unconfirmed_reason = 'edited'`; an item written before the first correction is judged against what was
+  transcribed, one written after (minutes written again) against the line before this correction, and an `edited` mark
+  goes when the words it was written from come back. What the user wrote or checked is never marked. Sentences of note
+  expansions follow their quote (`corrected(quote:)`) and carry `edited` in their JSON; detected questions follow too
+  (their `knowledge_fts` row by hand, since the triggers only follow `kept`). `analyzeInTransaction` runs in the same
+  transaction, so a corrected name becomes a mention and a misheard one stops being suggested.
+- **Undo.** `TextCorrection` (in memory) holds the line before and after and every mark, quote and question it changed;
+  `undoCorrection` restores them only while the line still reads as the correction left it, and leaves anything the user
+  changed since. A user split of a corrected line cuts `original_text` at the same word (`oldCut(atNew:)`) and its
+  `SpeakerUndo.Split` keeps the whole original.
+- **Interface.** `MeetingsModel.lineDraft` is the line being corrected (Return on the highlighted line, the pencil, the
+  context menu, Edit › Correct Highlighted Passage); it is saved when the person leaves the meeting or the window locks,
+  like a note. `TranscriptLineEditor` uses `NoCopyText`, so copy protection applies. Afterwards the meeting is read again
+  and `LLMService.speakersChanged` re-checks owner marks and re-embeds stale chunks.
+
 ### Migrations
 
 `Schema.migrations` in `Storage/Schema.swift` is the single, ordered registry. Versions are strictly increasing and

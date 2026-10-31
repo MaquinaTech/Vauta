@@ -1464,6 +1464,17 @@
 
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "줄을 변경할 수 없습니다";
+"Couldn’t correct the line" = "줄을 수정할 수 없습니다";
+"Corrected words" = "수정한 단어";
+"Return saves, Esc cancels" = "Return은 저장, Esc는 취소";
+"Corrected" = "수정됨";
+"Restore Original" = "원래대로 복원";
+"Transcribed as: “%@”" = "전사된 내용: “%@”";
+"Put back the words as they were transcribed" = "전사된 그대로의 단어로 되돌립니다";
+"Correct Line" = "줄 수정";
+"Correct the words of this line (Return)" = "이 줄의 단어 수정(Return)";
+"Correct Highlighted Passage" = "강조 표시된 구간 수정";
+"You corrected the transcript here after the minutes were written. Check that this still says what was said." = "회의록을 작성한 뒤 여기서 전사를 수정했습니다. 실제 발언과 여전히 맞는지 확인하세요.";
 
 /* Alert title */
 "Couldn’t change the note" = "메모를 변경할 수 없습니다";

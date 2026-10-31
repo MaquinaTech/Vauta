@@ -58,6 +58,10 @@ public enum UnconfirmedReason {
     public static func rankedOut(after soft: String?) -> String { soft.map { "\(rankedOut):\($0)" } ?? rankedOut }
 
     public static func isRankedOut(_ reason: String?) -> Bool { reason == rankedOut || reason?.hasPrefix(rankedOut + ":") == true }
+
+    /// The user corrected the line the item cites after the minutes were written, where the item relied on it
+    /// (`MeetingStore.correctSegment`).
+    public static let edited = "edited"
 }
 
 public struct TaskItem: Sendable, Identifiable, Hashable {

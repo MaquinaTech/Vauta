@@ -1464,6 +1464,17 @@
 
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "Impossibile modificare la riga";
+"Couldn’t correct the line" = "Impossibile correggere la riga";
+"Corrected words" = "Parole corrette";
+"Return saves, Esc cancels" = "A capo salva, Esc annulla";
+"Corrected" = "Corretta";
+"Restore Original" = "Ripristina originale";
+"Transcribed as: “%@”" = "Trascritto come: “%@”";
+"Put back the words as they were transcribed" = "Ripristina le parole come sono state trascritte";
+"Correct Line" = "Correggi riga";
+"Correct the words of this line (Return)" = "Correggi le parole di questa riga (A capo)";
+"Correct Highlighted Passage" = "Correggi il passaggio evidenziato";
+"You corrected the transcript here after the minutes were written. Check that this still says what was said." = "Hai corretto la trascrizione qui dopo che il verbale è stato scritto. Controlla che dica ancora ciò che è stato detto.";
 
 /* Alert title */
 "Couldn’t change the note" = "Impossibile modificare la nota";

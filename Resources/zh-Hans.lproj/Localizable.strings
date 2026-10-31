@@ -1464,6 +1464,17 @@
 
 /* Alert title: saying whether a transcript line is the user's own or an echo of the speakers failed */
 "Couldn’t change the line" = "无法更改此行";
+"Couldn’t correct the line" = "无法修正此行";
+"Corrected words" = "修正后的文字";
+"Return saves, Esc cancels" = "按 Return 存储，按 Esc 取消";
+"Corrected" = "已修正";
+"Restore Original" = "恢复原文";
+"Transcribed as: “%@”" = "转写为：“%@”";
+"Put back the words as they were transcribed" = "恢复为转写时的文字";
+"Correct Line" = "修正此行";
+"Correct the words of this line (Return)" = "修正此行的文字（Return）";
+"Correct Highlighted Passage" = "修正高亮片段";
+"You corrected the transcript here after the minutes were written. Check that this still says what was said." = "会议纪要生成后，你在这里修正了转写。请确认这项内容仍与所说的话一致。";
 
 /* Alert title */
 "Couldn’t change the note" = "无法更改笔记";

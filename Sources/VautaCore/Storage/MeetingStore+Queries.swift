@@ -18,20 +18,22 @@ extension MeetingStore {
     /// transcript itself and the speaker tools; whatever reads it as what was said leaves them out.
     public func segments(of meetingID: Int64, echoes: Bool = false) throws -> [StoredSegment] {
         try db.query("""
-            SELECT s.id, s.meeting_id, s.speaker, s.start, s.end, s.text, \(Self.speakerColumns), s.echo
+            SELECT s.id, s.meeting_id, s.speaker, s.start, s.end, s.text, \(Self.speakerColumns), s.echo, s.original_text
             FROM segments s \(Self.speakerJoins) WHERE s.meeting_id = ?\(echoes ? "" : " AND \(Self.notEcho)") ORDER BY s.start, s.id
             """, [.integer(meetingID)]).map { row in
             var segment = Self.segment(row, speakerAt: 6)
             segment.isEcho = row.int(6 + Self.speakerColumnCount) == 1
+            segment.originalText = row.optionalString(7 + Self.speakerColumnCount)
             return segment
         }
     }
 
-    /// The stored translations of a meeting's segments, in segment order.
+    /// The stored translations of a meeting's segments, in segment order. A corrected line has none: its translation is of
+    /// what the transcriber wrote, and comes back with Restore Original.
     public func translations(of meetingID: Int64) throws -> [StoredTranslation] {
         try db.query("""
             SELECT t.segment_id, t.lang, t.text FROM segment_translations t
-            JOIN segments s ON s.id = t.segment_id WHERE s.meeting_id = ? ORDER BY s.start, s.id, t.lang
+            JOIN segments s ON s.id = t.segment_id WHERE s.meeting_id = ? AND s.original_text IS NULL ORDER BY s.start, s.id, t.lang
             """, [.integer(meetingID)]).map { StoredTranslation(segmentID: $0.int(0), language: $0.string(1), text: $0.string(2)) }
     }
 

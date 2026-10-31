@@ -65,7 +65,8 @@ extension MeetingStore {
                 else { throw Self.cannotUndo }
                 meetings.insert(l.int(0))
                 try run("INSERT INTO segments_fts(segments_fts, rowid, text) VALUES ('delete', ?, ?)", [.integer(split.left), .text(split.leftText)])
-                try run("UPDATE segments SET end = ?, text = ? WHERE id = ?", [.real(split.end), .text(split.text), .integer(split.left)])
+                try run("UPDATE segments SET end = ?, text = ?, original_text = ?, edited_at = ? WHERE id = ?",
+                        [.real(split.end), .text(split.text), split.original.map { .text($0) }, split.editedAt.map { .real($0) }, .integer(split.left)])
                 try run("INSERT INTO segments_fts(rowid, text) VALUES (?, ?)", [.integer(split.left), .text(split.text)])
                 for table in ["mentions", "suggestions", "decisions", "tasks"] {
                     try run("UPDATE \(table) SET segment_id = ? WHERE segment_id = ?", [.integer(split.left), .integer(split.right)])

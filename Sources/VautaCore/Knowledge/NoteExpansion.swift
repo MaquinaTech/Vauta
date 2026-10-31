@@ -44,12 +44,15 @@ public struct NoteExpansion: Sendable, Equatable {
         public var unconfirmed: Bool
         /// The transcript says something different from the note: shown as "The transcript says: …".
         public var differs: Bool
+        /// `unconfirmed` because the user corrected a line it cites after it was written (`correctSegment`); the mark goes when
+        /// the line is restored. Stored only when true.
+        public var edited: Bool
 
-        public init(text: String, cites: [Cite] = [], quote: String = "", unconfirmed: Bool = false, differs: Bool = false) {
-            self.text = text; self.cites = cites; self.quote = quote; self.unconfirmed = unconfirmed; self.differs = differs
+        public init(text: String, cites: [Cite] = [], quote: String = "", unconfirmed: Bool = false, differs: Bool = false, edited: Bool = false) {
+            self.text = text; self.cites = cites; self.quote = quote; self.unconfirmed = unconfirmed; self.differs = differs; self.edited = edited
         }
 
-        private enum CodingKeys: String, CodingKey { case text, cites, quote, unconfirmed, differs }
+        private enum CodingKeys: String, CodingKey { case text, cites, quote, unconfirmed, differs, edited }
 
         public init(from decoder: Decoder) throws {
             let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -58,6 +61,17 @@ public struct NoteExpansion: Sendable, Equatable {
             quote = try c.decodeIfPresent(String.self, forKey: .quote) ?? ""
             unconfirmed = try c.decodeIfPresent(Bool.self, forKey: .unconfirmed) ?? false
             differs = try c.decodeIfPresent(Bool.self, forKey: .differs) ?? false
+            edited = try c.decodeIfPresent(Bool.self, forKey: .edited) ?? false
+        }
+
+        public func encode(to encoder: Encoder) throws {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(text, forKey: .text)
+            try c.encode(cites, forKey: .cites)
+            try c.encode(quote, forKey: .quote)
+            try c.encode(unconfirmed, forKey: .unconfirmed)
+            try c.encode(differs, forKey: .differs)
+            if edited { try c.encode(true, forKey: .edited) }
         }
     }
 
