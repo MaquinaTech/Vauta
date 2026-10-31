@@ -8041,6 +8041,10 @@
 
 /* Transcript: under a line of the user's channel that repeats what the other participants said, because the microphone heard them from the speakers */
 "Echo of your speakers" = "스피커 에코";
+"Your voice, sent back" = "되돌아온 내 목소리";
+"Not an Echo" = "에코 아님";
+"A participant’s speakers sent your voice back into the call, so this line repeats what you said. It is kept here, but left out of the minutes, answers, owners, search and exports." = "참가자의 스피커가 내 목소리를 통화로 되돌려 보내서 이 줄은 내가 한 말을 반복합니다. 여기에는 남지만 회의록, 답변, 담당자, 검색, 내보내기에서는 제외됩니다.";
+"Another participant said this: count it in answers, search and exports, and in the minutes the next time they are written" = "다른 참가자가 한 말입니다. 답변, 검색, 내보내기에 포함되며 다음에 회의록을 작성할 때도 포함됩니다";
 "Mark as Done" = "완료로 표시";
 
 /* Edit menu: the action Undo takes back, marking a transcript line as an echo of the speakers again */

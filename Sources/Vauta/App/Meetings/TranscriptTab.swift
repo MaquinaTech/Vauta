@@ -304,7 +304,7 @@ struct TranscriptTab: View {
                     CorrectedNote(original: original) { Task { await model.restoreOriginal(segment) } }
                 }
                 if segment.isEcho {
-                    EchoNote { Task { await model.setEcho(segment, false) } }
+                    EchoNote(channel: segment.channel) { Task { await model.setEcho(segment, false) } }
                 }
                 if let translation {
                     FilledText(text: translation, selectable: !copyProtection)
@@ -328,7 +328,7 @@ struct TranscriptTab: View {
         .accessibilityElement(children: isEditing ? .contain : .ignore)
         .accessibilityLabel(SpeakerLabel.spoken(segment, time: time))
         .accessibilityValue(Text(verbatim: [segment.originalText.map { CorrectedNote.title + ". " + CorrectedNote.transcribed($0) },
-                                            segment.isEcho ? EchoNote.title : nil, SpeakerLabel.spokenNotes(segment, translation: translation)]
+                                            segment.isEcho ? EchoNote.title(for: segment.channel) : nil, SpeakerLabel.spokenNotes(segment, translation: translation)]
             .compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")))
         .accessibilityAddTraits(isHighlighted ? [.isButton, .isSelected] : .isButton)
         .accessibilityAction { model.highlight(segment) }
@@ -338,7 +338,7 @@ struct TranscriptTab: View {
                 Button("Speaker options") { model.speakerPopover = .line(segment.id) }
             }
             if segment.isEcho {
-                Button(EchoNote.restore) { Task { await model.setEcho(segment, false) } }
+                Button(EchoNote.restore(for: segment.channel)) { Task { await model.setEcho(segment, false) } }
             }
             if canCorrect { Button(CorrectLineButton.title) { model.beginCorrecting(segment) } }
             if segment.originalText != nil { Button(CorrectedNote.restoreTitle) { Task { await model.restoreOriginal(segment) } } }

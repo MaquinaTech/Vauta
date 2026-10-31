@@ -8041,6 +8041,10 @@
 
 /* Transcript: under a line of the user's channel that repeats what the other participants said, because the microphone heard them from the speakers */
 "Echo of your speakers" = "スピーカーからのエコー";
+"Your voice, sent back" = "返ってきた自分の声";
+"Not an Echo" = "エコーではない";
+"A participant’s speakers sent your voice back into the call, so this line repeats what you said. It is kept here, but left out of the minutes, answers, owners, search and exports." = "参加者のスピーカーが自分の声を通話に返したため、この行は自分の発言を繰り返しています。ここには残りますが、議事録、回答、担当者、検索、書き出しには含まれません。";
+"Another participant said this: count it in answers, search and exports, and in the minutes the next time they are written" = "ほかの参加者の発言です。回答、検索、書き出しに含め、次に議事録を作成するときにも含めます";
 "Mark as Done" = "完了にする";
 
 /* Edit menu: the action Undo takes back, marking a transcript line as an echo of the speakers again */

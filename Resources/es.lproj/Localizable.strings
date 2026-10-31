@@ -8041,6 +8041,10 @@
 
 /* Transcript: under a line of the user's channel that repeats what the other participants said, because the microphone heard them from the speakers */
 "Echo of your speakers" = "Eco de tus altavoces";
+"Your voice, sent back" = "Tu voz, devuelta";
+"Not an Echo" = "No es un eco";
+"A participant’s speakers sent your voice back into the call, so this line repeats what you said. It is kept here, but left out of the minutes, answers, owners, search and exports." = "Los altavoces de un participante devolvieron tu voz a la llamada, así que esta línea repite lo que dijiste. Se conserva aquí, pero queda fuera de las actas, las respuestas, los responsables, la búsqueda y las exportaciones.";
+"Another participant said this: count it in answers, search and exports, and in the minutes the next time they are written" = "Lo dijo otro participante: cuenta en las respuestas, la búsqueda y las exportaciones, y en las actas la próxima vez que se escriban";
 "Mark as Done" = "Marcar como hecha";
 
 /* Edit menu: the action Undo takes back, marking a transcript line as an echo of the speakers again */

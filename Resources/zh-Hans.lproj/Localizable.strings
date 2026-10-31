@@ -8041,6 +8041,10 @@
 
 /* Transcript: under a line of the user's channel that repeats what the other participants said, because the microphone heard them from the speakers */
 "Echo of your speakers" = "扬声器回声";
+"Your voice, sent back" = "你的声音被传回";
+"Not an Echo" = "不是回声";
+"A participant’s speakers sent your voice back into the call, so this line repeats what you said. It is kept here, but left out of the minutes, answers, owners, search and exports." = "某位参与者的扬声器把你的声音传回了通话，因此这一行重复了你说的话。它会保留在这里，但不会计入会议纪要、回答、负责人、搜索和导出。";
+"Another participant said this: count it in answers, search and exports, and in the minutes the next time they are written" = "这是其他参与者说的话：将计入回答、搜索和导出，并在下次生成会议纪要时计入";
 "Mark as Done" = "标记为已完成";
 
 /* Edit menu: the action Undo takes back, marking a transcript line as an echo of the speakers again */

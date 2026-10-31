@@ -50,9 +50,27 @@ struct EchoMarkTests {
         #expect(try await s.markEchoes(m.id) == 0, "a line the person said is theirs is never marked again")
         try await s.setEcho(m.echo, true)
         #expect(try await s.echoes(of: m.id) == [m.echo])
-        // Only a Me line can be an echo.
+        // An Others line too (the far side's echo of the user), and back.
         try await s.setEcho(m.others, true)
+        #expect(try await s.echoes(of: m.id) == [m.others, m.echo])
+        try await s.setEcho(m.others, false)
         #expect(try await s.echoes(of: m.id) == [m.echo])
+    }
+
+    /// A participant on speakers sends the user's voice back into Others a call's round trip later: that line is marked, also
+    /// when the user wore headphones (their microphone never heard the speakers, but the echo came from the far side).
+    @Test func theFarSidesEchoOfTheUserIsMarkedInOthers() async throws {
+        let f = try KnowledgeFixture()
+        let s = f.store!
+        for headphones in [false, true] {
+            let id = try await s.startMeeting(at: .now, locale: Locale(identifier: "en-US"))
+            let mine = try await s.append(Segment(channel: .me, start: 10, end: 14, text: Self.said, isFinal: true), to: id)
+            let back = try await s.append(Segment(channel: .others, start: 10.4, end: 14.5, text: Self.said.lowercased(), isFinal: true), to: id)
+            let theirs = try await s.append(Segment(channel: .others, start: 16, end: 20, text: Self.reply, isFinal: true), to: id)
+            try await s.endMeeting(id, at: .now + 60, marksEchoes: !headphones)
+            #expect(try await s.echoes(of: id) == [back], "headphones: \(headphones)")
+            #expect(try await s.citableSegments(id).map(\.id) == [mine, theirs])
+        }
     }
 
     @Test func anEchoIsNotTheUserTalking() async throws {
