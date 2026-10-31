@@ -17,6 +17,7 @@ struct SettingsSearchTests {
         #expect(found("vocab") == ["recording: Custom vocabulary"])
         #expect(found("STOP screen").contains("recording: Stop recording when the screen locks"), "every word, in any order")
         #expect(found("ïntegrated") == ["models: Integrated model"])
+        #expect(found("pause").contains("general: Pause or resume recording"))
         #expect(found("").isEmpty && found("   ").isEmpty)
         #expect(found("zzz").isEmpty)
     }

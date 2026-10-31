@@ -44,6 +44,8 @@ public struct AppNotification: Equatable, Sendable {
         case startBlocked = "vauta.start.blocked"
         case startNeedsModel = "vauta.start.model"
         case voicesUnused = "vauta.voices.unused"
+        /// The recording has been paused for a while (`pauseReminder`).
+        case pauseReminder = "vauta.paused"
         /// Shortly before a meeting: "Brief ready". Never carries brief content, and the event's title only when titles may be shown.
         case brief = "vauta.brief"
 
@@ -52,6 +54,7 @@ public struct AppNotification: Equatable, Sendable {
             switch self {
             case .autoStopWarning: [.keepRecording]
             case .hangup: [.stopRecording, .keepRecording]
+            case .pauseReminder: [.resumeRecording, .stopRecording]
             case .suggestion: [.transcribe]
             case .recordingStopped: [.openMeeting]
             case .serverUnreachable: [.showModels]
@@ -68,7 +71,7 @@ public struct AppNotification: Equatable, Sendable {
         /// What a click on the notification itself does.
         public var defaultAction: Action? {
             switch self {
-            case .autoStopWarning, .hangup: nil
+            case .autoStopWarning, .hangup, .pauseReminder: nil
             case .suggestion: .transcribe
             case .recordingStopped, .minutesReady, .minutesFailed, .recordingImported: .openMeeting
             case .serverUnreachable: .showModels
@@ -84,7 +87,7 @@ public struct AppNotification: Equatable, Sendable {
         public var gate: Gate {
             switch self {
             case .brief: .brief
-            case .autoStopWarning, .hangup, .suggestion: .always
+            case .autoStopWarning, .hangup, .suggestion, .pauseReminder: .always
             case .minutesReady, .recordingImported: .minutesReady
             case .recordingStopped, .serverUnreachable, .minutesFailed, .startFailed, .startBlocked, .startNeedsModel, .voicesUnused: .problems
             }
@@ -94,6 +97,8 @@ public struct AppNotification: Equatable, Sendable {
     public enum Action: String, CaseIterable, Sendable {
         case keepRecording = "keep"
         case stopRecording = "stop"
+        /// Resumes the paused recording.
+        case resumeRecording = "resume"
         case transcribe
         case openMeeting = "open"
         case retryMinutes = "retry"
@@ -159,6 +164,16 @@ public struct AppNotification: Equatable, Sendable {
             title: String(localized: "Vauta will stop recording soon", comment: "Notification title before an automatic stop"),
             body: String(localized: "The meeting hasn’t been heard for a while. Recording stops in \(secondsLeft) s unless you keep recording.",
                          comment: "Notification body before an automatic stop; the argument is seconds"))
+    }
+
+    /// The recording has been paused for `minutes`: nothing is captured until it resumes, and a meeting that went on is being
+    /// missed.
+    public static func pauseReminder(minutes: Int) -> AppNotification {
+        AppNotification(
+            kind: .pauseReminder,
+            title: String(localized: "The recording is still paused", comment: "Notification title when a recording has been paused for a while"),
+            body: String(localized: "Nothing has been captured for \(Duration.seconds(minutes * 60).formatted(.units(allowed: [.minutes], width: .wide))). Resume if the meeting goes on, or stop to save it.",
+                         comment: "Notification body when a recording has been paused for a while; the argument is a length of time in words, like 15 minutes"))
     }
 
     /// - Parameter appName: the app that released the microphone, if known.

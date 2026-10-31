@@ -30,6 +30,8 @@ extension RecorderModel {
     func pauseRecording() {
         guard canTogglePause, !isPaused, let capture, capture.pause() else { return }
         isPaused = true
+        pausedSince = .now
+        pauseReminded = false
         // Nothing is heard while paused: no meters frozen at their last level, no warning about a silence Vauta made.
         levels = [:]
         silenceWarning = nil
@@ -55,16 +57,38 @@ extension RecorderModel {
             return
         }
         isPaused = false
+        endPauseReminder()
         // The silences start again from now: the pause never counts towards the automatic stop.
         lastOthersHeard = ContinuousClock.now
         writePause { store, id, at in try await store.endPause(id, at: at) }
         AccessibilityNotification.Announcement(String(localized: "Recording resumed.", comment: "VoiceOver announcement when a paused recording captures again")).post()
     }
 
+    /// How long a pause goes on before a notification says the recording is still paused: longer than a short break, short
+    /// enough that a meeting that went on is not lost for long.
+    static let pauseReminderMinutes = 15
+
+    static func remindsOfPause(pausedFor: Duration, reminded: Bool) -> Bool {
+        !reminded && pausedFor >= .seconds(pauseReminderMinutes * 60)
+    }
+
+    /// While paused (the ticker): once per pause, the notification that the recording is still paused, with Resume.
+    func remindOfPauseIfDue(now: ContinuousClock.Instant) {
+        guard isPaused, let since = pausedSince, Self.remindsOfPause(pausedFor: now - since, reminded: pauseReminded) else { return }
+        pauseReminded = true
+        post(.pauseReminder(minutes: Self.pauseReminderMinutes))
+    }
+
+    private func endPauseReminder() {
+        pausedSince = nil
+        notifier.remove(.pauseReminder)
+    }
+
     /// At stop: a pause that is on ends where the recording does.
     func endPauseAtStop() {
         guard isPaused else { return }
         isPaused = false
+        endPauseReminder()
         writePause { store, id, at in try await store.endPause(id, at: at) }
     }
 

@@ -36,6 +36,7 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         let title = switch action {
         case .keepRecording: String(localized: "Keep Recording", comment: "Notification button")
         case .stopRecording: String(localized: "Stop and Save", comment: "Notification button")
+        case .resumeRecording: String(localized: "Resume", comment: "Notification button: resumes the paused recording")
         case .transcribe: String(localized: "Record", comment: "Notification button: start recording the meeting")
         case .openMeeting: String(localized: "Open Meeting", comment: "Notification button: open the meeting")
         case .retryMinutes: String(localized: "Try Again", comment: "Notification button: write the minutes again")
