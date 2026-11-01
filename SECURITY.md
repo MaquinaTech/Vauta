@@ -442,6 +442,25 @@ Vauta publishes source, not binaries, so what you run is what you built. To chec
    test or command, and `scripts/check-dependencies.sh` verifies the pinned dependencies.
 4. Check the result with the `codesign` commands above and the Network Activity list in the app.
 
+### If the release key changes
+
+`update.sh` accepts one key: the one in the `.github/allowed_signers` of the checkout you already have, which must also match the
+fingerprint written in the script. It never moves to another key by itself. If the maintainer's key is lost, compromised or
+replaced, a release signed with a new key makes it stop ("is not signed by the maintainer's key", or "does not hold the
+maintainer's key"). Don't edit the script or `.github/allowed_signers` to make it pass. Check the new key yourself, once:
+
+1. The project announces a new key in the release notes of the first release signed with it, and lists it among the signing keys
+   of the MaquinaTech GitHub account ([its signing keys](https://api.github.com/users/MaquinaTech/ssh_signing_keys)). While the
+   old key is still in the maintainer's hands, a tag signed with the old key also states the new fingerprint.
+2. Confirm the new fingerprint from more than one of those sources, as GitHub serves them, not only from the checkout.
+3. Verify the new release's tag by hand, as in step 2 of [Verifying what you run](#verifying-what-you-run), with the
+   `.github/allowed_signers` of that tag (`git show v<version>:.github/allowed_signers`) and the new fingerprint, and read what
+   changed in `scripts/update.sh`. Then run `git checkout v<version>` and `./scripts/install.sh` (in your own Terminal with
+   a local signing identity). From that release on, `update.sh` checks the new key.
+
+If the old key was lost, nothing signed with it can vouch for the new one: the GitHub account and the release notes are then the
+only sources, so you trust the account alone.
+
 ## Audit status
 
 Vauta has **not been independently audited**. Its security properties are backed by public tests and source code, listed
