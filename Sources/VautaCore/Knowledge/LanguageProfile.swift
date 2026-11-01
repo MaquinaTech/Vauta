@@ -82,11 +82,12 @@ public struct LanguageProfile: Sendable, Equatable {
         capitalizationMarksNames && token.capitalizedMidSentence
     }
 
-    /// Sound key for misrecognition hints, or nil where no valid rule set
-    /// exists: the Spanish rules make "Hannah" sound like "Ana", which is
-    /// right in Spanish and wrong in English.
+    /// Sound key for misrecognition hints, with the rules of the language, or nil where no valid rule set
+    /// exists: the Spanish rules make "Hannah" sound like "Ana", which is right in Spanish and wrong in
+    /// English, where its own rules keep them apart (`PhoneticKeys`). `text` is the word as written:
+    /// French accents change how it sounds ("René" is not "Rennes").
     public func phoneticKey(_ text: String) -> String? {
-        ["es", "ca", "gl"].contains(languageCode) ? TextKeys.phonetic(text) : nil
+        ["es", "ca", "gl"].contains(languageCode) ? TextKeys.phonetic(text) : PhoneticKeys.key(text, language: languageCode)
     }
 
     // MARK: Data

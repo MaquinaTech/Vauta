@@ -2,46 +2,49 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
 import Foundation
+import Synchronization
 
 /// The outcome of a race between some work and a timer: the first to finish wins, the other is cancelled and never awaited.
-private final class RaceBox<T: Sendable>: @unchecked Sendable {
-    private let lock = NSLock()
-    private var continuation: CheckedContinuation<T, Error>?
-    private var early: Result<T, Error>?
-    private var finished = false
-    private var cancelers: [@Sendable () -> Void] = []
+/// The continuation is resumed and the cancelers are called outside the lock.
+private final class RaceBox<T: Sendable>: Sendable {
+    private struct State {
+        var continuation: CheckedContinuation<T, Error>?
+        var early: Result<T, Error>?
+        var finished = false
+        var cancelers: [@Sendable () -> Void] = []
+    }
+    private let state = Mutex(State())
 
     func install(_ continuation: CheckedContinuation<T, Error>) {
-        lock.lock()
-        if let early {
-            lock.unlock()
-            continuation.resume(with: early)
-        } else {
-            self.continuation = continuation
-            lock.unlock()
+        let early = state.withLock { s -> Result<T, Error>? in
+            if s.early == nil { s.continuation = continuation }
+            return s.early
         }
+        if let early { continuation.resume(with: early) }
     }
 
     func addCanceler(_ canceler: @escaping @Sendable () -> Void) {
-        lock.lock()
-        let already = finished
-        if !already { cancelers.append(canceler) }
-        lock.unlock()
+        let already = state.withLock { s in
+            if !s.finished { s.cancelers.append(canceler) }
+            return s.finished
+        }
         if already { canceler() }
     }
 
     func finish(_ result: Result<T, Error>) {
-        lock.lock()
-        guard !finished else { lock.unlock(); return }
-        finished = true
-        let continuation = self.continuation
-        self.continuation = nil
-        if continuation == nil { early = result }
-        let toCancel = cancelers
-        cancelers = []
-        lock.unlock()
-        continuation?.resume(with: result)
-        for cancel in toCancel { cancel() }
+        let won = state.withLock { s -> (continuation: CheckedContinuation<T, Error>?, cancelers: [@Sendable () -> Void])? in
+            guard !s.finished else { return nil }
+            s.finished = true
+            let continuation = s.continuation
+            s.continuation = nil
+            if continuation == nil { s.early = result }
+            let cancelers = s.cancelers
+            s.cancelers = []
+            return (continuation, cancelers)
+        }
+        guard let won else { return }
+        won.continuation?.resume(with: result)
+        for cancel in won.cancelers { cancel() }
     }
 }
 
@@ -109,20 +112,12 @@ func forbidDatalessDownloads() {
 /// Counts the extractions that are running. One that is still running when the next file's turn comes has been abandoned by
 /// its deadline: Apple's parsers (PDFKit, NSAttributedString) never look at a clock, so a crafted file can keep its thread
 /// busy for the rest of the session. The indexer stops starting such parsers while too many are stuck.
-final class ExtractionTracker: @unchecked Sendable {
-    private let lock = NSLock()
-    private var count = 0
+final class ExtractionTracker: Sendable {
+    private let count = Mutex(0)
 
-    var live: Int {
-        lock.lock(); defer { lock.unlock() }
-        return count
-    }
+    var live: Int { count.withLock { $0 } }
 
-    func begin() {
-        lock.lock(); count += 1; lock.unlock()
-    }
+    func begin() { count.withLock { $0 += 1 } }
 
-    func end() {
-        lock.lock(); count -= 1; lock.unlock()
-    }
+    func end() { count.withLock { $0 -= 1 } }
 }

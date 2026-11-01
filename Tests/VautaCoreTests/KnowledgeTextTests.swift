@@ -163,11 +163,13 @@ struct KnowledgeLanguageProfileTests {
     }
 
     @Test func phoneticKeyOnlyWhereTheRulesHold() {
-        // The Spanish key makes "Hannah" sound like "Ana": right in Spanish, wrong in English.
+        // The Spanish key makes "Hannah" sound like "Ana": right in Spanish, wrong in English, which has rules of its own.
         let es = LanguageProfile(identifier: "es-ES"), en = LanguageProfile(identifier: "en-US")
         #expect(es.phoneticKey("Hannah") == es.phoneticKey("Ana"))
-        #expect(en.phoneticKey("Hannah") == nil)
+        #expect(en.phoneticKey("Hannah") != nil && en.phoneticKey("Hannah") != en.phoneticKey("Ana"))
         #expect(LanguageProfile(identifier: "ca-ES").phoneticKey("Vallès") != nil)
+        // German capitalizes every noun, so its corrector is off and it has no key.
+        #expect(LanguageProfile(identifier: "de-DE").phoneticKey("Meyer") == nil)
     }
 
     @Test func sentenceTerminatorsPerScript() {
