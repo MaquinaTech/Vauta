@@ -80,6 +80,13 @@ swift test -Xswiftc -plugin-path \
 To run part of the suite, add `--filter`, for example `swift test --filter CaptureCatalogTests` (plus the plugin path
 above when needed).
 
+**The minutes replay.** `MinutesReplayRegressionTests` replays the replies that Apple's on-device model and the integrated
+model gave on three invented meetings (`Tests/VautaCoreTests/Fixtures/MinutesReplay`) through everything after the model,
+and fails when the minutes they give change. When the change is intended, write the expected minutes again with
+`VAUTA_WRITE_MINUTES_REPLAY=1` (and `--filter MinutesReplayRegression`) and let the diff of the `.minutes.json` files show
+it in the pull request. A change to what the minutes ask the model needs new replies; the suite's comment says how to
+record them.
+
 ### Test coverage
 
 Last measured on 10 October 2026 (it has not been re-measured since, and the code has changed) with `swift test --enable-code-coverage` and

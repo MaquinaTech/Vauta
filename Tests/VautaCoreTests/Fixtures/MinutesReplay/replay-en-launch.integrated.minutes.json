@@ -1,0 +1,111 @@
+{
+  "dropped" : 0,
+  "items" : [
+    {
+      "citations" : [
+        9
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "Brightmold was selected as the supplier for the casing.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        25
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "The pilot program units will be lent to the two schools, with return in June.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        18
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "figures",
+      "text" : "The product launch date was moved to March 2nd.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        26
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "question",
+      "text" : "Draft a feedback form for the pilot program.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        28
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "noCommitment",
+      "text" : "Drive the units over for Riverside pilot.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        32
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 4",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Follow up with the legal team regarding insurance for lent units.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        19
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 3",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "reason" : "figures",
+      "text" : "Provide the Portuguese translation of the manual by February 20th.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        11
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Send the purchase order by Thursday.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        10
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Send the purchase order to Brightmold this week.",
+      "unconfirmed" : false
+    }
+  ],
+  "modelCalls" : 2,
+  "openQuestions" : [
+    "The insurance payment for the lent units still needs to be checked with the legal team."
+  ],
+  "proposed" : 11,
+  "summary" : "The meeting addressed three main items: the casing supplier, the product launch date, and the pilot program with two schools. Regarding the casing, Brightmold was chosen over Fendler due to superior sample quality, despite being slightly more expensive and requiring a decision on the initial batch cost. The group agreed to proceed with Brightmold, and Omar committed to sending the purchase order by Thursday. For the launch date, the initial target was revised to March 2nd to allow for packaging and translation completion. The pilot program was approved as a loan of forty units, with the condition that a feedback form be created for the schools, and the units are to be returned in June. Several action items were assigned, including drafting the feedback form and clarifying the insurance liability with the legal team.",
+  "topics" : [
+    "Supplier for the casing",
+    "Product launch date",
+    "Pilot program with schools"
+  ]
+}

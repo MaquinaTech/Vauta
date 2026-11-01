@@ -359,9 +359,11 @@ public enum MinutesEvaluation {
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent("vauta-minutes-eval-\(UUID().uuidString)", isDirectory: true)
         defer { try? FileManager.default.removeItem(at: directory) }
         let store = try MeetingStore(directory: directory, keyStore: MemoryKeyStore())
-        // A fixed date, so "on Friday" resolves the same on every run.
+        // A fixed date in a fixed time zone, so "on Friday" resolves the same on every run and every Mac: in the Mac's own zone,
+        // midnight UTC is still 31 December west of Greenwich, and recorded replies dated for 1 January would fail the due checks.
         let date = Date(timeIntervalSince1970: 1_104_537_600)
-        let meeting = try await store.startMeeting(at: date, locale: language, outputLocale: outputLocale ?? language)
+        let meeting = try await store.startMeeting(at: date, locale: language, outputLocale: outputLocale ?? language,
+                                                   timeZone: TimeZone(identifier: "UTC") ?? .gmt)
         // The suite is removed by the entry point that started the run (`removeEvaluationDefaults`), not here: other services share it.
         let service = LLMService(store: store, providers: providers, searchDefaults: EvaluationDefaults.suite)
         await service.setMinutesArms(arms)

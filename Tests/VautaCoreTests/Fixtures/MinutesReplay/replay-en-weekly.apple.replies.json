@@ -1,0 +1,65 @@
+{
+  "calls" : [
+    {
+      "finishReason" : "unknown"
+    },
+    {
+      "finishReason" : "unknown"
+    },
+    {
+      "finishReason" : "unknown"
+    },
+    {
+      "finishReason" : "unknown"
+    }
+  ],
+  "contextTokens" : 8192,
+  "diagnostics" : {
+    "blocks" : 2,
+    "blocksOmitted" : 0,
+    "blocksUnreadable" : 0,
+    "counts" : {
+      "closing.addedDecisions" : 0,
+      "closing.addedTasks" : 3,
+      "decision.noAgreement" : 4,
+      "decision.reanchored" : 2,
+      "decision.tentative" : 2,
+      "items.owner.self" : 3,
+      "items.owner.withheld" : 1,
+      "items.task.dueUnbacked" : 2,
+      "items.task.ownerMeUnbacked" : 1,
+      "owner.self" : 8,
+      "owner.withheld" : 4,
+      "rank.limit" : 7,
+      "rank.proposed" : 25,
+      "rank.shown" : 7,
+      "task.noCommitment" : 3,
+      "task.ownerMeUnbacked" : 7,
+      "task.reanchored" : 4,
+      "task.tentative" : 1,
+      "timing.evidenceMs" : 32,
+      "timing.rankMs" : 8
+    },
+    "dropped" : 6,
+    "drops" : {
+      "decision.duplicate" : 1,
+      "decision.rawQuote" : 2,
+      "item.nearCopy" : 1,
+      "items.decision.rawQuote" : 4,
+      "task.done" : 1
+    },
+    "dueGiven" : 1,
+    "dueRuleViolations" : 0,
+    "dueUnreadable" : 1,
+    "kept" : 24,
+    "openQuestions" : 3,
+    "proposed" : 34,
+    "topics" : 5
+  },
+  "replies" : [
+    "```json\n{\n  \"summary\": \"The team decides on migration phases for payments, sets up crash fix timelines, and addresses audit costs. They plans for intern hiring and data retention changes, and adjusts notification settings based on survey feedback.\",\n  \"topics\": [\n    \"Payments migration\",\n    \"Crash fix timeline\",\n    \"Accessibility audit\",\n    \"Internship hiring\",\n    \"Data retention\",\n    \"Notification settings\"\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Stay with current provider and migrate payments in two phases: cards in June, saved methods in August.\",\n      \"seg\": 26,\n      \"quote\": \"We stay with the current provider and migrate in two phases, cards in June and saved methods in August.\"\n    },\n    {\n      \"text\": \"Fix calendar crash by Wednesday.\",\n      \"seg\": 55,\n      \"quote\": \"I'll fix the calendar crash by Wednesday.\"\n    },\n    {\n      \"text\": \"Set crash fix timeline to two days, regression suite to two days.\",\n      \"seg\": 9,\n      \"quote\": \"Two days for the fix, maybe one more to be safe with the tests.\"\n    },\n    {\n      \"text\": \"Set crash fix deadline until Thursday.\",\n      \"seg\": 11,\n      \"quote\": \"Then we don't ship on Thursday. We hold the release until the crash is fixed and retested.\"\n    },\n    {\n      \"text\": \"Set crash fix deadline to the following Monday.\",\n      \"seg\": 17,\n      \"quote\": \"Let's aim for the following Monday then, but only if Ben's run is clean.\"\n    },\n    {\n      \"text\": \"Set data retention to eighteen months.\",\n      \"seg\": 87,\n      \"quote\": \"We adopt the eighteen months that legal proposed.\"\n    },\n    {\n      \"text\": \"Delete logs older than three years, then eighteen months.\",\n      \"seg\": 88,\n      \"quote\": \"I'll write the deletion job and run the first step at the start of next month.\"\n    },\n    {\n      \"text\": \"Set crash fix to two point four wait.\",\n      \"seg\": 14,\n      \"quote\": \"Two point four waits for the crash fix.\"\n    }\n  ],\n  \"tasks\": [\n    {\n      \"text\": \"Write migration plan with dates.\",\n      \"owner\": \"Felix\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 27,\n      \"quote\": \"Felix, can you write the migration plan with the dates?\"\n    },\n    {\n      \"text\": \"Estimate screens for mobile part of phase two.\",\n      \"owner\": \"Dalia\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 29,\n      \"quote\": \"Put me down for the mobile part of phase two, I'll estimate the screens once I see the plan.\"\n    },\n    {\n      \"text\": \"Hire temporary support for six weeks.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 38,\n      \"quote\": \"One more person for six weeks. A temporary contract would be enough.\"\n    },\n    {\n      \"text\": \"Write job ad for intern.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 59,\n      \"quote\": \"Thank you. I can write the job ad today if that helps.\"\n    },\n    {\n      \"text\": \"Send offer to second candidate.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 62,\n      \"quote\": \"Then we offer the internship to the second candidate.\"\n    },\n    {\n      \"text\": \"Run per-key traffic monitoring and alert.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 77,\n      \"quote\": \"I'll have the monitoring and the alert in place by the fifteenth.\"\n    },\n    {\n      \"text\": \"Write deletion job for logs.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 102,\n      \"quote\": \"I'll write the deletion job and run the first step at the start of next month.\"\n    },\n    {\n      \"text\": \"Update privacy page in help centre.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 111,\n      \"quote\": \"I'll update the privacy page in the help centre so it says eighteen months.\"\n    }\n  ],\n  \"open_questions\": [\n    {\n      \"question\": \"What are the audit costs?\",\n      \"seg\": 47,\n      \"quote\": \"Do we know what the audit costs? I don't remember it being in the budget.\"\n    },\n    {\n      \"question\": \"Should we charge for higher API limit?\",\n      \"seg\": 80,\n      \"quote\": \"Maybe, but that's a question for the partnership team, not for us today. Let's leave it open.\"\n    },\n    {\n      \"question\": \"Are backups included in deletion?\",\n      \"seg\": 94,\n      \"quote\": \"What about the backups? If the logs are in last year's backups, are they really deleted?\"\n    }\n  ]\n}\n```",
+    "```json\n{\n  \"summary\": \"The team discussed a testing meetup in October, on-call rota, next sprint priorities, staging alerts, icon feedback, and migration phases.\",\n  \"topics\": [\n    \"testing meetup in October\",\n    \"on-call rota\",\n    \"next sprint priorities\",\n    \"staging alerts\",\n    \"icon feedback\",\n    \"migration phases\"\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Move staging alerts to email.\",\n      \"seg\": 122,\n      \"quote\": \"Yes, I'll move the staging alerts to email tonight, together with the disk cleanup.\"\n    },\n    {\n      \"text\": \"Write on-call rota by Friday.\",\n      \"seg\": 125,\n      \"quote\": \"I'll write the rota and send it by Friday.\"\n    },\n    {\n      \"text\": \"Keep support hours unchanged.\",\n      \"seg\": 127,\n      \"quote\": \"No, support stays nine to six. The rota is only for the systems.\"\n    },\n    {\n      \"text\": \"Phase one of payments continues next sprint.\",\n      \"seg\": 131,\n      \"quote\": \"Fine, phase one starts this sprint and continues in the next one.\"\n    },\n    {\n      \"text\": \"Crash fix is first task.\",\n      \"seg\": 134,\n      \"quote\": \"Agreed. Crash first, then the button, then payments.\"\n    },\n    {\n      \"text\": \"Offer internship to second candidate.\",\n      \"seg\": 145,\n      \"quote\": \"We move at the end of the month, and we offer the internship to the second candidate.\"\n    }\n  ],\n  \"tasks\": [\n    {\n      \"text\": \"Move staging alerts to email.\",\n      \"owner\": \"Speaker 2\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 122,\n      \"quote\": \"Yes, I'll move the staging alerts to email tonight, together with the disk cleanup.\"\n    },\n    {\n      \"text\": \"Write on-call rota.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": \"2024-06-14\",\n      \"seg\": 125,\n      \"quote\": \"I'll write the rota and send it by Friday.\"\n    },\n    {\n      \"text\": \"Clean up old builds.\",\n      \"owner\": \"Speaker 2\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 138,\n      \"quote\": \"I'll clean up the old builds tonight.\"\n    },\n    {\n      \"text\": \"Send icon feedback.\",\n      \"owner\": \"Speaker 4\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 141,\n      \"quote\": \"I sent mine yesterday.\"\n    },\n    {\n      \"text\": \"Send icon feedback.\",\n      \"owner\": \"Speaker 5\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 142,\n      \"quote\": \"I'll send mine tomorrow.\"\n    }\n  ],\n  \"open_questions\": []\n}\n```",
+    "```json\n{\n  \"title\": \"Payments Migration & Crash Fix Planning\",\n  \"summary\": \"Me discusses migration phases for payments, sets crash fix timelines, and addresses audit costs. The team decides to stay with the current provider and migrate payments in two phases: cards in June, saved methods in August. A crash fix is scheduled for Wednesday, with a timeline of two days for the fix and two days for the regression suite. They also discuss internship hiring, data retention changes, and notification settings. Tasks include writing a migration plan, estimating screens, and writing a job ad. Decisions and tasks are documented in the meeting notes.\",\n  \"topics\": [\n    \"payments migration\",\n    \"crash fix timeline\",\n    \"accessibility audit\",\n    \"internship hiring\",\n    \"notification settings\"\n  ],\n  \"open_questions\": [\n    \"What are the details of the data retention changes?\",\n    \"How will the internship hiring process be structured?\",\n    \"What are the specific steps for estimating screens for the mobile part of phase two?\"\n  ]\n}\n```",
+    "```json\n{\n  \"decisions\": [\n    {\n      \"text\": \"support stays nine to six.\",\n      \"seg\": 127,\n      \"quote\": \"No, support stays nine to six. The rota is only for the systems.\"\n    },\n    {\n      \"text\": \"crash fix is two days and the button is one.\",\n      \"seg\": 129,\n      \"quote\": \"That's a lot for one sprint, but the crash is two days and the button is one, so it fits.\"\n    },\n    {\n      \"text\": \"the reminder setting right after the button.\",\n      \"seg\": 135,\n      \"quote\": \"And the reminder setting right after the button, if there's room.\"\n    },\n    {\n      \"text\": \"Ben gives the talk in October.\",\n      \"seg\": 147,\n      \"quote\": \"Ben gives the talk in October, on-call rotates weekly, and two things are still open: charging partners for the higher limit, and whether the backups count for the deletion.\"\n    }\n  ],\n  \"tasks\": [\n    {\n      \"text\": \"move the staging alerts to email tonight, together with the disk cleanup.\",\n      \"owner\": \"Speaker 2\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 122,\n      \"quote\": \"Yes, I'll move the staging alerts to email tonight, together with the disk cleanup.\"\n    },\n    {\n      \"text\": \"write the rota and send it by Friday.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": \"2005-01-14\",\n      \"seg\": 125,\n      \"quote\": \"That's fair. A day off after any night page. I'll write the rota and send it by Friday.\"\n    },\n    {\n      \"text\": \"clean up the old builds tonight.\",\n      \"owner\": \"Speaker 2\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 138,\n      \"quote\": \"I'll clean up the old builds tonight.\"\n    },\n    {\n      \"text\": \"send feedback on the new icons by Friday.\",\n      \"owner\": \"Speaker 3\",\n      \"owner_id\": null,\n      \"due\": \"2005-01-14\",\n      \"seg\": 140,\n      \"quote\": \"Just that the design team asked for feedback on the new icons by Friday.\"\n    }\n  ]\n}\n```"
+  ]
+}

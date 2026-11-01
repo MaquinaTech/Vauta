@@ -1,0 +1,1043 @@
+{
+ "meeting": "replay-en-weekly",
+ "language": "en",
+ "source": "invented for the replay fixtures",
+ "passages": [
+  {
+   "id": 1,
+   "start": 0.0,
+   "end": 8.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Morning everyone. We have a long list today, so let's keep it moving. Release status first, then payments, support, the accessibility audit, the office move and the intern."
+  },
+  {
+   "id": 2,
+   "start": 11.0,
+   "end": 19.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "After that a few newer things: the partner API limits, data retention, the survey, an invitation for Ben, and the on-call rota. Then the next sprint."
+  },
+  {
+   "id": 3,
+   "start": 24.0,
+   "end": 32.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Aiko, how is the two point four release looking?"
+  },
+  {
+   "id": 4,
+   "start": 36.0,
+   "end": 44.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Mostly good. All features are merged, but we still have the crash on older phones when you open the calendar view twice in a row."
+  },
+  {
+   "id": 5,
+   "start": 49.0,
+   "end": 57.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "I can reproduce it every time on the test phone with the old operating system. It happens in about one out of three tries on the newer ones too."
+  },
+  {
+   "id": 6,
+   "start": 62.0,
+   "end": 70.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Is that the date picker again or something new?"
+  },
+  {
+   "id": 7,
+   "start": 73.0,
+   "end": 81.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "It's new. The calendar view keeps a reference to the old screen and the second open tries to reuse it after it's gone."
+  },
+  {
+   "id": 8,
+   "start": 85.0,
+   "end": 93.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "How long would a fix take?"
+  },
+  {
+   "id": 9,
+   "start": 95.0,
+   "end": 103.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Two days for the fix, maybe one more to be safe with the tests."
+  },
+  {
+   "id": 10,
+   "start": 107.0,
+   "end": 115.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "And I need a full day to run the regression suite on the old phones after that."
+  },
+  {
+   "id": 11,
+   "start": 120.0,
+   "end": 128.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Then we don't ship on Thursday. We hold the release until the crash is fixed and retested."
+  },
+  {
+   "id": 12,
+   "start": 129.0,
+   "end": 137.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Fine by me. Nothing on the backend depends on that date."
+  },
+  {
+   "id": 13,
+   "start": 139.0,
+   "end": 147.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "Support would rather wait too. A crash in the calendar is the worst thing we could send to customers right now."
+  },
+  {
+   "id": 14,
+   "start": 149.0,
+   "end": 157.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Okay, decided. Two point four waits for the crash fix."
+  },
+  {
+   "id": 15,
+   "start": 162.0,
+   "end": 170.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "I'll fix the calendar crash by Wednesday."
+  },
+  {
+   "id": 16,
+   "start": 172.0,
+   "end": 180.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "And I'll rerun the regression suite on Thursday as soon as the build is there."
+  },
+  {
+   "id": 17,
+   "start": 184.0,
+   "end": 192.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Good. Let's aim for the following Monday then, but only if Ben's run is clean."
+  },
+  {
+   "id": 18,
+   "start": 196.0,
+   "end": 204.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Next, payments. Felix, you looked at the migration."
+  },
+  {
+   "id": 19,
+   "start": 206.0,
+   "end": 214.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Yes. The current provider ends support for the old checkout in September. We have to move to their new interface or switch providers."
+  },
+  {
+   "id": 20,
+   "start": 218.0,
+   "end": 226.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Switching providers would mean new contracts, new fees and a security review. Moving to their new interface is mostly our work."
+  },
+  {
+   "id": 21,
+   "start": 229.0,
+   "end": 237.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "What's your recommendation?"
+  },
+  {
+   "id": 22,
+   "start": 240.0,
+   "end": 248.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Stay with them and migrate in two phases. First the card payments in June, then the saved payment methods in August."
+  },
+  {
+   "id": 23,
+   "start": 250.0,
+   "end": 258.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "From the mobile side, phase one is small. Phase two needs the new screens for saved cards."
+  },
+  {
+   "id": 24,
+   "start": 259.0,
+   "end": 267.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "Please don't touch saved cards during the summer peak. July is our busiest month."
+  },
+  {
+   "id": 25,
+   "start": 269.0,
+   "end": 277.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "That's why I put it in August, after the peak."
+  },
+  {
+   "id": 26,
+   "start": 279.0,
+   "end": 287.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Okay, we stay with the current provider and migrate in two phases, cards in June and saved methods in August."
+  },
+  {
+   "id": 27,
+   "start": 292.0,
+   "end": 300.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Felix, can you write the migration plan with the dates?"
+  },
+  {
+   "id": 28,
+   "start": 301.0,
+   "end": 309.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Sure, I'll have the plan ready by next Friday."
+  },
+  {
+   "id": 29,
+   "start": 311.0,
+   "end": 319.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Put me down for the mobile part of phase two, I'll estimate the screens once I see the plan."
+  },
+  {
+   "id": 30,
+   "start": 322.0,
+   "end": 330.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Thanks. Support backlog. Dalia?"
+  },
+  {
+   "id": 31,
+   "start": 332.0,
+   "end": 340.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "We have about three hundred and forty open tickets. Two weeks ago it was two hundred."
+  },
+  {
+   "id": 32,
+   "start": 341.0,
+   "end": 349.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "Most of them are people who can't find how to move a booking. It's the same question again and again."
+  },
+  {
+   "id": 33,
+   "start": 351.0,
+   "end": 359.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Could we put a move button directly on the booking screen? Right now it's hidden in the menu."
+  },
+  {
+   "id": 34,
+   "start": 363.0,
+   "end": 371.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "That's a small change. I could do it in the next sprint."
+  },
+  {
+   "id": 35,
+   "start": 373.0,
+   "end": 381.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "That would help a lot, but it won't clear the backlog we already have."
+  },
+  {
+   "id": 36,
+   "start": 382.0,
+   "end": 390.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "What do you need to clear it?"
+  },
+  {
+   "id": 37,
+   "start": 395.0,
+   "end": 403.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "One more person for six weeks. A temporary contract would be enough."
+  },
+  {
+   "id": 38,
+   "start": 407.0,
+   "end": 415.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Okay. We hire a temp for support for six weeks. I'll talk to finance about the budget this afternoon."
+  },
+  {
+   "id": 39,
+   "start": 417.0,
+   "end": 425.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "Thank you. I can write the job ad today if that helps."
+  },
+  {
+   "id": 40,
+   "start": 430.0,
+   "end": 438.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Yes please, write it today and I'll post it once finance says yes."
+  },
+  {
+   "id": 41,
+   "start": 440.0,
+   "end": 448.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "And I'll take the move button into the next sprint."
+  },
+  {
+   "id": 42,
+   "start": 450.0,
+   "end": 458.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Good. Accessibility audit."
+  },
+  {
+   "id": 43,
+   "start": 460.0,
+   "end": 468.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "The external auditor offered two slots, the second week of May or the first week of June."
+  },
+  {
+   "id": 44,
+   "start": 473.0,
+   "end": 481.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "May is too early. We still have the old colour scheme on half the screens."
+  },
+  {
+   "id": 45,
+   "start": 486.0,
+   "end": 494.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Then June. Ben, can you book the first week of June with them?"
+  },
+  {
+   "id": 46,
+   "start": 497.0,
+   "end": 505.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Yes, I'll book it today."
+  },
+  {
+   "id": 47,
+   "start": 510.0,
+   "end": 518.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Do we know what the audit costs? I don't remember it being in the budget."
+  },
+  {
+   "id": 48,
+   "start": 522.0,
+   "end": 530.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "I don't know. It was discussed last year, but I'm not sure it was approved."
+  },
+  {
+   "id": 49,
+   "start": 531.0,
+   "end": 539.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "We should find out before we sign anything."
+  },
+  {
+   "id": 50,
+   "start": 543.0,
+   "end": 551.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Agreed. That's open for now; I'll check the budget and come back to it next week."
+  },
+  {
+   "id": 51,
+   "start": 553.0,
+   "end": 561.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Office move. As you know, we move to the third floor at the end of the month."
+  },
+  {
+   "id": 52,
+   "start": 564.0,
+   "end": 572.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "The device lab needs special care. There are forty test phones and the charging racks."
+  },
+  {
+   "id": 53,
+   "start": 574.0,
+   "end": 582.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "I can help pack the phones, but someone should label every cable or we'll lose a day."
+  },
+  {
+   "id": 54,
+   "start": 583.0,
+   "end": 591.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "I'll label the cables and pack the lab on the last Thursday of the month."
+  },
+  {
+   "id": 55,
+   "start": 595.0,
+   "end": 603.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "The servers aren't affected, they stay in the data centre."
+  },
+  {
+   "id": 56,
+   "start": 607.0,
+   "end": 615.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "Will the support phones keep the same numbers?"
+  },
+  {
+   "id": 57,
+   "start": 617.0,
+   "end": 625.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Yes, the numbers stay the same. Facilities confirmed that."
+  },
+  {
+   "id": 58,
+   "start": 629.0,
+   "end": 637.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Last item, the intern. We interviewed three people. Who did you like?"
+  },
+  {
+   "id": 59,
+   "start": 642.0,
+   "end": 650.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "The second candidate, the one who built the train timetable app. Clear thinking and good questions."
+  },
+  {
+   "id": 60,
+   "start": 655.0,
+   "end": 663.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Same for me. The first one was strong too, but wanted to work on design, not code."
+  },
+  {
+   "id": 61,
+   "start": 666.0,
+   "end": 674.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "I liked the second one as well. She asked about our testing, which almost nobody does."
+  },
+  {
+   "id": 62,
+   "start": 676.0,
+   "end": 684.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Then we offer the internship to the second candidate."
+  },
+  {
+   "id": 63,
+   "start": 688.0,
+   "end": 696.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "I'll send her the offer on Monday."
+  },
+  {
+   "id": 64,
+   "start": 701.0,
+   "end": 709.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Can she start in July? I'd like her in the payments work."
+  },
+  {
+   "id": 65,
+   "start": 712.0,
+   "end": 720.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "I'll ask her when I send the offer."
+  },
+  {
+   "id": 66,
+   "start": 721.0,
+   "end": 729.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Now the newer things. First, the partner API. Felix, you said two partners keep hitting the limit?"
+  },
+  {
+   "id": 67,
+   "start": 733.0,
+   "end": 741.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Yes. The travel agency partner and the ticket reseller both hit the hundred requests per minute limit every evening between six and eight."
+  },
+  {
+   "id": 68,
+   "start": 745.0,
+   "end": 753.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "When they hit it, their customers see an error and the bookings fail. Last week that was about two hundred failed bookings."
+  },
+  {
+   "id": 69,
+   "start": 757.0,
+   "end": 765.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "We get those tickets too. People think it's our app that is broken, not the partner's site."
+  },
+  {
+   "id": 70,
+   "start": 767.0,
+   "end": 775.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Can't they just retry later? Most clients retry after a few seconds."
+  },
+  {
+   "id": 71,
+   "start": 779.0,
+   "end": 787.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "The reseller does retry, but the travel agency shows the error straight away. We asked them to fix it, but that will take them months."
+  },
+  {
+   "id": 72,
+   "start": 792.0,
+   "end": 800.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "What would you raise the limit to?"
+  },
+  {
+   "id": 73,
+   "start": 805.0,
+   "end": 813.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Three hundred per minute for those two keys. The servers can take it; we're at forty percent at the evening peak."
+  },
+  {
+   "id": 74,
+   "start": 817.0,
+   "end": 825.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "My worry is that we don't see per-key traffic today. If one partner goes wild, we only notice when everything is slow."
+  },
+  {
+   "id": 75,
+   "start": 829.0,
+   "end": 837.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "That's fair. I can add per-key monitoring with an alert at eighty percent of the limit. It's about two days of work."
+  },
+  {
+   "id": 76,
+   "start": 839.0,
+   "end": 847.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Then let's do it in that order. We raise the limit to three hundred for those two partners, but only once the per-key monitoring is live."
+  },
+  {
+   "id": 77,
+   "start": 850.0,
+   "end": 858.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Okay. I'll have the monitoring and the alert in place by the fifteenth."
+  },
+  {
+   "id": 78,
+   "start": 860.0,
+   "end": 868.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "Should we charge for the higher limit? Other companies sell it as a premium tier."
+  },
+  {
+   "id": 79,
+   "start": 870.0,
+   "end": 878.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Maybe, but that's a question for the partnership team, not for us today. Let's leave it open."
+  },
+  {
+   "id": 80,
+   "start": 882.0,
+   "end": 890.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "I'll mention it to them, but I don't promise anything."
+  },
+  {
+   "id": 81,
+   "start": 895.0,
+   "end": 903.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Next, data retention. Legal sent a request on Monday."
+  },
+  {
+   "id": 82,
+   "start": 907.0,
+   "end": 915.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "They want us to stop keeping booking logs forever. Their proposal is eighteen months, then delete."
+  },
+  {
+   "id": 83,
+   "start": 919.0,
+   "end": 927.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Today the logs go back six years. That's about four terabytes in the archive."
+  },
+  {
+   "id": 84,
+   "start": 930.0,
+   "end": 938.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Does the app use old logs for anything? I think the booking history screen reads from the database, not from the logs."
+  },
+  {
+   "id": 85,
+   "start": 942.0,
+   "end": 950.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Right, the history screen doesn't touch the logs. Only the fraud checks look back, and they use ninety days at most."
+  },
+  {
+   "id": 86,
+   "start": 952.0,
+   "end": 960.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Then eighteen months is plenty. I'd only ask that we keep the test fixtures that were built from logs, but those are anonymised already."
+  },
+  {
+   "id": 87,
+   "start": 962.0,
+   "end": 970.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Okay. We adopt the eighteen months that legal proposed."
+  },
+  {
+   "id": 88,
+   "start": 971.0,
+   "end": 979.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "I'd delete in two steps: first everything older than three years, then the rest down to eighteen months a month later. If something breaks, we see it early."
+  },
+  {
+   "id": 89,
+   "start": 981.0,
+   "end": 989.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Good idea. Two steps, starting with the logs older than three years."
+  },
+  {
+   "id": 90,
+   "start": 993.0,
+   "end": 1001.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "I'll write the deletion job and run the first step at the start of next month."
+  },
+  {
+   "id": 91,
+   "start": 1005.0,
+   "end": 1013.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "And I'll update the privacy page in the help centre so it says eighteen months."
+  },
+  {
+   "id": 92,
+   "start": 1018.0,
+   "end": 1026.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "What about the backups? If the logs are in last year's backups, are they really deleted?"
+  },
+  {
+   "id": 93,
+   "start": 1030.0,
+   "end": 1038.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Good question. I don't know what legal expects there."
+  },
+  {
+   "id": 94,
+   "start": 1042.0,
+   "end": 1050.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Let's ask legal. Dalia, you have the thread with them, can you ask whether the backups count?"
+  },
+  {
+   "id": 95,
+   "start": 1054.0,
+   "end": 1062.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "Yes, I'll ask them this week."
+  },
+  {
+   "id": 96,
+   "start": 1067.0,
+   "end": 1075.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "The customer survey results came in on Friday. Dalia, the short version?"
+  },
+  {
+   "id": 97,
+   "start": 1078.0,
+   "end": 1086.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "Three hundred and twelve answers. Overall satisfaction went down a little, from eight point one to seven point six."
+  },
+  {
+   "id": 98,
+   "start": 1087.0,
+   "end": 1095.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "The biggest complaint, by far, is notifications. People get three reminders for every booking and many find that too much."
+  },
+  {
+   "id": 99,
+   "start": 1098.0,
+   "end": 1106.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Three is the default because of the no-shows. The product team said fewer reminders means more people forget."
+  },
+  {
+   "id": 100,
+   "start": 1111.0,
+   "end": 1119.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Do we have numbers on that? I remember the test last year showed almost no difference between one and three reminders."
+  },
+  {
+   "id": 101,
+   "start": 1123.0,
+   "end": 1131.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "I think it was about one percent more no-shows with a single reminder. I'd have to check the report."
+  },
+  {
+   "id": 102,
+   "start": 1132.0,
+   "end": 1140.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "One percent against our biggest complaint. I think the answer is clear. We go down to one reminder by default, and people who want more can turn them on."
+  },
+  {
+   "id": 103,
+   "start": 1144.0,
+   "end": 1152.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "No objection from the backend. It's a setting, the scheduler already supports it."
+  },
+  {
+   "id": 104,
+   "start": 1154.0,
+   "end": 1162.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "The settings screen needs a small change, but it's easy. I'll do it in the next sprint, after the move button."
+  },
+  {
+   "id": 105,
+   "start": 1163.0,
+   "end": 1171.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "I'll write to the customers who complained the loudest, there were five of them, and tell them it's coming."
+  },
+  {
+   "id": 106,
+   "start": 1174.0,
+   "end": 1182.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Thanks. Anything else from the survey?"
+  },
+  {
+   "id": 107,
+   "start": 1186.0,
+   "end": 1194.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "A few people asked for a dark mode. Not many, maybe fifteen."
+  },
+  {
+   "id": 108,
+   "start": 1195.0,
+   "end": 1203.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Dark mode is a big job with the old colour scheme still around. After the accessibility work it would be much easier."
+  },
+  {
+   "id": 109,
+   "start": 1206.0,
+   "end": 1214.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Then not now. Let's look at dark mode again after the audit."
+  },
+  {
+   "id": 110,
+   "start": 1215.0,
+   "end": 1223.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "I could maybe look at how other apps word their reminder settings, if I find time this week."
+  },
+  {
+   "id": 111,
+   "start": 1226.0,
+   "end": 1234.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Ben, you mentioned an invitation to speak?"
+  },
+  {
+   "id": 112,
+   "start": 1237.0,
+   "end": 1245.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Yes, a testing meetup in October asked me to give a talk about how we test on old phones."
+  },
+  {
+   "id": 113,
+   "start": 1250.0,
+   "end": 1258.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "It's a small conference, about two hundred people, but a good place to find testers. They pay the hotel, not the flight."
+  },
+  {
+   "id": 114,
+   "start": 1259.0,
+   "end": 1267.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "We've been trying to hire a second tester for months. That sounds worth it."
+  },
+  {
+   "id": 115,
+   "start": 1268.0,
+   "end": 1276.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "I agree. Go, and we pay the flight."
+  },
+  {
+   "id": 116,
+   "start": 1277.0,
+   "end": 1285.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Great. I'll send them the abstract by the end of next week."
+  },
+  {
+   "id": 117,
+   "start": 1290.0,
+   "end": 1298.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "If you want, I can review the slides before you go."
+  },
+  {
+   "id": 118,
+   "start": 1300.0,
+   "end": 1308.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Yes, please, that would help."
+  },
+  {
+   "id": 119,
+   "start": 1313.0,
+   "end": 1321.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Last of the new items: on-call. We had three pages at night last week and all of them went to Felix."
+  },
+  {
+   "id": 120,
+   "start": 1322.0,
+   "end": 1330.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "It's fine once in a while, but not every week. And two of the three were the disk alarm on staging, which shouldn't page anyone."
+  },
+  {
+   "id": 121,
+   "start": 1334.0,
+   "end": 1342.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Staging shouldn't page at night at all. Can we move those alerts to email?"
+  },
+  {
+   "id": 122,
+   "start": 1347.0,
+   "end": 1355.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Yes, I'll move the staging alerts to email tonight, together with the disk cleanup."
+  },
+  {
+   "id": 123,
+   "start": 1359.0,
+   "end": 1367.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "And for the real pages, we rotate. One week each, Felix and Aiko first, then Ben joins after the release."
+  },
+  {
+   "id": 124,
+   "start": 1368.0,
+   "end": 1376.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Okay for me, as long as we get a day off after a night with a page."
+  },
+  {
+   "id": 125,
+   "start": 1379.0,
+   "end": 1387.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "That's fair. A day off after any night page. I'll write the rota and send it by Friday."
+  },
+  {
+   "id": 126,
+   "start": 1390.0,
+   "end": 1398.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "Does support need to be in the rota?"
+  },
+  {
+   "id": 127,
+   "start": 1400.0,
+   "end": 1408.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "No, support stays nine to six. The rota is only for the systems."
+  },
+  {
+   "id": 128,
+   "start": 1413.0,
+   "end": 1421.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Okay, the next sprint. My proposal: the calendar crash, the move button, and phase one of payments."
+  },
+  {
+   "id": 129,
+   "start": 1426.0,
+   "end": 1434.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "That's a lot for one sprint, but the crash is two days and the button is one, so it fits."
+  },
+  {
+   "id": 130,
+   "start": 1439.0,
+   "end": 1447.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Phase one of payments won't be finished in one sprint. I can start it."
+  },
+  {
+   "id": 131,
+   "start": 1448.0,
+   "end": 1456.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Fine, phase one starts this sprint and continues in the next one."
+  },
+  {
+   "id": 132,
+   "start": 1457.0,
+   "end": 1465.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "From support, the move button is the most important thing on that list."
+  },
+  {
+   "id": 133,
+   "start": 1467.0,
+   "end": 1475.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "From testing, I need the crash fix first so I can plan the regression run."
+  },
+  {
+   "id": 134,
+   "start": 1480.0,
+   "end": 1488.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Agreed. Crash first, then the button, then payments."
+  },
+  {
+   "id": 135,
+   "start": 1491.0,
+   "end": 1499.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "And the reminder setting right after the button, if there's room."
+  },
+  {
+   "id": 136,
+   "start": 1500.0,
+   "end": 1508.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Yes, if there's room."
+  },
+  {
+   "id": 137,
+   "start": 1510.0,
+   "end": 1518.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "One more thing. The staging server is running out of disk space. It's at ninety two percent."
+  },
+  {
+   "id": 138,
+   "start": 1521.0,
+   "end": 1529.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "I'll clean up the old builds tonight."
+  },
+  {
+   "id": 139,
+   "start": 1532.0,
+   "end": 1540.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Thanks, Felix. Anything else from anyone?"
+  },
+  {
+   "id": 140,
+   "start": 1542.0,
+   "end": 1550.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Just that the design team asked for feedback on the new icons by Friday."
+  },
+  {
+   "id": 141,
+   "start": 1553.0,
+   "end": 1561.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "I sent mine yesterday."
+  },
+  {
+   "id": 142,
+   "start": 1564.0,
+   "end": 1572.0,
+   "speaker": "Speaker 5 (remote)",
+   "text": "I'll send mine tomorrow."
+  },
+  {
+   "id": 143,
+   "start": 1577.0,
+   "end": 1585.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Okay. Let me sum up. We hold two point four for the crash fix. We stay with the payment provider and migrate in two phases."
+  },
+  {
+   "id": 144,
+   "start": 1589.0,
+   "end": 1597.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "We hire a temp for support for six weeks. The audit is the first week of June, and its budget is still open."
+  },
+  {
+   "id": 145,
+   "start": 1601.0,
+   "end": 1609.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "We move at the end of the month, and we offer the internship to the second candidate."
+  },
+  {
+   "id": 146,
+   "start": 1610.0,
+   "end": 1618.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "On the newer items: the two partners get three hundred requests per minute once the monitoring is live, booking logs are kept for eighteen months, and reminders go down to one by default."
+  },
+  {
+   "id": 147,
+   "start": 1621.0,
+   "end": 1629.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Ben gives the talk in October, on-call rotates weekly, and two things are still open: charging partners for the higher limit, and whether the backups count for the deletion."
+  },
+  {
+   "id": 148,
+   "start": 1633.0,
+   "end": 1641.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Thanks everyone, see you next week."
+  }
+ ]
+}

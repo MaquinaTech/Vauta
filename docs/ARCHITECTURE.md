@@ -721,6 +721,9 @@ swift test
   Importing MLX anywhere but `Sources/VautaMLX` fails a source-scan test.
 - **No audio.** Tests never record. Capture logic is tested through pure types (`MeetingAppCatalog`, `ChannelHealth`,
   `SystemAudioScope`).
+- **No model.** The language models are replaced by recorded or written replies. `MinutesReplayRegressionTests` replays
+  what Apple's on-device model and the integrated model replied on three invented meetings (`Fixtures/MinutesReplay`)
+  through everything after the model, with what the app sends each backend, and fails when the minutes change.
 - **Compatibility.** Migration tests build a database with the old SQL and check that it still opens and reads
   correctly; journal tests replay legacy statements.
 - **UI logic** lives in `VautaCore` as value types (`UnlockWindow`, `AppNotification`, `RetentionChange`,
