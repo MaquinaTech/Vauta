@@ -164,6 +164,9 @@ xattr -cr "$APP"
 # --- Sign ----------------------------------------------------------------------------------
 if [[ "$MODE" == "local" ]]; then
   if [[ -t 0 ]]; then
+    # The build took minutes, so the person may be in another window: the bell and a notification say the password is asked now.
+    printf '\a'
+    osascript -e 'display notification "Type the signing keychain password in Terminal to finish the build." with title "Vauta"' >/dev/null 2>&1 || true
     echo "Password of Vauta's signing keychain (the one you chose in setup-signing.sh, not your Mac's):"
     for try in 1 2 3; do
       security unlock-keychain "$KC" && break

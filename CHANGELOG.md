@@ -78,6 +78,7 @@ Developer tools:
 
 ### Fixed
 
+- Installing or updating never leaves a moment with no app: `install.sh` (and `update.sh`, which runs it) copies the new app next to the installed one, checks its signature and only then swaps the two, so a copy that fails half way (a full disk, Ctrl-C) leaves the installed app as it was, and a run cut during the swap is finished by the next one. Before, the installed app was removed first. A build with your own signing identity also rings the terminal's bell and shows a notification when it asks for the signing keychain's password, since the build takes minutes and you may be in another window.
 - **Meetings** relock on time when the Mac's date or time is changed: the unlock now counts on the system's continuous clock instead of the date, so setting the clock back no longer kept Meetings unlocked longer (the time the Mac sleeps still counts).
 - A backup file declaring an image larger than any Mac can hold made Vauta quit while restoring it; it is now refused as damaged. Fuzz tests now feed mutated input to the parsers of a model server's stream, the store's journal and the store image, and check that each ends in a value or an error within its limits.
 - A file added to a document folder while Vauta was scanning it is no longer missed until the next change in that folder. A change that arrives during a scan lists the folder again when the scan ends, and **Reindex** asked during a scan still reads the skipped files again.
