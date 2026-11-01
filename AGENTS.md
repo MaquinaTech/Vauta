@@ -57,6 +57,7 @@ It handles **confidential conversations**. The rules below protect the user's da
 | License headers check | `scripts/check-headers.sh` |
 | App bundle without a signing identity | `VAUTA_BUNDLE_ID=local.vauta.dev VAUTA_ALLOW_ADHOC=1 scripts/build-app.sh` (builds `build/Vauta.app` with its own bundle ID, so it never touches the installed app's data; don't open it unless the user asks) |
 | Dependencies check | `scripts/check-dependencies.sh` (only the pinned mlx-swift fork and swift-numerics) |
+| Shell variables check | `scripts/check-shell-vars.sh` (write `${name}` before a non-ASCII character) |
 | GPU kernels and the search model in the shipped binary | `build/Vauta.app/Contents/MacOS/Vauta mlx-selftest [--model]` (hidden command; exit 0 pass, 1 fail, 2 unsupported, 3 model missing) |
 
 The first build compiles MLX's C++ and takes several minutes; `-j 3` still applies.

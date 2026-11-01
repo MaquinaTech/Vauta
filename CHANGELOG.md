@@ -48,6 +48,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Developer tools:
 
+- `scripts/check-shell-vars.sh`, which CI runs, fails when a shell variable is followed straight by a character that is not ASCII ("$latest…"): macOS's bash 3.2 reads the character as part of the name, and under `set -u` the script stops on an unbound variable, as the `update.sh` of 0.9.3 did when a newer release was there. The name goes in braces before such a character (`${latest}…`).
 - `Vauta diarize --none-bias <n>` (and `--none-bias` in `eval/scripts/run_diarization.py` and `run_diar_sets.py`) lowers the segmentation's "nobody speaks" class by that much before each frame is decided, to measure calling more frames speech. Swept from -0.5 to 2 on the tuning set and the held-out English files: missed speech turns into as much false alarm or more, and the best value is within noise, so the app keeps the network's own decision (docs/BENCHMARKS.md, "Tried and not changed").
 - `llm-eval --tasks ask-cross` asks each question in the meetings it names by its time or place, as Ask does, with "now" the day after the series' last meeting; its traces say which (`scope`) and whether nothing there matched (`widened`). The live answers' replay writes `pastScope`.
 - `llm-eval --tasks echo` also sweeps the far side's echo judged in Others and writes `echo/far_sweep.tsv`.

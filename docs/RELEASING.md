@@ -33,7 +33,7 @@ No secrets and no `release` environment are needed.
 1. On `main`, with CI green: set the version in `CHANGELOG.md` (replace "Unreleased" with the version and date), in
    `Resources/Info.plist` (`CFBundleShortVersionString`, and `CFBundleVersion` one higher) and in `scripts/render-ui.sh`, and
    commit. The plist is the version every build uses; the release workflow refuses a tag that doesn't match it.
-   Run locally: `swift build -c release --arch arm64`, the tests, `scripts/check-strings.sh`, `scripts/check-headers.sh`, `scripts/check-dependencies.sh`.
+   Run locally: `swift build -c release --arch arm64`, the tests, `scripts/check-strings.sh`, `scripts/check-headers.sh`, `scripts/check-dependencies.sh`, `scripts/check-shell-vars.sh`.
    Check the search model ([SEARCH_MODEL.md](SEARCH_MODEL.md)): its download hosts resolve from the EU and APAC, `Vauta mlx-selftest --model` passes on a locally signed build, and the licences and model card terms are unchanged.
 2. Run the cryptography review check: the `git diff` command in [CRYPTO_REVIEW.md](CRYPTO_REVIEW.md) (from the commit it names
    to the tag's commit, over the paths it lists) must print nothing. If it prints something, redo that review first.

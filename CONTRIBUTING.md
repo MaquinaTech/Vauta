@@ -96,6 +96,7 @@ scripts/check-strings.sh        # every translation matches the English keys and
 scripts/extract-strings.sh && git diff --exit-code -- Resources/en.lproj/Localizable.strings   # English strings in sync with the code
 scripts/check-headers.sh        # every source file has the SPDX license header
 scripts/check-dependencies.sh   # only the pinned mlx-swift fork and swift-numerics
+scripts/check-shell-vars.sh     # no shell variable runs straight into a non-ASCII character ("${name}…", not "$name…")
 find Resources Sources \( -name '*.plist' -o -name '*.entitlements' -o -name '*.strings' -o -name '*.stringsdict' \) \
   -print0 | xargs -0 plutil -lint
 for f in scripts/*.sh; do bash -n "$f"; done   # and shellcheck, if installed
