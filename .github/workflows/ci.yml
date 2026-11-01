@@ -111,6 +111,7 @@ jobs:
       - name: Check shell scripts
         run: |
           for f in scripts/*.sh; do bash -n "$f"; done
+          scripts/check-shell-vars.sh
           if command -v shellcheck >/dev/null; then shellcheck scripts/*.sh; else echo "shellcheck not installed; syntax check only"; fi
 
       - name: Assemble the app bundle (ad-hoc signature)
