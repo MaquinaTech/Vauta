@@ -37,6 +37,7 @@ struct PanelFooter: View {
                 HStack(spacing: 10) {
                     askButton
                     meetingsButton
+                    hideButton
                     Spacer(minLength: 4)
                     settingsButton
                     quitButton
@@ -45,6 +46,7 @@ struct PanelFooter: View {
                     HStack(spacing: 10) {
                         askButton
                         meetingsButton
+                        hideButton
                         Spacer(minLength: 4)
                     }
                     HStack(spacing: 10) {
@@ -71,6 +73,14 @@ struct PanelFooter: View {
         Button("Meetings") { open(.meetings) }
             .disabled(model.panelDataUnavailable)
             .unavailableHelp(model)
+    }
+
+    /// While recording, before sharing the screen in the call (Recording › Hide Vauta Windows the rest of the time).
+    @ViewBuilder private var hideButton: some View {
+        if model.isRecording, !model.concealer.isOn {
+            Button("Hide Windows") { model.hideWindows() }
+                .help("Takes Vauta’s windows, the notepad and the captions off the screen while you share it. The recording goes on.")
+        }
     }
 
     private var settingsButton: some View {

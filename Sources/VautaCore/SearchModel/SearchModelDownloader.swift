@@ -41,9 +41,14 @@ actor SearchModelDownloader {
         (Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String) ?? "dev"
     }
 
+    /// The User-Agent of the downloads from Hugging Face: the app's name only. The system's default would also name the build,
+    /// the version of macOS's network stack and of Darwin, which the download doesn't need.
+    static let userAgent = "Vauta"
+
     /// A session for the download: ephemeral, no cache, cookies or credentials, system proxies honoured, default TLS trust.
     static func makeSession(protocolClasses: [AnyClass]? = nil, log: NetworkActivityLog = .shared) -> AuditedSession {
         let c = URLSessionConfiguration.ephemeral
+        c.httpAdditionalHeaders = ["User-Agent": userAgent]
         c.urlCache = nil
         c.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
         c.httpCookieStorage = nil

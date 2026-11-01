@@ -52,6 +52,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
     private var _primary: LLMServerConfig.Endpoint?
     /// Set when a host name resolved outside the allowed network.
     private var _peerViolation: String?
+    private var _certificate: CertificateValidity?
 
     var config: LLMServerConfig? { lock.withLock { _config } }
     private var primary: LLMServerConfig.Endpoint? { lock.withLock { _primary } }
@@ -75,7 +76,19 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
 
     func recordPeerViolation(_ address: String) { lock.withLock { _peerViolation = address } }
 
+    /// How long the server's certificates stay valid, as the last TLS connection to a configured endpoint presented them;
+    /// nil over HTTP or before the first connection, and again after a new configuration.
+    public var certificate: CertificateValidity? { lock.withLock { _certificate } }
+
+    func recordCertificate(_ validity: CertificateValidity) { lock.withLock { _certificate = validity } }
+
     private func makeSession() -> AuditedSession {
+        AuditedSession(configuration: Self.sessionConfiguration(protocolClasses: protocolClasses), delegate: self, log: log)
+    }
+
+    /// The model server session's rules (tests read them back): TLS 1.3, no proxy of any kind, nothing kept (cache, cookies,
+    /// credentials). Redirects are refused by the delegate, and the trust by `ServerTrust`.
+    static func sessionConfiguration(protocolClasses: [AnyClass]? = nil) -> URLSessionConfiguration {
         let c = URLSessionConfiguration.ephemeral
         c.tlsMinimumSupportedProtocolVersion = .TLSv13
         c.urlCache = nil
@@ -93,7 +106,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
         c.timeoutIntervalForRequest = 900
         c.timeoutIntervalForResource = 3 * 3600
         if let protocolClasses { c.protocolClasses = protocolClasses }
-        return AuditedSession(configuration: c, delegate: self, log: log)
+        return c
     }
 
     public convenience init(config: LLMServerConfig? = nil,
@@ -131,6 +144,7 @@ public final class LLMClient: NSObject, URLSessionDataDelegate, @unchecked Senda
             _primary = valid ? primary : nil
             _endpoints = valid ? endpoints : [:]
             _peerViolation = nil
+            _certificate = nil
             _session?.invalidateAndCancel()
             _session = nil
         }

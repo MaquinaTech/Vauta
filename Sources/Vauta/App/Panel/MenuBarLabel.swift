@@ -13,16 +13,25 @@ struct MenuBarLabel: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        label
-            .accessibilityLabel(Text(verbatim: "Vauta"))
-            .accessibilityValue(Text(verbatim: accessibilityValue))
-            .task {
-                // The menu-bar label is the only view that always exists: it
-                // lends the model the window actions (notifications, relock).
-                model.openWindowAction = openWindow
-                model.dismissWindowAction = dismissWindow
-                if preferences.needsOnboarding { openWindow(id: "onboarding") }
-            }
+        HStack(spacing: 3) {
+            label
+            // Vauta's windows are hidden for presenting: the icon says so until they come back.
+            if model.concealer.isOn { Image(systemName: "eye.slash") }
+        }
+        .accessibilityLabel(Text(verbatim: "Vauta"))
+        .accessibilityValue(Text(verbatim: model.concealer.isOn ? accessibilityValue + ", " + Self.windowsHidden : accessibilityValue))
+        .task {
+            // The menu-bar label is the only view that always exists: it
+            // lends the model the window actions (notifications, relock).
+            model.openWindowAction = openWindow
+            model.dismissWindowAction = dismissWindow
+            if preferences.needsOnboarding { openWindow(id: "onboarding") }
+        }
+    }
+
+    /// Said after the icon's state while Vauta's windows are hidden for presenting.
+    static var windowsHidden: String {
+        String(localized: "Vauta’s windows hidden", comment: "Menu-bar icon state for VoiceOver, after the recording state, while Vauta’s windows are hidden for sharing the screen")
     }
 
     @ViewBuilder private var label: some View {

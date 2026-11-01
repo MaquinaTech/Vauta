@@ -293,6 +293,7 @@ model server you configured. The rules are enforced in code (`LLMServerConfig`, 
 | TLS 1.3 only | `tlsMinimumSupportedProtocolVersion = .TLSv13` |
 | Private CA | When set, the certificates in your CA bundle are the **only** trust anchors. Without one, the system anchors are used (for a publicly trusted certificate, such as one from `tailscale cert`). Either way, evaluation makes no network fetches (no OCSP, CRL or missing intermediates), so a publicly trusted server must send its full chain. The host name must match the certificate |
 | Certificate pins | SHA-256 of the leaf certificate's SubjectPublicKeyInfo (base64). Several are allowed for rotation. EC P-256/P-384/P-521 and RSA keys |
+| Expiry | The earliest end among the certificates of the chain a connection presented (leaf, intermediates, private CA) is kept in memory: Status warns 30 days before it, `doctor` prints it, and a connection refused for an expired certificate names the date. Nothing about it is stored or sent |
 | Names need trust | A host given by name (not an IP address) needs a private CA or a pin. Configurations saved by an earlier version without either keep working and show a warning |
 | Peer check | For hosts given by name, the address actually connected to must be private (or, for IPv6 only, on a subnet this Mac is directly attached to; an IPv4 peer must always be private); otherwise further requests are refused until the configuration is applied again. Before the first request of a session to such a host, Vauta sends a probe with no body and no key (`GET …/models`) and waits for its connection metrics: nothing else is sent until the connected address is known to be allowed, and nothing is sent if the metrics don't arrive within 10 seconds. Every completed request is checked again. What remains: the system may open another connection later (a second one in parallel, or a new one after the idle one closed) and resolve the name again; a request on that connection is checked only once it completes, and stops the ones after it. TLS runs first on that connection too, which is why new configurations need a private CA or a pin for names |
 | No proxies, no redirects | HTTP, HTTPS, SOCKS, PAC and proxy auto-discovery are disabled; redirects are refused |
@@ -321,7 +322,7 @@ and `SearchModelDownloader`, and also goes through `AuditedSession` with the pur
 | Redirects are not followed | The 302 comes back as a response and the downloader validates its `Location`. If it carries `X-Repo-Commit`, `X-Linked-Etag` or `X-Linked-Size`, they must equal the pinned revision, hash and size |
 | Ranges, exactly | Each weights request must be answered `206` with `Content-Range: bytes a-b/1488915288` and exactly the requested length; a `200` is cancelled before its body is read. The tokenizer is capped at its pinned size |
 | Integrity from hashes | Default TLS trust with no pinning (Hugging Face rotates certificates), so the guarantee is the checksums: per block (as it arrives), per tensor and for the assembled file. A block that differs is fetched once more; a second difference deletes the partial file. No self-hosted conversion exists |
-| Ephemeral and anonymous | No cache, cookies or credential storage; no `Authorization` header and no token (the model is not gated); default User-Agent. System proxies are honoured (unlike the model-server session), because the destination is on the internet. The signed CDN address is kept in memory only and its query string never reaches the log, the export or a file |
+| Ephemeral and anonymous | No cache, cookies or credential storage; no `Authorization` header and no token (the model is not gated); `User-Agent: Vauta`, without the build or the system's versions. System proxies are honoured (unlike the model-server session), because the destination is on the internet. The signed CDN address is kept in memory only and its query string never reaches the log, the export or a file |
 | Import | Files you choose are identified by size and checked with the same hashes before they are used; symbolic links are followed, as in the Hugging Face cache |
 
 ### The integrated language model (optional download)
@@ -345,7 +346,9 @@ add JIT, unsigned-memory or library-validation entitlements. The procedure is in
 [docs/SEARCH_MODEL.md](docs/SEARCH_MODEL.md#the-self-test).
 
 **Third-party code.** MLX is the only third-party package: a fork of mlx-swift (MIT) pinned by revision, built from source.
-`scripts/check-dependencies.sh` and a test fail on any other package or revision. Bumping it follows the checklist in
+`scripts/check-dependencies.sh` and a test fail on any other package or revision; `scripts/build-app.sh` (so `install.sh` and
+`update.sh`) runs that check before building and builds with `--force-resolved-versions`, so a `Package.resolved` that
+doesn't match is a stop, never re-resolved. Bumping it follows the checklist in
 docs/SEARCH_MODEL.md (re-apply the patches, regenerate the kernel source, run the self-test on signed builds). Its licences
 are in [NOTICE](NOTICE) and `THIRD_PARTY_LICENSES.txt`. The pin is transitive: the fork's own submodule `Source/Cmlx/mlx` points to a second
 repository, `MaquinaTech/mlx` at commit `d1dfda2` (branch `vauta-clt`), which carries the C++ part of the runtime-compilation patch; both

@@ -153,6 +153,15 @@ Status: designed and unit-tested; the VoiceOver and Full Keyboard Access pass is
 - Escape in the bar closes it (only there: the window keeps Escape for everything else); **Done** closes it too, and so does leaving the
   Transcript tab or the meeting.
 
+## Hide Vauta Windows (sharing the screen)
+
+- The command is in the Recording menu (Full Keyboard Access and VoiceOver reach it there) and, while recording, at the
+  bottom of the panel; its title says what it does now: **Hide Vauta Windows** or **Show Vauta Windows**.
+- While the windows are hidden, the menu-bar icon draws a crossed-out eye beside its state and VoiceOver adds "Vauta’s
+  windows hidden" to it, so the state is never told by the picture alone. The notice at the top of the panel has the
+  **Show Windows** button.
+- Hiding gives the keyboard back to the app that was in front, and nothing of Vauta takes the focus while they are hidden.
+
 ## Manual VoiceOver pass for the speaker screens and the panel (to record)
 
 Turn VoiceOver on (⌘F5), open a meeting with speakers and go through each item; write the date, macOS version and

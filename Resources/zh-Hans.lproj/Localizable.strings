@@ -2635,6 +2635,12 @@
 /* No comment provided by engineer. */
 "Hide Transcript" = "隐藏转录文本";
 
+/* No comment provided by engineer. */
+"Hide Vauta Windows" = "隐藏 Vauta 窗口";
+
+/* No comment provided by engineer. */
+"Hide Windows" = "隐藏窗口";
+
 /* Settings → Live answers: the switch that hides an answer card when the people in the meeting already answered the question */
 "Hide answers when someone answers aloud" = "有人当场回答时隐藏回答";
 
@@ -2941,6 +2947,9 @@
 /* VoiceOver hint of the collapsed group of other possible items in the minutes */
 "Items the model proposed that are less certain than the main ones. Open the group to review them." = "模型提出的、把握不如主要事项的内容。展开该分组即可查看。";
 
+/* Status detail after the connected line; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"Its certificate expires on %@. Renew it before then: make-server-cert.sh renews one it made and keeps the pin." = "它的证书将于 %@ 到期。请在此之前续期：make-server-cert.sh 可续期它自己创建的证书，并保留锁定值。";
+
 /* No comment provided by engineer. */
 "Its email address %@ is discarded; “%@” keeps its own." = "其电子邮件地址 %@ 将被舍弃；“%@”保留自己的地址。";
 
@@ -3208,6 +3217,9 @@
 "Updating the live notes…" = "正在更新实时笔记…";
 "Update the live notes with what was said since the last ones" = "用上次实时笔记之后的发言更新实时笔记";
 "Nothing new was said since the last live notes" = "自上次实时笔记以来没有新的发言";
+
+/* Detail of the panel notice while Vauta’s windows are hidden for sharing the screen; a window the user opens on purpose still shows */
+"Nothing of Vauta comes on screen by itself until you show them again." = "在你再次显示之前，Vauta 的任何内容都不会自行出现在屏幕上。";
 
 /* Notification body when the model server is unreachable while recording */
 "Live notes are paused. Recording continues, and the minutes will be written when the server is back." = "实时笔记已暂停。录音会继续，服务器恢复后将生成会⁠议⁠纪⁠要。";
@@ -5492,6 +5504,12 @@
 /* No comment provided by engineer. */
 "Show Transcript" = "显示转录文本";
 
+/* No comment provided by engineer. */
+"Show Vauta Windows" = "显示 Vauta 窗口";
+
+/* No comment provided by engineer. */
+"Show Windows" = "显示窗口";
+
 /* Brief: button that shows every item of a section; the argument is how many there are */
 "Show all (%lld)" = "显示全部（%lld）";
 
@@ -5920,6 +5938,9 @@
 
 /* Shortcut name: opens the floating notepad to type a short note during a recording */
 "Take a note" = "记笔记";
+
+/* No comment provided by engineer. */
+"Takes Vauta’s windows, the notepad and the captions off the screen while you share it. The recording goes on." = "共享屏幕时，将 Vauta 的窗口、记事本和字幕移出屏幕。录音会继续。";
 
 /* Accessibility label
    Kind of the target of a relation; also a field label
@@ -6364,6 +6385,9 @@
 
 /* Model job error */
 "The model server was busy for too long." = "模型服务器繁忙时间过长。";
+
+/* Model server check result; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"The model server’s certificate expired on %@. Renew it on the server: make-server-cert.sh renews one it made and keeps the pin." = "模型服务器的证书已于 %@ 到期。请在服务器上续期：make-server-cert.sh 可续期它自己创建的证书，并保留锁定值。";
 
 /* Model error */
 "The model server’s response is too large." = "模型服务器的响应过大。";
@@ -7413,6 +7437,12 @@
 
 /* Settings → General, after setup when the menu bar icon couldn't be found */
 "Vauta’s icon may be hidden in the menu bar, for example behind the notch. Open Vauta again from Finder, Spotlight or Apps to come back here." = "Vauta 的图标可能被隐藏在菜单栏中，例如刘海后面。请从访达、聚焦搜索或“App”再次打开 Vauta，即可回到这里。";
+
+/* Panel notice while Vauta’s windows, the notepad and the captions are hidden for sharing the screen */
+"Vauta’s windows are hidden" = "Vauta 窗口已隐藏";
+
+/* Menu-bar icon state for VoiceOver, after the recording state, while Vauta’s windows are hidden for sharing the screen */
+"Vauta’s windows hidden" = "Vauta 窗口已隐藏";
 
 /* No comment provided by engineer. */
 "Verified" = "已验证";

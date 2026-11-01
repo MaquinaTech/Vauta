@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
 import Foundation
+import Synchronization
 
 public enum ModelKind: String, Codable, Sendable {
     case chat
@@ -190,18 +191,16 @@ public enum ServerDiscovery {
     }
 
     /// The body of one discovery answer, filled on the session's queue.
-    /// `@unchecked Sendable`: `bytes` is read and written under `lock` only.
-    private final class CappedBody: @unchecked Sendable {
+    private final class CappedBody: Sendable {
         private let limit: Int
-        private let lock = NSLock()
-        private var bytes = Data()
+        private let bytes = Mutex(Data())
 
         init(limit: Int) { self.limit = limit }
 
-        var data: Data { lock.withLock { bytes } }
+        var data: Data { bytes.withLock { $0 } }
 
         func append(_ chunk: Data) throws {
-            try lock.withLock {
+            try bytes.withLock { bytes in
                 guard bytes.count + chunk.count <= limit else { throw LLMError.tooLarge }
                 bytes.append(chunk)
             }

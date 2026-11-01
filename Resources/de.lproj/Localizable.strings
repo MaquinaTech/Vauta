@@ -2635,6 +2635,12 @@
 /* No comment provided by engineer. */
 "Hide Transcript" = "Transkript ausblenden";
 
+/* No comment provided by engineer. */
+"Hide Vauta Windows" = "Vauta-Fenster ausblenden";
+
+/* No comment provided by engineer. */
+"Hide Windows" = "Fenster ausblenden";
+
 /* Settings → Live answers: the switch that hides an answer card when the people in the meeting already answered the question */
 "Hide answers when someone answers aloud" = "Antworten ausblenden, wenn jemand laut antwortet";
 
@@ -2941,6 +2947,9 @@
 /* VoiceOver hint of the collapsed group of other possible items in the minutes */
 "Items the model proposed that are less certain than the main ones. Open the group to review them." = "Punkte, die das Modell vorgeschlagen hat und die weniger sicher sind als die wichtigsten. Öffne die Gruppe, um sie zu prüfen.";
 
+/* Status detail after the connected line; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"Its certificate expires on %@. Renew it before then: make-server-cert.sh renews one it made and keeps the pin." = "Sein Zertifikat läuft am %@ ab. Erneuere es vorher: make-server-cert.sh erneuert eines, das es erstellt hat, und behält den Pin.";
+
 /* No comment provided by engineer. */
 "Its email address %@ is discarded; “%@” keeps its own." = "Die E-Mail-Adresse %@ wird verworfen; „%@“ behält die eigene.";
 
@@ -3208,6 +3217,9 @@
 "Updating the live notes…" = "Live-Notizen werden aktualisiert …";
 "Update the live notes with what was said since the last ones" = "Die Live-Notizen mit dem aktualisieren, was seit den letzten gesagt wurde";
 "Nothing new was said since the last live notes" = "Seit den letzten Live-Notizen wurde nichts Neues gesagt";
+
+/* Detail of the panel notice while Vauta’s windows are hidden for sharing the screen; a window the user opens on purpose still shows */
+"Nothing of Vauta comes on screen by itself until you show them again." = "Nichts von Vauta erscheint von selbst auf dem Bildschirm, bis du sie wieder anzeigst.";
 
 /* Notification body when the model server is unreachable while recording */
 "Live notes are paused. Recording continues, and the minutes will be written when the server is back." = "Live-Notizen sind pausiert. Die Aufnahme läuft weiter, und das Protokoll wird geschrieben, sobald der Server wieder da ist.";
@@ -5492,6 +5504,12 @@
 /* No comment provided by engineer. */
 "Show Transcript" = "Transkript anzeigen";
 
+/* No comment provided by engineer. */
+"Show Vauta Windows" = "Vauta-Fenster anzeigen";
+
+/* No comment provided by engineer. */
+"Show Windows" = "Fenster anzeigen";
+
 /* Brief: button that shows every item of a section; the argument is how many there are */
 "Show all (%lld)" = "Alle anzeigen (%lld)";
 
@@ -5920,6 +5938,9 @@
 
 /* Shortcut name: opens the floating notepad to type a short note during a recording */
 "Take a note" = "Notiz machen";
+
+/* No comment provided by engineer. */
+"Takes Vauta’s windows, the notepad and the captions off the screen while you share it. The recording goes on." = "Nimmt die Fenster von Vauta, den Notizblock und die Untertitel vom Bildschirm, während du ihn teilst. Die Aufnahme läuft weiter.";
 
 /* Accessibility label
    Kind of the target of a relation; also a field label
@@ -6364,6 +6385,9 @@
 
 /* Model job error */
 "The model server was busy for too long." = "Der Modellserver war zu lange ausgelastet.";
+
+/* Model server check result; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"The model server’s certificate expired on %@. Renew it on the server: make-server-cert.sh renews one it made and keeps the pin." = "Das Zertifikat des Modellservers ist am %@ abgelaufen. Erneuere es auf dem Server: make-server-cert.sh erneuert eines, das es erstellt hat, und behält den Pin.";
 
 /* Model error */
 "The model server’s response is too large." = "Die Antwort des Modellservers ist zu groß.";
@@ -7413,6 +7437,12 @@
 
 /* Settings → General, after setup when the menu bar icon couldn't be found */
 "Vauta’s icon may be hidden in the menu bar, for example behind the notch. Open Vauta again from Finder, Spotlight or Apps to come back here." = "Das Symbol von Vauta ist in der Menüleiste möglicherweise verdeckt, zum Beispiel hinter der Notch. Öffne Vauta erneut über den Finder, Spotlight oder „Apps“, um hierher zurückzukehren.";
+
+/* Panel notice while Vauta’s windows, the notepad and the captions are hidden for sharing the screen */
+"Vauta’s windows are hidden" = "Die Fenster von Vauta sind ausgeblendet";
+
+/* Menu-bar icon state for VoiceOver, after the recording state, while Vauta’s windows are hidden for sharing the screen */
+"Vauta’s windows hidden" = "Vauta-Fenster ausgeblendet";
 
 /* No comment provided by engineer. */
 "Verified" = "Verifiziert";

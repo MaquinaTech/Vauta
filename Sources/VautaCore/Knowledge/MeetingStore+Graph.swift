@@ -87,11 +87,12 @@ extension MeetingStore {
         }
         let profile = LanguageProfile(locale: try locale ?? meetingLocale(meetingID))
 
-        // Alias dictionary (normalized keys) → live entities.
-        let entries = try db.query("""
-            SELECT a.alias_norm, a.entity_id, a.weight FROM aliases a JOIN entities e ON e.id = a.entity_id
+        // Alias dictionary (normalized keys) → live entities; as written, for the sound keys.
+        let aliases = try db.query("""
+            SELECT a.alias_norm, a.entity_id, a.weight, a.alias FROM aliases a JOIN entities e ON e.id = a.entity_id
             WHERE e.merged_into IS NULL
-            """).map { (norm: $0.string(0), value: AliasTarget(entity: $0.int(1), weight: $0.double(2))) }
+            """).map { (norm: $0.string(0), value: AliasTarget(entity: $0.int(1), weight: $0.double(2)), written: $0.string(3)) }
+        let entries = aliases.map { (norm: $0.norm, value: $0.value) }
         let matcher = NameMatcher(entries, profile: profile)
         let glossary = try db.query("SELECT id, term, entity_id FROM glossary").map { (id: $0.int(0), term: $0.string(1), entity: $0.optionalInt(2)) }
         try run("DELETE FROM mentions WHERE meeting_id = ? AND resolved_by NOT IN ('user', 'llm')", [.integer(meetingID)])
@@ -104,7 +105,7 @@ extension MeetingStore {
                                             [.integer(meetingID)]).map { "\($0.int(0))|\(TextKeys.matchKey(TextKeys.norm($0.string(1))))" })
         let names = Dictionary(try db.query("SELECT id, name FROM entities WHERE merged_into IS NULL").map { ($0.int(0), $0.string(1)) },
                                uniquingKeysWith: { a, _ in a })
-        let fuzzy = profile.capitalizationMarksNames ? fuzzyKeys(entries, glossary: glossary, names: names, matcher: matcher, profile: profile) : []
+        let fuzzy = profile.capitalizationMarksNames ? fuzzyKeys(aliases, glossary: glossary, names: names, matcher: matcher, profile: profile) : []
 
         var occurrences: [Occurrence] = []
         var corrections: [String: Correction] = [:]
@@ -124,7 +125,7 @@ extension MeetingStore {
                     corrections[tok.norm]!.count += 1
                     continue
                 }
-                let targets = correctionTargets(tok.norm, fuzzy: fuzzy, profile: profile)
+                let targets = correctionTargets(tok.norm, written: tok.original, fuzzy: fuzzy, profile: profile)
                 if !targets.isEmpty {
                     corrections[tok.norm] = Correction(segment: seg.int(0), t: seg.double(1), surface: tok.original, targets: targets, count: 1)
                 }
@@ -187,25 +188,26 @@ extension MeetingStore {
     }
 
     /// Fuzzy candidates: one-word aliases and glossary terms of 4+ characters.
-    private func fuzzyKeys(_ entries: [(norm: String, value: AliasTarget)], glossary: [(id: Int64, term: String, entity: Int64?)],
+    private func fuzzyKeys(_ entries: [(norm: String, value: AliasTarget, written: String)],
+                           glossary: [(id: Int64, term: String, entity: Int64?)],
                            names: [Int64: String], matcher: NameMatcher<AliasTarget>, profile: LanguageProfile) -> [FuzzyKey] {
         var out: [FuzzyKey] = []
-        for (norm, target) in entries where norm.count >= 4 && !norm.contains(" ") {
-            out.append(FuzzyKey(norm: norm, phonetic: profile.phoneticKey(norm), entity: target.entity, glossary: nil,
+        for (norm, target, written) in entries where norm.count >= 4 && !norm.contains(" ") {
+            out.append(FuzzyKey(norm: norm, phonetic: profile.phoneticKey(written), entity: target.entity, glossary: nil,
                                 label: names[target.entity] ?? norm))
         }
         for g in glossary {
             let n = TextKeys.norm(g.term)
             if n.count >= 4, !n.contains(" "), matcher.values(for: n) == nil {
-                out.append(FuzzyKey(norm: n, phonetic: profile.phoneticKey(n), entity: g.entity, glossary: g.id, label: g.term))
+                out.append(FuzzyKey(norm: n, phonetic: profile.phoneticKey(g.term), entity: g.entity, glossary: g.id, label: g.term))
             }
         }
         return out
     }
 
-    /// Context entries that sound or are spelled like `norm` (best first, at most 4).
-    private func correctionTargets(_ norm: String, fuzzy: [FuzzyKey], profile: LanguageProfile) -> [SuggestionCandidate] {
-        let phonetic = profile.phoneticKey(norm)
+    /// Context entries that sound or are spelled like `norm`, `written` as the transcript has it (best first, at most 4).
+    private func correctionTargets(_ norm: String, written: String, fuzzy: [FuzzyKey], profile: LanguageProfile) -> [SuggestionCandidate] {
+        let phonetic = profile.phoneticKey(written)
         let limit = norm.count >= 7 ? 2 : 1
         var targets: [SuggestionCandidate] = []
         for k in fuzzy where k.norm != norm {

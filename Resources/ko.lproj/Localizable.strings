@@ -2635,6 +2635,12 @@
 /* No comment provided by engineer. */
 "Hide Transcript" = "녹취록 숨기기";
 
+/* No comment provided by engineer. */
+"Hide Vauta Windows" = "Vauta 윈도우 숨기기";
+
+/* No comment provided by engineer. */
+"Hide Windows" = "윈도우 숨기기";
+
 /* Settings → Live answers: the switch that hides an answer card when the people in the meeting already answered the question */
 "Hide answers when someone answers aloud" = "누군가 직접 답하면 답변 숨기기";
 
@@ -2941,6 +2947,9 @@
 /* VoiceOver hint of the collapsed group of other possible items in the minutes */
 "Items the model proposed that are less certain than the main ones. Open the group to review them." = "모델이 제안한 항목 중 주요 항목보다 확실성이 낮은 항목입니다. 그룹을 열어 검토하세요.";
 
+/* Status detail after the connected line; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"Its certificate expires on %@. Renew it before then: make-server-cert.sh renews one it made and keeps the pin." = "인증서가 %@에 만료됩니다. 그 전에 갱신하세요. make-server-cert.sh는 직접 만든 인증서를 고정 값을 유지한 채 갱신합니다.";
+
 /* No comment provided by engineer. */
 "Its email address %@ is discarded; “%@” keeps its own." = "이 항목의 이메일 주소(%@)는 삭제되고, “%@” 항목은 자체 이메일 주소를 유지합니다.";
 
@@ -3208,6 +3217,9 @@
 "Updating the live notes…" = "실시간 메모 업데이트 중…";
 "Update the live notes with what was said since the last ones" = "지난 실시간 메모 이후의 발언으로 실시간 메모를 업데이트";
 "Nothing new was said since the last live notes" = "지난 실시간 메모 이후 새로운 발언이 없습니다";
+
+/* Detail of the panel notice while Vauta’s windows are hidden for sharing the screen; a window the user opens on purpose still shows */
+"Nothing of Vauta comes on screen by itself until you show them again." = "다시 표시할 때까지 Vauta의 어떤 것도 저절로 화면에 나타나지 않습니다.";
 
 /* Notification body when the model server is unreachable while recording */
 "Live notes are paused. Recording continues, and the minutes will be written when the server is back." = "실시간 메모가 일시 정지되었습니다. 녹음은 계속되며, 서버가 복구되면 회의록이 작성됩니다.";
@@ -5492,6 +5504,12 @@
 /* No comment provided by engineer. */
 "Show Transcript" = "녹취록 보기";
 
+/* No comment provided by engineer. */
+"Show Vauta Windows" = "Vauta 윈도우 표시";
+
+/* No comment provided by engineer. */
+"Show Windows" = "윈도우 표시";
+
 /* Brief: button that shows every item of a section; the argument is how many there are */
 "Show all (%lld)" = "모두 보기(%lld)";
 
@@ -5920,6 +5938,9 @@
 
 /* Shortcut name: opens the floating notepad to type a short note during a recording */
 "Take a note" = "메모하기";
+
+/* No comment provided by engineer. */
+"Takes Vauta’s windows, the notepad and the captions off the screen while you share it. The recording goes on." = "화면을 공유하는 동안 Vauta의 윈도우, 메모장, 자막을 화면에서 치웁니다. 녹음은 계속됩니다.";
 
 /* Accessibility label
    Kind of the target of a relation; also a field label
@@ -6364,6 +6385,9 @@
 
 /* Model job error */
 "The model server was busy for too long." = "모델 서버가 너무 오랫동안 사용 중이었습니다.";
+
+/* Model server check result; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"The model server’s certificate expired on %@. Renew it on the server: make-server-cert.sh renews one it made and keeps the pin." = "모델 서버의 인증서가 %@에 만료되었습니다. 서버에서 갱신하세요. make-server-cert.sh는 직접 만든 인증서를 고정 값을 유지한 채 갱신합니다.";
 
 /* Model error */
 "The model server’s response is too large." = "모델 서버의 응답이 너무 큽니다.";
@@ -7413,6 +7437,12 @@
 
 /* Settings → General, after setup when the menu bar icon couldn't be found */
 "Vauta’s icon may be hidden in the menu bar, for example behind the notch. Open Vauta again from Finder, Spotlight or Apps to come back here." = "Vauta 아이콘이 메뉴 막대에서 가려져 있을 수 있습니다(예: 노치 뒤). 이곳으로 돌아오려면 Finder, Spotlight 또는 앱에서 Vauta를 다시 여세요.";
+
+/* Panel notice while Vauta’s windows, the notepad and the captions are hidden for sharing the screen */
+"Vauta’s windows are hidden" = "Vauta 윈도우가 숨겨져 있음";
+
+/* Menu-bar icon state for VoiceOver, after the recording state, while Vauta’s windows are hidden for sharing the screen */
+"Vauta’s windows hidden" = "Vauta 윈도우 숨겨짐";
 
 /* No comment provided by engineer. */
 "Verified" = "확인됨";

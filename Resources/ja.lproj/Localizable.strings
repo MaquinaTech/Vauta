@@ -2635,6 +2635,12 @@
 /* No comment provided by engineer. */
 "Hide Transcript" = "文字起こしを非表示";
 
+/* No comment provided by engineer. */
+"Hide Vauta Windows" = "Vautaのウインドウを隠す";
+
+/* No comment provided by engineer. */
+"Hide Windows" = "ウインドウを隠す";
+
 /* Settings → Live answers: the switch that hides an answer card when the people in the meeting already answered the question */
 "Hide answers when someone answers aloud" = "誰かが口頭で答えたら回答を表示しない";
 
@@ -2941,6 +2947,9 @@
 /* VoiceOver hint of the collapsed group of other possible items in the minutes */
 "Items the model proposed that are less certain than the main ones. Open the group to review them." = "モデルが提案した、主要な項目より確度の低い項目です。グループを開いて確認してください。";
 
+/* Status detail after the connected line; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"Its certificate expires on %@. Renew it before then: make-server-cert.sh renews one it made and keeps the pin." = "証明書の有効期限は%@です。それまでに更新してください。make-server-cert.shは自分で作成した証明書を、ピンを変えずに更新します。";
+
 /* No comment provided by engineer. */
 "Its email address %@ is discarded; “%@” keeps its own." = "メールアドレス%@は破棄され、「%@」は自身のメールアドレスを保持します。";
 
@@ -3208,6 +3217,9 @@
 "Updating the live notes…" = "ライブメモを更新中…";
 "Update the live notes with what was said since the last ones" = "前回のライブメモ以降の発言でライブメモを更新";
 "Nothing new was said since the last live notes" = "前回のライブメモ以降、新しい発言はありません";
+
+/* Detail of the panel notice while Vauta’s windows are hidden for sharing the screen; a window the user opens on purpose still shows */
+"Nothing of Vauta comes on screen by itself until you show them again." = "もう一度表示するまで、Vautaのものが勝手に画面に表示されることはありません。";
 
 /* Notification body when the model server is unreachable while recording */
 "Live notes are paused. Recording continues, and the minutes will be written when the server is back." = "ライブメモは一時停止中です。録音は続いており、サーバが復旧したら議事録が作成されます。";
@@ -5492,6 +5504,12 @@
 /* No comment provided by engineer. */
 "Show Transcript" = "文字起こしを表示";
 
+/* No comment provided by engineer. */
+"Show Vauta Windows" = "Vautaのウインドウを表示";
+
+/* No comment provided by engineer. */
+"Show Windows" = "ウインドウを表示";
+
 /* Brief: button that shows every item of a section; the argument is how many there are */
 "Show all (%lld)" = "すべて表示（%lld）";
 
@@ -5920,6 +5938,9 @@
 
 /* Shortcut name: opens the floating notepad to type a short note during a recording */
 "Take a note" = "メモを取る";
+
+/* No comment provided by engineer. */
+"Takes Vauta’s windows, the notepad and the captions off the screen while you share it. The recording goes on." = "画面を共有している間、Vautaのウインドウ、メモ帳、字幕を画面から外します。録音は続きます。";
 
 /* Accessibility label
    Kind of the target of a relation; also a field label
@@ -6364,6 +6385,9 @@
 
 /* Model job error */
 "The model server was busy for too long." = "モデルサーバのビジー状態が長すぎました。";
+
+/* Model server check result; the argument is a date. make-server-cert.sh is Vauta's script that makes a server certificate */
+"The model server’s certificate expired on %@. Renew it on the server: make-server-cert.sh renews one it made and keeps the pin." = "モデルサーバの証明書は%@に期限が切れました。サーバで更新してください。make-server-cert.shは自分で作成した証明書を、ピンを変えずに更新します。";
 
 /* Model error */
 "The model server’s response is too large." = "モデルサーバの応答が大きすぎます。";
@@ -7413,6 +7437,12 @@
 
 /* Settings → General, after setup when the menu bar icon couldn't be found */
 "Vauta’s icon may be hidden in the menu bar, for example behind the notch. Open Vauta again from Finder, Spotlight or Apps to come back here." = "Vautaのアイコンがメニューバーで隠れている可能性があります（たとえばノッチの裏側）。ここに戻るには、Finder、Spotlight、またはアプリ一覧からVautaをもう一度開いてください。";
+
+/* Panel notice while Vauta’s windows, the notepad and the captions are hidden for sharing the screen */
+"Vauta’s windows are hidden" = "Vautaのウインドウは非表示です";
+
+/* Menu-bar icon state for VoiceOver, after the recording state, while Vauta’s windows are hidden for sharing the screen */
+"Vauta’s windows hidden" = "Vautaのウインドウは非表示";
 
 /* No comment provided by engineer. */
 "Verified" = "確認済み";

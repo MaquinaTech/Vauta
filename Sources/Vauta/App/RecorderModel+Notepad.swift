@@ -31,7 +31,10 @@ extension RecorderModel {
             return self.phase == .stopping || self.llmStatus.queued > 0 || self.llmStatus.activityMeeting == meeting
         }
         notepadSavedMeeting = nil
-        if preferences.openNotepadOnStart { notepadWindow.show(model: self, takesKeyboard: false) }
+        if preferences.openNotepadOnStart {
+            // With Vauta's windows hidden for presenting, it opens when they come back.
+            if concealer.isOn { notepadComesBack = true } else { notepadWindow.show(model: self, takesKeyboard: false) }
+        }
     }
 
     func resetNotepad() {
@@ -61,12 +64,15 @@ extension RecorderModel {
     /// closes it and the meeting app has the keyboard back.
     func toggleNotepadFromShortcut() {
         guard phase == .recording else { return }
+        // Opened or closed on purpose while Vauta's windows are hidden: Show Vauta Windows leaves it as the person left it.
+        notepadComesBack = false
         notepadWindow.toggle(model: self)
     }
 
     /// The panel's button.
     func openNotepad() {
         guard phase == .recording else { return }
+        notepadComesBack = false
         notepadWindow.show(model: self, takesKeyboard: true)
     }
 
