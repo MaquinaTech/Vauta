@@ -52,6 +52,10 @@ final class DockPresence {
         windows.allObjects.contains { $0.isVisible || $0.isMiniaturized }
     }
 
+    /// Whether `window` is one of Vauta's windows (Meetings, Settings, Network Activity, the setup), the ones Hide Vauta
+    /// Windows takes off the screen.
+    func isTracked(_ window: NSWindow) -> Bool { windows.contains(window) }
+
     private func scheduleUpdate() {
         pending?.cancel()
         // After the event settles: a closing window is still visible when its

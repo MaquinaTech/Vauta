@@ -145,3 +145,28 @@ struct SpeechModelBanner: View {
         }
     }
 }
+
+/// Vauta's windows are hidden for presenting (Hide Vauta Windows): the panel says so until they come back, and brings them back.
+struct WindowsHiddenBanner: View {
+    let model: RecorderModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label {
+                PanelNoticeText(
+                    title: String(localized: "Vauta’s windows are hidden", comment: "Panel notice while Vauta’s windows, the notepad and the captions are hidden for sharing the screen"),
+                    detail: String(localized: "Nothing of Vauta comes on screen by itself until you show them again.", comment: "Detail of the panel notice while Vauta’s windows are hidden for sharing the screen; a window the user opens on purpose still shows"))
+            } icon: {
+                Image(systemName: "eye.slash")
+            }
+            PanelActionRow {
+                Button("Show Windows") { model.showHiddenWindows() }
+                    .buttonStyle(.borderedProminent)
+            }
+            .controlSize(.small)
+            .panelBannerActions()
+        }
+        .panelBannerLabel(.info)
+        .panelBanner(.info)
+    }
+}
