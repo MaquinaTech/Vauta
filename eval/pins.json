@@ -12,7 +12,7 @@
   "ami_manual_annotations": {
     "url": "https://groups.inf.ed.ac.uk/ami/AMICorpusAnnotations/ami_public_manual_1.6.2.zip",
     "sha256": "b56e5babb2496b8795deeeda7e71178d7fbc9963f94276cf2a3f4b56ebbc9f9d",
-    "use": "meetings.xml (speaker to headset channel) and the manual word transcripts (words/*.words.xml)"
+    "use": "meetings.xml (speaker to headset channel and roles), the manual word transcripts (words/*.words.xml), and the abstractive summaries, summary links and dialogue acts (abstractive/, extractive/*.summlink.xml, dialogueActs/: the human gold of the minutes, build_ami_gold.py)"
   },
   "ami_audio_base": "https://groups.inf.ed.ac.uk/ami/AMICorpusMirror/amicorpus",
   "voxconverse_audio_zip": "https://www.robots.ox.ac.uk/~vgg/data/voxconverse/data/voxconverse_test_wav.zip",
