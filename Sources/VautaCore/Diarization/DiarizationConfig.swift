@@ -32,6 +32,11 @@ public struct DiarizationConfig: Sendable, Equatable {
     public var minEmbeddingSeconds: Double = 1.0
     /// Embed only the frames where the speaker is alone (falls back to all their active frames when too short).
     public var excludeOverlap = true
+    /// Segmentation: subtracted from the log-probability of "nobody speaks" before each frame's class is chosen. Above 0 the
+    /// network calls more frames speech (less missed speech, more false alarm); 0 is the network's own decision. Swept from -0.5
+    /// to 2 on the tuning set and the held-out English files (docs/BENCHMARKS.md, "Tried and not changed"): every step trades
+    /// missed speech for as much false alarm or more, and the best value (0.25) is within noise, so it stays at 0.
+    public var noneLogBias: Float = 0
 
     /// Live clustering: the largest Euclidean distance (between L2-normalised vectors) to join a live speaker.
     public var onlineAssignDistance: Float = 1.1

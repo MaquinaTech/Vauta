@@ -28,6 +28,14 @@ enum Powerset {
         return out
     }
 
+    /// The scores with the log-probability of "nobody speaks" (class 0) lowered by `noneLogBias` in every frame.
+    static func biased(_ scores: [Float], frames: Int, noneLogBias: Float) -> [Float] {
+        guard noneLogBias != 0 else { return scores }
+        var out = scores
+        for t in 0..<frames { out[t * classes] -= noneLogBias }
+        return out
+    }
+
     /// Hard decode: the most likely class of every frame of a [frames x 7] score array.
     static func argmaxClasses(_ scores: [Float], frames: Int) -> [UInt8] {
         var out = [UInt8](repeating: 0, count: frames)
@@ -111,8 +119,10 @@ public final class Segmenter: @unchecked Sendable {
         return Powerset.logSoftmax(logits, frames: SegmentationGeometry.frames)
     }
 
-    /// The powerset class of each of the 589 frames (0...6).
-    public func classes(window: [Float]) throws -> [UInt8] {
-        Powerset.argmaxClasses(try logProbabilities(window: window), frames: SegmentationGeometry.frames)
+    /// The powerset class of each of the 589 frames (0...6), with "nobody speaks" lowered by `noneLogBias`
+    /// (`DiarizationConfig.noneLogBias`).
+    public func classes(window: [Float], noneLogBias: Float = 0) throws -> [UInt8] {
+        Powerset.argmaxClasses(Powerset.biased(try logProbabilities(window: window), frames: SegmentationGeometry.frames, noneLogBias: noneLogBias),
+                               frames: SegmentationGeometry.frames)
     }
 }

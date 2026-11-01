@@ -39,7 +39,7 @@ let usage = """
                                           word with its time and the recognizer's confidence (evaluation, PUBLIC audio)
       store-stats                         Size and counts of the existing store (read-only)
       speaker-models                      Verify (SHA-256) and load the bundled speaker-separation models
-      diarize <audio> [--rttm <out>] [--threshold <n>] [--live-agreement]
+      diarize <audio> [--rttm <out>] [--threshold <n>] [--none-bias <n>] [--live-agreement]
                                           Separate the speakers of an audio file on this Mac and print RTTM (no text,
                                           no audio is written); --threshold is the clustering cut (default 0.70)
       echo-coupling <me audio> <others audio>
@@ -179,6 +179,13 @@ func runCLI(_ arguments: [String]) async -> Int32 {
                     return 2
                 }
                 config.finalThreshold = threshold
+            }
+            if let value = invocation.values["--none-bias"] {
+                guard let bias = Float(value), abs(bias) <= 5 else {
+                    printError("--none-bias takes a number from -5 to 5 (the default is \(config.noneLogBias)).")
+                    return 2
+                }
+                config.noneLogBias = bias
             }
             let url = URL(fileURLWithPath: path)
             guard FileManager.default.isReadableFile(atPath: url.path) else {
