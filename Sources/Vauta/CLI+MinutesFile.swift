@@ -24,6 +24,10 @@ func minutesFile(_ invocation: CommandInvocation) async throws -> Int32 {
     } catch let failure as MinutesEvaluation.Failure {
         printError(failure.description)
         return 1
+    } catch let failure as MinutesEvaluation.RunFailure {
+        // The job's own message ("the model's answer was cut off…"), not the generic text of an error without one.
+        printError(failure.description)
+        return 1
     }
     let encoder = JSONEncoder()
     encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

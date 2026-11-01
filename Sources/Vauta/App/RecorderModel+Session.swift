@@ -183,7 +183,8 @@ extension RecorderModel {
     func receive(_ segment: Segment) {
         var segment = segment
         // Provisional speaker labels go on FINAL segments only (the captions stay one per channel). The Me channel is
-        // always the same single speaker. The labels are data for the views; nothing shows them yet.
+        // always the same single speaker. The panel's live transcript shows them, marked provisional; the speakers written
+        // when the recording ends replace them.
         if segment.isFinal, let diarizer {
             segment = segment.with(speaker: segment.channel == .me ? SpeakerTag(ordinal: 1)
                                    : diarizer.provisionalSpeaker(start: segment.start, end: segment.end))
