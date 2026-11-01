@@ -105,7 +105,7 @@ Tapped processes: the app's bundle ID and its `<bundle ID>.helper` processes (El
 | Webex | `Cisco-Systems.Spark`, `com.webex.meetingmanager`, `com.cisco.webexmeetingsapp` | | Expected — needs verification |
 | FaceTime | `com.apple.FaceTime`, `com.apple.avconferenced` | Call audio may run in the `avconferenced` system daemon, which may report no bundle ID. If "Others" stays silent, use **All system audio**. | Expected — needs verification |
 
-Any other app works with **All system audio**. To have an app listed, open an issue with the results described below.
+Any other app works with **All system audio**. To have an app listed, open a [compatibility report](https://github.com/MaquinaTech/Vauta/issues/new?template=compatibility.yml) with the results described below.
 
 ## Meeting links in your calendar
 
@@ -115,12 +115,12 @@ If you turn on **Settings → Calendar**, Vauta recognises meeting links in even
 
 You need Vauta installed and a real call, for example with a friend or a second device. Tell the other person that you are testing a transcription app.
 
-The commands below use the installed app's binary. For a build from source, replace `/Applications` with `~/Applications`. Both commands only read state: they never record audio or open your meetings.
+The commands below use the installed app's binary, which `scripts/install.sh` puts in `~/Applications`. Both commands only read state: they never record audio or open your meetings.
 
 1. **Check the app's processes during the call.** With the call running and the other person talking, run:
 
    ```sh
-   /Applications/Vauta.app/Contents/MacOS/Vauta status
+   ~/Applications/Vauta.app/Contents/MacOS/Vauta status
    ```
 
    It lists every process that Core Audio knows about, marking the ones that are playing (●) or using the microphone (🎙), with its bundle ID, its process ID and the family Vauta assigns to it. The last line says which meeting app is using the microphone. Check that:
@@ -138,7 +138,7 @@ The commands below use the installed app's binary. For a build from source, repl
 3. **If something is wrong**, run the doctor as well:
 
    ```sh
-   /Applications/Vauta.app/Contents/MacOS/Vauta doctor
+   ~/Applications/Vauta.app/Contents/MacOS/Vauta doctor
    ```
 
 ## Per-app verification checklist (maintainer)
@@ -155,7 +155,7 @@ Nothing here needs meeting content: do not copy transcripts into the results.
 - **Settings → Speakers → Separate speakers** is on. **Settings → Translation**: Live Translation on, a target language that
   differs from the meeting language, and its language download done.
 - Microphone and system-audio permissions granted. Audio source: **Auto**.
-- Terminal open with `/Applications/Vauta.app/Contents/MacOS/Vauta status` ready.
+- Terminal open with `~/Applications/Vauta.app/Contents/MacOS/Vauta status` ready.
 
 ### Steps for each app
 
@@ -220,7 +220,7 @@ Replace "not yet verified" with the outcome. Do not delete a row: add a new date
 
 ## How to report
 
-Open a [bug report](https://github.com/MaquinaTech/Vauta/issues/new/choose), whether it worked or not, and include:
+Open a [compatibility report](https://github.com/MaquinaTech/Vauta/issues/new?template=compatibility.yml), whether it worked or not. Its form asks for:
 
 - the app or browser and its version, and the meeting service for web calls (for example "Chrome 141, Google Meet");
 - your Vauta version (`Vauta --version`), macOS version and Mac model;

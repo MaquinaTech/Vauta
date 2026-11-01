@@ -57,6 +57,7 @@ It handles **confidential conversations**. The rules below protect the user's da
 | License headers check | `scripts/check-headers.sh` |
 | App bundle without a signing identity | `VAUTA_BUNDLE_ID=local.vauta.dev VAUTA_ALLOW_ADHOC=1 scripts/build-app.sh` (builds `build/Vauta.app` with its own bundle ID, so it never touches the installed app's data; don't open it unless the user asks) |
 | Dependencies check | `scripts/check-dependencies.sh` (only the pinned mlx-swift fork and swift-numerics) |
+| Shell variables check | `scripts/check-shell-vars.sh` (write `${name}` before a non-ASCII character) |
 | GPU kernels and the search model in the shipped binary | `build/Vauta.app/Contents/MacOS/Vauta mlx-selftest [--model]` (hidden command; exit 0 pass, 1 fail, 2 unsupported, 3 model missing) |
 
 The first build compiles MLX's C++ and takes several minutes; `-j 3` still applies.
@@ -349,7 +350,8 @@ with status 1 when it finds a problem.
 Then the user checks Settings › **Status** (every item should be green or explained) and makes a 1–2 minute test
 recording with **⌃⌥R** (press again to stop). If the first-run setup was skipped, microphone and system audio
 permissions are requested at the first recording. Afterwards, the meeting should have minutes in Meetings, and Ask should answer with citations. Settings ›
-Status › **Copy Diagnostics** copies versions and the checklist, with no meeting content, for a support request.
+Status › **Copy Diagnostics** copies versions and the checklist, with no meeting content, for a support request; **Report a Problem…**
+copies them too and opens a GitHub bug report with only the Vauta and macOS versions filled in.
 
 ## Updating Vauta for a user
 
@@ -391,11 +393,12 @@ Builds from source default to the bundle ID `local.vauta.app`. A different bundl
 
 ## Uninstalling
 
-1. Quit Vauta.
+1. If **Settings → General → Open Vauta at login** is on, the user turns it off; then quit Vauta.
 2. Delete `~/Applications/Vauta.app` and `~/Library/Containers/<bundle-id>/` (this deletes all meetings). The optional
    search model and the integrated language model (the `gemma-4-e4b-it` folder) live inside that container, in
    `Data/Library/Application Support/Vauta Models`; they hold no meeting content, so the user can also remove it first with Settings → Models → Delete. You still must not open the container:
    tell the user the path.
 3. In Keychain Access, delete the items whose service is `<bundle-id>`.
-4. Optional: delete the signing keychain `~/Library/Keychains/vauta-signing.keychain-db` and
+4. The user runs `tccutil reset All <bundle-id>` in their own Terminal to remove the permissions macOS keeps for Vauta.
+5. Optional: delete the signing keychain `~/Library/Keychains/vauta-signing.keychain-db` and
    `scripts/signing-identity.txt`.

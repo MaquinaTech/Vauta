@@ -921,6 +921,9 @@
 /* No comment provided by engineer. */
 "Bring Back Speakers" = "話者を元に戻す";
 
+/* Settings → Status; title of the row that opens a new bug report on GitHub */
+"Bug report" = "バグレポート";
+
 /* Network Activity result; the argument is an HTTP status code */
 "Busy (%lld)" = "混雑中（%lld）";
 
@@ -1397,6 +1400,9 @@
    Confirmation after copying minutes or an answer
    Diagnostics button after copying */
 "Copied" = "コピーしました";
+
+/* Settings → Status; explains Report a Problem… */
+"Copies the diagnostics and opens a new bug report on GitHub in your browser, with your Vauta and macOS versions filled in. Paste the diagnostics there; nothing else is in the address." = "診断情報をコピーし、ブラウザで GitHub の新しいバグレポートを開きます。Vauta と macOS のバージョンは入力済みです。診断情報はそこに貼り付けてください。アドレスにはそれ以外の情報は含まれません。";
 
 /* Answers card: copies the answer */
 "Copy" = "コピー";
@@ -5167,6 +5173,9 @@
 
 /* No comment provided by engineer. */
 "Replace Meetings, Context and Settings" = "ミーティング、コンテキスト、設定を置き換える";
+
+/* Settings → Status; copies the diagnostics and opens a new bug report on GitHub */
+"Report a Problem…" = "問題を報告…";
 
 /* Network Activity column: HTTP method and path */
 "Request" = "リクエスト";

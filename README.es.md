@@ -143,11 +143,12 @@ Vauta tiene tres sitios que vas a usar:
 - Un Mac con **Apple silicon**.
 - **macOS 26** o posterior.
 - Espacio libre en disco para el modelo de voz de Apple de cada idioma que transcribas. macOS descarga cada uno una sola vez.
-- Para redactar actas, una de estas dos opciones:
-  - **Apple Intelligence** activado, en un Mac y un idioma compatibles, o
+- Para redactar actas, una de estas opciones:
+  - **Apple Intelligence** activado, en un Mac y un idioma compatibles,
+  - el **modelo integrado** opcional (Gemma 4 E4B, de Google) en un Mac con 16 GB de memoria o más: una descarga de unos 15 GB, de los que se quedan unos 4,2 GB en el Mac ([más abajo](#el-modelo-integrado-opcional)), o
   - un **servidor de modelos compatible con OpenAI** en este Mac o en otro ordenador de tu red. Consulta [docs/MODEL_SERVERS.md](docs/MODEL_SERVERS.md).
 
-La transcripción funciona sin ninguna de las dos. Sin modelo tendrás transcripciones, pero no actas ni respuestas.
+La transcripción funciona sin ninguna de ellas. Sin modelo tendrás transcripciones, pero no actas ni respuestas.
 
 ## Instalar desde el código fuente
 
@@ -176,9 +177,9 @@ Vauta aparece en la barra de menús. Mientras una de sus ventanas (Reuniones, Aj
 VAUTA_ALLOW_ADHOC=1 ./scripts/install.sh
 ```
 
-A cambio, cada recompilación le parece a macOS una app nueva, así que vuelve a pedir los permisos tras cada actualización.
+A cambio, cada recompilación le parece a macOS una app nueva, así que vuelve a pedir los permisos tras cada actualización, y el Llavero no distingue una actualización de Vauta de otra app que pida su clave ([SECURITY.md](SECURITY.md#code-signing), en inglés). Úsala solo para una prueba rápida.
 
-La primera vez que se abre la app, macOS pide la contraseña del Llavero para «Vauta». Elige **Permitir siempre**. Si ese aviso aparece en cualquier otro momento, elige **Denegar**.
+La primera vez que se abre la app, macOS pide la contraseña del Llavero para «Vauta». Elige **Permitir siempre**. Vuelve a pedirla tras cada actualización de una compilación ad hoc y después de crear una identidad de firma nueva: elige también entonces **Permitir siempre**. Si el aviso aparece cuando no acabas de instalar ni de actualizar Vauta, elige **Denegar**.
 
 **Permisos.** Durante la configuración inicial macOS pide el **micrófono** (tu voz), el **audio del sistema** (los demás participantes de la llamada) y, si activas esas funciones, **Calendario** (títulos y asistentes de las reuniones), **Recordatorios** (para enviarles las tareas) y notificaciones. Vauta también pide acceso a tu **red local** si lo apuntas a un servidor de modelos en otro ordenador. Puedes cambiar cada uno después en Ajustes del Sistema → Privacidad y seguridad.
 
@@ -192,7 +193,7 @@ VAUTA_ALLOW_ADHOC=1 ./scripts/update.sh     # con la firma ad hoc
 
 Comprueba la clave con el `.github/allowed_signers` que ya tienes (y con la huella de [SECURITY.md](SECURITY.md#verifying-what-you-run), en inglés), no instala una versión más antigua que la instalada, ejecuta las pruebas y deja esta carpeta en la etiqueta de la versión (`git switch main` vuelve a la rama). Desde una copia de la 0.9.3 o anterior, ejecuta una vez `git checkout main && git pull` y después `./scripts/update.sh`: las versiones anteriores a la 0.9.3 no tienen el script, y el de la 0.9.3 puede detenerse con «unbound variable» cuando hay una versión más reciente. Esa descarga no la cubre la comprobación de la firma; [SECURITY.md](SECURITY.md#supported-versions) (en inglés) explica cómo comprobarla tú.
 
-**Desinstalar.** Cierra Vauta y borra `~/Applications/Vauta.app`. Tus reuniones están en el contenedor de la app, `~/Library/Containers/<bundle-id>/` (bundle ID por defecto `local.vauta.app`); borrar esa carpeta borra todas las reuniones, así que haz antes una copia si las quieres (**Ajustes → Privacidad y seguridad → Copia de seguridad…**). Después borra en Acceso a Llaveros los elementos cuyo servicio sea el bundle ID. Si usaste `setup-signing.sh`, también puedes borrar el llavero `~/Library/Keychains/vauta-signing.keychain-db`.
+**Desinstalar.** Si activaste **Ajustes → General → Abrir Vauta al iniciar sesión**, desactívalo primero. Después cierra Vauta y borra `~/Applications/Vauta.app`. Tus reuniones están en el contenedor de la app, `~/Library/Containers/<bundle-id>/` (bundle ID por defecto `local.vauta.app`); borrar esa carpeta borra todas las reuniones, así que haz antes una copia si las quieres (**Ajustes → Privacidad y seguridad → Copia de seguridad…**). Después borra en Acceso a Llaveros los elementos cuyo servicio sea el bundle ID y ejecuta `tccutil reset All <bundle-id>` para quitar los permisos que macOS guarda para Vauta (micrófono, audio del sistema, Calendario y Recordatorios). Si usaste `setup-signing.sh`, también puedes borrar el llavero `~/Library/Keychains/vauta-signing.keychain-db`.
 
 El bundle ID (por defecto `local.vauta.app`) es la identidad de Vauta ante macOS: de él dependen los permisos, los elementos del Llavero y el contenedor del sandbox. Para usar el tuyo, define `VAUTA_BUNDLE_ID` en `scripts/local.env` *antes* de la primera instalación. Si lo cambias después, Vauta empieza de cero, y una compilación con otro bundle ID es una app distinta con sus propios datos. Para mover los datos entre dos bundle ID (por ejemplo de `local.vauta.app` al tuyo), usa **Ajustes → Privacidad y seguridad → Copia de seguridad…** en la app antigua y **Restaurar…** en la nueva.
 
@@ -227,6 +228,7 @@ Puedes cambiar los dos atajos en **Ajustes → General**.
 | Opción | Configuración | Ideal para |
 |---|---|---|
 | **Apple Intelligence en este Mac** (*Inicio rápido · Calidad básica*) | Ninguna, si Apple Intelligence está activado | Empezar. Totalmente privado. Solo lee a la vez una parte corta de la reunión, así que las reuniones largas se resumen por partes y las actas son más cortas y menos fiables. |
+| **Modelo integrado (Gemma 4 E4B, Google)** | **Ajustes → Modelos → Descargar**: unos 15 GB desde Hugging Face, de los que se guardan unos 4,2 GB. 16 GB de memoria o más | Reuniones enteras leídas de una vez en este Mac, sin servidor que mantener. Opcional y nunca el predeterminado ([más abajo](#el-modelo-integrado-opcional)). |
 | **Un servidor de modelos en este Mac** | **Ajustes → Modelos → Configurar…** te guía con LM Studio u Ollama y el modelo que cabe en la memoria de tu Mac | Mejores actas con modelos más grandes, sin salir de este Mac. Necesita 16 GB de memoria o más. |
 | **Un servidor de modelos en tu red** | Un servidor en otro ordenador, por HTTPS | Un Mac modesto, con un ordenador más potente en casa o en la oficina. |
 

@@ -87,7 +87,8 @@ Last measured on 10 October 2026 (it has not been re-measured since, and the cod
 **27.5 % of lines** (17,143 of 62,396), 32.4 % of functions, 37.3 % of regions for the whole package, the `VautaCore` library and the app target (`Sources/Vauta`: recorder model, command line,
 windows). Most of the app target is SwiftUI and capture code that tests do not drive; the library on its own,
 which holds the logic, is at **84.6 % of lines** (16,986 of 20,077), 80.7 % of functions, 79.9 % of regions. CI computes both
-figures in each run's job summary once GitHub Actions are enabled; this paragraph is refreshed by hand until then.
+figures in the job summary of every run and keeps the report as the run's `coverage` artifact; this paragraph is measured by
+hand, so it lags behind.
 
 ### Other checks that CI runs
 
@@ -96,6 +97,7 @@ scripts/check-strings.sh        # every translation matches the English keys and
 scripts/extract-strings.sh && git diff --exit-code -- Resources/en.lproj/Localizable.strings   # English strings in sync with the code
 scripts/check-headers.sh        # every source file has the SPDX license header
 scripts/check-dependencies.sh   # only the pinned mlx-swift fork and swift-numerics
+scripts/check-shell-vars.sh     # no shell variable runs straight into a non-ASCII character ("${name}…", not "$name…")
 find Resources Sources \( -name '*.plist' -o -name '*.entitlements' -o -name '*.strings' -o -name '*.stringsdict' \) \
   -print0 | xargs -0 plutil -lint
 for f in scripts/*.sh; do bash -n "$f"; done   # and shellcheck, if installed
@@ -145,12 +147,15 @@ to command mode; `Vauta help` lists them all.
 | `languages` | Transcription languages and whether their models are installed. |
 | `install-speech-assets [--locale <id>]` | Downloads Apple's speech model for a language. |
 | `install-dictation-assets [--locale <id>]` | Downloads the dictation model (used for custom vocabulary). |
-| `transcribe-file <audio> [--locale <id>]` | Transcribes an audio file; prints counts only unless `--show-text`. |
+| `transcribe-file <audio> [--locale <id>] [--vocab "a,b"]` | Transcribes an audio file; prints counts only unless `--show-text` (with `--out <words.jsonl>`, every word with its time and confidence: public audio only). |
 | `server-check <config.json> [--ask-key]` | Tests a model server configuration with sample text. |
 | `cert-pin <cert.pem>` | Prints the SPKI pin of a certificate. |
-| `diarize <audio> [--rttm <out>] [--threshold <n>]` | Separates the speakers of a file and prints RTTM (no text, no audio written). Used by `eval/`. |
+| `diarize <audio> [--rttm <out>] [--threshold <n>] [--none-bias <n>] [--live-agreement]` | Separates the speakers of a file and prints RTTM (no text, no audio written). Used by `eval/`. |
+| `echo-coupling <me audio> <others audio>` | Evaluation: whether the microphone heard the others, measured over two files (counts only). Used by `eval/`. |
+| `minutes-file <transcript.json> --out <minutes.json> [--locale <id>]` | Evaluation: the minutes of a **public** transcript with Apple's on-device model, saved with their citations. Never on a real meeting. |
 | `speaker-models` | Verifies (SHA-256) and loads the bundled speaker-separation models. |
 | `store-stats` | Size and counts of an existing store (read-only). |
+| `help`, `--help` | Lists the commands. |
 | `version`, `--version` | Prints the version. |
 
 ### Evaluation harness
@@ -173,7 +178,7 @@ outside the project directory and never sign, install or distribute it.
 | `Tests/VautaCoreTests/` | Swift Testing suites for `VautaCore` |
 | `Resources/` | `Info.plist`, entitlements, app icon and the `<lang>.lproj` localizations |
 | `scripts/` | Build, install, signing and lint scripts (`package.sh` and `notarize.sh` are optional, for forks with an Apple Developer account) |
-| `tools/` | `make-icon.swift`, which renders the app icon |
+| `tools/` | Developer tools that are never built into the app: `llm-eval/` (around `Vauta llm-eval`, the language-model evaluation), `language-model/` and `search-model/` (the manifests, goldens and tiny test models of the two optional models), `convert-diarization-models/` (makes the bundled speaker-separation models), `stringsdata-to-strings.swift` (used by `scripts/extract-strings.sh`) and `make-icon.swift` (renders the app icon) |
 | `docs/` | User and contributor documentation |
 
 ## Coding conventions
@@ -377,10 +382,11 @@ How it works, and what to keep in mind:
 
 ### How changes reach `main`
 
-The standard for `main` is: changes arrive only through pull requests that pass CI, every maintainer uses two-factor
-authentication, and force pushes are blocked. The project lead switches these on when the repository goes public, so they are the
-rule contributors are held to, not a description of settings already in force (the full list, including how reviews work with
-a single maintainer, is in [GOVERNANCE.md](GOVERNANCE.md#repository-controls)). Pin any GitHub
+Changes reach `main` only through pull requests that pass CI and CodeQL, every commit must be signed, and force pushes are
+blocked: a ruleset enforces it (the full list, including how reviews work with a single maintainer, is in
+[GOVERNANCE.md](GOVERNANCE.md#repository-controls)). Sign your commits with an SSH or GPG key that you added to your GitHub
+account as a signing key (`git commit -S -s`, or `git config commit.gpgsign true`), so GitHub shows them as Verified; otherwise
+the pull request cannot be merged as it is. Pin any GitHub
 Action you add by its full commit SHA with the version in a comment, and give each workflow the least permissions it
 needs. Releases are made by maintainers only, as described in [docs/RELEASING.md](docs/RELEASING.md).
 
@@ -402,8 +408,8 @@ This adds a line with the name and email from your Git configuration:
 Signed-off-by: Your Name <you@example.com>
 ```
 
-Use your real name. To sign off commits you already made on your branch, run
-`git rebase --signoff main` and force-push the branch. A DCO check (the DCO GitHub app, installed when the repository goes public) reports pull requests with commits that are not
-signed off, and the project lead asks for the sign-off before merging.
+Use your real name. To sign off (and sign) commits you already made on your branch, run
+`git rebase --signoff --gpg-sign main` and force-push the branch. The project lead checks the sign-off of every commit before
+merging and asks for it when one is missing.
 
 Contributions are licensed under the [Apache License 2.0](LICENSE), as stated in its section 5.

@@ -143,10 +143,11 @@ Vauta has three places you will use:
 - **macOS 26** or later.
 - Free disk space for Apple's speech model of each language you transcribe. macOS downloads each one once.
 - To write minutes, one of these:
-  - **Apple Intelligence** turned on, on a Mac and in a language that support it, or
+  - **Apple Intelligence** turned on, on a Mac and in a language that support it,
+  - the optional **integrated model** (Gemma 4 E4B by Google) on a Mac with 16 GB of memory or more: a download of about 15 GB, of which about 4.2 GB stay on the Mac ([below](#the-integrated-model-optional)), or
   - an **OpenAI-compatible model server** on this Mac or on another computer in your network. See [docs/MODEL_SERVERS.md](docs/MODEL_SERVERS.md).
 
-Transcription works without either. Without a model, you still get transcripts but no minutes or answers.
+Transcription works without any of them. Without a model, you still get transcripts but no minutes or answers.
 
 ## Install from source
 
@@ -175,7 +176,7 @@ Vauta appears in the menu bar. While one of its windows (Meetings, Settings, Set
 VAUTA_ALLOW_ADHOC=1 ./scripts/install.sh
 ```
 
-The trade-off: every rebuild looks like a new app to macOS, so it asks for the permissions again after every update.
+The trade-off: every rebuild looks like a new app to macOS, so it asks for the permissions again after every update, and the Keychain cannot tell an update of Vauta from another app asking for its key ([SECURITY.md](SECURITY.md#code-signing)). Use it only for a quick trial.
 
 The first time the app opens, macOS asks for your Keychain password for "Vauta". Choose **Always Allow**. It asks again after every update of an ad-hoc build, and after you create a new signing identity: choose **Always Allow** then too. If the prompt appears when you have not just installed or updated Vauta, choose **Deny**.
 
@@ -191,7 +192,7 @@ VAUTA_ALLOW_ADHOC=1 ./scripts/update.sh     # with the ad-hoc signature
 
 It checks the key against the `.github/allowed_signers` you already have (and the fingerprint in [SECURITY.md](SECURITY.md#verifying-what-you-run)), refuses an older version than the one installed, runs the tests and leaves this folder at the release tag (`git switch main` goes back to the branch). From a checkout of 0.9.3 or earlier, run `git checkout main && git pull` once, then `./scripts/update.sh`: versions before 0.9.3 don't have the script, and the one in 0.9.3 can stop with "unbound variable" when a newer release is there. That one pull is not covered by the signature check; [SECURITY.md](SECURITY.md#supported-versions) says how to check it yourself.
 
-**Uninstall.** Quit Vauta and delete `~/Applications/Vauta.app`. Your meetings live in the app's container, `~/Library/Containers/<bundle-id>/` (default bundle ID `local.vauta.app`); deleting that folder deletes all meetings, so back them up first if you want them (**Settings → Privacy & Security → Back Up…**). Then delete the Keychain items whose service is the bundle ID in Keychain Access. If you used `setup-signing.sh`, you can also delete the keychain `~/Library/Keychains/vauta-signing.keychain-db`.
+**Uninstall.** If you turned on **Settings → General → Open Vauta at login**, turn it off first. Then quit Vauta and delete `~/Applications/Vauta.app`. Your meetings live in the app's container, `~/Library/Containers/<bundle-id>/` (default bundle ID `local.vauta.app`); deleting that folder deletes all meetings, so back them up first if you want them (**Settings → Privacy & Security → Back Up…**). Then delete the Keychain items whose service is the bundle ID in Keychain Access, and run `tccutil reset All <bundle-id>` to remove the permissions macOS keeps for Vauta (microphone, system audio, Calendar, Reminders). If you used `setup-signing.sh`, you can also delete the keychain `~/Library/Keychains/vauta-signing.keychain-db`.
 
 The bundle ID (default `local.vauta.app`) is Vauta's identity for macOS: permissions, Keychain items and the sandbox container all hang on it. To use your own, set `VAUTA_BUNDLE_ID` in `scripts/local.env` *before* the first install. Changing it later starts Vauta from scratch, and a build with a different bundle ID is a separate app with its own data. To move data between two bundle IDs (for example from `local.vauta.app` to your own), use **Settings → Privacy & Security → Back Up…** in the old app and **Restore…** in the new one.
 
@@ -226,6 +227,7 @@ Both shortcuts can be changed in **Settings → General**.
 | Option | Setup | Good for |
 |---|---|---|
 | **Apple Intelligence on this Mac** (*Quick start · Basic quality*) | None, if Apple Intelligence is on | Getting started. Fully private. It reads only a short part of a meeting at a time, so long meetings are summarized in parts and minutes are shorter and less reliable. |
+| **Integrated model (Gemma 4 E4B, Google)** | **Settings → Models → Download**: about 15 GB from Hugging Face, of which about 4.2 GB are kept. 16 GB of memory or more | Whole meetings read in one pass on this Mac, with no server to run. Optional and never the default ([below](#the-integrated-model-optional)). |
 | **A model server on this Mac** | **Settings → Models → Set Up…** guides you through LM Studio or Ollama and the model that fits your Mac's memory | Better minutes with larger models, still on this Mac. Needs 16 GB of memory or more. |
 | **A model server on your network** | A server on another computer, reached over HTTPS | A small Mac, with a bigger computer elsewhere at home or in the office. |
 
