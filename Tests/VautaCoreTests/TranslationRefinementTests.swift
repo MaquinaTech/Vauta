@@ -329,16 +329,16 @@ struct TranslationRefinementTests {
 
     @Test func raceReturnsTheFirstOutcomeAndToleratesAnOperationThatIgnoresCancellation() async {
         let finished = SharedBox(false)
-        let release = AsyncStream.makeStream(of: Void.self)
+        let hold = UncancellableHold()
         let outcome = await LiveTranslator.race(budget: .milliseconds(60)) {
             // Ignores cancellation: keeps waiting after it, until the test lets it go.
-            for await _ in release.stream { break }
+            await hold.wait()
             finished.mutate { $0 = true }
             return "late"
         }
-        guard case .failed = outcome else { Issue.record("expected a timeout"); release.continuation.finish(); return }
+        guard case .failed = outcome else { Issue.record("expected a timeout"); hold.release(); return }
         // The answer came back while the operation was still running: it did not wait for it (it could not: nothing lets it go yet).
         #expect(!finished.value, "the answer did not wait for the operation")
-        release.continuation.finish()
+        hold.release()
     }
 }

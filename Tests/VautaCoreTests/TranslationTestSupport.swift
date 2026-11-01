@@ -46,6 +46,32 @@ final class StubGate: @unchecked Sendable {
     }
 }
 
+/// A wait that cancellation does not end, as an operation that ignores it: it returns only once the test lets it go. (Iterating an
+/// `AsyncStream` would not do: it ends when its task is cancelled.)
+final class UncancellableHold: @unchecked Sendable {
+    private let lock = NSLock()
+    private var isOpen = false
+    private var waiter: CheckedContinuation<Void, Never>?
+
+    func wait() async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            lock.lock()
+            if isOpen { lock.unlock(); continuation.resume(); return }
+            waiter = continuation
+            lock.unlock()
+        }
+    }
+
+    func release() {
+        lock.lock()
+        isOpen = true
+        let waiting = waiter
+        waiter = nil
+        lock.unlock()
+        waiting?.resume()
+    }
+}
+
 /// A translator that answers "«text»" after a delay and remembers what it was asked.
 final class StubTranslator: Translator, @unchecked Sendable {
     private let lock = NSLock()
@@ -58,6 +84,8 @@ final class StubTranslator: Translator, @unchecked Sendable {
     var failing: Set<String> = []
     /// Per-text delay, for tests that need a slow first sentence.
     var delays: [String: Duration] = [:]
+    /// Per-text hold, for tests that look at the state while a text is being translated: it answers once the test opens it.
+    var gates: [String: StubGate] = [:]
     /// Put before every answer (e.g. the target language), so tests can tell pairs apart.
     var tag = ""
 
@@ -76,7 +104,7 @@ final class StubTranslator: Translator, @unchecked Sendable {
         }
         defer { lock.withLock { _active -= 1 } }
         do {
-            try await Task.sleep(for: delays[text] ?? delay)
+            if let gate = gates[text] { try await gate.wait() } else { try await Task.sleep(for: delays[text] ?? delay) }
         } catch {
             lock.withLock { _cancelled.append(text) }
             throw error
