@@ -74,9 +74,9 @@ if legacy_same_id && pgrep -f "$LEGACY_BIN" >/dev/null; then
   exit 1
 fi
 
-mkdir -p ~/Applications
-rm -rf ~/Applications/Vauta.app
-cp -R build/Vauta.app ~/Applications/Vauta.app
+# The new copy is made and verified next to the installed app, then the two are swapped: a failure at any point (a full
+# disk, Ctrl-C) leaves a working app in ~/Applications.
+scripts/install-app.sh build/Vauta.app ~/Applications/Vauta.app
 if legacy_same_id; then
   # The Trash folder may be protected (Full Disk Access): then Finder moves it there (macOS may ask to let Terminal
   # control Finder). A failure is only a warning: Vauta is already installed.
