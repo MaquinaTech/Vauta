@@ -17,6 +17,7 @@ import zipfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "scripts"))
 import build_ami_gold as bg  # noqa: E402
+import gold_match_packets as gp  # noqa: E402
 import score_minutes_gold as sg  # noqa: E402
 
 M = "XX0001a"
@@ -194,6 +195,55 @@ class ScoreTests(unittest.TestCase):
         self.assertEqual((pooled["found_rate"], pooled["supported_rate"], pooled["chance_rate"], pooled["meetings"]), (1.0, 0.5, 0.167, 1))
         self.assertEqual(pooled["found_ci"], [1.0, 1.0])
         self.assertEqual(report["p"]["test"]["decision"]["meetings"], 1)
+
+
+
+class ContentTests(unittest.TestCase):
+    """The blind packets for the judge, and the scores by what the items say."""
+
+    def setUp(self):
+        self.gold = bg.build(corpus(), M, TRANSCRIPT)
+        self.minutes = {
+            "apple": [{"case": M, "decisions": [{"text": "Rubber case", "citations": [1]},
+                                                {"text": "Ranked out", "citations": [1], "unconfirmed": True, "reason": "rank"}],
+                       "tasks": [{"text": "Draw the case", "citations": [5]}]}],
+            "integrated": [{"case": M, "decisions": [{"text": "The case is rubber", "citations": [4]}], "tasks": []}],
+        }
+
+    def test_packets_name_no_provider_and_leave_out_ranked_out_items(self):
+        human, items, key = gp.packets({M: self.gold}, self.minutes, seed=5)
+        self.assertEqual([h[1] for h in human], [f"{M}:decision.1", f"{M}:action.1", f"{M}:action.2"])
+        self.assertEqual(sorted(i[3] for i in items), ["Draw the case", "Rubber case", "The case is rubber"])
+        self.assertNotIn("apple", json.dumps([human, items]))
+        self.assertNotIn("integrated", json.dumps([human, items]))
+        self.assertEqual({(k["provider"], k["field"], k["index"]) for k in key.values()},
+                         {("apple", "decisions", 0), ("apple", "tasks", 0), ("integrated", "decisions", 0)})
+        self.assertEqual(gp.packets({M: self.gold}, self.minutes, seed=5), (human, items, key))
+
+    def test_found_stated_and_cited_where_it_was_said(self):
+        matches = {("apple", M, "decisions", 0): [("decision.1", "full")],
+                   ("apple", M, "tasks", 0): [("action.1", "part"), ("decision.1", "part")],
+                   ("integrated", M, "decisions", 0): [("decision.1", "part")]}
+        apple = sg.content_meeting(self.gold, self.minutes["apple"][0], matches, "apple", tolerance=0)
+        self.assertEqual(apple["decision"], {"human": 1, "found": 1, "found_full": 1, "items": 1, "stated": 1, "pairs_linked": 1, "pairs_cited": 1})
+        # the task states a human action in part (and a decision, which is not its kind); it cites passage 5, the action is at 6
+        self.assertEqual(apple["action"], {"human": 2, "found": 1, "found_full": 0, "items": 1, "stated": 1, "pairs_linked": 1, "pairs_cited": 0})
+        self.assertEqual(sg.content_meeting(self.gold, self.minutes["apple"][0], matches, "apple", tolerance=1)["action"]["pairs_cited"], 1)
+        integrated = sg.content_meeting(self.gold, self.minutes["integrated"][0], matches, "integrated", tolerance=0)["decision"]
+        self.assertEqual((integrated["found"], integrated["found_full"], integrated["stated"], integrated["pairs_cited"]), (1, 0, 1, 0))
+
+    def test_the_graded_file_is_read_with_the_key(self):
+        with tempfile.TemporaryDirectory() as folder:
+            graded, key = os.path.join(folder, "items_graded.tsv"), os.path.join(folder, "key.json")
+            with open(graded, "w", encoding="utf-8") as f:
+                f.write("meeting\titem_id\tkind\ttext\tstates\n")
+                f.write(f"{M}\t{M}:X01\tdecision\tRubber case\t{M}:decision.1=full;{M}:action.1=part\n")
+                f.write(f"{M}\t{M}:X02\ttask\tSomething\tnone\n")
+            with open(key, "w", encoding="utf-8") as f:
+                json.dump({"seed": 1, "items": {f"{M}:X01": {"provider": "apple", "field": "decisions", "index": 0},
+                                                f"{M}:X02": {"provider": "apple", "field": "tasks", "index": 3}}}, f)
+            self.assertEqual(sg.read_matches(graded, key), {("apple", M, "decisions", 0): [("decision.1", "full"), ("action.1", "part")],
+                                                             ("apple", M, "tasks", 3): []})
 
 
 if __name__ == "__main__":

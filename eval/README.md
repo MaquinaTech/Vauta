@@ -55,6 +55,8 @@ eval/.venv/bin/python -I eval/scripts/run_minutes.py --bin .build/release/Vauta 
 eval/.venv/bin/python -I eval/scripts/score_minutes.py --minutes m.json --transcript t.json                       # citation checks on minutes of a PUBLIC transcript (rubric: eval/rubric/)
 python3 -I eval/scripts/build_ami_gold.py --sets <folder of <meeting>.json> --out <gold>                          # human gold of the minutes: AMI's decisions and actions with the passages the annotators linked them to
 python3 -I eval/scripts/score_minutes_gold.py --gold <gold> --minutes apple=<minutes.apple.jsonl> [--minutes integrated=<…>] [--out <dir>]   # where the minutes of `llm-eval --tasks minutes` point, against that gold
+python3 -I eval/scripts/gold_match_packets.py --gold <gold> --minutes apple=<…> [--minutes integrated=<…>] --out <packets>   # blind packets for a judge to match the items with the human sentences by content (rubric: eval/rubric/MINUTES_GOLD_MATCH.md)
+python3 -I eval/scripts/score_minutes_gold.py --gold <gold> --minutes apple=<…> [--minutes integrated=<…>] --matches <packets>/blind/items_graded.tsv --key <packets>/sealed/key.json [--out <dir>]   # adds what the items say, from the judge's grades
 ```
 
 `Vauta diarize`, `Vauta echo-coupling` and `Vauta transcribe-file` are offline evaluation commands: they read their files
@@ -82,7 +84,10 @@ whose SHA-256 is not the pinned one and copies no name from the corpus ids; the 
 within one passage of a passage linked to the sentence: the human decisions and actions found (recall), the items grounded in
 one (supported), the items grounded anywhere in the human summary, the same rates for a citation drawn at random, and the
 owners of the tasks grounded in an action that names roles. An AMI sentence often holds several decisions, so there is no
-one-to-one matching. It scores where an item points, not what it says. Tests: `python3 -I -m unittest discover -s eval/tests -p 'test_ami_gold.py'` (an invented meeting).
+one-to-one matching. What an item says is judged blind: `gold_match_packets.py` mixes the items of every model under neutral
+ids next to the human sentences of each meeting, with the judge's instructions, and seals the key apart (its SHA-256 goes in the
+packets before any judging); with the judge's `items_graded.tsv` and that key, `score_minutes_gold.py` adds the human sentences
+found by content (in full or in part), the items that state one, and whether such an item cites where it was said. Tests: `python3 -I -m unittest discover -s eval/tests -p 'test_ami_gold.py'` (an invented meeting).
 
 ## Limits
 

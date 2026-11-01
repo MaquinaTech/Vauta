@@ -29,7 +29,7 @@ are never committed. This is the only place the README takes accuracy figures fr
 | Minutes, Apple's on-device model, 10 AMI meetings x 3 min of manual transcript: decisions and tasks kept by the app's checks | 13 of the 18 the model proposed; every kept item has a citation that exists and holds its figures; 3 of the 13 (23 %) marked Unconfirmed | Only one model and a small sample: [Minutes](#minutes-citations) |
 | Same, 10 min windows (longer than the model's 4,096-token window, so written block by block) | 0 of 42 proposals kept | |
 | Minutes, Apple's model and the integrated model, 20 sealed public meetings, harness phase, measured 2026-10-24 (blind, one LLM judge with no human review, **every switch on**): firm decisions and tasks covered, firm list length | Apple 100 of 167 in a list of 185 items (before: 99 in 518); integrated 51 (before: 42), the request the app runs on the integrated model since 2026-10-24 (items first, outcome rule, recall wording, expected counts with the item floor, greedy decoding); on the development meetings it listed 5.3 items per meeting at recall 0.32 and precision 0.61 (old: 0.22 to 0.25 and 0.66) with a median +14 s and p90 +53 s per meeting on the pairs. Apple's figures are for the ranked extraction with the outcome-first digest switched on, which the app does not ship | Not reproducible from the repository: the test set is sealed. Apple ships a subset that was not judged as such. Date, build, tables, limits and commands: [LANGUAGE_MODEL.md](LANGUAGE_MODEL.md#harness-phase-what-ships-blind-test-2026-10-24) |
-| Minutes against **AMI's human summaries**, 13 whole meetings (manual transcripts): human decisions found / decisions citing near one (a random passage: 9 %) | Apple 25 % / 22 %; integrated model 20 % / 28 %; the 17 human actions found 71 % and 59 %; no task has the owner the annotators named | One run per model; scores where an item points, not what it says; not held out: [Minutes against AMI's human summaries](#minutes-against-amis-human-summaries) |
+| Minutes against **AMI's human summaries**, 13 whole meetings (manual transcripts): human decisions found / decisions citing near one (a random passage: 9 %) | Apple 25 % / 22 %; integrated model 20 % / 28 %. By content (one blind LLM judge): 20 % and 21 % of the 70 human decisions found; 31 % and 49 % of the decisions state one. No task has the owner the annotators named | One run per model; content matched by one blind LLM judge, no human review; not held out: [Minutes against AMI's human summaries](#minutes-against-amis-human-summaries) |
 
 The DER figure for AMI uses the "no-bleed" scoring region explained below. With the plain scoring region it is 38.1 %
 for AMI (26.3 % for all 18 recordings), almost all of it false alarm caused by an artifact of how the test audio is
@@ -486,6 +486,15 @@ An AMI sentence often holds several decisions at once, so a sentence counts as f
 sentence: there is no one-to-one matching. The items the ranking leaves in "Other possible items" are not counted as items;
 the column "with other items" adds them to what is found.
 
+What the items say was judged blind as well. Packets mixed the 204 decisions and tasks the two models showed under neutral ids,
+next to the 88 human decisions and actions of the 13 meetings (with a link or not), with the key sealed before any judging
+(SHA-256 `0dbfa4da…`); `eval/scripts/gold_match_packets.py` writes the same packets again, and the same key in its own layout
+(`dbe10430…`). One LLM judge, of another model family than the two measured and not told
+which model wrote what, marked the human sentences each item states, in full or in part
+([rubric](../eval/rubric/MINUTES_GOLD_MATCH.md); its grades have SHA-256 `0b427b46…`). `score_minutes_gold.py --matches` then
+counts the human sentences found by content, the items that state one, and whether such an item cites where it was said
+(within one passage of a linked passage).
+
 ### Results
 
 | Model | Kind | Human sentences | Found | With other items | Items | Supported | At random | In the human summary | At random | Right owner |
@@ -495,6 +504,15 @@ the column "with other items" adds them to what is found.
 | Integrated | decisions | 60 | **20 %** [10 %, 33 %] | 20 % | 43 | **28 %** [17 %, 38 %] | 9 % | 88 % | 63 % | – |
 | Integrated | tasks | 17 | **59 %** [17 %, 86 %] | 59 % | 36 | **31 %** [5 %, 59 %] | 2 % | 75 % | 63 % | 0 of 9 |
 
+By content (one blind judge, every human sentence):
+
+| Model | Kind | Human sentences | Found by content | In full | Items | Stating one | Cited where it was said |
+|---|---|---:|---:|---:|---:|---:|---:|
+| Apple | decisions | 70 | **20 %** [12 %, 28 %] | 7 % | 58 | **31 %** [18 %, 44 %] | 7 of 17 |
+| Apple | tasks | 18 | **50 %** [25 %, 68 %] | 17 % | 67 | **15 %** [5 %, 28 %] | 9 of 10 |
+| Integrated | decisions | 70 | **21 %** [12 %, 33 %] | 9 % | 43 | **49 %** [29 %, 68 %] | 9 of 19 |
+| Integrated | tasks | 18 | **39 %** [17 %, 60 %] | 22 % | 36 | **31 %** [8 %, 60 %] | 10 of 11 |
+
 95 % intervals: meeting-cluster bootstrap. On the 9 test meetings alone, Apple's minutes find 27 % of the decisions and 77 % of
 the actions, the integrated model's 14 % and 69 % (`gold_scores.json`). With no tolerance (the cited passage itself must be a
 linked one), Apple's decisions fall to 13 % found and 12 % supported and the integrated model's to 17 % and 26 %: Apple's
@@ -502,19 +520,24 @@ citations land next to the linked passage more often than on it. With two passag
 
 ### What this says, and what it does not
 
-- **The minutes point where people decided, more often than chance, and miss most of it.** A decision of either model cites a
-  passage near a human decision 2.4 to 3.1 times as often as a random passage would, and most items (72 to 88 %) cite something
-  the human summary covers. But the minutes find a fifth to a quarter of the 60 human decisions: the annotators wrote down
-  design decisions (materials, buttons, colours, the battery) that the minutes leave out or cite elsewhere.
-- **Tasks: few human actions, many tasks.** The 17 human actions are found 59 to 71 % of the time, from 36 tasks (integrated)
-  and 67 (Apple), of which a quarter to a third are grounded in one. Many of the others read as points to discuss rather than
-  tasks ("Evaluate color options").
+- **The minutes find about a fifth of the human decisions, by either measure.** By content, 20 % (Apple) and 21 % (integrated)
+  of the 70 human decisions, and few of them in full (7 and 9 %); by where they point, 25 and 20 % of the 60 with a link. The
+  annotators wrote down design decisions (materials, buttons, colours, the battery) that the minutes leave out.
+- **The integrated model's decisions are more often real decisions.** 49 % of them state a human decision, against 31 % of
+  Apple's, and both cite near a human decision 2.4 to 3.1 times as often as a random passage would; most items (72 to 88 %) cite
+  something the human summary covers.
+- **Tasks: few human actions, many tasks.** Half of the 18 human actions are stated by one of Apple's 67 tasks and 39 % by one
+  of the integrated model's 36, but only 15 % of Apple's tasks and 31 % of the integrated model's state a human action. Many of
+  the others read as points to discuss rather than tasks ("Evaluate color options").
+- **Said right, cited elsewhere.** A task that states a human action cites where it was said 19 times out of 21; a decision that
+  states a human decision, 16 times out of 36. The measure by place misses the other 20: said right, but cited more than one
+  passage away from where the annotator linked it.
 - **No task has the owner the annotators named.** AMI's participants play roles and call each other by them, and the minutes
   never take a role as an owner (a role is not a person). On this corpus 8 of Apple's 98 tasks (counting those ranked out) and 2
   of the integrated model's 36 have an owner at all. This measures the corpus as much as the minutes: an owner needs a named
   person (an attendee, someone in Context).
-- **It scores where an item points, not what it says.** An item can cite the right passage and get it wrong, or say it right and
-  cite another passage. One annotator wrote each summary, each model ran once, 13 meetings: the intervals are wide.
+- **One annotator, one judge, one run.** One annotator wrote each summary; one LLM judge matched the items, with no human
+  review of its matches; each model ran once, on 13 meetings: the intervals are wide.
 - **Not held out.** These meetings are in the `llm-eval` sets the minutes were developed on. The 11 scenario meetings that no
   evaluation had used are sealed for the check before a release ([`eval/heldout/README.md`](../eval/heldout/README.md)).
 
