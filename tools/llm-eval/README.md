@@ -25,7 +25,7 @@ stored). Its requests go through the app's own client and rules, so they show th
 | `--guard none\|g1\|g2\|g1+g2` | Which guards of a live answer are on: the three-way `found` (G1) and the check of the quoted lines against the moment of the question (G2). |
 | `--warm` (or `--replay-realtime`) | Replays each meeting as a recording: the integrated model reads the transcript as the segments arrive (a reading every ~600 characters, the way the app does), and the minutes or the question read only what came after. The traces carry `warmSeconds` and the prefix reuse. |
 
-The minutes run stores the speakers of the transcript as speakers of the meeting (as after a real recording) instead of writing "Speaker 3 (remote):" in front of each line, so owners can be measured. Each call in `traces.jsonl` has a `breakdown` (`tokenizeSeconds`, `slotWaitSeconds`, `gateWaitSeconds`, `newPrefillTokens`, `prefillChunks`, `prefillSeconds`) next to the time to the first token. A meeting whose minutes fail writes no result file; its calls, error and replies go to `minutes/<meeting>.<provider>.failed.json` instead, so the answer that could not be read can be looked at (the sets are public transcripts).
+The minutes run stores the speakers of the transcript as speakers of the meeting (as after a real recording) instead of writing "Speaker 3 (remote):" in front of each line, so owners can be measured. Each call in `traces.jsonl` has a `breakdown` (`tokenizeSeconds`, `slotWaitSeconds`, `gateWaitSeconds`, `newPrefillTokens`, `prefillChunks`, `prefillSeconds`, and `longestChunkSeconds` and `longestBurstSeconds`, the longest the call held the GPU between two checkpoints while reading and while decoding) next to the time to the first token. A meeting whose minutes fail writes no result file; its calls, error and replies go to `minutes/<meeting>.<provider>.failed.json` instead, so the answer that could not be read can be looked at (the sets are public transcripts).
 
 ## Live answers to questions heard in the meeting
 
@@ -81,9 +81,9 @@ Another session may be using the CPU, GPU and RAM. For every speed, latency, res
 10%, bounded wait, each trace says whether it was met); run the two providers interleaved item by item (ABAB); take GPU energy from the
 chip-level IOReport figure (primary for GPU work, with the foreign load next to it) and CPU time and CPU energy per process
 (`ri_energy_nj`, CPU only: the secondary figure); and say which absolute numbers were taken under foreign load.
-Quality counts are not a measure of load, but they are not fixed either: the integrated model's prefill chunks follow the measured
-speed, so its replies, minutes included, change from run to run (by up to ten points of recall on the 13 AMI meetings with a human
-summary). Run each arm three times or more, or pass `--prefill-chunk <tokens>` so a run repeats token for token
+Quality counts are not a measure of load. The integrated model reads in fixed 128-token chunks, so a run repeats token for token,
+but it is one draw of the bf16 rounding: with chunks that followed the measured speed, the replies changed from run to run by up to
+ten points of recall on the 13 AMI meetings with a human summary. Compare arms on several draws, `--prefill-chunk 64`, `96`, `128`…
 (docs/LANGUAGE_MODEL.md, "The second pass (A3) against the human gold").
 
 ## The sets (2026-10-12)

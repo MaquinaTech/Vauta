@@ -96,6 +96,9 @@ public struct LanguageModelOutput: Sendable {
     public var slotWaitSeconds: Double = 0
     public var gateWaitSeconds: Double = 0
     public var prefillChunks: Int = 0
+    /// The longest stretches between two checkpoints, reading the prompt and decoding (`GenerationResult`).
+    public var longestChunkSeconds: Double = 0
+    public var longestBurstSeconds: Double = 0
 }
 
 /// A running generation was asked to give way to a more urgent one that needs the same kept prefix (live notes and the incremental
@@ -167,8 +170,8 @@ public actor LanguageModelEngine {
     public var isLoaded: Bool { engine != nil }
     public var isDamaged: Bool { damaged }
 
-    /// Runs prefill in chunks of exactly `n` tokens (nil = sized by speed, as in the app). The parity check against mlx-lm's goldens
-    /// uses 512, the chunking they were made with.
+    /// Runs prefill in chunks of `n` tokens, ending at the multiples of `n` (nil = `Gemma4Engine.prefillChunk`, as in the app). The
+    /// parity check against mlx-lm's goldens uses 512, the chunking they were made with.
     public func setPrefillChunk(_ n: Int?) {
         fixedChunk = n
         engine?.fixedChunk = n
@@ -526,7 +529,7 @@ public actor LanguageModelEngine {
                                    decodeSeconds: result.decodeSeconds,
                                    peakFootprintMB: result.peakFootprintMB, maskUploadSeconds: result.maskUploadSeconds,
                                    tokenizeSeconds: tokenizeSeconds, slotWaitSeconds: waits.slot, gateWaitSeconds: waits.gate,
-                                   prefillChunks: result.prefillChunks)
+                                   prefillChunks: result.prefillChunks, longestChunkSeconds: result.longestChunkSeconds, longestBurstSeconds: result.longestBurstSeconds)
     }
 
     /// What reading a meeting's transcript into the kept prefix did.
@@ -584,7 +587,7 @@ public actor LanguageModelEngine {
         let r = try await run(GenerationRequest(prompt: ids, maxTokens: maxTokens, sampling: DecodingParameters.greedy), constraint: nil, priority: .interactive, onToken: nil).0
         return LanguageModelOutput(text: "", tokens: r.tokens, promptTokens: r.promptTokens, reusedTokens: r.reusedTokens, finish: r.finish.rawValue,
                                    prefillSeconds: r.prefillSeconds, firstTokenSeconds: r.firstTokenSeconds, firstTokenSinceCallSeconds: nil, decodeSeconds: r.decodeSeconds,
-                                   peakFootprintMB: r.peakFootprintMB)
+                                   peakFootprintMB: r.peakFootprintMB, longestChunkSeconds: r.longestChunkSeconds, longestBurstSeconds: r.longestBurstSeconds)
     }
 
     /// Last-position logits for ids (the golden check), under the gate like any other GPU work.

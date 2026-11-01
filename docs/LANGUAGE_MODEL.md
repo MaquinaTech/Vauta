@@ -129,13 +129,20 @@ tied 4-bit output head with `tanh(x/30)*30`, bf16 activations and bf16 key/value
   from the memory map and dequantised on the GPU (about 6.2 KB per token).
 - **Sliding caches** keep the last 511 tokens before a chunk; attention runs over those and the chunk with a windowed mask. This is
   the same set of keys as mlx-lm's rotating cache. **Full caches** grow in steps of 1,024 tokens.
-- **Prefill** is chunked twice over. Memory: the largest power of two up to 512 whose unfused attention scores (heads x chunk x
-  context x 4 bytes) stay under 256 MiB, because the fused attention kernel is not used at head dimensions 256 and 512. Time: the chunk
-  is also cut to what the measured prefill speed does in 0.4 s (a multiple of 16, at least 16; the first chunk is 64 tokens, before a
-  speed is known). At the measured 193 to 224 tokens/s that is 64 to 80 tokens, so cancellation, the gate and the heat check are
-  looked at every 0.3 to 0.4 s, not after a 512-token chunk (2.3 to 2.7 s). Measured on the real model (release, 4,000 tokens,
-  interleaved, load1 4 to 6): 512-token chunks 219 tokens/s, 256 218, 128 215, time-sized 205, so the guarantee costs 6 to 7% of
-  prefill speed. Cancelling a 12,000-token prefill 30 s in was seen after 0.25 s (the GPU was shared at the time).
+- **Prefill** runs in chunks of 128 tokens (`Gemma4Engine.prefillChunk`) that end at the multiples of 128 of the prompt, wherever
+  the reading started: from the start, from a kept prefix, or continued while the meeting is recorded. Every reading of a prompt
+  therefore runs the same chunks and gives the same bits, because the bf16 sums depend on the chunking ("One run is one draw" below).
+  A kept prefix is continued only from a chunk boundary, or from its own end when that is the new prefix's end too; the reading of a
+  recording keeps a checkpoint at its last boundary and reads up to 127 tokens again when the next lines come. The memory rule (the
+  largest power of two up to 512 whose unfused attention scores, heads x chunk x context x 4 bytes, stay under 256 MiB, because the
+  fused attention kernel is not used at head dimensions 256 and 512) never cuts 128 within the 65,536-token context. Cancellation,
+  the gate and the heat check are looked at between two chunks: on this Mac (release, 4 public AMI meetings of 11,475 to 19,656
+  tokens, quiet) a chunk held the GPU 0.45 s at most (once 0.68 s, below), prefill ran at 363 to 376 tokens/s, and the minutes
+  repeated token for token, cold and replayed as a recording. Until 1 November the chunk was cut to what the measured speed did in 0.4 s (64 to 80
+  tokens at the 193 to 224 tokens/s of a loaded Mac), which changed the chunks, and with them the minutes, on every run; the same
+  meetings then read at 345 to 352 tokens/s. Measured before that on 4,000 tokens (interleaved, load1 4 to 6): 512-token chunks 219
+  tokens/s, 256 218, 128 215, time-sized 205. Cancelling a 12,000-token prefill 30 s in was seen after 0.25 s (the GPU was shared at
+  the time).
 - **The layers that share keys and values run on one position.** Layers 24 to 41 write no keys or values, and only the last
   position's hidden state is ever read (the next token's logits). A chunk of the prompt whose hidden state is not wanted evaluates the
   caches alone: MLX is lazy, so layers 0 to 22 and the keys and values of layer 23 run, and the rest of layer 23 and the 18 shared
@@ -175,8 +182,12 @@ tied 4-bit output head with `tanh(x/30)*30`, bf16 activations and bf16 key/value
   `llm-selftest`.
 - **One GPU job at a time** across this model and the search model (`MLXWorkGate`): interactive answer, live notes, minutes, bulk
   embedding in that order. A generation does not hold the gate for its whole length (minutes took 77 to 115 s): it takes it per
-  prefill chunk and per burst of 16 decoded tokens (`GenerationLease`) and, at every checkpoint, gives it to a waiter of higher
-  priority. A search query's embedding, or a live answer during a minutes job, therefore waits at most one chunk or burst (a test runs
+  prefill chunk and per burst of 8 decoded tokens, with one more checkpoint between the last chunk and the first burst
+  (`GenerationLease`), and, at every checkpoint, gives it to a waiter of higher priority. Measured on 4 public AMI meetings (release,
+  quiet): the longest chunk held the GPU 0.36 to 0.45 s (0.68 s once, on the first meeting of a run under load 3.9) and the longest
+  burst 0.41 to 0.56 s, where bursts of 16 tokens held it 1.07 to 1.21 s (the first one also took the last chunk), for the same
+  tokens and a decode 0.2 to 0.9 % slower (19.4 to 21.3 tokens/s). A search query's embedding, or a live answer during a minutes job,
+  therefore waits at most one chunk or burst (a test runs
   a 900-token generation and an interactive request: the request is served after about 60 tokens, and a live generation finishes inside
   a minutes one). Everything that touches the GPU in `LanguageModelEngine` goes through the gate, the kernel self-test and the weight
   load included (a source test checks every entry point). The engine itself is an actor that stays free between checkpoints.
@@ -300,7 +311,7 @@ the question file, the blind packets with a sealed key and the manifest; see `to
 the same assembled file) with the same limit, so the many-chunk growth of the full-attention caches and the windowed masks past the
 8.5k tokens of the other goldens are checked too.
 
-The goldens were made with 512-token prefill chunks. The app now sizes chunks by time (64 to 80 tokens), so `llm-selftest` checks twice:
+The goldens were made with 512-token prefill chunks. The app reads in 128-token chunks, so `llm-selftest` checks twice:
 with 512-token chunks (`setPrefillChunk`) tokens and logits against the goldens, as above; and with the app's chunks it requires top-1 on
 8 of 8 and the top-20 within the same limit and *reports* the greedy agreement (a near tie can flip with bf16 rounding when the chunking
 changes, as it does in mlx-lm itself). The tiny-model CI test compares one pass over the whole prompt with the 20 best logits (within 3% of
@@ -423,7 +434,7 @@ benchmark above is the controlled comparison.
   Measured on this Mac under load 5 to 9, 6 random walks per schema (minutes, answer, live notes, note batch), 14,687 masks:
   **median 0.47 to 0.50 ms, p99 0.70 to 0.93 ms, but a maximum of 108 ms (minutes) and 48 ms (answer)** on the first masks of a
   value, which build the lazy per-length string tables: that outlier exceeds the design's 5 ms worst case and is paid once per
-  call (bounded by the 0.4 s chunk rule). A larger tool run (`VAUTA_LLM_WALKS=100`: 400 walks, 218,353 masks) gave the same median
+  call (inside one decode burst). A larger tool run (`VAUTA_LLM_WALKS=100`: 400 walks, 218,353 masks) gave the same median
   (0.49 ms) and p99 (0.72 to 0.78 ms), worst cases of 50 to 106 ms, and 400 of 400 walks ended and parsed. The design's 10,000 walks
   per schema were not run (a walk costs about 0.5 s here, so 40,000 would take about 6 hours of a shared GPU-free Mac). The first constraint of a process takes 2.2 s (TokenIndex of 262,144 tokens). The suite asserts
   loose bounds only (median under 20 ms, p99 under 250 ms) because the Mac is shared. Every walk that ended parsed.
@@ -997,7 +1008,7 @@ solo runs. A second judge matched the same items with the human summaries, as in
   run once G1 failed.
 
 **One run is one draw.** The same binary, prompt and greedy decoding gave different minutes in every run, on every meeting, summary
-included: the prefill chunk is sized by the measured speed ("Running it", **Prefill**), so one 13,525-token prompt ran in 103 chunks once and
+included: the prefill chunk was sized by the measured speed ("Running it", **Prefill**), so one 13,525-token prompt ran in 103 chunks once and
 102 the next, and a near tie flips with the bf16 rounding (completions of 1,188, 962 and 909 tokens). The number of items barely moves
 (76 in each release run, 104 to 106 for A3); which ones does. The release run of BENCHMARKS.md found 28.6 % of the human decisions and
 actions, and three more found 29.9 to 40.3 %: a difference between two single runs smaller than about ten points says nothing.
@@ -1005,6 +1016,15 @@ Every gate of the minutes on the integrated model therefore needs three runs or 
 (chunks of exactly 128 tokens) three of these meetings gave the same minutes twice, token for token (548, 649 and 499 tokens in the
 first request), in the same time as the app's chunks (60.8 to 68.2 s): a run then repeats, so two arms can be compared on the same
 draw, and a few chunk sizes (64, 96, 128…) give controlled draws in place of the timing's.
+
+**The app now reads in fixed chunks (2026-11-01).** Chunks of 128 tokens that end at the multiples of 128 of the prompt, in the app
+as in the evaluation, so the same transcript gives the same minutes on the same Mac: rewritten later, or written right after a
+recording whose transcript was read as it came in. Measured with the release build on ES2011d, IS1009b, IS1009d and TS3004d (11,475
+to 19,656 tokens): two cold runs gave the same replies, token for token, on 4 of 4 meetings, and a run replayed as a recording
+(`--warm`, the meeting read every 600 characters, 14 to 25 chunks left after it) gave the same replies as the cold ones on 4 of 4.
+Prefill ran at 363 to 376 tokens/s, against 345 to 352 for the same meetings with the speed-sized chunks. A repeatable run is still
+one draw of the rounding: an arm that changes the prompt changes the sums too, so a gate still needs several draws, now chosen with
+`--prefill-chunk` (64, 96, 128…) instead of left to the timing.
 
 ## Findings of blind run 4 (2026-10-15)
 
@@ -1028,7 +1048,7 @@ reading its 2,000 tokens: the fallback was neither fast nor good.
 **Fix.** The fallback is gone (`estimatedReadSeconds`, `coldFallbackLive`, `coldFallbackFinished` and `fallbackPassageTokens` are
 deleted). A question about one meeting whose transcript fits the Ask window always sends the whole visible transcript. It uses the meeting's
 kept prefix when that meeting is being read or was just recorded and the Ask prefix otherwise, so a reading of this meeting that is in
-flight is *joined*: the reading steps aside at its next chunk (0.3 to 0.4 s, `GenerationPreempted`) and the question continues from what
+flight is *joined*: the reading steps aside at its next chunk (0.36 to 0.45 s, `GenerationPreempted`) and the question continues from what
 was read, without reading anything twice. A reading of another meeting is not waited for (separate slot, interactive priority on the gate),
 and the question no longer starts a second reading in its place. The reading shows its progress (`onPrefill`) and can be cancelled.
 Past the window the passages path is unchanged. The window is `ContextBudget.askInput`: 20,000 tokens at a 32,768-token context, scaled by

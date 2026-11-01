@@ -94,6 +94,10 @@ public struct LatencyBreakdown: Codable, Sendable, Equatable {
     public var newPrefillTokens = 0
     public var prefillChunks = 0
     public var prefillSeconds = 0.0
+    /// The longest the integrated model held the GPU without a checkpoint while reading the prompt, and while decoding: the longest
+    /// a more urgent job waited for it because of this call.
+    public var longestChunkSeconds = 0.0
+    public var longestBurstSeconds = 0.0
     public init() {}
 }
 

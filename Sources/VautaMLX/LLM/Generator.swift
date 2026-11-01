@@ -61,6 +61,34 @@ public struct GenerationResult: Sendable {
     public var maskUploadSeconds: Double = 0
     /// Prefill chunks that ran for this request (the kept prefix's included).
     public var prefillChunks = 0
+    /// The longest stretch between two checkpoints while reading the prompt, and while decoding: the longest a more urgent job
+    /// waited for the GPU because of this request.
+    public var longestChunkSeconds = 0.0
+    public var longestBurstSeconds = 0.0
+}
+
+/// Times the stretches between checkpoints of one request.
+final class HoldClock {
+    private var since = Date()
+    private(set) var prefill = 0.0
+    private(set) var decode = 0.0
+    var decoding = false
+
+    /// Ends a stretch: a checkpoint is about to run, or the request returns.
+    func lap() {
+        let held = Date().timeIntervalSince(since)
+        if decoding { decode = max(decode, held) } else { prefill = max(prefill, held) }
+    }
+    /// Starts the next stretch (the checkpoint gave the GPU back).
+    func resume() { since = Date() }
+
+    func wrap(_ checkpoint: GenerationCheckpoint?) -> GenerationCheckpoint {
+        { [self] in
+            lap()
+            try await checkpoint?()
+            resume()
+        }
+    }
 }
 
 /// Called between prefill chunks and every `Gemma4Engine.decodeBurst` tokens: the place where a job gives the GPU to a more
@@ -69,7 +97,7 @@ public typealias GenerationCheckpoint = () async throws -> Void
 
 /// Prefill and decode over `Gemma4TextModel`, with one kept prefix state per slot (see `GenerationRequest.sharedPrefix`).
 /// Not `Sendable`: owned by one actor. Cancellation and checkpoints run between prefill chunks and between decode bursts; a
-/// prefill chunk is sized to take about `chunkSeconds` of GPU time, so neither waits long even on the real model.
+/// prefill chunk (`prefillChunk` tokens) takes about as long as a decode burst on the real model, so neither waits long.
 public final class Gemma4Engine {
     public let model: Gemma4TextModel
     /// A kept prefix: its token ids, its caches, and the states it can be rewound to, by length, ascending. The last one is the
@@ -88,22 +116,26 @@ public final class Gemma4Engine {
 
     static let margin = 16
     public static let maxContext = 65_536
-    /// Decode steps between two checkpoints.
-    public static let decodeBurst = 16
+    /// Decode steps between two checkpoints: about as long as a prefill chunk on the real model (0.41 to 0.56 s on an M2, where 16
+    /// tokens held the GPU 1.07 to 1.21 s), so a more urgent job waits as little during decoding as during prefill, for a decode
+    /// 0.2 to 0.9 % slower.
+    public static let decodeBurst = 8
     /// Tokens kept in reserve when a constrained output must end at the token limit: the shortest valid ending can grow by this
     /// much with one more token, so closing at this distance always fits.
     static let closeSlack = 64
     /// Distance from the token limit at which the shortest ending is first computed.
     static let closeWindow = 256
 
-    /// Test hook: the largest prefill chunk (nil = the memory and time rules of `chunkSize`).
+    /// Prompt tokens per prefill chunk. Chunks end at the multiples of it (positions in the prompt, not in one call), so every reading
+    /// of a prompt runs the same chunks: from the start, from a kept prefix, or continued while a meeting is recorded. The bf16 sums
+    /// depend on the chunking, and a near tie between two tokens flips with them: chunks sized by the measured speed gave other
+    /// minutes on every run. A chunk of 128 tokens holds the GPU about as long as a decode burst (0.36 to 0.45 s on an M2 at 363
+    /// to 376 tokens a second, up to 19,656 tokens), and reads faster than the speed-sized chunks did (345 to 352 tokens a second).
+    public static let prefillChunk = 128
+    /// Test hook: a smaller prefill chunk (nil = `prefillChunk`, or `fixedChunk`).
     public var chunkLimit: Int?
-    /// GPU time one prefill chunk should take: the longest the engine goes without looking at cancellation or the gate.
-    public var chunkSeconds = 0.4
-    /// Test and self-test hook: a fixed prefill chunk (the goldens of mlx-lm are made with 512), cut by the memory rule only.
+    /// Test and self-test hook: another prefill chunk (the goldens of mlx-lm are made with 512), cut by the memory rule.
     public var fixedChunk: Int?
-    /// The first prefill chunk, before a speed is known (tests set it to run a short prompt in one go).
-    public var firstChunk = 64
     /// Measured prefill speed (tokens per second, smoothed); nil until the first chunk has run.
     private(set) var prefillRate: Double?
     public var measuredPrefillRate: Double? { prefillRate }
@@ -117,6 +149,10 @@ public final class Gemma4Engine {
     public func keptPrefixTokens(_ slot: PrefixSlot = .ask) -> Int { slots[slot]?.ids.count ?? 0 }
     /// Lengths of the checkpoints a slot can be rewound to (tests and diagnostics).
     func checkpointLengths(_ slot: PrefixSlot) -> [Int] { slots[slot]?.checkpoints.map(\.length) ?? [] }
+    /// The keys and values a slot holds, as floats (tests: two readings of the same prompt hold the same bits).
+    func keptValues(_ slot: PrefixSlot) -> [[Float]] {
+        (slots[slot]?.caches.usedArrays ?? []).map { $0.asType(.float32).reshaped([-1]).asArray(Float.self) }
+    }
     /// Memory held by the kept prefixes: their caches and checkpoints.
     public var cacheBytes: Int { slots.values.reduce(0) { $0 + $1.caches.byteCount + $1.checkpoints.reduce(0) { $0 + $1.byteCount } } }
     /// Memory held by one slot.
@@ -130,13 +166,15 @@ public final class Gemma4Engine {
     public var checkpointNearSpacing = 512
     public var checkpointFarSpacing = 8192
 
-    /// Which of the checkpoint lengths to keep for a prefix of `end` tokens: the last one, every one within `nearEnd` of it, and
-    /// otherwise one per `farSpacing` tokens.
-    static func pruned(_ lengths: [Int], end: Int, nearEnd: Int, farSpacing: Int) -> [Int] {
+    /// Which of the checkpoint lengths to keep for a prefix of `end` tokens: the last one, `boundary` (the last chunk boundary
+    /// before it, where a longer prompt continues), one per `nearSpacing` tokens within `nearEnd` of the end, and one per
+    /// `farSpacing` further back. The boundaries of earlier, shorter prefixes are thinned like any other checkpoint.
+    static func pruned(_ lengths: [Int], end: Int, boundary: Int? = nil, nearEnd: Int, nearSpacing: Int, farSpacing: Int) -> [Int] {
         var kept: [Int] = []
         var last = 0
         for l in lengths.sorted() where l <= end {
-            if l == end || end - l <= nearEnd || l - last >= farSpacing {
+            let spacing = end - l <= nearEnd ? nearSpacing : farSpacing
+            if l == end || l == boundary || l - last >= spacing {
                 kept.append(l)
                 last = l
             }
@@ -166,25 +204,26 @@ public final class Gemma4Engine {
         return c
     }
 
-    /// The chunk to run next: what the memory rule allows, cut to what the measured speed does in `seconds` (a multiple of 16, at
-    /// least 16). Before any measurement a short chunk is run to get one.
-    static func chunk(memoryCap: Int, rate: Double?, seconds: Double, initial: Int = 64) -> Int {
-        guard let rate, rate > 0 else { return min(initial, memoryCap) }
-        let byTime = Int(rate * seconds) / 16 * 16
-        return max(16, min(memoryCap, byTime))
+    /// The chunk of a prompt that `contextEnd` tokens of context will follow: `prefillChunk` (or the test hooks), cut by the memory rule.
+    func chunkUnit(contextEnd: Int) -> Int {
+        min(fixedChunk ?? Self.prefillChunk, chunkLimit ?? Int.max, Self.chunkSize(context: contextEnd))
+    }
+
+    /// Where the chunk that starts at position `start` ends: the next multiple of `unit`, or `end`.
+    static func chunkEnd(from start: Int, end: Int, unit: Int) -> Int {
+        min(end, (start / unit + 1) * unit)
     }
 
     private func prefill(_ ids: ArraySlice<Int32>, caches: LayerCaches, contextEnd: Int, wantHidden: Bool,
                          checkpoint: GenerationCheckpoint?, afterChunk: ((Int) -> Void)? = nil, isolation: isolated (any Actor)? = #isolation) async throws -> MLXArray? {
         var last: MLXArray?
         var i = ids.startIndex
+        let unit = chunkUnit(contextEnd: contextEnd)
         while i < ids.endIndex {
             try Task.checkCancellation()
             try await checkpoint?()
-            let memoryCap = Self.chunkSize(context: contextEnd)
-            let wanted = fixedChunk.map { min($0, memoryCap) } ?? Self.chunk(memoryCap: memoryCap, rate: prefillRate, seconds: chunkSeconds, initial: firstChunk)
-            let size = min(chunkLimit ?? Int.max, wanted)
-            let j = min(ids.endIndex, i + size)
+            // `ids` keeps the prompt's indices, so `i` is the position in the prompt.
+            let j = Self.chunkEnd(from: i, end: ids.endIndex, unit: unit)
             let started = Date()
             let h = try model.forward(Array(ids[i..<j]), caches: caches)
             // Only the last chunk's hidden state is ever read, and only when the caller wants it. For any other chunk, evaluating the
@@ -220,6 +259,8 @@ public final class Gemma4Engine {
         let total = prompt.count
         let report = request.onPrefill
         let progress: ((Int) -> Void)? = report.map { r in { (done: Int) -> Void in r(done, total) } }
+        let clock = HoldClock()
+        let checkpoint = clock.wrap(checkpoint)
         // 1. Get the caches to the shared prefix: reuse the slot's kept state when the prompt starts with it. A request with no
         // shared prefix runs on scratch caches and leaves every slot as it was.
         let target = request.sharedPrefix.map { max(0, min($0, prompt.count - 1) - Self.margin) } ?? 0
@@ -249,7 +290,10 @@ public final class Gemma4Engine {
         }
         // The shared prefix and the rest of the prompt: everything read before the first token.
         let prefillSeconds = prefixSeconds + Date().timeIntervalSince(prefillStart)
+        // Between the last chunk and the first burst too, so a waiter never waits for both.
+        try await checkpoint()
         // 3. Decode.
+        clock.decoding = true
         var sampler = Sampler(params: request.sampling, vocab: cfg.vocab)
         var out: [Int32] = []
         var finish = GenerationFinish.length
@@ -337,13 +381,14 @@ public final class Gemma4Engine {
             sinceCheckpoint += feed.count
             if sinceCheckpoint >= Self.decodeBurst {
                 sinceCheckpoint = 0
-                try await checkpoint?()
+                try await checkpoint()
             }
         }
         peak = max(peak, MLXRuntime.physFootprintMB())
+        clock.lap()
         return GenerationResult(tokens: out, finish: finish, promptTokens: prompt.count, reusedTokens: reused, prefillSeconds: prefillSeconds,
                                 firstTokenSeconds: firstToken, decodeSeconds: Date().timeIntervalSince(decodeStart), peakFootprintMB: peak, maskUploadSeconds: maskUpload,
-                                prefillChunks: chunksRun - chunksBefore)
+                                prefillChunks: chunksRun - chunksBefore, longestChunkSeconds: clock.prefill, longestBurstSeconds: clock.decode)
     }
 
     /// Brings the slot's caches to hold `prompt[0..<target]`, continuing from the longest valid checkpoint, and stores the result
@@ -354,7 +399,8 @@ public final class Gemma4Engine {
         var reused = 0
         var checkpoints: [LayerCaches.Snapshot] = []
         let caches: LayerCaches
-        if let kept = slots[slot], let resume = Self.resumePoint(kept.ids, prompt: prompt, limit: target, checkpoints: kept.checkpoints) {
+        let unit = chunkUnit(contextEnd: target)
+        if let kept = slots[slot], let resume = Self.resumePoint(kept.ids, prompt: prompt, limit: target, checkpoints: kept.checkpoints, unit: unit) {
             // Continue from the latest checkpoint at or before the first differing token.
             caches = kept.caches
             caches.restore(resume)
@@ -376,7 +422,10 @@ public final class Gemma4Engine {
             onPrefill?(offset)
             guard offset < target else { return }
             let near = offset >= target - nearEnd && offset - lastCheckpoint >= nearSpacing
-            if near || offset - lastCheckpoint >= farSpacing {
+            // The last chunk boundary before the end: a longer prompt (the next lines of a recording) continues from it, not from
+            // the end, so it runs the chunks a cold reading of that prompt runs.
+            let lastBoundary = target - offset < unit
+            if near || lastBoundary || offset - lastCheckpoint >= farSpacing {
                 checkpoints.append(caches.compactSnapshot())
                 lastCheckpoint = offset
                 // What a stopped prefill has done so far stays valid: the ids and checkpoints up to this one.
@@ -384,7 +433,8 @@ public final class Gemma4Engine {
             }
         })
         if checkpoints.last?.length != target { checkpoints.append(caches.snapshot()) }
-        let keepLengths = Set(Self.pruned(checkpoints.map(\.length), end: target, nearEnd: checkpointNearEnd, farSpacing: checkpointFarSpacing))
+        let keepLengths = Set(Self.pruned(checkpoints.map(\.length), end: target, boundary: (target - 1) / unit * unit,
+                                          nearEnd: nearEnd, nearSpacing: nearSpacing, farSpacing: farSpacing))
         slots[slot] = Kept(ids: Array(prompt[0..<target]), caches: caches, checkpoints: checkpoints.filter { keepLengths.contains($0.length) })
         return (caches, reused)
     }
@@ -405,12 +455,13 @@ public final class Gemma4Engine {
     }
 
     /// The checkpoint a kept prefix continues from for `prompt`: the latest one at or before the first token where the two differ
-    /// (and at or before `limit`, the length the new prefix will have). nil when there is none, and the prompt starts again.
-    static func resumePoint(_ kept: [Int32], prompt: [Int32], limit: Int, checkpoints: [LayerCaches.Snapshot]) -> LayerCaches.Snapshot? {
+    /// (and at or before `limit`, the length the new prefix will have) that a cold reading of the new prefix also stops at: a chunk
+    /// boundary (a multiple of `unit`) or `limit` itself. nil when there is none, and the prompt starts again.
+    static func resumePoint(_ kept: [Int32], prompt: [Int32], limit: Int, checkpoints: [LayerCaches.Snapshot], unit: Int) -> LayerCaches.Snapshot? {
         let n = min(kept.count, limit, prompt.count)
         var common = 0
         while common < n, kept[common] == prompt[common] { common += 1 }
-        return checkpoints.last { $0.length <= common && $0.length > 0 }
+        return checkpoints.last { $0.length <= common && $0.length > 0 && ($0.length % unit == 0 || $0.length == limit) }
     }
 
     /// Whether the last 32 tokens have just repeated for the third time in a row.
