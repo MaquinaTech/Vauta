@@ -921,6 +921,9 @@
 /* No comment provided by engineer. */
 "Bring Back Speakers" = "Restaurer les intervenants";
 
+/* Settings → Status; title of the row that opens a new bug report on GitHub */
+"Bug report" = "Rapport de bug";
+
 /* Network Activity result; the argument is an HTTP status code */
 "Busy (%lld)" = "Occupée (%lld)";
 
@@ -1397,6 +1400,9 @@
    Confirmation after copying minutes or an answer
    Diagnostics button after copying */
 "Copied" = "Copié";
+
+/* Settings → Status; explains Report a Problem… */
+"Copies the diagnostics and opens a new bug report on GitHub in your browser, with your Vauta and macOS versions filled in. Paste the diagnostics there; nothing else is in the address." = "Copie les diagnostics et ouvre dans votre navigateur un nouveau rapport de bug sur GitHub, avec vos versions de Vauta et de macOS déjà remplies. Collez-y les diagnostics ; rien d’autre ne figure dans l’adresse.";
 
 /* Answers card: copies the answer */
 "Copy" = "Copier";
@@ -5167,6 +5173,9 @@
 
 /* No comment provided by engineer. */
 "Replace Meetings, Context and Settings" = "Remplacer réunions, contexte et réglages";
+
+/* Settings → Status; copies the diagnostics and opens a new bug report on GitHub */
+"Report a Problem…" = "Signaler un problème…";
 
 /* Network Activity column: HTTP method and path */
 "Request" = "Requête";

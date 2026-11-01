@@ -1,0 +1,116 @@
+name: Compatibility report
+description: Whether Vauta recorded a call in a meeting app or browser, whether it worked or not.
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for checking a meeting app. A report that it **worked** helps as much as one that it did not: it is what turns an app's
+        status in [docs/COMPATIBILITY.md](https://github.com/MaquinaTech/Vauta/blob/main/docs/COMPATIBILITY.md) into **Verified**.
+        Please **do not paste transcripts, minutes or any other meeting content**. `Vauta status` and `Vauta doctor` print none.
+  - type: dropdown
+    id: app
+    attributes:
+      label: Meeting app or browser
+      description: The rows of the Results table in docs/COMPATIBILITY.md, or another one.
+      options:
+        - Zoom
+        - Microsoft Teams (new)
+        - Microsoft Teams (classic)
+        - Google Meet in Chrome
+        - Slack huddle
+        - FaceTime
+        - Webex
+        - Discord
+        - A call in another browser (say which below)
+        - Another app (say which below)
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: App or browser version, and the meeting service for a web call
+      placeholder: "Chrome 141, Google Meet"
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Audio source in Vauta
+      options:
+        - Automatic
+        - Only the apps I choose
+        - All system audio
+    validations:
+      required: true
+  - type: dropdown
+    id: others
+    attributes:
+      label: Was Others captured?
+      options:
+        - "Yes: the Others meter moved and Others was transcribed"
+        - "Partly: the meter moved, but little or nothing was transcribed"
+        - "No: Others stayed silent"
+    validations:
+      required: true
+  - type: dropdown
+    id: speakers
+    attributes:
+      label: Were the other participants told apart after the meeting?
+      options:
+        - "Yes"
+        - "Partly (some voices merged or split)"
+        - "No"
+        - Only one other participant
+        - Not checked
+  - type: dropdown
+    id: captions
+    attributes:
+      label: Live Translation captions
+      options:
+        - Not tried
+        - Worked
+        - Did not work
+  - type: dropdown
+    id: capture-alert
+    attributes:
+      label: Did the panel say that the app is in a call but Vauta hears nothing from it?
+      options:
+        - "No"
+        - "Yes"
+        - Not sure
+  - type: input
+    id: vauta-version
+    attributes:
+      label: Vauta version
+      description: Settings > About, or `~/Applications/Vauta.app/Contents/MacOS/Vauta version` in Terminal.
+      placeholder: "1.0.0 (123)"
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version and Mac model
+      placeholder: "macOS 27.2, MacBook Air M3"
+    validations:
+      required: true
+  - type: textarea
+    id: status
+    attributes:
+      label: "`Vauta status` during the call"
+      description: |
+        Run `~/Applications/Vauta.app/Contents/MacOS/Vauta status` in Terminal while the call is going on and paste the lines of the
+        meeting app's processes. You can leave out unrelated processes.
+      render: text
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything that changed it
+      description: Muting, rejoining, headphones, another output device, the source you switched to…
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: This report holds no transcript, minutes or other meeting content.
+          required: true

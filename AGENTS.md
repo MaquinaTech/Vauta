@@ -349,7 +349,8 @@ with status 1 when it finds a problem.
 Then the user checks Settings › **Status** (every item should be green or explained) and makes a 1–2 minute test
 recording with **⌃⌥R** (press again to stop). If the first-run setup was skipped, microphone and system audio
 permissions are requested at the first recording. Afterwards, the meeting should have minutes in Meetings, and Ask should answer with citations. Settings ›
-Status › **Copy Diagnostics** copies versions and the checklist, with no meeting content, for a support request.
+Status › **Copy Diagnostics** copies versions and the checklist, with no meeting content, for a support request; **Report a Problem…**
+copies them too and opens a GitHub bug report with only the Vauta and macOS versions filled in.
 
 ## Updating Vauta for a user
 

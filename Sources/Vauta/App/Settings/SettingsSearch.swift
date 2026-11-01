@@ -45,7 +45,7 @@ enum SettingsSearch {
                     "Prepare a brief before meetings", "Notify me before a meeting", "Reminders in the brief", "Show related reminders in the brief",
                     "Reminder lists Vauta reads", "After meetings", "Default list", "Default calendar", "Alert on the due day", "Time of the alert",
                     "Include the meeting’s name in notes"],
-        .status: ["Checklist", "Diagnostics", "Copy Diagnostics"],
+        .status: ["Checklist", "Diagnostics", "Copy Diagnostics", "Report a Problem…"],
         .about: ["Credits and Licenses", "License", "Source code", "Third-party software"],
     ]
 
