@@ -5,14 +5,15 @@ import VautaCore
 import AppKit
 import SwiftUI
 
-/// A click on the bar acts at once, though the bar never becomes the key window.
-final class CompanionHostingView: NSHostingView<CompanionBar> {
+/// A click on the companion acts at once, though it never becomes the key window.
+final class CompanionHostingView: NSHostingView<CompanionView> {
     override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 }
 
 /// The meeting companion's window: a borderless floating bar that never activates Vauta and never takes the keyboard (the
 /// meeting app keeps both), on every Space and over full-screen apps. It asks macOS to stay out of screen sharing, which is not
-/// guaranteed (Hide Vauta Windows takes it off the screen). It is dragged by its time and keeps the place it was put in.
+/// guaranteed (Hide Vauta Windows takes it off the screen). It is dragged by its time and keeps the place it was put in; its
+/// details open under the bar, which stays where it was.
 @MainActor
 final class CompanionPanelController: NSObject {
     static let frameName = "VautaCompanion"
@@ -57,20 +58,25 @@ final class CompanionPanelController: NSObject {
 
     private func makePanel(_ model: RecorderModel, close: @escaping () -> Void) -> NSPanel {
         let panel = Self.makeBarePanel()
-        let host = CompanionHostingView(rootView: CompanionBar(model: model, close: close) { [weak self] size in self?.fit(size) })
+        let host = CompanionHostingView(rootView: CompanionView(model: model, close: close) { [weak self] size in self?.fit(size) })
         host.sizingOptions = []
         panel.contentView = host
         panel.setFrameAutosaveName(Self.frameName)
         return panel
     }
 
-    /// The bar's own size, keeping its centre and its top edge where they were (the time grows by a digit after an hour).
+    /// The companion's own size, keeping its centre and its top edge where they were (the time grows by a digit after an hour,
+    /// the details open under the bar), moved only as far as it takes to stay on its screen (details opened near the bottom).
     private func fit(_ size: CGSize) {
         guard let panel, size.width > 0, size.height > 0, panel.frame.size != size else { return }
         var frame = panel.frame
         frame.origin.x = frame.midX - size.width / 2
         frame.origin.y = frame.maxY - size.height
         frame.size = size
+        if let visible = (panel.screen ?? NSScreen.main)?.visibleFrame {
+            frame.origin.x = min(max(frame.origin.x, visible.minX), visible.maxX - frame.width)
+            frame.origin.y = min(max(frame.origin.y, visible.minY), visible.maxY - frame.height)
+        }
         panel.setFrame(frame, display: true)
     }
 
@@ -84,12 +90,29 @@ final class CompanionPanelController: NSObject {
     }
 }
 
-/// The meeting companion: the recording's state and time, and the commands used during a call, one click each. It reads the
-/// recording as the menu-bar panel does, so the two always agree.
-struct CompanionBar: View {
+/// The meeting companion: the bar and, when the person opens them, its details under it (`CompanionDetails`).
+struct CompanionView: View {
     @Bindable var model: RecorderModel
     var close: () -> Void
     var onSize: (CGSize) -> Void = { _ in }
+
+    var body: some View {
+        VStack(spacing: 6) {
+            CompanionBar(model: model, close: close)
+            if model.preferences.companionShowsDetails {
+                CompanionDetails(model: model)
+            }
+        }
+        .fixedSize()
+        .onGeometryChange(for: CGSize.self, of: { $0.size }) { onSize($0) }
+    }
+}
+
+/// The bar: the recording's state and time, and the commands used during a call, one click each. It reads the recording as the
+/// menu-bar panel does, so the two always agree.
+struct CompanionBar: View {
+    @Bindable var model: RecorderModel
+    var close: () -> Void
 
     static var title: String {
         String(localized: "Meeting Companion", comment: "Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver)")
@@ -116,6 +139,11 @@ struct CompanionBar: View {
             .disabled(!model.canTogglePause)
             CompanionButton("Stop Recording", symbol: "stop.fill") { model.stop() }
             Divider().frame(height: 16)
+            // What the panel shows while it is open, kept beside the call: the answers, the live notes, the newest passages.
+            CompanionButton(model.preferences.companionShowsDetails ? "Hide Details" : "Show Details",
+                            symbol: model.preferences.companionShowsDetails ? "chevron.up" : "chevron.down") {
+                model.preferences.companionShowsDetails.toggle()
+            }
             CompanionButton("Close", symbol: "xmark") { close() }
         }
         .font(.callout)
@@ -124,7 +152,6 @@ struct CompanionBar: View {
         .background(.regularMaterial, in: Capsule())
         .overlay(Capsule().strokeBorder(.separator))
         .fixedSize()
-        .onGeometryChange(for: CGSize.self, of: { $0.size }) { onSize($0) }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(Text(verbatim: Self.title))
     }

@@ -264,7 +264,7 @@ struct RecorderPanel: View {
     private var showsStatus: Bool { model.isRecording || model.phase == .stopping }
     private var showsGeneralWarnings: Bool { PanelWarnings(model: model, scope: .general).isVisible }
     private var showsLiveWarnings: Bool { PanelWarnings(model: model, scope: .live).isVisible }
-    private var hasTranscript: Bool { !model.segments.isEmpty || !model.volatileSegments.isEmpty }
+    private var hasTranscript: Bool { model.hasLiveTranscript }
     private var hasProblem: Bool { PanelWarnings(model: model, scope: .problem).isVisible }
 
     /// The gaps between the parts of the panel that are on screen.

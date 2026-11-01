@@ -201,6 +201,13 @@ struct OthersCard: View {
     }
 }
 
+extension RecorderModel {
+    /// The Live notes card has something to show: notes, or why they couldn't be written (the panel and the companion).
+    var showsLiveNotes: Bool { !livePoints.isEmpty || !liveDecisions.isEmpty || !liveTasks.isEmpty || liveNotesError != nil }
+    /// The recording has passages to show, finished or still being said.
+    var hasLiveTranscript: Bool { !segments.isEmpty || !volatileSegments.isEmpty }
+}
+
 /// Notes the model takes while recording.
 struct LiveNotesView: View {
     let model: RecorderModel
@@ -224,7 +231,7 @@ struct LiveNotesView: View {
     private static let chrome: CGFloat = 24 + 20 + 6
 
     var body: some View {
-        if !model.livePoints.isEmpty || !model.liveDecisions.isEmpty || !model.liveTasks.isEmpty || model.liveNotesError != nil {
+        if model.showsLiveNotes {
             VStack(alignment: .leading, spacing: 6) {
                 // The count of the notes under the fold sits in the title row, so the card is no taller for it.
                 HStack(spacing: 8) {
