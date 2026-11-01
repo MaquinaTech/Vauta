@@ -230,7 +230,7 @@ struct BriefRecordingRowContent: View {
             if expanded {
                 // What the person owes comes first: the panel is short and the end of the row scrolls out of sight.
                 BriefContentView(sections: snapshot.sections.sorted { ($0.kind == .openTasks ? 0 : 1) < ($1.kind == .openTasks ? 0 : 1) }, agenda: snapshot.agenda,
-                                 only: [.lastTime, .openTasks], compact: true, open: open)
+                                 only: snapshot.lastTimeHidden ? [.openTasks, .relatedMeetings] : [.lastTime, .openTasks], compact: true, open: open)
                     .onExitCommand { expanded = false }
             }
         }

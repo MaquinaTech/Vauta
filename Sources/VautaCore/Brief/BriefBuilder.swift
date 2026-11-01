@@ -23,11 +23,13 @@ public struct BriefAssembly: Sendable {
     public var reminderCosines: [String: Double]?
     public var now: Date
     public var locale: String?
+    /// Whether "Last time" is built (`BriefLastTimeShipping`); the evaluation always builds it, to measure it.
+    public var showsLastTime: Bool
 
     public init(event: BriefEvent, facts: BriefFacts, invitationLines: [String] = [], query: String, querySufficient: Bool = true,
                 mode: BriefRankingMode, meetingHits: [BriefMeetingHit] = [], documentHits: [BriefDocumentHit] = [],
                 taskCosines: [Int64: Double]? = nil, reminders: [BriefReminder] = [], reminderCosines: [String: Double]? = nil,
-                now: Date = AppClock.now, locale: String? = nil) {
+                now: Date = AppClock.now, locale: String? = nil, showsLastTime: Bool = true) {
         self.event = event
         self.facts = facts
         self.invitationLines = invitationLines
@@ -41,6 +43,7 @@ public struct BriefAssembly: Sendable {
         self.reminderCosines = reminderCosines
         self.now = now
         self.locale = locale
+        self.showsLastTime = showsLastTime
     }
 }
 
@@ -61,13 +64,17 @@ public enum BriefBuilder {
         }
 
         add(.people, people(a))
-        let (lastItems, shownTasks) = lastTime(a)
+        var lastItems: (items: [BriefItem], total: Int) = ([], 0)
+        var shownTasks = Set<Int64>()
+        if a.showsLastTime { (lastItems, shownTasks) = lastTime(a) }
         add(.lastTime, lastItems.items, total: lastItems.total)
         let tasks = openTasks(a, excluding: shownTasks)
         add(.openTasks, tasks.items, total: tasks.total)
 
         let excluded = Set([a.facts.last?.meetingID].compactMap { $0 })
-        let related = a.querySufficient ? relatedMeetings(a, excluding: excluded, locale: locale) : (items: [BriefItem](), total: 0)
+        var related = a.querySufficient ? relatedMeetings(a, excluding: excluded, locale: locale) : (items: [BriefItem](), total: 0)
+        // Without "Last time" the last meeting leads the related meetings, so its minutes stay one click away.
+        if !a.showsLastTime, let last = a.facts.last { related = ([lastMeeting(last)] + related.items, related.total + 1) }
         add(.relatedMeetings, related.items, total: related.total)
         let docs = documents(a, locale: locale)
         add(.documents, docs.items, total: docs.total)
@@ -87,8 +94,18 @@ public enum BriefBuilder {
                 }
             }
         }
-        return BriefSnapshot(occurrence: a.event.occurrence, title: a.event.title, start: a.event.start, end: a.event.end, service: a.event.service,
-                             seriesName: a.facts.seriesName, mode: a.mode, relatedSkipped: !a.querySufficient, sections: sections)
+        var snapshot = BriefSnapshot(occurrence: a.event.occurrence, title: a.event.title, start: a.event.start, end: a.event.end, service: a.event.service,
+                                     seriesName: a.facts.seriesName, mode: a.mode, relatedSkipped: !a.querySufficient, sections: sections)
+        snapshot.lastTimeHidden = !a.showsLastTime && a.facts.last != nil
+        return snapshot
+    }
+
+    /// The last meeting as a related meeting: its date and title, linked to its minutes, and no line of them.
+    static func lastMeeting(_ last: BriefLastMeeting) -> BriefItem {
+        var item = BriefItem(kind: .relatedMeeting, text: BriefText.line(last.title), link: .meeting(meetingID: last.meetingID, t: nil))
+        item.meetingID = last.meetingID
+        item.meetingDate = last.date
+        return item
     }
 
     // MARK: People

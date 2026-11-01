@@ -176,11 +176,11 @@ extension BriefEvaluation {
         }
 
         let t0 = Date()
-        let result = await composer.build(briefed, settings: settings, environment: BriefEnvironment(), backend: nil, now: start.addingTimeInterval(-600))
+        let result = await composer.build(briefed, settings: settings, environment: BriefEnvironment(), backend: nil, showsLastTime: true, now: start.addingTimeInterval(-600))
         detail["composeSeconds"] = String(format: "%.3f", Date().timeIntervalSince(t0))
         guard var snapshot = result.snapshot else { return ArmRun(text: "", record: record, calls: [], detail: detail) }
         // The same inputs must give the same brief.
-        let again = await composer.build(briefed, settings: settings, environment: BriefEnvironment(), backend: nil, now: start.addingTimeInterval(-600))
+        let again = await composer.build(briefed, settings: settings, environment: BriefEnvironment(), backend: nil, showsLastTime: true, now: start.addingTimeInterval(-600))
         detail["deterministic"] = "\(again.snapshot?.digest == snapshot.digest)"
         detail["mode"] = snapshot.mode.rawValue
         if arm.semantic && snapshot.mode != .semantic { detail["semanticFellBack"] = "true" }

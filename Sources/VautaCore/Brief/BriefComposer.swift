@@ -49,8 +49,9 @@ public struct BriefComposer: Sendable {
         self.reminderSource = reminders
     }
 
+    /// `showsLastTime`: nil asks `BriefLastTimeShipping` for `backend`.
     public func build(_ event: BriefEvent, settings: BriefSettings, environment: BriefEnvironment, backend: BriefBackend? = nil,
-                      integratedLoaded: Bool = false, now: Date = AppClock.now) async -> Result {
+                      integratedLoaded: Bool = false, showsLastTime: Bool? = nil, now: Date = AppClock.now) async -> Result {
         let policy = BriefPolicy.decide(environment, backend: backend, integratedLoaded: integratedLoaded)
         guard policy.build else { return Result(snapshot: nil, policy: policy, reminders: .off, facts: nil) }
 
@@ -102,7 +103,8 @@ public struct BriefComposer: Sendable {
         }
         let assembly = BriefAssembly(event: event, facts: facts, invitationLines: invitation, query: query, querySufficient: sufficient, mode: mode,
                                      meetingHits: meetingHits, documentHits: documentHits, taskCosines: taskCosines, reminders: eligible,
-                                     reminderCosines: reminderCosines, now: now, locale: locale)
+                                     reminderCosines: reminderCosines, now: now, locale: locale,
+                                     showsLastTime: showsLastTime ?? BriefLastTimeShipping.shows(backend: backend))
         return Result(snapshot: BriefBuilder.assemble(assembly), policy: policy, reminders: remindersState, facts: facts)
     }
 }

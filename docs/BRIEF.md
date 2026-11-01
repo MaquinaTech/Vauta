@@ -17,6 +17,12 @@ This page describes the code in `Sources/VautaCore/Brief/` and the interface in 
 - **Settings**: Calendar & Reminders (brief, notification time, in-person, invitation notes, Reminders and their lists), Documents (a folder holds notes exported from Notes).
 - **The default: on once Calendar is on, notification 10 minutes before.** `BriefPreferences.enabled` is true and the lead time 10; Settings → Calendar & Reminders turns the brief off or sets the lead time (Off, 5, 10, 15, 30; there is no second switch in General). The judge had recommended leaving it off until the evaluation is re-run; the default was kept after reading the result. The stored default is `BriefPreferences.enabled` (two places in that file), and every statement of it is in README.md, README.es.md, CHANGELOG.md, PRIVACY.md and docs/CLAIMS.md. While the brief is off (a person turned it off), the first time Calendar is on and a qualifying meeting is coming the panel shows a one-time card with only the title and time (nothing is built, the description is not read) with **Set Up…** (opens Settings → Calendar & Reminders) and **Not Now**; turning the brief on ends the offer.
 - The suggested agenda is wired but `BriefAgendaShipping.shipped` is empty: no backend shows it (see Evaluation result). Keywords rank related meetings, documents, notes and reminders (`BriefRankingShipping.searchModelRanks` is false).
+- "Last time" is wired but `BriefLastTimeShipping.shipped` is empty: no backend shows it (see [Re-judged evaluation](#re-judged-evaluation-november-2026)). In its place:
+  - the last meeting leads "Related meetings", one click from its minutes, with no line of them;
+  - the open tasks of the people invited stay under "Open tasks";
+  - the panel card shows the last meeting rather than "Nothing open from earlier meetings".
+
+  Stored minutes do not record which backend wrote them, so the switch reads the backend that writes minutes now. The evaluation still builds the section, to measure it.
 
 ## Pieces
 
@@ -191,7 +197,7 @@ Both backends fail the gate, whatever the lines that were not judged turn out to
 
 **A defect of the wrong-attribution check.** Minutes runs write a task with no due day as `"due": ""`. The check counted that as a day the brief failed to print: every wrong attribution in the first traces of this run (45 on Apple's minutes, 30 on the integrated model's) came from it. It now reads `""` and `"null"` as no day, as the validation does. The traces count wrong attribution by the check that found it (`wrongAttribution.<check>`).
 
-**Not changed yet.** The brief still shows "Last time" on every backend. Whether to hide it until a backend passes its gate, as the agenda is hidden, is open. Hiding it on one backend alone would rest on the minutes provider chosen now, because stored minutes do not record which backend wrote them. No ranking or quality claim rests on these figures. No other product was measured.
+**What changed.** No backend shows "Last time" until one passes its gate (`BriefLastTimeShipping`, as the agenda is hidden: see [Where it appears](#where-it-appears)). No ranking or quality claim rests on these figures. No other product was measured.
 
 ## Rules worth knowing
 
@@ -205,7 +211,7 @@ Both backends fail the gate, whatever the lines that were not judged turn out to
 
 ## Not done
 
-- The deterministic brief fails P@3 for "Last time" on both backends, also when re-judged with the minutes stored as the app stores them (see [Re-judged evaluation](#re-judged-evaluation-november-2026)), and "Documents and notes" and "Related meetings" fail their gates in the re-judged run. The brief is on by default; no quality claim rests on it.
+- The deterministic brief fails P@3 for "Last time" on both backends, also when re-judged with the minutes stored as the app stores them (see [Re-judged evaluation](#re-judged-evaluation-november-2026)), so no backend shows that section; "Documents and notes" and "Related meetings" fail their gates in the re-judged run too. The brief is on by default; no quality claim rests on it.
 - The model server's agenda is unmeasured.
 - A recording carries the brief when it is linked to the calendar occurrence the brief is for, or, for an in-person event (no meeting link), when it starts from the panel while that event's card is shown (from the lead time to 15 minutes after the start, `BriefController.inPersonEventOnCard`, the same window as `BriefRecordingMatch`). In that case the event's title, attendees and series (never the invitation's notes) are saved with the recording like those of a meeting with a link, so the next occurrence finds it by series or by attendees. A recording of anything else started in that window, such as an unrelated ad-hoc conversation, also takes the card's event; the person who wants none closes the card by recording later or discarding the recording. Recordings near a linked event that is not the card's keep none.
 - **Not verified: Reminders access under the App Sandbox.** Whether `requestFullAccessToReminders` shows its prompt with only `com.apple.security.personal-information.calendars` has to be checked by running a signed, sandboxed build and pressing Allow Reminders Access…. It needs a maintainer with a real Reminders store; the automated checks never run the app against it. The build keeps `NSRemindersFullAccessUsageDescription` in Info.plist and adds no entitlement. If the prompt does not appear, discuss it with the maintainer before changing `Resources/Vauta.entitlements`: until then, Reminders may show "Open System Settings" with nothing to toggle.

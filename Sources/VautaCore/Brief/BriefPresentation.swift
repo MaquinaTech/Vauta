@@ -70,6 +70,22 @@ public enum BriefAgendaShipping {
     }
 }
 
+/// Whether "Last time" is shown: only for a backend whose minutes passed that section's gate in the evaluation (P@3 at least 0.80,
+/// docs/BRIEF.md). The section repeats the last meeting's minutes. Re-judged as the app shows it, it failed on Apple's minutes and on the
+/// integrated model's, and the server's was not measured, so the set is empty. Stored minutes do not record which backend wrote them: the
+/// backend is the one that writes minutes now. Without the section the last meeting leads "Related meetings", one click from its minutes,
+/// and the open tasks of the people invited stay under "Open tasks".
+public enum BriefLastTimeShipping {
+    /// Backends whose "Last time" passed the gate.
+    public static let shipped: Set<BriefBackend> = []
+
+    /// `backend` is nil for a brief built without a model (while Meetings are locked): then the section is shown only if every backend shows it.
+    public static func shows(backend: BriefBackend?, shipped: Set<BriefBackend> = BriefLastTimeShipping.shipped) -> Bool {
+        guard let backend else { return shipped == Set(BriefBackend.allCases) }
+        return shipped.contains(backend)
+    }
+}
+
 /// Whether the search model may rank a brief. It may not: on the evaluation's test series it ranked related meetings, documents, notes
 /// and reminders no better than keywords and showed more irrelevant ones, so keywords rank. The retrieval and the semantic path stay
 /// in the code and in the tests.
@@ -134,7 +150,9 @@ public struct BriefPanelCard: Sendable, Equatable {
         if snapshot.isFirstMeeting {
             body = .firstMeeting
         } else {
-            let lines = [snapshot.section(.lastTime)?.items.first, snapshot.section(.openTasks)?.items.first].compactMap { $0 }
+            var lines = [snapshot.section(.lastTime)?.items.first, snapshot.section(.openTasks)?.items.first].compactMap { $0 }
+            // Without "Last time" the brief did not look at what the last meeting left open: the meeting itself stands in its place.
+            if snapshot.lastTimeHidden, let last = snapshot.section(.relatedMeetings)?.items.first { lines.insert(last, at: 0) }
             body = lines.isEmpty ? .nothingOpen : .lines(lines)
         }
         return BriefPanelCard(summary: summary, content: .ready(Ready(peopleCount: people, body: body, people: snapshot.section(.people)?.items.map(\.text) ?? [])), identifier: event.identifier)

@@ -163,7 +163,7 @@ struct UpcomingEntriesView: View {
         } else if let snapshot = entry.snapshot {
             if snapshot.isFirstMeeting {
                 Text("First meeting with these people", comment: "Menu-bar panel, brief card: nobody coming to the meeting was in an earlier meeting of Vauta").foregroundStyle(.secondary)
-            } else if snapshot.section(.lastTime) == nil, snapshot.section(.openTasks) == nil {
+            } else if !snapshot.lastTimeHidden, snapshot.section(.lastTime) == nil, snapshot.section(.openTasks) == nil {
                 Text("Nothing open from earlier meetings", comment: "Menu-bar panel, brief card: earlier meetings left no open task, decision or question").foregroundStyle(.secondary)
             }
             BriefContentView(sections: snapshot.sections, agenda: snapshot.agenda, agendaFirst: true,
@@ -176,7 +176,7 @@ struct UpcomingEntriesView: View {
         } else {
             // The skeleton: the section headings the page will have, until the brief is built.
             VStack(alignment: .leading, spacing: PaneLayout.section) {
-                ForEach([BriefSectionKind.people, .lastTime, .openTasks], id: \.self) { kind in
+                ForEach(BriefLastTimeShipping.shipped.isEmpty ? [BriefSectionKind.people, .openTasks] : [.people, .lastTime, .openTasks], id: \.self) { kind in
                     Label(BriefLabels.title(kind), systemImage: BriefLabels.symbol(kind)).font(.headline).foregroundStyle(.tertiary)
                 }
                 ThinkingOrb()

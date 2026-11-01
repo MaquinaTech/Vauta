@@ -186,7 +186,8 @@ struct BriefComposerTests {
         let (f, composer, retriever, event) = try await Self.rig()
         retriever.cosineValues = ["Book the factory visit": 0.9, "Send the revised budget": 0.3, "Call Ana about the shell material": 0.8]
         let revision = await f.store.editRevision
-        let result = await composer.build(event, settings: BriefSettings(remindersEnabled: true, reminderListIDs: ["L"]), environment: BriefEnvironment(), now: BriefFixtures.now)
+        let result = await composer.build(event, settings: BriefSettings(remindersEnabled: true, reminderListIDs: ["L"]), environment: BriefEnvironment(), showsLastTime: true,
+                                          now: BriefFixtures.now)
         let snapshot = try #require(result.snapshot)
         #expect(snapshot.mode == .semantic && result.reminders == .shown)
         #expect(snapshot.sections.map(\.kind) == [.people, .lastTime, .relatedMeetings, .documents, .reminders])
@@ -194,13 +195,21 @@ struct BriefComposerTests {
         #expect(snapshot.section(.reminders)!.items.map(\.text) == ["Call Ana about the shell material"])
         #expect(await f.store.editRevision == revision, "building a brief commits nothing")
         // Same inputs, same snapshot.
-        let again = await composer.build(event, settings: BriefSettings(remindersEnabled: true, reminderListIDs: ["L"]), environment: BriefEnvironment(), now: BriefFixtures.now)
+        let again = await composer.build(event, settings: BriefSettings(remindersEnabled: true, reminderListIDs: ["L"]), environment: BriefEnvironment(), showsLastTime: true,
+                                         now: BriefFixtures.now)
         #expect(again.snapshot?.digest == snapshot.digest)
+        // As the app builds it (`BriefLastTimeShipping`): no "Last time", the last meeting first among the related ones, Ana's tasks under "Open tasks".
+        let shipped = try #require(await composer.build(event, settings: BriefSettings(remindersEnabled: true, reminderListIDs: ["L"]), environment: BriefEnvironment(),
+                                                        now: BriefFixtures.now).snapshot)
+        #expect(shipped.lastTimeHidden && shipped.sections.map(\.kind) == [.people, .openTasks, .relatedMeetings, .documents, .reminders])
+        #expect(shipped.section(.relatedMeetings)!.items.count == 2 && shipped.section(.relatedMeetings)!.items.last?.meetingID == 99)
+        #expect(Set(shipped.section(.openTasks)!.items.map(\.text)) == ["Send the revised budget", "Book the factory visit"])
+        #expect(!shipped.items.contains { $0.text.contains("Keep the C-shaped shell") || $0.text.contains("We compared suppliers") })
     }
 
     @Test func whileRecordingNothingIsEmbeddedAndTheRankingIsLexical() async throws {
         let (_, composer, retriever, event) = try await Self.rig()
-        let result = await composer.build(event, settings: BriefSettings(), environment: BriefEnvironment(isRecording: true), now: BriefFixtures.now)
+        let result = await composer.build(event, settings: BriefSettings(), environment: BriefEnvironment(isRecording: true), showsLastTime: true, now: BriefFixtures.now)
         let snapshot = try #require(result.snapshot)
         #expect(snapshot.mode == .keyword && result.policy.agenda == .waitForRecording)
         #expect(!retriever.calls.contains("mode") && !retriever.calls.contains("cosines"), "no model is asked while a meeting is recorded: \(retriever.calls)")
