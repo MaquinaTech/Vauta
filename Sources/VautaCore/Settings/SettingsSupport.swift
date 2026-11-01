@@ -120,4 +120,24 @@ public struct DiagnosticsReport: Sendable, Equatable {
     }
 
     static let maxValueLength = 160
+
+    /// A new bug report on GitHub with only the versions filled in: the issue form's `vauta-version` and `macos-version` fields
+    /// (`.github/ISSUE_TEMPLATE/bug_report.yml`). The diagnostics go through the clipboard, for the person to read before pasting them.
+    /// Each value keeps letters, digits, spaces and `.()-` only, up to 40 characters, so nothing else can reach the address.
+    public var issueURL: URL {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "github.com"
+        components.path = "/MaquinaTech/Vauta/issues/new"
+        components.queryItems = [
+            URLQueryItem(name: "template", value: "bug_report.yml"),
+            URLQueryItem(name: "vauta-version", value: Self.addressSafe("\(appVersion) (\(build))")),
+            URLQueryItem(name: "macos-version", value: Self.addressSafe(system)),
+        ]
+        return components.url!
+    }
+
+    static func addressSafe(_ value: String) -> String {
+        String(value.filter { $0.isASCII && ($0.isLetter || $0.isNumber || " .()-".contains($0)) }.prefix(40))
+    }
 }

@@ -921,6 +921,9 @@
 /* No comment provided by engineer. */
 "Bring Back Speakers" = "화자 복원";
 
+/* Settings → Status; title of the row that opens a new bug report on GitHub */
+"Bug report" = "버그 보고";
+
 /* Network Activity result; the argument is an HTTP status code */
 "Busy (%lld)" = "사용 중(%lld)";
 
@@ -1397,6 +1400,9 @@
    Confirmation after copying minutes or an answer
    Diagnostics button after copying */
 "Copied" = "복사됨";
+
+/* Settings → Status; explains Report a Problem… */
+"Copies the diagnostics and opens a new bug report on GitHub in your browser, with your Vauta and macOS versions filled in. Paste the diagnostics there; nothing else is in the address." = "진단 정보를 복사하고 브라우저에서 GitHub의 새 버그 보고서를 엽니다. Vauta 및 macOS 버전은 미리 입력됩니다. 진단 정보는 그곳에 붙여넣으세요. 주소에는 그 외의 정보가 포함되지 않습니다.";
 
 /* Answers card: copies the answer */
 "Copy" = "복사";
@@ -5167,6 +5173,9 @@
 
 /* No comment provided by engineer. */
 "Replace Meetings, Context and Settings" = "회의, 컨텍스트, 설정 교체";
+
+/* Settings → Status; copies the diagnostics and opens a new bug report on GitHub */
+"Report a Problem…" = "문제 보고…";
 
 /* Network Activity column: HTTP method and path */
 "Request" = "요청";

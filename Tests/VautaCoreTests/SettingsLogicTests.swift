@@ -160,4 +160,36 @@ struct SettingsSupportTests {
         #expect(lines[3].hasPrefix("- models: line one line two"))
         #expect(lines[3].count <= "- models: ".count + DiagnosticsReport.maxValueLength)
     }
+
+    /// Report a Problem… opens this address: the bug report form with the two versions and nothing else, whatever the entries hold.
+    @Test func theBugReportAddressHoldsTheVersionsOnly() throws {
+        let report = DiagnosticsReport(appVersion: "0.9.4", build: "57", system: "macOS Version 27.2 (Build 26B123)",
+                                       entries: [.init("models", "server http://192.168.1.50:8443/v1 qwen3")])
+        let url = report.issueURL
+        let components = try #require(URLComponents(url: url, resolvingAgainstBaseURL: false))
+        #expect(components.scheme == "https" && components.host == "github.com" && components.path == "/MaquinaTech/Vauta/issues/new")
+        #expect(components.queryItems?.map(\.name) == ["template", "vauta-version", "macos-version"])
+        #expect(components.queryItems?.map(\.value) == ["bug_report.yml", "0.9.4 (57)", "macOS Version 27.2 (Build 26B123)"])
+        #expect(!url.absoluteString.contains("192.168") && !url.absoluteString.contains("qwen"))
+    }
+
+    @Test func aVersionCannotAddToTheBugReportAddress() throws {
+        let report = DiagnosticsReport(appVersion: "1.0&title=x#y", build: "1\nbody=z", system: "macOS 27 " + String(repeating: "9", count: 80), entries: [])
+        let components = try #require(URLComponents(url: report.issueURL, resolvingAgainstBaseURL: false))
+        #expect(components.queryItems?.map(\.name) == ["template", "vauta-version", "macos-version"])
+        #expect(components.queryItems?[1].value == "1.0titlexy (1bodyz)")
+        #expect(components.queryItems?[2].value?.count == 40)
+        #expect(components.fragment == nil)
+    }
+
+    /// GitHub fills a form field from the query item of the same id: renaming a field in the form would leave it empty.
+    @Test func theBugReportFormHasTheFieldsTheAddressFills() throws {
+        let url = DiagnosticsReport(appVersion: "1", build: "1", system: "macOS", entries: []).issueURL
+        let items = try #require(URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems)
+        let template = try #require(items.first { $0.name == "template" }?.value)
+        let form = try String(contentsOf: PackagingTests.root.appendingPathComponent(".github/ISSUE_TEMPLATE/\(template)"), encoding: .utf8)
+        for item in items where item.name != "template" {
+            #expect(form.contains("    id: \(item.name)\n"), "\(template) has no field \(item.name)")
+        }
+    }
 }

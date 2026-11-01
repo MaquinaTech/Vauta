@@ -119,6 +119,26 @@ struct PackagingTests {
         #expect(!warn.output.contains("PackagingTests.swift"))
     }
 
+    // MARK: - scripts/check-shell-vars.sh
+
+    /// macOS's bash 3.2 reads a byte that is not ASCII right after a name as part of it: "$latest…" stopped the update.sh
+    /// of 0.9.3 on an unbound variable. The same name in braces passes, and so does a variable followed by ASCII.
+    @Test func shellVariableCheckFailsOnAVariableRightBeforeAnEllipsis() throws {
+        let fixture = try Fixture()
+        try fixture.write("bad.sh", "#!/bin/bash\nlatest=1\necho \"Verifying $latest\u{2026}\"\n")
+        try fixture.write("good.sh", "#!/bin/bash\nlatest=1\necho \"Verifying ${latest}\u{2026}, then $latest and done\"\n")
+        let failed = try Self.run("scripts/check-shell-vars.sh", [fixture.url.appendingPathComponent("bad.sh").path])
+        #expect(failed.status == 1 && failed.output.contains("bad.sh:3:"), "the line is shown: \(failed.output)")
+        let passed = try Self.run("scripts/check-shell-vars.sh", [fixture.url.appendingPathComponent("good.sh").path])
+        #expect(passed.status == 0, "\(passed.output)")
+    }
+
+    @Test func vautasShellScriptsPassTheVariableCheck() throws {
+        let result = try Self.run("scripts/check-shell-vars.sh", [])
+        #expect(result.status == 0, "\(result.output)")
+        #expect(result.output.contains("OK: "))
+    }
+
     // MARK: - Helpers
 
     static func stringsdict(other: String, valueType: String = "lld", extra: String) -> String {

@@ -42,6 +42,20 @@ struct StatusPane: View {
                     Text("Support report", comment: "Settings → Status; title of the row that copies the diagnostics")
                     Text(description: String(localized: "Versions and the checklist above, for a support request. No meeting content, names or addresses."))
                 }
+                LabeledContent {
+                    Button(String(localized: "Report a Problem…", comment: "Settings → Status; copies the diagnostics and opens a new bug report on GitHub")) {
+                        let report = model.diagnosticsReport()
+                        NSPasteboard.general.clearContents()
+                        NSPasteboard.general.setString(report.text, forType: .string)
+                        copied = true
+                        NSWorkspace.shared.open(report.issueURL)
+                    }
+                    .disabled(model.statusItems.isEmpty)
+                } label: {
+                    Text("Bug report", comment: "Settings → Status; title of the row that opens a new bug report on GitHub")
+                    Text(description: String(localized: "Copies the diagnostics and opens a new bug report on GitHub in your browser, with your Vauta and macOS versions filled in. Paste the diagnostics there; nothing else is in the address.",
+                                             comment: "Settings → Status; explains Report a Problem…"))
+                }
             } header: {
                 Text("Diagnostics")
             }

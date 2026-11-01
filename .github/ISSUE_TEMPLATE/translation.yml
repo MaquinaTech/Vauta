@@ -39,5 +39,5 @@ body:
     id: vauta-version
     attributes:
       label: Vauta version
-      description: Settings > About.
+      description: Settings → About.
       placeholder: "1.0.0 (123)"

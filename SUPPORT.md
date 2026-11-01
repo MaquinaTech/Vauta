@@ -8,7 +8,8 @@ Vauta is a free, open-source project maintained by one person. There is no paid 
 |---|---|
 | Ask how to do something, or get help with your setup | [GitHub Discussions, Q&A](https://github.com/MaquinaTech/Vauta/discussions/categories/q-a) |
 | Share an idea or discuss a direction before it is a request | [GitHub Discussions, Ideas](https://github.com/MaquinaTech/Vauta/discussions/categories/ideas) |
-| Report something that doesn't work | [A bug report](https://github.com/MaquinaTech/Vauta/issues/new/choose) |
+| Report something that doesn't work | [A bug report](https://github.com/MaquinaTech/Vauta/issues/new/choose), or **Settings → Status → Report a Problem…**, which copies the diagnostics and opens one with your versions filled in |
+| Say whether a meeting app or browser worked with Vauta | [A compatibility report](https://github.com/MaquinaTech/Vauta/issues/new?template=compatibility.yml) |
 | Suggest an improvement | [A feature request](https://github.com/MaquinaTech/Vauta/issues/new/choose) |
 | Report a wrong or missing translation | [A translation issue](https://github.com/MaquinaTech/Vauta/issues/new/choose) |
 | Report a security vulnerability | [Private vulnerability reporting](https://github.com/MaquinaTech/Vauta/security/advisories/new), **never** a public issue |
@@ -26,14 +27,14 @@ Good details get faster answers:
 - **Transcription language** and **model provider** (Apple Intelligence, LM Studio, Ollama…), with the model name if
   you use a model server.
 - **What you did, what you expected and what happened.**
-- **Diagnostics**: Settings › Status › **Copy Diagnostics** copies versions and the setup checklist, without meeting
+- **Diagnostics**: Settings → Status → **Copy Diagnostics** copies versions and the setup checklist, without meeting
   content. From Terminal, this read-only check gives a similar report:
 
   ```sh
-  /Applications/Vauta.app/Contents/MacOS/Vauta doctor
+  ~/Applications/Vauta.app/Contents/MacOS/Vauta doctor
   ```
 
-  (For a build from source, use `~/Applications/Vauta.app/Contents/MacOS/Vauta`.) For capture problems, also run
+  For capture problems, also run
   `Vauta status` the same way while the call is playing audio. It lists the processes playing or recording audio,
   without any audio or text.
 
