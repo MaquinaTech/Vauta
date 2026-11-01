@@ -39,6 +39,8 @@ No secrets and no `release` environment are needed.
    to the tag's commit, over the paths it lists) must print nothing. If it prints something, redo that review first.
    Re-run `eval/run_all.sh` if speaker or transcription code changed since [BENCHMARKS.md](BENCHMARKS.md) was written, and
    check [COMPATIBILITY.md](COMPATIBILITY.md) has the results of the real-call checklist.
+   If the snapshot envelope, the journal or the backup format has a new version since the last release, check that its golden
+   is in `Tests/VautaCoreTests/Fixtures/Formats` next to the old ones ([CONTRIBUTING.md](../CONTRIBUTING.md#compatibility-migrations-and-persisted-formats)).
 3. Check that a clean clone builds and installs with the README steps.
 4. Tag the commit with a signed tag and push it:
 

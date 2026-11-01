@@ -105,11 +105,11 @@ jobs:
       - name: Test the statistics of the evaluation gates (standard library only)
         run: python3 -I -m unittest discover -s eval/tests -p 'test_stats.py'
 
-      - name: Test the word confidence scoring of the evaluation (standard library only)
-        run: python3 -I -m unittest discover -s eval/tests -p 'test_score_wer.py'
-
       - name: Test the human gold of the minutes and its scoring (standard library only)
         run: python3 -I -m unittest discover -s eval/tests -p 'test_ami_gold.py'
+
+      - name: Test the word confidence scoring of the evaluation (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_score_wer.py'
 
       - name: Check shell scripts
         run: |
