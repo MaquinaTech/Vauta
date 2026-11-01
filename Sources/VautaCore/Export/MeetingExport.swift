@@ -176,13 +176,16 @@ public struct MeetingExport: Sendable, Equatable {
     public var speakers: [Speaker]
     /// The questions the person kept, in the order they were asked.
     public var questions: [QuestionEntry]
+    /// The language of the lines' `translation` (a `storageCode`, "en" or "zh-Hans"); nil when no line has one.
+    public var translationLanguage: String?
 
     public init(title: String, startedAt: Date, endedAt: Date? = nil, language: String? = nil, participantsInformedAt: Date? = nil,
                 attendees: [String] = [],
                 summary: String = "", topics: [String] = [], openQuestions: [String] = [], decisions: [Item] = [],
                 tasks: [TaskEntry] = [], notes: [NoteEntry] = [], transcript: [Line] = [], pauses: [MeetingPause] = [], speakers: [Speaker] = [],
-                questions: [QuestionEntry] = []) {
+                questions: [QuestionEntry] = [], translationLanguage: String? = nil) {
         self.questions = questions
+        self.translationLanguage = translationLanguage
         self.pauses = pauses
         self.title = title
         self.startedAt = startedAt

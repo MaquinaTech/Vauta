@@ -203,7 +203,7 @@ struct ExportSheet: View {
                             .toggleStyle(.checkbox)
                             .padding(.leading, 20)
                             .disabled(!transcriptIncluded)
-                            .help("Write the stored translation under each line of “Others”")
+                            .help("Write the translation under each line")
                     }
                 }
                 RadioGroupRow(title: String(localized: "Speakers", comment: "Export option title: how speakers are labelled"), selection: speakerLabelsBinding,

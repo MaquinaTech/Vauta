@@ -78,8 +78,8 @@ extension MeetingStore {
                 // Translations made after the split translate only the left half.
                 try run("DELETE FROM segment_translations WHERE segment_id = ?", [.integer(split.left)])
                 for t in split.translations {
-                    try run("INSERT INTO segment_translations(segment_id, lang, text) VALUES (?, ?, ?)",
-                            [.integer(split.left), .text(t.language), .text(t.text)])
+                    try run("INSERT INTO segment_translations(segment_id, lang, text, source) VALUES (?, ?, ?, ?)",
+                            [.integer(split.left), .text(t.language), .text(t.text), t.source.map { .text($0) }])
                 }
             }
             for row in record.speakers {

@@ -53,8 +53,7 @@ extension MeetingsModel {
             meetingImported = imported
             keptVoices = kept
             roster = SpeakerRoster(speakers: speakers, segments: segs)
-            translations = TranslationDisplay.texts(from: stored, preferred: preferences?.translationTarget)
-            translationLanguage = TranslationDisplay.chooseLanguage(from: stored, preferred: preferences?.translationTarget)
+            showTranslations(stored, of: id)
             self.marks = marks
             self.pauses = pauses
             self.notes = notes

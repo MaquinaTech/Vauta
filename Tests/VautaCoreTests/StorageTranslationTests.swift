@@ -24,7 +24,7 @@ struct StorageTranslationTests {
         try fx.writeLegacyStore(schema: 10)
         let store = try fx.open()
         #expect(try await store.pragma("user_version") == Schema.currentVersion)
-        #expect(try await store.columnNames("segment_translations") == ["segment_id", "lang", "text"])
+        #expect(try await store.columnNames("segment_translations") == ["segment_id", "lang", "text", "source"])
         #expect(try await store.segments(of: 1).count == 2, "old data is untouched")
         #expect(try await store.translations(of: 1).isEmpty)
         let id = try await store.segments(of: 1)[1].id

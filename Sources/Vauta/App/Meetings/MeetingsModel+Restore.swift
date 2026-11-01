@@ -8,6 +8,7 @@ extension MeetingsModel {
     func prepareForRestore() {
         draft = nil
         taskDraft = nil
+        erasedTranslations()
     }
 
     /// After the store was replaced: forgets everything shown and reloads if the window is open.

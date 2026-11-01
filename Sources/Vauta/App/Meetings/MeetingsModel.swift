@@ -255,6 +255,10 @@ final class MeetingsModel {
     var translations: [Int64: String] = [:]
     /// The language of `translations` (a language identifier).
     var translationLanguage: String?
+    /// Translating transcripts (Transcript → Translate).
+    let translation = TranscriptTranslationModel()
+    /// The language the person chose to read each meeting's transcript in, in this session (`storageCode` by meeting).
+    var chosenTranslations: [Int64: String] = [:]
     var marks: [MeetingMark] = []
     /// When the recording was paused: the transcript shows where nothing was captured.
     var pauses: [MeetingPause] = []
@@ -360,12 +364,13 @@ final class MeetingsModel {
     var cardTemplate: MinutesTemplateChoice?
     var customTemplates: [CustomMinutesTemplate] = []
     @ObservationIgnored var llm: LLMService? {
-        didSet { ask.llm = llm; importer.llm = llm; notepad.llm = llm }
+        didSet { ask.llm = llm; importer.llm = llm; notepad.llm = llm; translation.llm = llm }
     }
     /// App preferences (copy protection, default template and language).
     @ObservationIgnored var preferences: Preferences? {
         didSet {
             importer.preferences = preferences
+            translation.preferences = preferences
             if let preferences { actions.preferences = preferences.actions }
         }
     }
@@ -484,6 +489,8 @@ final class MeetingsModel {
         ask.openCitation = { [weak self] meeting, segment in self?.open(meeting: meeting, segment: segment) }
         ask.openMinutes = { [weak self] meeting in self?.open(meeting: meeting, tab: .summary) }
         notepad.store = store
+        translation.store = store
+        translation.onStored = { [weak self] id in Task { await self?.reloadTranslations(id) } }
         notepad.addedAfter = true
         notepad.report = { [weak self] title, error in self?.present(title, error) }
         // Clearing a note's words in Meetings asks first, like every other delete here.

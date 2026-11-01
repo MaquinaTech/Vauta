@@ -161,6 +161,22 @@
 			<string>%lld Aufträge warten auf den Modellserver</string>
 		</dict>
 	</dict>
+	<key>%lld lines couldn’t be translated.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>one</key>
+			<string>%lld Zeile konnte nicht übersetzt werden.</string>
+			<key>other</key>
+			<string>%lld Zeilen konnten nicht übersetzt werden.</string>
+		</dict>
+	</dict>
 	<key>%lld meetings</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

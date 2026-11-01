@@ -21,6 +21,15 @@ extension LLMService {
                                 purpose: purpose)
     }
 
+    /// Translator for a finished meeting's transcript (`TranscriptTranslator`): the model server as for Live Translation, but
+    /// each request waits for the lane after every other one, so translating a long meeting never holds up a question, live
+    /// work or the minutes. nil when no server is set up.
+    public func transcriptTranslator(source: Locale.Language, target: Locale.Language, model: String?) -> ServerTranslator? {
+        guard let chat = providers.refinementChat else { return nil }
+        return ServerTranslator(chat: LaneChat(service: self, inner: chat, priority: .translation), source: source, target: target,
+                                model: model)
+    }
+
     /// Live notes wait here while translations are in flight (at most `maxWaitForRefinements`).
     func waitForRefinements() async throws {
         let deadline = ContinuousClock.now + Self.maxWaitForRefinements
@@ -51,6 +60,27 @@ private struct RefinementChat: ChatModel {
             return result
         } catch {
             await service.refinementEnded()
+            throw error
+        }
+    }
+}
+
+/// The server chat model through the lane at `priority`: one request at a time, after the ones that come first.
+private struct LaneChat: ChatModel {
+    let service: LLMService
+    let inner: any ChatModel
+    let priority: LLMService.Priority
+
+    var contextTokens: Int? { get async { await inner.contextTokens } }
+
+    func chat(_ messages: [ChatMessage], _ options: ChatOptions, onProgress: (@Sendable (Int) -> Void)?) async throws -> ChatResult {
+        try await service.acquire(priority)
+        do {
+            let result = try await inner.chat(messages, options, onProgress: onProgress)
+            await service.release()
+            return result
+        } catch {
+            await service.release()
             throw error
         }
     }

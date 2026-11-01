@@ -115,19 +115,27 @@ public struct CaptionFrameStore {
 /// Chooses which stored translation to show under a transcript: one language
 /// per meeting, so a meeting translated into two languages stays readable.
 public enum TranslationDisplay {
-    /// The language with the most translated passages (the preferred one wins a tie).
-    public static func chooseLanguage(from stored: [MeetingStore.StoredTranslation], preferred: String?) -> String? {
-        var counts: [String: Int] = [:]
-        for item in stored { counts[item.language, default: 0] += 1 }
-        return counts.max { a, b in
-            if a.value != b.value { return a.value < b.value }
-            return (a.key == preferred ? 1 : 0) < (b.key == preferred ? 1 : 0)
-        }?.key
+    /// The language to show: `chosen` (the one the person picked for the meeting) when there is one, even before its first
+    /// translated passage; else the language with the most translated passages (the preferred one wins a tie).
+    public static func chooseLanguage(from stored: [MeetingStore.StoredTranslation], preferred: String?, chosen: String? = nil) -> String? {
+        if let chosen { return chosen }
+        return languages(in: stored, preferred: preferred).first
     }
 
-    /// Segment ID → translated text, in the chosen language.
-    public static func texts(from stored: [MeetingStore.StoredTranslation], preferred: String?) -> [Int64: String] {
-        guard let language = chooseLanguage(from: stored, preferred: preferred) else { return [:] }
+    /// Segment ID → translated text, in the language `chooseLanguage` picks.
+    public static func texts(from stored: [MeetingStore.StoredTranslation], preferred: String?, chosen: String? = nil) -> [Int64: String] {
+        guard let language = chooseLanguage(from: stored, preferred: preferred, chosen: chosen) else { return [:] }
         return Dictionary(stored.filter { $0.language == language }.map { ($0.segmentID, $0.text) }, uniquingKeysWith: { first, _ in first })
+    }
+
+    /// The languages with translated passages, the most first (the preferred one wins a tie, then by code).
+    public static func languages(in stored: [MeetingStore.StoredTranslation], preferred: String? = nil) -> [String] {
+        var counts: [String: Int] = [:]
+        for item in stored { counts[item.language, default: 0] += 1 }
+        return counts.sorted { a, b in
+            if a.value != b.value { return a.value > b.value }
+            if (a.key == preferred) != (b.key == preferred) { return a.key == preferred }
+            return a.key < b.key
+        }.map(\.key)
     }
 }

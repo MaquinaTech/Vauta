@@ -538,6 +538,10 @@ enum Schema {
             ALTER TABLE series ADD COLUMN template TEXT;
             ALTER TABLE meetings ADD COLUMN card_template TEXT;
             """)),
+        // Translated transcripts: `segment_translations.source` is the line's text a translation was made from, so it shows only
+        // while the line reads that way (a corrected line is translated again). NULL = stored before version 38: a translation of
+        // what the transcriber wrote, shown while the line is not corrected, as before. Content: it lives and dies with the segment.
+        Migration(38, .sql("ALTER TABLE segment_translations ADD COLUMN source TEXT;")),
     ]
 
     /// The schema version this build writes.

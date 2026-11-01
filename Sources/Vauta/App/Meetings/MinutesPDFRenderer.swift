@@ -144,6 +144,11 @@ enum MinutesPDFRenderer {
         if options.includeTranscript && !e.transcript.isEmpty {
             heading(String(localized: "Transcript", comment: "Exported minutes: section title"))
             let small = NSFont.systemFont(ofSize: 10)
+            if let note = MeetingExportRenderer.translationNote(e, options: options) {
+                let p = NSMutableAttributedString(string: note + "\n", attributes: [.font: NSFontManager.shared.convert(small, toHaveTrait: .italicFontMask), .foregroundColor: secondary])
+                p.addAttribute(.paragraphStyle, value: paragraph(spacingBefore: 0, after: 6), range: NSRange(location: 0, length: p.length))
+                out.append(p)
+            }
             let bold = NSFont.boldSystemFont(ofSize: 10)
             let paused = MeetingPause.places(of: e.pauses, among: e.transcript.map(\.start))
             // Where the recording was paused: nothing was captured, so the gap in the times is not a silence.

@@ -159,6 +159,7 @@ extension MeetingsModel {
         _ = try? await store.redetectFollowUps(meetingID)
         guard selectedID == meetingID else { return }
         await refreshDetail()
+        translateCorrectedLines(meetingID)
         if !hits.isEmpty { await runSearch() }
     }
 }
