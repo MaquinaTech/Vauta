@@ -16,6 +16,8 @@ enum PendingDeletion: Identifiable {
     case voice(entity: Int64, name: String, isSelf: Bool)
     /// A line of the transcript, taken out of the record (`MeetingStore.deleteSegment`).
     case line(MeetingStore.StoredSegment)
+    /// Several meetings chosen in the list; `keepsCreated`: Vauta created reminders or events from some of them.
+    case meetings([MeetingStore.Meeting], keepsCreated: Bool)
 
     var id: String {
         switch self {
@@ -27,6 +29,7 @@ enum PendingDeletion: Identifiable {
         case .question(let index, _): "question-\(index)"
         case .voice(let entity, _, _): "voice-\(entity)"
         case .line(let s): "line-\(s.id)"
+        case .meetings(let list, _): "meetings-" + list.map { String($0.id) }.joined(separator: ",")
         }
     }
 
@@ -66,6 +69,8 @@ enum PendingDeletion: Identifiable {
         case .voice(_, let name, let isSelf):
             isSelf ? Self.ownVoiceTitle : String(localized: "Delete the saved voice of \(name)?", comment: "Confirmation title; the argument is a person's name")
         case .line: String(localized: "Delete this line for good?", comment: "Confirmation title when deleting a line of a meeting’s transcript")
+        case .meetings(let list, _):
+            String(localized: "Delete \(list.count) meetings?", comment: "Confirmation title when deleting several meetings chosen in the list; the argument is how many (2 or more)")
         }
     }
 
@@ -84,6 +89,11 @@ enum PendingDeletion: Identifiable {
         case .line(let s):
             s.text + "\n\n" + String(localized: "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line.",
                                       comment: "Confirmation message when deleting a transcript line, under the line’s words")
+        case .meetings(_, let keepsCreated):
+            String(localized: "Their transcripts, decisions, tasks, notes and marks are removed from the encrypted store. You can’t undo this.",
+                   comment: "Confirmation message when deleting several meetings chosen in the list")
+                + (keepsCreated ? "\n\n" + String(localized: "The reminders and events Vauta created from them stay in Reminders and Calendar.",
+                                                    comment: "Confirmation message when deleting several meetings, some with reminders or events Vauta created; deleting the meetings does not remove them") : "")
         }
     }
 
@@ -98,6 +108,7 @@ enum PendingDeletion: Identifiable {
         case .question: String(localized: "Delete Question", comment: "Button: confirm deleting an open question")
         case .voice: String(localized: "Delete Voice", comment: "Button: confirm deleting a saved voice")
         case .line: DeleteLineLabel.title
+        case .meetings: String(localized: "Delete Meetings", comment: "Button: confirm deleting several meetings")
         }
     }
 }
@@ -152,6 +163,7 @@ extension MeetingsModel {
             await perform(String(localized: "Couldn’t delete the saved voice", comment: "Alert title")) { _ = try await store.deleteVoiceProfiles(entityID: entity) }
             await loadEntity()
         case .line(let s): await deleteLine(s)
+        case .meetings(let list, _): await deleteMeetings(list.map(\.id))
         }
     }
 

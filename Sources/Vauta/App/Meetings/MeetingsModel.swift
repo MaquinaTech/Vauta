@@ -88,7 +88,7 @@ final class MeetingsModel {
 
     // MARK: List and search
 
-    var meetings: [MeetingStore.Meeting] = []
+    var meetings: [MeetingStore.Meeting] = [] { didSet { keepChosenVisible() } }
     var hits: [MeetingStore.SearchHit] = []
     var knowledgeHits: [KnowledgeHit] = []
     /// Passages of the person's documents that match the search (keywords only, no model).
@@ -110,7 +110,7 @@ final class MeetingsModel {
     /// The meeting being recorded (it can't be deleted).
     var activeMeetingID: Int64?
     /// Meetings matching the tokens (nil = no filter).
-    var filteredIDs: [Int64]?
+    var filteredIDs: [Int64]? { didSet { keepChosenVisible() } }
     var tokens: [FilterToken] = [] {
         didSet {
             guard tokens != oldValue else { return }
@@ -125,6 +125,8 @@ final class MeetingsModel {
     /// Selecting the same meeting again does nothing (keeps the highlight).
     var selectedID: Int64? {
         didSet {
+            // A meeting opened any other way (a link, a search result, Open), or none, is the list's whole selection.
+            if !selectingFromList, selection != Set(selectedID.map { [$0] } ?? []) { selection = Set(selectedID.map { [$0] } ?? []) }
             guard selectedID != oldValue else { return }
             noteActivity()
             otherItemsExpanded = false
@@ -148,6 +150,20 @@ final class MeetingsModel {
             Task { await loadDetail() }
         }
     }
+    /// The meetings chosen in the list. The one meeting shown (`selectedID`) is its only member; several are chosen with ⌘- or
+    /// ⇧-click in Meetings mode, and the detail then offers what can be done to all of them.
+    var selection: Set<Int64> = [] {
+        didSet {
+            guard selection != oldValue else { return }
+            let single = selection.count == 1 ? selection.first : nil
+            guard selectedID != single else { return }
+            selectingFromList = true
+            selectedID = single
+            selectingFromList = false
+        }
+    }
+    /// `selectedID` is being set from `selection`, which must not be narrowed back to it.
+    @ObservationIgnored private var selectingFromList = false
     /// Called after "Erase All" (so other views drop what they held).
     @ObservationIgnored var onErased: (() -> Void)?
     /// Called after a term was added to the glossary from here (so Context lists it).

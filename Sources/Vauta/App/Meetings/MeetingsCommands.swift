@@ -62,17 +62,20 @@ struct MeetingsCommands: Commands {
                 .disabled(model?.canOpenSpeakerOptionsOfHighlight != true)
             Button("Correct Highlighted Passage") { model?.correctHighlight() }
                 .disabled(model?.canCorrectHighlight != true)
-            Button("Delete Meeting…") {
+            Button(model?.choosesSeveral == true ? "Delete \(model?.selection.count ?? 0) Meetings…" : "Delete Meeting…") {
                 // The ⌘⌫ key in a text field still deletes to the start of the line; choosing the menu item
                 // with the mouse or VoiceOver always asks to delete the meeting.
                 if NSApp.currentEvent?.type == .keyDown, let text = NSApp.keyWindow?.firstResponder as? NSTextView {
                     text.deleteToBeginningOfLine(nil)
+                } else if model?.choosesSeveral == true {
+                    model?.confirmDeleteChosen()
                 } else {
                     model?.confirmDeleteSelected()
                 }
             }
             .keyboardShortcut(.delete, modifiers: .command)
-            .disabled(model?.shownMeeting == nil || model?.mode != .meetings || model?.isActive == true)
+            .disabled(model?.mode != .meetings || (model?.choosesSeveral == true ? model?.canDeleteChosen != true
+                                                                                  : model?.shownMeeting == nil || model?.isActive == true))
         }
         CommandGroup(before: .sidebar) {
             ForEach(MeetingsModel.Mode.allCases) { mode in
