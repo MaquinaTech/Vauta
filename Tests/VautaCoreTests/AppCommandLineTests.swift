@@ -21,6 +21,30 @@ struct AppCommandLineTests {
         #expect(LaunchMode.parse([command, "x"]) == .cli([command, "x"]))
     }
 
+    /// Every option a command reads is one the parser knows: an option missing from the lists is refused as unknown before the
+    /// command runs. The commands of the diagnostics build are left out (they compile, and their options exist, only there).
+    @Test func everyOptionTheCommandsReadIsKnownToTheParser() throws {
+        let app = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Sources/Vauta")
+        let files = try #require(FileManager.default.enumerator(at: app, includingPropertiesForKeys: nil)).compactMap { $0 as? URL }.filter { $0.pathExtension == "swift" }
+        let valueRead = try Regex(#"values\["(--[a-z0-9-]+)"\]"#), flagRead = try Regex(#"\.has\("(--[a-z0-9-]+)"\)"#)
+        var read = 0
+        for file in files {
+            let text = try String(contentsOf: file, encoding: .utf8)
+            if text.components(separatedBy: "\n").prefix(5).contains("#if VAUTA_DIAGNOSTICS") { continue }
+            for match in text.matches(of: valueRead) {
+                let name = String(text[try #require(match.output[1].range)])
+                #expect(CommandInvocation.valueOptions.contains(name), "\(file.lastPathComponent) reads \(name)")
+                read += 1
+            }
+            for match in text.matches(of: flagRead) {
+                let name = String(text[try #require(match.output[1].range)])
+                #expect(CommandInvocation.flagOptions.contains(name), "\(file.lastPathComponent) reads \(name)")
+                read += 1
+            }
+        }
+        #expect(read > 50, "the scan found \(read) options: the pattern no longer matches how the commands read them")
+    }
+
     @Test func minutesFileTakesItsOutputPath() throws {
         let invocation = try CommandInvocation(parsing: ["minutes-file", "t.json", "--out", "m.json", "--locale", "en-US"])
         #expect(invocation.positional == ["t.json"])

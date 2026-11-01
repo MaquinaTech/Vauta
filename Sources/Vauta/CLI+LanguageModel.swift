@@ -99,11 +99,12 @@ private func throw_usage() { printError("usage: llm-install status|verify|adopt|
 /// `--ask old|new` (live-answer, ask-cross, ask-retrieval) asks with Ask as it shipped (`old`) or with the harness of this phase (`new`, the default: the proposal rule only for questions about a decision, short keyword windows with spelled numbers and a rerank on the small window, passages oldest first with the place of their meeting, and the keyword query translated as the app does it); a list of rule, windows, order, translate switches one part. `--tasks ask-retrieval` runs Ask's retrieval alone (no model) and writes the passages sent per question.
 /// `--harness old|new` (minutes, integrated model) regenerates the minutes with the request as it shipped (`old`) or with the items before the summary, the outcome rule for the summary, the recall wording, the expected counts and greedy decoding (`new`, the default); a list of items, rule, recall, count, greedy, t03 switches one part (greedy and t03 set the temperature of the minutes request).
 /// `Vauta llm-eval --tasks minutes,live-answer --providers apple,integrated --sets <dir> [--questions <file.jsonl>] --out <dir>
-/// [--seed 7] [--sampler card|greedy] [--only <text>] [--max-items n] [--quiet-wait seconds] [--repeat n]
+/// [--seed 7] [--sampler card|greedy] [--only <text>] [--max-items n] [--quiet-wait seconds] [--repeat n] [--prefill-chunk tokens]
 /// [--arms a0|a1|a2|a3|streaming,recall,items] [--decided on] [--guard none|g1|g2|g1+g2] [--warm|--replay-realtime] [--renumber-final] [--after-meeting]`: EVALUATION ONLY (hidden). `--warm` replays each meeting as a
 /// recording, with the integrated model reading it as the segments arrive; `--renumber-final` makes the final speaker labelling
 /// number the voices the other way round than the live one; `--after-meeting` (with `--warm`, live-answer) asks the questions
-/// about the finished meeting, whose whole transcript was read while it recorded.
+/// about the finished meeting, whose whole transcript was read while it recorded. `--prefill-chunk n` prefills the integrated model in
+/// chunks of exactly n tokens instead of the app's chunks sized by speed, so a run repeats token for token.
 /// Runs the app's minutes code and Ask with both providers interleaved item by item (ABAB) on PUBLIC transcripts, in a throwaway
 /// store; never the user's store. See docs/LANGUAGE_MODEL.md. The integrated model comes from `VAUTA_LLM_MODEL_DIR`.
 /// `--providers server --server <config.json> [--ask-key]` (minutes, live-answer) adds a model server, from the same file as `server-check`: its
@@ -125,6 +126,10 @@ func llmEval(_ invocation: CommandInvocation) async -> Int32 {
     options.maxItems = invocation.values["--max-items"].flatMap { Int($0) }
     options.quietWait = invocation.values["--quiet-wait"].flatMap { Double($0) } ?? 0
     options.repetitions = invocation.values["--repeat"].flatMap { Int($0) } ?? 1
+    if let chunk = invocation.values["--prefill-chunk"] {
+        guard let n = Int(chunk), (16...512).contains(n) else { printError("--prefill-chunk: a number of tokens from 16 to 512"); return 1 }
+        options.prefillChunk = n
+    }
     options.embeddingTranscript = invocation.values["--with-embeddings"].map { URL(fileURLWithPath: $0) }
     options.embeddingPurpose = invocation.values["--embedding-purpose"] == "query" ? .query : .document
     if let arms = invocation.values["--arms"] {

@@ -94,6 +94,14 @@ ids next to the human sentences of each meeting, with the judge's instructions, 
 packets before any judging); with the judge's `items_graded.tsv` and that key, `score_minutes_gold.py` adds the human sentences
 found by content (in full or in part), the items that state one, and whether such an item cites where it was said. Tests: `python3 -I -m unittest discover -s eval/tests -p 'test_ami_gold.py'` (an invented meeting).
 
+A human summary leaves out decisions it did not think worth writing, so an item it does not state may still be right. Whether the
+transcript says what an item says is judged blind too: `item_support.py packets` mixes the items of every set of minutes under
+neutral ids, each with the passages around the one it cites (six before and after by default), with the judge's instructions
+([`rubric/MINUTES_ITEM_SUPPORT.md`](rubric/MINUTES_ITEM_SUPPORT.md)), and seals the key apart. The judge grades each item `yes`,
+`weak` (said, but stated beyond the passages: a proposal as a decision, a wrong owner) or `no`; `item_support.py score` gives the
+supported share per set, for all the items and for the firm ones, and with `--compare BASE,NEW` the paired per-meeting
+difference and its non-inferiority test (`--margin`, 0.10 by default). Tests: `python3 -I -m unittest discover -s eval/tests -p 'test_item_support.py'`.
+
 ## Limits
 
 The 18-file tuning set is English only (the held-out sets add Spanish: read speech and synthetic conversations, no real meeting); simulated conferencing codec (Opus), not real calls; close-talk headsets, easier than a speakerphone in a room;

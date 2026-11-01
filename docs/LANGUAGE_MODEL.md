@@ -965,6 +965,47 @@ No blind judge graded these minutes.
 The gate is a median of at least 6 and at most 20 % of runs with no decision: neither arm passes, and A1 is not better than A0 here (it was 5 against 3 on the three meetings of the first measurement). A3 (the second pass) was not re-run on the nine
 (it takes 200 s or more per meeting; its earlier figures on 3 meetings are above) and the 8 test meetings were not run: a blind judge is needed to say whether the extra items are true, and none was available to this work. Nothing about recall ships.
 
+### The second pass (A3) against the human gold (2026-11-01): not shipped
+
+The release minutes already carry the recall wording (A1 is part of `MinutesHarness.shipped`), so A3 (`--arms all`) adds only the
+windowed second pass to what ships. Both ran on the integrated model over the 13 AMI meetings with a human summary
+([BENCHMARKS.md](BENCHMARKS.md#minutes-against-amis-human-summaries)), with a release build of `f484493` (the minutes code is the same on
+`main` today), cold, with nothing else running: release three times, A3 three times, interleaved. The gates were written down, and
+their SHA-256 kept, before any judge ran; the place-based score of one run of each had been seen.
+
+| Gate | Release | A3 | Needed | Result |
+|---|---|---|---|---|
+| G1. Human decisions and actions found (the cited passage within one of a linked one), mean of 3 runs | 34.2 % (29.9, 32.5, 40.3) | 38.1 % (35.1, 37.7, 41.6) | +5 points, and the meeting-cluster bootstrap of the paired difference (first runs) above 0 | +3.9 points, [0.0, +21.5]: **not met** |
+| G2. Items the transcript supports (one blind judge, both arms mixed) | 34 % (27 of 79) | 36 % (38 of 106) | non-inferior per meeting, margin 10 points | −6.8 points per meeting, 90 % interval [−19.8, +6.2]: **not shown** |
+| G3. Wall time of the minutes, median over meetings of the per-meeting medians | 84.8 s | 130.6 s | at most 60 s more | +40.4 s (24.5 to 68.4): met |
+
+For G2 a judge of another model family read each item next to the passages around the one it cites (six before and after) and
+graded it `yes`, `weak` (said, but beyond the passages: a proposal as a decision, a wrong owner) or `no`
+([rubric](../eval/rubric/MINUTES_ITEM_SUPPORT.md), `eval/scripts/item_support.py`; key and grades sealed with their SHA-256). The
+release run it graded is the one of BENCHMARKS.md (same binary, sets and arms, interleaved with Apple's model), not one of the three
+solo runs. A second judge matched the same items with the human summaries, as in BENCHMARKS.md.
+
+- **A3 finds more decisions and fewer actions.** Decisions found: 23.9 % against 31.1 % (means of 3 runs); actions: 70.6 % against
+  62.7 % (of 17). By content (the second judge, first runs): human decisions stated 21 % against 29 %, human actions 6 of 18 against
+  4, decisions that state a human one 49 % against 40 %.
+- **Its extra items are mostly the ones the checks already doubt.** Decisions left "to be confirmed" for no agreement in the next
+  lines (`noAgreement`) went from 24 to 46, and the judge supported 9 of them in both arms: the second pass adds about 22 of them per
+  13 meetings, none supported. Firm items: 10 of 16 supported against 14 of 21, and the firm items find the same human sentences
+  (9.1 % in the mean of 3 runs for both). Leaving the second pass's doubted items out was tried on these grades (after the fact):
+  it lifts the supported share to 49 % but keeps 20 supported items against 27, so it gives back the recall.
+- **Verdict: A3 stays behind `--arms`.** The confirmation of G2 on 26 more public meetings, written down before running, was not
+  run once G1 failed.
+
+**One run is one draw.** The same binary, prompt and greedy decoding gave different minutes in every run, on every meeting, summary
+included: the prefill chunk is sized by the measured speed ("Running it", **Prefill**), so one 13,525-token prompt ran in 103 chunks once and
+102 the next, and a near tie flips with the bf16 rounding (completions of 1,188, 962 and 909 tokens). The number of items barely moves
+(76 in each release run, 104 to 106 for A3); which ones does. The release run of BENCHMARKS.md found 28.6 % of the human decisions and
+actions, and three more found 29.9 to 40.3 %: a difference between two single runs smaller than about ten points says nothing.
+Every gate of the minutes on the integrated model therefore needs three runs or more of each arm. With `llm-eval --prefill-chunk 128`
+(chunks of exactly 128 tokens) three of these meetings gave the same minutes twice, token for token (548, 649 and 499 tokens in the
+first request), in the same time as the app's chunks (60.8 to 68.2 s): a run then repeats, so two arms can be compared on the same
+draw, and a few chunk sizes (64, 96, 128…) give controlled draws in place of the timing's.
+
 ## Findings of blind run 4 (2026-10-15)
 
 ### R1. Cold questions answered from a starved excerpt (fixed)
