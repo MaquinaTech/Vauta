@@ -1,0 +1,9 @@
+# Thread sanitizer suppressions for .github/workflows/sanitizers.yml. Each entry says why the report is not a bug in Vauta.
+#
+# An actor whose executor is a DispatchSerialQueue (`unownedExecutor`): the thread sanitizer does not see that two jobs of the same
+# serial queue never overlap, so it reports the actor's own state, read in one job and written in the next, as a race. All of that
+# state is actor-isolated, which the compiler checks. A twenty-line program shows it on its own: the same accesses race on such an
+# actor and do not on a default actor (checked with Xcode 27's toolchain, November 2026). These two engines run their MLX work on a
+# utility queue, never on the cooperative pool, and are the only actors with such an executor.
+race:SearchModelEngine.swift
+race:LanguageModelEngine.swift

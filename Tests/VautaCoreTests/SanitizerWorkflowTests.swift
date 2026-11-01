@@ -47,4 +47,23 @@ struct SanitizerWorkflowTests {
         #expect(gpu.subtracting(skipped).isEmpty, "marked .gpuExclusive but run under the sanitizers: \(gpu.subtracting(skipped).sorted())")
         #expect(skipped.subtracting(suites.keys).isEmpty, "in GPU_SUITES but not a suite: \(skipped.subtracting(suites.keys).sorted())")
     }
+
+    /// The thread sanitizer reads the suppressions, the waits are stretched, and every suppression has its reason above it and names a
+    /// source file that exists (a renamed file would silently stop matching).
+    @Test func everySuppressionHasItsReasonAndNamesAFileThatExists() throws {
+        let workflow = try String(contentsOf: Self.root.appending(path: ".github/workflows/sanitizers.yml"), encoding: .utf8)
+        #expect(workflow.contains("suppressions=${{ github.workspace }}/.github/tsan-suppressions.txt"))
+        #expect(workflow.contains("VAUTA_TEST_TIME_SCALE:"))
+        let lines = try String(contentsOf: Self.root.appending(path: ".github/tsan-suppressions.txt"), encoding: .utf8).split(separator: "\n", omittingEmptySubsequences: false)
+        let entries = lines.enumerated().filter { !$0.element.hasPrefix("#") && !$0.element.trimmingCharacters(in: .whitespaces).isEmpty }
+        #expect(!entries.isEmpty)
+        let sources = Set((FileManager.default.enumerator(at: Self.root.appending(path: "Sources"), includingPropertiesForKeys: nil)?.allObjects as? [URL] ?? []).map(\.lastPathComponent))
+        for (index, entry) in entries {
+            let parts = entry.split(separator: ":", maxSplits: 1).map(String.init)
+            #expect(parts.count == 2 && ["race", "deadlock", "mutex", "signal", "thread"].contains(parts[0]), "\(entry)")
+            #expect(sources.contains(parts.last ?? ""), "\(entry) names no source file")
+            // Its reason: a comment block above it (other entries may come between them).
+            #expect(lines[..<index].contains { $0.hasPrefix("# ") && $0.count > 20 }, "\(entry) has no reason")
+        }
+    }
 }

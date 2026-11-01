@@ -49,7 +49,9 @@ private final class Scratch {
 
 @MainActor
 private func until(_ seconds: Double = 240, _ condition: () async -> Bool) async -> Bool {
-    let deadline = Date().addingTimeInterval(seconds)
+    // Stretched under a sanitizer (`VAUTA_TEST_TIME_SCALE`, set by the sanitizers workflow), as in VautaCoreTests' `TestTiming`.
+    let scale = ProcessInfo.processInfo.environment["VAUTA_TEST_TIME_SCALE"].flatMap(Double.init).map { max(1, $0) } ?? 1
+    let deadline = Date().addingTimeInterval(seconds * scale)
     while Date() < deadline {
         if await condition() { return true }
         try? await Task.sleep(for: .milliseconds(20))

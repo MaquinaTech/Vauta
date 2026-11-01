@@ -102,7 +102,7 @@ import Testing
         let line = String(repeating: "漢字", count: 1_000_000)
         var cuts: [String] = []
         let cpu = cpuSeconds { cuts = PassageChunker.hardCut(line, maximum: 600) }
-        #expect(cpu < 1, "cutting took \(cpu) s of CPU")
+        #expect(!TestTiming.holdsBudgets || cpu < 1, "cutting took \(cpu) s of CPU")
         #expect(cuts.allSatisfy { $0.count <= 600 })
         #expect(cuts.joined().count == 2_000_000)
     }

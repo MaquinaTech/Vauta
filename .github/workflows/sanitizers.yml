@@ -4,7 +4,9 @@
 # The test suite under the thread sanitizer and the address sanitizer, weekly and on demand, and on a pull request that changes
 # this file, so a change to it runs before it is merged. Races and memory errors the normal run does not see: the code has many
 # locks and `@unchecked Sendable` types that only these tools check. Not a required check; a failure is triaged by hand, and a
-# finding that is not a bug in Vauta gets a suppression with its reason (TSAN_OPTIONS `suppressions=`), never a skipped test.
+# finding that is not a bug in Vauta gets a suppression with its reason (`.github/tsan-suppressions.txt`), never a skipped test.
+# The code runs many times slower under the sanitizers: `VAUTA_TEST_TIME_SCALE` stretches the tests' waits by that factor, and a test
+# of a time budget runs its code without holding it to the budget (`TestTiming`).
 #
 # The suites that run the integrated or the search model on the GPU are skipped: their work runs in MLX's C++ and Metal's own
 # threads, which these sanitizers do not model, and they are the slowest suites under them. `SanitizerWorkflowTests` checks that
@@ -52,6 +54,7 @@ jobs:
       - name: Test
         env:
           # Report every race, not only the first: a run is read whole. (The address sanitizer stops at its first error.)
-          TSAN_OPTIONS: halt_on_error=0:second_deadlock_stack=1
+          TSAN_OPTIONS: halt_on_error=0:second_deadlock_stack=1:suppressions=${{ github.workspace }}/.github/tsan-suppressions.txt
           ASAN_OPTIONS: detect_stack_use_after_return=1
+          VAUTA_TEST_TIME_SCALE: "5"
         run: swift test -j 3 --sanitize=${{ matrix.sanitizer }} --skip "$GPU_SUITES"

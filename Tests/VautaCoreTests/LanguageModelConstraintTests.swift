@@ -269,7 +269,7 @@ struct LanguageModelConstraintTests {
         for b in Array("{\"title\":\"ab".utf8) { _ = s.step(b, g) }
         let first = cpuSeconds { _ = engine.mask(for: s) }
         let cached = cpuSeconds { for _ in 0..<1000 { _ = engine.mask(for: s) } }
-        #expect(cached / 1000 < 0.001 || first < 0.5)
-        #expect(first < 1.0)
+        #expect(!TestTiming.holdsBudgets || cached / 1000 < 0.001 || first < 0.5)
+        #expect(!TestTiming.holdsBudgets || first < 1.0)
     }
 }
