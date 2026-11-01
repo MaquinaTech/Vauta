@@ -30,14 +30,14 @@ struct BriefLastTimeShippingTests {
         return facts
     }
 
-    @Test func withoutItTheLastMeetingLeadsTheRelatedMeetingsAndTheOwnedTasksStay() {
+    @Test func withoutItTheLastMeetingLeadsTheRelatedMeetingsAndTheOwnedTasksStay() throws {
         var a = BriefFixtures.assembly(facts: Self.facts())
         a.showsLastTime = false
         let snapshot = BriefBuilder.assemble(a)
         #expect(snapshot.section(.lastTime) == nil && snapshot.lastTimeHidden)
-        let related = try? #require(snapshot.section(.relatedMeetings))
-        #expect(related?.items.first?.link == .meeting(meetingID: 1, t: nil) && related?.items.first?.text == "Supplier review")
-        #expect(related?.items.first?.detail == nil, "no line of the minutes comes with it")
+        let related = try #require(snapshot.section(.relatedMeetings))
+        #expect(related.items.first?.link == .meeting(meetingID: 1, t: nil) && related.items.first?.text == "Supplier review")
+        #expect(related.items.first?.detail == nil, "no line of the minutes comes with it")
         #expect(snapshot.section(.openTasks)?.items.map(\.text) == ["Send the revised budget"], "the task of someone invited stays; the unowned one went with the section")
         for word in ["Keep the C-shaped shell", "Who signs off", "The team compared"] {
             #expect(!snapshot.items.contains { $0.text.contains(word) }, "\(word) is a line of the last minutes")
