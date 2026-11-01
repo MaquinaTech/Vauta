@@ -1,0 +1,189 @@
+{
+ "meeting": "replay-es-fiestas",
+ "language": "es",
+ "source": "invented for the replay fixtures",
+ "passages": [
+  {
+   "id": 1,
+   "start": 0.0,
+   "end": 8.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Bueno, empezamos. Hoy toca cerrar el presupuesto de las fiestas y decidir lo del escenario."
+  },
+  {
+   "id": 2,
+   "start": 10.0,
+   "end": 18.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "He mirado las cuentas. Nos quedan unos doce mil euros para todo."
+  },
+  {
+   "id": 3,
+   "start": 23.0,
+   "end": 31.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "El año pasado el escenario solo ya costó cuatro mil quinientos."
+  },
+  {
+   "id": 4,
+   "start": 35.0,
+   "end": 43.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Este año la empresa de siempre nos pide cinco mil doscientos."
+  },
+  {
+   "id": 5,
+   "start": 45.0,
+   "end": 53.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "¿Y la otra empresa, la de Villanueva?"
+  },
+  {
+   "id": 6,
+   "start": 56.0,
+   "end": 64.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Cuatro mil ochocientos, pero sin el montaje de luces."
+  },
+  {
+   "id": 7,
+   "start": 68.0,
+   "end": 76.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Si sumamos las luces nos vamos a lo mismo. Y con la de siempre no hemos tenido nunca problemas."
+  },
+  {
+   "id": 8,
+   "start": 77.0,
+   "end": 85.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Pues nos quedamos con la empresa de siempre para el escenario."
+  },
+  {
+   "id": 9,
+   "start": 88.0,
+   "end": 96.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Carmen, ¿puedes llamarles para confirmar la fecha?"
+  },
+  {
+   "id": 10,
+   "start": 97.0,
+   "end": 105.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Sí, les llamo mañana por la mañana y confirmo el sábado catorce."
+  },
+  {
+   "id": 11,
+   "start": 110.0,
+   "end": 118.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Perfecto. Lo siguiente es la orquesta."
+  },
+  {
+   "id": 12,
+   "start": 122.0,
+   "end": 130.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "La orquesta pide dos mil. Yo propondría bajar a una sola actuación en vez de dos."
+  },
+  {
+   "id": 13,
+   "start": 132.0,
+   "end": 140.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Con una actuación nos ahorramos ochocientos."
+  },
+  {
+   "id": 14,
+   "start": 145.0,
+   "end": 153.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Vale, una sola actuación, el sábado por la noche."
+  },
+  {
+   "id": 15,
+   "start": 158.0,
+   "end": 166.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Yo hablo con el representante de la orquesta esta semana para cambiar el contrato."
+  },
+  {
+   "id": 16,
+   "start": 169.0,
+   "end": 177.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Muy bien. Luego está lo de los permisos del ayuntamiento."
+  },
+  {
+   "id": 17,
+   "start": 180.0,
+   "end": 188.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "El permiso de ocupación de la plaza hay que pedirlo con un mes de antelación."
+  },
+  {
+   "id": 18,
+   "start": 191.0,
+   "end": 199.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "O sea, antes del catorce de mayo."
+  },
+  {
+   "id": 19,
+   "start": 203.0,
+   "end": 211.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Eso lo puedo presentar yo, que tengo el certificado digital."
+  },
+  {
+   "id": 20,
+   "start": 212.0,
+   "end": 220.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Genial, gracias."
+  },
+  {
+   "id": 21,
+   "start": 222.0,
+   "end": 230.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Una duda que tengo: ¿quién se encarga de la limpieza después? El año pasado lo hizo el ayuntamiento, pero este año no lo sé."
+  },
+  {
+   "id": 22,
+   "start": 235.0,
+   "end": 243.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "No lo sé. Habrá que preguntarlo en el próximo pleno."
+  },
+  {
+   "id": 23,
+   "start": 246.0,
+   "end": 254.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "También habría que pensar en los baños portátiles, que siempre se nos olvidan."
+  },
+  {
+   "id": 24,
+   "start": 258.0,
+   "end": 266.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Sí, lo dejamos para la próxima reunión."
+  },
+  {
+   "id": 25,
+   "start": 271.0,
+   "end": 279.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Con todo, el presupuesto queda en unos once mil doscientos, dentro de lo que tenemos."
+  },
+  {
+   "id": 26,
+   "start": 280.0,
+   "end": 288.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Pues aprobado así. Nos vemos en dos semanas."
+  }
+ ]
+}

@@ -1,0 +1,79 @@
+{
+  "dropped" : 1,
+  "items" : [
+    {
+      "citations" : [
+        26
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "figures",
+      "text" : "Se aprobó el presupuesto de 11.200 euros.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        14
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "Se decidió una actuación con la orquesta.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        8
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "Se eligió la empresa habitual para el escenario.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        9
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "question",
+      "text" : "Confirmar la fecha con la empresa habitual.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        15
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 3",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Contactar con el representante de la orquesta.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        17
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "text" : "Pedir el permiso de ocupación de la plaza.",
+      "unconfirmed" : false
+    }
+  ],
+  "modelCalls" : 1,
+  "openQuestions" : [
+
+  ],
+  "proposed" : 8,
+  "summary" : "Se decidió usar la empresa habitual para el escenario, la orquesta con una actuación y solicitar el permiso de ocupación de la plaza con un mes de antelación. Se aprobaron los gastos, quedando un presupuesto de unos 11.200 euros. Se dejaron pendientes la limpieza y los baños portátiles para la próxima reunión.",
+  "topics" : [
+    "presupuesto",
+    "escenario",
+    "orquesta",
+    "permisos",
+    "limpieza",
+    "baños portátiles"
+  ]
+}

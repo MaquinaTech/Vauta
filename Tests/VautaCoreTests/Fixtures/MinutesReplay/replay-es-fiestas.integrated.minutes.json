@@ -1,0 +1,116 @@
+{
+  "dropped" : 1,
+  "items" : [
+    {
+      "citations" : [
+        14
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "noAgreement",
+      "text" : "Se acordó reducir la actuación de la orquesta a una sola vez.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        26
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "Se aprobó el presupuesto final de once mil doscientos euros.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        8
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "Se decidió contratar a la empresa de siempre para el escenario.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        15
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 3",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Alguien debe hablar con el representante de la orquesta esta semana para cambiar el contrato.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        17
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "noCommitment",
+      "text" : "Alguien debe solicitar el permiso de ocupación de la plaza con un mes de antelación.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        10
+      ],
+      "due" : "2005-01-02",
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "noCommitment",
+      "text" : "Carmen llamará para confirmar la fecha.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        15
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 3",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Hablar con el representante de la orquesta sobre el cambio de contrato.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        10
+      ],
+      "due" : "2005-01-02",
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "noCommitment",
+      "text" : "Llamar a la empresa del escenario para confirmar la fecha.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        19
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "noCommitment",
+      "text" : "Presentar el permiso de ocupación de la plaza del ayuntamiento.",
+      "unconfirmed" : true
+    }
+  ],
+  "modelCalls" : 2,
+  "openQuestions" : [
+    "¿Quién se encargará de la limpieza después de las fiestas?",
+    "¿Qué se hará respecto a los baños portátiles?"
+  ],
+  "proposed" : 13,
+  "summary" : "La reunión comenzó discutiendo el presupuesto para las fiestas y la elección del escenario. Se determinó que el presupuesto restante era de doce mil euros para todo el evento. Tras comparar precios, se decidió contratar a la empresa de siempre para el escenario, cuyo coste asciende a cinco mil doscientos euros. En cuanto a la orquesta, se acordó reducir su actuación a una sola vez, lo que supone un ahorro de ochocientos euros. Se estableció que el permiso de ocupación de la plaza debe solicitarse con un mes de antelación, es decir, antes del catorce de mayo. Finalmente, tras revisar los costes, se aprobó el presupuesto total en once mil doscientos euros. Las tareas pendientes incluyen confirmar la fecha con la empresa del escenario, negociar con la orquesta y solicitar los permisos municipales.",
+  "topics" : [
+    "Presupuesto fiestas",
+    "Elección escenario",
+    "Orquesta",
+    "Permisos ayuntamiento",
+    "Limpieza",
+    "Baños portátiles"
+  ]
+}

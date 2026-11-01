@@ -2,3 +2,5 @@
 # normalisation may touch them, whatever core.autocrlf or text=auto a contributor or CI has.
 Sources/VautaCore/Resources/Models/** binary
 Tests/VautaCoreTests/Fixtures/** binary
+# The minutes replay compares decoded JSON, not bytes, and a change to its expected minutes is reviewed as a diff.
+Tests/VautaCoreTests/Fixtures/MinutesReplay/*.json diff merge

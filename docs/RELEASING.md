@@ -22,16 +22,17 @@ timestamp is deterministic, set `SOURCE_DATE_EPOCH` to fix that too).
 1. Done: the repository is public and GitHub Actions are on. `ci.yml` runs on every pull request and every push to `main`,
    `codeql.yml` on pull requests to `main`, pushes to it and weekly, and `scorecard.yml` on pushes to `main`, on changes to branch protection and weekly;
    `release.yml` runs only when you start it on a tag (below).
-2. Add a tag ruleset (Settings, Rules) so that only you can create or delete tags matching `v*`: a tag is the one thing that
-   can start a release.
-3. Turn on branch protection and two-factor authentication ([GOVERNANCE.md](../GOVERNANCE.md#repository-controls)).
+2. Done: a tag ruleset (Settings → Rules) lets only a repository administrator create, move or delete tags matching `v*`: a tag
+   is the one thing that can start a release.
+3. Done: the ruleset on `main` ([GOVERNANCE.md](../GOVERNANCE.md#repository-controls)). Keep two-factor authentication on for
+   every maintainer.
 
 No secrets and no `release` environment are needed.
 
 ## Releasing a version
 
 1. On `main`, with CI green: set the version in `CHANGELOG.md` (replace "Unreleased" with the version and date), in
-   `Resources/Info.plist` (`CFBundleShortVersionString`, and `CFBundleVersion` one higher) and in `scripts/render-ui.sh`, and
+   `Resources/Info.plist` (`CFBundleShortVersionString`, and `CFBundleVersion` one higher), and
    commit. The plist is the version every build uses; the release workflow refuses a tag that doesn't match it.
    Run locally: `swift build -c release --arch arm64`, the tests, `scripts/check-strings.sh`, `scripts/check-headers.sh`, `scripts/check-dependencies.sh`, `scripts/check-shell-vars.sh`.
    Check the search model ([SEARCH_MODEL.md](SEARCH_MODEL.md)): its download hosts resolve from the EU and APAC, `Vauta mlx-selftest --model` passes on a locally signed build, and the licences and model card terms are unchanged.

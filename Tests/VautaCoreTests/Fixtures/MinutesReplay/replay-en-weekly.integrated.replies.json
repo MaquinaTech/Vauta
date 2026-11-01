@@ -1,0 +1,47 @@
+{
+  "calls" : [
+    {
+      "finishReason" : "stop"
+    },
+    {
+      "finishReason" : "stop"
+    }
+  ],
+  "contextTokens" : 65536,
+  "diagnostics" : {
+    "blocks" : 0,
+    "blocksOmitted" : 0,
+    "blocksUnreadable" : 0,
+    "counts" : {
+      "closing.addedDecisions" : 1,
+      "closing.addedTasks" : 0,
+      "decision.noAgreement" : 4,
+      "items.decision.reanchored" : 1,
+      "items.owner.self" : 3,
+      "items.owner.withheld" : 1,
+      "items.task.reanchored" : 4,
+      "owner.self" : 10,
+      "owner.withheld" : 1,
+      "summary.figureNotInTranscript" : 1,
+      "task.noCommitment" : 1,
+      "task.tentative" : 1,
+      "timing.evidenceMs" : 22
+    },
+    "dropped" : 0,
+    "drops" : {
+
+    },
+    "dueGiven" : 0,
+    "dueRuleViolations" : 0,
+    "dueUnreadable" : 0,
+    "kept" : 17,
+    "openQuestions" : 3,
+    "prefixReuse" : 0,
+    "proposed" : 21,
+    "topics" : 8
+  },
+  "replies" : [
+    "{\n  \"title\": \"General Work Meeting Minutes\",\n  \"topics\": [\n    \"2.4 Release Status\",\n    \"Payments Migration\",\n    \"Support Backlog\",\n    \"Accessibility Audit\",\n    \"Office Move\",\n    \"Internship\",\n    \"Partner API Limits\",\n    \"Data Retention Policy\"\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"The 2.4 release is postponed until the calendar crash is fixed and retested.\",\n      \"seg\": 14,\n      \"quote\": \"Okay, decided. Two point four waits for the crash fix.\"\n    },\n    {\n      \"text\": \"The payment provider migration will proceed in two phases: card payments in June and saved payment methods in August.\",\n      \"seg\": 26,\n      \"quote\": \"Okay, we stay with the current provider and migrate in two phases\"\n    },\n    {\n      \"text\": \"The group agreed to hire a temporary person for support for six weeks.\",\n      \"seg\": 38,\n      \"quote\": \"Okay. We hire a temp for support for six weeks.\"\n    },\n    {\n      \"text\": \"The group agreed to adopt the legal proposal to keep booking logs for eighteen months.\",\n      \"seg\": 87,\n      \"quote\": \"Okay. We adopt the eighteen months that legal proposed.\"\n    },\n    {\n      \"text\": \"The default notification setting will be changed to one reminder, with the option for more reminders available.\",\n      \"seg\": 102,\n      \"quote\": \"We go down to one reminder by default\"\n    }\n  ],\n  \"tasks\": [\n    {\n      \"text\": \"Fix the calendar crash by Wednesday.\",\n      \"owner\": \"Speaker 1\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 15,\n      \"quote\": \"I'll fix the calendar crash by Wednesday.\"\n    },\n    {\n      \"text\": \"Rerun the regression suite on Thursday after the build is ready.\",\n      \"owner\": \"Speaker 1\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 16,\n      \"quote\": \"And I'll rerun the regression suite on Thursday as soon as the build is there.\"\n    },\n    {\n      \"text\": \"Write the migration plan with the dates for the payment provider.\",\n      \"owner\": \"Felix\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 28,\n      \"quote\": \"Sure, I'll have the plan ready by next Friday.\"\n    },\n    {\n      \"text\": \"Write the job advertisement for the temporary support role today.\",\n      \"owner\": \"Speaker 1\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 39,\n      \"quote\": \"Thank you. I can write the job ad today if that helps.\"\n    },\n    {\n      \"text\": \"Book the first week of June for the accessibility audit.\",\n      \"owner\": \"Ben\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 46,\n      \"quote\": \"Yes, I'll book it today.\"\n    },\n    {\n      \"text\": \"Write the deletion job and run the first step at the start of next month.\",\n      \"owner\": \"Speaker 2\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 90,\n      \"quote\": \"I'll write the deletion job and run the first step at the start of next month.\"\n    },\n    {\n      \"text\": \"Ask Legal if the backups count towards the deletion policy.\",\n      \"owner\": \"Speaker 1\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 95,\n      \"quote\": \"Yes, I'll ask them this week.\"\n    },\n    {\n      \"text\": \"Implement the move button in the next sprint.\",\n      \"owner\": \"Speaker 1\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 41,\n      \"quote\": \"I'll take the move button into the next sprint.\"\n    },\n    {\n      \"text\": \"Send the internship offer to the second candidate on Monday.\",\n      \"owner\": \"Speaker 2\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 63,\n      \"quote\": \"I'll send her the offer on Monday.\"\n    },\n    {\n      \"text\": \"Implement per-key monitoring and an alert at eighty percent of the limit.\",\n      \"owner\": \"Speaker 1\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 75,\n      \"quote\": \"I can add per-key monitoring with an alert at eighty percent\"\n    },\n    {\n      \"text\": \"Send the abstract for the testing meetup by the end of next week.\",\n      \"owner\": \"Speaker 4\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 116,\n      \"quote\": \"I'll send them the abstract by the end of next week.\"\n    }\n  ],\n  \"entities\": [],\n  \"open_questions\": [\n    \"The cost of the accessibility audit needs to be checked against the budget.\",\n    \"Whether the higher limit for the partner API should be charged as a premium tier.\",\n    \"Whether the backup logs count towards the data retention deletion policy.\"\n  ],\n  \"summary\": \"The meeting covered several key areas, including the 2.4 release, payment migration, support backlog, accessibility audit, office move, intern hiring, partner API limits, and data retention policy. Regarding the 2.4 release, it was decided to postpone shipping until the calendar crash is fixed and retested, with the fix due by Wednesday and regression testing scheduled for Thursday. For payments, the group agreed to stay with the current provider and migrate in two phases: card payments in June and saved methods in August. The support backlog issue was addressed by agreeing to hire a temporary person for six weeks to help clear the tickets. The accessibility audit was tentatively scheduled for the first week of June, pending budget confirmation. The group also decided to offer the internship to the second candidate, who is to receive the offer on Monday. Regarding the partner API, the limit for the two problematic partners will be raised to 300 requests per minute, contingent on new per-key monitoring being in place. Finally, the data retention policy was adopted to keep booking logs for eighteen months, and the default notification setting was lowered to one reminder. Several follow-up tasks were assigned to address remaining open items.\"\n}",
+    "{\n\"decisions\": [\n{\n\"text\": \"The crash fix means the 2.4 release waits for the crash to be fixed and retested.\",\n\"seg\": 144,\n\"quote\": \"We hold two point four for the crash fix.\"\n}\n],\n\"tasks\": [\n{\n\"text\": \"Fix the calendar crash by Wednesday.\",\n\"owner\": null,\n\"owner_id\": null,\n\"due\": null,\n\"seg\": 129,\n\"quote\": \"I'll fix the calendar crash by Wednesday.\"\n},\n{\n\"text\": \"Rerun the regression suite on Thursday once the build is there.\",\n\"owner\": null,\n\"owner_id\": null,\n\"due\": null,\n\"seg\": 130,\n\"quote\": \"I'll rerun the regression suite on Thursday as soon as the build is there.\"\n},\n{\n\"text\": \"Write the migration plan with the dates for the payment change.\",\n\"owner\": null,\n\"owner_id\": null,\n\"due\": null,\n\"seg\": 141,\n\"quote\": \"Sure, I'll have the plan ready by next Friday.\"\n},\n{\n\"text\": \"Add per-key monitoring with an alert at eighty percent of the limit.\",\n\"owner\": null,\n\"owner_id\": null,\n\"due\": null,\n\"seg\": 142,\n\"quote\": \"I can add per-key monitoring with an alert at eighty percent\"\n}\n]\n}"
+  ]
+}

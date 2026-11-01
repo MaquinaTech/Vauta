@@ -1,0 +1,252 @@
+{
+ "meeting": "replay-en-launch",
+ "language": "en",
+ "source": "invented for the replay fixtures",
+ "passages": [
+  {
+   "id": 1,
+   "start": 0.0,
+   "end": 8.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Okay, let's start. Three things today: the supplier for the casing, the launch date, and the pilot with the two schools."
+  },
+  {
+   "id": 2,
+   "start": 9.0,
+   "end": 17.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "First the casing. Omar, where are we with the quotes?"
+  },
+  {
+   "id": 3,
+   "start": 21.0,
+   "end": 29.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "We have two quotes. Fendler is cheaper per unit, about four euros twenty, but they need eight weeks."
+  },
+  {
+   "id": 4,
+   "start": 30.0,
+   "end": 38.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Brightmold is five ten per unit and they can deliver in four weeks."
+  },
+  {
+   "id": 5,
+   "start": 41.0,
+   "end": 49.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "The samples from Brightmold were much better. The Fendler ones had visible seams on the edge."
+  },
+  {
+   "id": 6,
+   "start": 53.0,
+   "end": 61.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "And with eight weeks we would miss the March window anyway."
+  },
+  {
+   "id": 7,
+   "start": 66.0,
+   "end": 74.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "So it sounds like Brightmold. Does anyone object?"
+  },
+  {
+   "id": 8,
+   "start": 79.0,
+   "end": 87.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "No, the difference is about nine hundred euros on the first batch. I can live with that."
+  },
+  {
+   "id": 9,
+   "start": 91.0,
+   "end": 99.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Good, then we go with Brightmold for the casing."
+  },
+  {
+   "id": 10,
+   "start": 103.0,
+   "end": 111.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Omar, can you send them the purchase order this week?"
+  },
+  {
+   "id": 11,
+   "start": 115.0,
+   "end": 123.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Yes, I'll send the purchase order by Thursday."
+  },
+  {
+   "id": 12,
+   "start": 125.0,
+   "end": 133.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Thanks. Second point, the launch date."
+  },
+  {
+   "id": 13,
+   "start": 137.0,
+   "end": 145.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "With Brightmold delivering in four weeks, the first units arrive mid February. Packaging needs another ten days."
+  },
+  {
+   "id": 14,
+   "start": 148.0,
+   "end": 156.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "The manual is not translated yet either. The Portuguese version is still missing."
+  },
+  {
+   "id": 15,
+   "start": 158.0,
+   "end": 166.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Then the fifteenth of February is not realistic. Let's move the launch to the second of March."
+  },
+  {
+   "id": 16,
+   "start": 171.0,
+   "end": 179.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "The second of March works for finance. The quarter closes after that."
+  },
+  {
+   "id": 17,
+   "start": 184.0,
+   "end": 192.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Agreed."
+  },
+  {
+   "id": 18,
+   "start": 195.0,
+   "end": 203.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Okay, the launch moves to the second of March."
+  },
+  {
+   "id": 19,
+   "start": 205.0,
+   "end": 213.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "I'll get the Portuguese translation of the manual done by the twentieth of February."
+  },
+  {
+   "id": 20,
+   "start": 218.0,
+   "end": 226.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Perfect."
+  },
+  {
+   "id": 21,
+   "start": 230.0,
+   "end": 238.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Last point, the pilot with the schools."
+  },
+  {
+   "id": 22,
+   "start": 243.0,
+   "end": 251.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Both schools said yes, Riverside and the Hillcrest primary. They want twenty units each."
+  },
+  {
+   "id": 23,
+   "start": 255.0,
+   "end": 263.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "Forty units for free is a lot. Could we lend them instead and take them back in June?"
+  },
+  {
+   "id": 24,
+   "start": 264.0,
+   "end": 272.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Lending is fine, but then we need a simple form for the teachers to report problems."
+  },
+  {
+   "id": 25,
+   "start": 277.0,
+   "end": 285.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Let's lend them, not give them. Forty units, back at the end of June."
+  },
+  {
+   "id": 26,
+   "start": 290.0,
+   "end": 298.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Priya, could you draft that feedback form?"
+  },
+  {
+   "id": 27,
+   "start": 301.0,
+   "end": 309.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Sure, I can do a first version next week."
+  },
+  {
+   "id": 28,
+   "start": 311.0,
+   "end": 319.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "Someone also has to drive the units over. I can do Riverside, but not Hillcrest."
+  },
+  {
+   "id": 29,
+   "start": 320.0,
+   "end": 328.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Let's leave Hillcrest open for now, we'll see who has time."
+  },
+  {
+   "id": 30,
+   "start": 333.0,
+   "end": 341.0,
+   "speaker": "Speaker 2 (remote)",
+   "text": "One thing I still don't know is who pays the insurance for the lent units."
+  },
+  {
+   "id": 31,
+   "start": 346.0,
+   "end": 354.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Good question. Nobody knows yet, we have to check with the legal team."
+  },
+  {
+   "id": 32,
+   "start": 355.0,
+   "end": 363.0,
+   "speaker": "Speaker 4 (remote)",
+   "text": "I'll ask legal about the insurance tomorrow."
+  },
+  {
+   "id": 33,
+   "start": 368.0,
+   "end": 376.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Great. Anything else?"
+  },
+  {
+   "id": 34,
+   "start": 378.0,
+   "end": 386.0,
+   "speaker": "Speaker 3 (remote)",
+   "text": "Just a reminder that the trade fair stand needs the new logo files."
+  },
+  {
+   "id": 35,
+   "start": 389.0,
+   "end": 397.0,
+   "speaker": "Speaker 1 (remote)",
+   "text": "Right. Okay, that's it. Thanks everyone."
+  }
+ ]
+}

@@ -1,0 +1,43 @@
+{
+  "calls" : [
+    {
+      "finishReason" : "unknown"
+    }
+  ],
+  "contextTokens" : 8192,
+  "diagnostics" : {
+    "blocks" : 0,
+    "blocksOmitted" : 0,
+    "blocksUnreadable" : 0,
+    "counts" : {
+      "decision.noAgreement" : 1,
+      "owner.addressee" : 1,
+      "owner.self" : 1,
+      "owner.withheld" : 2,
+      "question.dropped.copy" : 1,
+      "rank.limit" : 6,
+      "rank.proposed" : 6,
+      "rank.shown" : 5,
+      "task.noCommitment" : 1,
+      "task.ownerMeUnbacked" : 2,
+      "task.question" : 1,
+      "timing.evidenceMs" : 6,
+      "timing.rankMs" : 2
+    },
+    "dropped" : 3,
+    "drops" : {
+      "decision.quoteNotFound" : 1,
+      "entity.unknownEntity" : 2
+    },
+    "dueGiven" : 1,
+    "dueRuleViolations" : 0,
+    "dueUnreadable" : 0,
+    "kept" : 6,
+    "openQuestions" : 0,
+    "proposed" : 9,
+    "topics" : 3
+  },
+  "replies" : [
+    "```json\n{\n  \"title\": \"Casing, launch date, and pilot decisions\",\n  \"summary\": \"The group discussed the supplier for the casing, deciding on Brightmold for its better samples and shorter delivery. The launch date was moved to the second of March due to translation delays. For the pilot with schools, it was agreed to lend forty units to Riverside and Hillcrest, with Priya tasked to draft a feedback form. The task of driving units was assigned to Me, and the insurance question was deferred to legal.\",\n  \"topics\": [\n    \"Casing supplier\",\n    \"Launch date\",\n    \"Pilot with schools\"\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Brightmold is chosen for the casing.\",\n      \"seg\": 5,\n      \"quote\": \"We have two quotes. Fendler is cheaper per unit, about four euros twenty, but they need eight weeks. Brightmold is five ten per unit and they can deliver in four weeks.\"\n    },\n    {\n      \"text\": \"The launch date is the second of March.\",\n      \"seg\": 15,\n      \"quote\": \"Then the fifteenth of February is not realistic. Let's move the launch to the second of March.\"\n    },\n    {\n      \"text\": \"Forty units are lent to Riverside and Hillcrest.\",\n      \"seg\": 25,\n      \"quote\": \"Let's lend them, not give them. Forty units, back at the end of June.\"\n    }\n  ],\n  \"tasks\": [\n    {\n      \"text\": \"Send the purchase order for the casing.\",\n      \"owner\": \"Omar\",\n      \"owner_id\": null,\n      \"due\": \"2005-01-07\",\n      \"seg\": 10,\n      \"quote\": \"Omar, can you send them the purchase order this week?\"\n    },\n    {\n      \"text\": \"Draft the feedback form for the pilot.\",\n      \"owner\": \"Priya\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 26,\n      \"quote\": \"Priya, could you draft that feedback form?\"\n    },\n    {\n      \"text\": \"Drive units to Hillcrest.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 28,\n      \"quote\": \"Someone also has to drive the units over. I can do Riverside, but not Hillcrest.\"\n    },\n    {\n      \"text\": \"Ask legal about insurance for lent units.\",\n      \"owner\": \"Me\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 32,\n      \"quote\": \"I'll ask legal about the insurance tomorrow.\"\n    }\n  ],\n  \"entities\": [\n    {\n      \"mention\": \"Omar\",\n      \"id\": 0,\n      \"seg\": 2\n    },\n    {\n      \"mention\": \"Priya\",\n      \"id\": 0,\n      \"seg\": 26\n    }\n  ],\n  \"open_questions\": [\n    {\n      \"text\": \"Who pays the insurance for the lent units?\",\n      \"seg\": 30,\n      \"quote\": \"One thing I still don't know is who pays the insurance for the lent units.\"\n    }\n  ]\n}\n```"
+  ]
+}

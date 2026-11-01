@@ -1,0 +1,46 @@
+{
+  "calls" : [
+    {
+      "finishReason" : "stop"
+    },
+    {
+      "finishReason" : "stop"
+    }
+  ],
+  "contextTokens" : 65536,
+  "diagnostics" : {
+    "blocks" : 0,
+    "blocksOmitted" : 0,
+    "blocksUnreadable" : 0,
+    "counts" : {
+      "closing.addedDecisions" : 0,
+      "closing.addedTasks" : 2,
+      "decision.reanchored" : 1,
+      "items.decision.reanchored" : 1,
+      "items.owner.self" : 2,
+      "items.owner.withheld" : 1,
+      "owner.addressee" : 1,
+      "owner.self" : 2,
+      "owner.withheld" : 1,
+      "task.noCommitment" : 1,
+      "task.question" : 1,
+      "timing.evidenceMs" : 12
+    },
+    "dropped" : 0,
+    "drops" : {
+
+    },
+    "dueGiven" : 0,
+    "dueRuleViolations" : 0,
+    "dueUnreadable" : 0,
+    "kept" : 9,
+    "openQuestions" : 1,
+    "prefixReuse" : 0,
+    "proposed" : 11,
+    "topics" : 3
+  },
+  "replies" : [
+    "{\n  \"title\": \"Project Review: Casing, Launch Date, and Pilot Program\",\n  \"topics\": [\n    \"Supplier for the casing\",\n    \"Product launch date\",\n    \"Pilot program with schools\"\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Brightmold was selected as the supplier for the casing.\",\n      \"seg\": 19,\n      \"quote\": \"Good, then we go with Brightmold for the casing.\"\n    },\n    {\n      \"text\": \"The product launch date was moved to March 2nd.\",\n      \"seg\": 18,\n      \"quote\": \"Okay, the launch moves to the second of March.\"\n    },\n    {\n      \"text\": \"The pilot program units will be lent to the two schools, with return in June.\",\n      \"seg\": 25,\n      \"quote\": \"Let's lend them, not give them.\"\n    }\n  ],\n  \"tasks\": [\n    {\n      \"text\": \"Send the purchase order to Brightmold this week.\",\n      \"owner\": \"Omar\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 10,\n      \"quote\": \"Omar, can you send them the purchase order this week?\"\n    },\n    {\n      \"text\": \"Provide the Portuguese translation of the manual by February 20th.\",\n      \"owner\": \"Speaker 3 (remote)\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 19,\n      \"quote\": \"I'll get the Portuguese translation of the manual done by the twentieth of February.\"\n    },\n    {\n      \"text\": \"Draft a feedback form for the pilot program.\",\n      \"owner\": \"Priya\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 26,\n      \"quote\": \"Priya, could you draft that feedback form?\"\n    },\n    {\n      \"text\": \"Follow up with the legal team regarding insurance for lent units.\",\n      \"owner\": \"Speaker 4 (remote)\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 32,\n      \"quote\": \"I'll ask legal about the insurance tomorrow.\"\n    }\n  ],\n  \"entities\": [],\n  \"open_questions\": [\n    \"The insurance payment for the lent units still needs to be checked with the legal team.\"\n  ],\n  \"summary\": \"The meeting addressed three main items: the casing supplier, the product launch date, and the pilot program with two schools. Regarding the casing, Brightmold was chosen over Fendler due to superior sample quality, despite being slightly more expensive and requiring a decision on the initial batch cost. The group agreed to proceed with Brightmold, and Omar committed to sending the purchase order by Thursday. For the launch date, the initial target was revised to March 2nd to allow for packaging and translation completion. The pilot program was approved as a loan of forty units, with the condition that a feedback form be created for the schools, and the units are to be returned in June. Several action items were assigned, including drafting the feedback form and clarifying the insurance liability with the legal team.\"\n}",
+    "{\n\"decisions\": [\n{\n\"text\": \"Brightmold was selected as the casing supplier.\",\n\"seg\": 19,\n\"quote\": \"So it sounds like Brightmold. Does anyone object?\"\n}\n],\n\"tasks\": [\n{\n\"text\": \"Send the purchase order by Thursday.\",\n\"owner\": \"Omar\",\n\"owner_id\": null,\n\"due\": null,\n\"seg\": 11,\n\"quote\": \"Yes, I'll send the purchase order by Thursday.\"\n},\n{\n\"text\": \"Drive the units over for Riverside pilot.\",\n\"owner\": \"Speaker 4 (remote)\",\n\"owner_id\": null,\n\"due\": null,\n\"seg\": 28,\n\"quote\": \"I can do Riverside, but not Hillcrest.\"\n},\n{\n\"text\": \"Follow up with legal about insurance for lent units.\",\n\"owner\": \"Speaker 4 (remote)\",\n\"owner_id\": null,\n\"due\": \"2005-01-01\" ,\n\"seg\": 32,\n\"quote\": \"I'll ask legal about the insurance tomorrow.\"\n}\n]\n}"
+  ]
+}
