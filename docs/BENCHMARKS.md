@@ -29,6 +29,7 @@ are never committed. This is the only place the README takes accuracy figures fr
 | Minutes, Apple's on-device model, 10 AMI meetings x 3 min of manual transcript: decisions and tasks kept by the app's checks | 13 of the 18 the model proposed; every kept item has a citation that exists and holds its figures; 3 of the 13 (23 %) marked Unconfirmed | Only one model and a small sample: [Minutes](#minutes-citations) |
 | Same, 10 min windows (longer than the model's 4,096-token window, so written block by block) | 0 of 42 proposals kept | |
 | Minutes, Apple's model and the integrated model, 20 sealed public meetings, harness phase, measured 2026-10-24 (blind, one LLM judge with no human review, **every switch on**): firm decisions and tasks covered, firm list length | Apple 100 of 167 in a list of 185 items (before: 99 in 518); integrated 51 (before: 42), the request the app runs on the integrated model since 2026-10-24 (items first, outcome rule, recall wording, expected counts with the item floor, greedy decoding); on the development meetings it listed 5.3 items per meeting at recall 0.32 and precision 0.61 (old: 0.22 to 0.25 and 0.66) with a median +14 s and p90 +53 s per meeting on the pairs. Apple's figures are for the ranked extraction with the outcome-first digest switched on, which the app does not ship | Not reproducible from the repository: the test set is sealed. Apple ships a subset that was not judged as such. Date, build, tables, limits and commands: [LANGUAGE_MODEL.md](LANGUAGE_MODEL.md#harness-phase-what-ships-blind-test-2026-10-24) |
+| Minutes against **AMI's human summaries**, 13 whole meetings (manual transcripts): human decisions found / decisions citing near one (a random passage: 9 %) | Apple 25 % / 22 %; integrated model 20 % / 28 %; the 17 human actions found 71 % and 59 %; no task has the owner the annotators named | One run per model; scores where an item points, not what it says; not held out: [Minutes against AMI's human summaries](#minutes-against-amis-human-summaries) |
 
 The DER figure for AMI uses the "no-bleed" scoring region explained below. With the plain scoring region it is 38.1 %
 for AMI (26.3 % for all 18 recordings), almost all of it false alarm caused by an artifact of how the test audio is
@@ -456,6 +457,67 @@ had no decision or task that passed the checks (the summary and topics are not c
 meetings. Samples are small (13 kept items), the model is not deterministic (a rerun gives other counts), and the manual
 transcript is cleaner than a recogniser's output on a real call. The command uses Apple's on-device model only; a model server is not measured.
 
+## Minutes against AMI's human summaries
+
+### Method
+
+AMI's annotators wrote an abstractive summary of each scenario meeting, with sections for its decisions, actions and problems,
+and linked each sentence to the dialogue acts it rests on (the summary links of the AMI manual annotations 1.6.2, CC BY 4.0,
+the zip already pinned in `eval/pins.json`). It is a reference for the minutes that no model wrote. `eval/scripts/build_ami_gold.py`
+takes those sentences for the 13 meetings of the `llm-eval` AMI set that have one (ES2004 b to d, ES2011d, IS1009 b to d,
+TS3003 b to d and TS3004 b to d: whole meetings of 30 to 45 minutes, manual transcripts, all four participants; 9 of them in the
+set's test split), with the linked dialogue acts as passages of the transcript the minutes are written from: 70 decision
+sentences (60 with a link) and 18 action sentences (17 with a link), over 3,869 passages.
+
+`llm-eval --tasks minutes` wrote the minutes with what the app sends (`--extraction release --summary release --harness release
+--open-questions release`), with Apple's on-device model (macOS 27.2 (26B123)) and with the integrated Gemma 4 E4B, one run
+each. It used a release build of `f484493`, whose minutes code is the same at `c8db768` (run `gold-minutes-1`, 1 November 2026).
+Each decision or task cites one passage. `score_minutes_gold.py` counts an item as *grounded* in a human sentence when that
+passage is within one passage of a passage linked to the sentence, and reports:
+
+- **found**: the human decisions (or actions) that some decision (or task) of the minutes is grounded in;
+- **supported**: the decisions (or tasks) grounded in a human decision (or action);
+- **in the human summary**: the items grounded in any sentence of the summary, its abstract and problems included;
+- **at random**: what a citation drawn at random scores on the last two, from the share of passages near a linked one;
+- **right owner**: of the tasks grounded in an action whose subject names roles ("The industrial designer will ..."), those
+  whose owner is one of those speakers.
+
+An AMI sentence often holds several decisions at once, so a sentence counts as found once and an item as supported by any
+sentence: there is no one-to-one matching. The items the ranking leaves in "Other possible items" are not counted as items;
+the column "with other items" adds them to what is found.
+
+### Results
+
+| Model | Kind | Human sentences | Found | With other items | Items | Supported | At random | In the human summary | At random | Right owner |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Apple | decisions | 60 | **25 %** [12 %, 40 %] | 28 % | 58 | **22 %** [12 %, 35 %] | 9 % | 78 % | 63 % | – |
+| Apple | tasks | 17 | **71 %** [36 %, 91 %] | 71 % | 67 | **24 %** [8 %, 44 %] | 2 % | 72 % | 63 % | 0 of 11 |
+| Integrated | decisions | 60 | **20 %** [10 %, 33 %] | 20 % | 43 | **28 %** [17 %, 38 %] | 9 % | 88 % | 63 % | – |
+| Integrated | tasks | 17 | **59 %** [17 %, 86 %] | 59 % | 36 | **31 %** [5 %, 59 %] | 2 % | 75 % | 63 % | 0 of 9 |
+
+95 % intervals: meeting-cluster bootstrap. On the 9 test meetings alone, Apple's minutes find 27 % of the decisions and 77 % of
+the actions, the integrated model's 14 % and 69 % (`gold_scores.json`). With no tolerance (the cited passage itself must be a
+linked one), Apple's decisions fall to 13 % found and 12 % supported and the integrated model's to 17 % and 26 %: Apple's
+citations land next to the linked passage more often than on it. With two passages of tolerance, the rates rise by at most 7 points.
+
+### What this says, and what it does not
+
+- **The minutes point where people decided, more often than chance, and miss most of it.** A decision of either model cites a
+  passage near a human decision 2.4 to 3.1 times as often as a random passage would, and most items (72 to 88 %) cite something
+  the human summary covers. But the minutes find a fifth to a quarter of the 60 human decisions: the annotators wrote down
+  design decisions (materials, buttons, colours, the battery) that the minutes leave out or cite elsewhere.
+- **Tasks: few human actions, many tasks.** The 17 human actions are found 59 to 71 % of the time, from 36 tasks (integrated)
+  and 67 (Apple), of which a quarter to a third are grounded in one. Many of the others read as points to discuss rather than
+  tasks ("Evaluate color options").
+- **No task has the owner the annotators named.** AMI's participants play roles and call each other by them, and the minutes
+  never take a role as an owner (a role is not a person). On this corpus 8 of Apple's 98 tasks (counting those ranked out) and 2
+  of the integrated model's 36 have an owner at all. This measures the corpus as much as the minutes: an owner needs a named
+  person (an attendee, someone in Context).
+- **It scores where an item points, not what it says.** An item can cite the right passage and get it wrong, or say it right and
+  cite another passage. One annotator wrote each summary, each model ran once, 13 meetings: the intervals are wide.
+- **Not held out.** These meetings are in the `llm-eval` sets the minutes were developed on. The 11 scenario meetings that no
+  evaluation had used are sealed for the check before a release ([`eval/heldout/README.md`](../eval/heldout/README.md)).
+
 ## Search by meaning (held-out check)
 
 The optional search model (EmbeddingGemma 2, [SEARCH_MODEL.md](SEARCH_MODEL.md)) was chosen after two spikes, not yet reproduced from this repository. Passage
@@ -638,6 +700,11 @@ eval/run_all.sh          # about 2.8 GB of downloads for the tuning set; about 2
 The minutes tables alone: `eval/.venv/bin/python -I eval/scripts/run_minutes.py --bin .build/release/Vauta --seconds 180` for the
 3-minute windows and `--seconds 600` for the 10-minute ones (`run_all.sh` runs both, tagged `<tag>-minutes180` and `<tag>-minutes600`).
 
+The human gold of the minutes: `python3 -I eval/scripts/build_ami_gold.py --sets <the llm-eval AMI sets> --out <gold>`, then
+`Vauta llm-eval --tasks minutes --sets <the same sets> --providers apple,integrated --extraction release --summary release --harness release
+--open-questions release --out <run>` and `python3 -I eval/scripts/score_minutes_gold.py --gold <gold> --minutes apple=<run>/minutes/minutes.apple.jsonl
+--minutes integrated=<run>/minutes/minutes.integrated.jsonl`.
+
 `eval/run_all.sh` verifies every download against `eval/manifests/*.sha256.txt` (`eval/manifests/heldout/` for the held-out sets) and `eval/pins.json`, checks the generated reference
 files against `eval/manifests/REFERENCES.sha256.txt`, and writes `environment.json`, per-file tables and `summary.json` / `wer.json`
 under `eval/work/runs/<tag>/`. The audio built here is regenerated, not stored, and is not byte-identical to earlier internal builds of the same
@@ -655,7 +722,9 @@ recipe (the Opus encode and the rounding differ), so figures can move by a few t
 - **Live labels were not changed or re-measured.** The provisional speaker labels shown while recording follow other settings; the figures here are for the final result after the meeting.
 - **Minutes quality, search and translation quality.** Minutes, Ask and Live Translation quality depend on the model you choose.
   For minutes this page reports only the mechanical citation checks of one model, Apple's on-device model, on 10 public AMI
-  windows ([Minutes citations](#minutes-citations)); the rubric scores (faithfulness, decisions, owners, coverage) have not been
+  windows ([Minutes citations](#minutes-citations)), and where the minutes of Apple's model and the integrated model point against
+  AMI's human summaries of 13 meetings ([Minutes against AMI's human summaries](#minutes-against-amis-human-summaries)), which
+  scores the place an item cites, not its wording; the rubric scores (faithfulness, decisions, owners, coverage) have not been
   given. Search and translation quality are not benchmarked here.
 - **Voice recognition across meetings** has its own calibration, written in [ARCHITECTURE.md](ARCHITECTURE.md) (search for
   "Calibration"); it was not re-run here and its data are not in the repository.
