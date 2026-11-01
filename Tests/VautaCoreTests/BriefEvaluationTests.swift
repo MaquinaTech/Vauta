@@ -100,6 +100,24 @@ struct BriefEvaluationTests {
         #expect(distractors <= 1, "at most one distractor on average")
     }
 
+    /// The brief reads the minutes as the app stores them: an item the ranking left out is not shown, an unconfirmed one keeps its mark, and
+    /// an item without a citation is still shown.
+    @Test func theStoredMinutesKeepTheirFlagsAsInTheApp() async throws {
+        let r = try Self.rig()
+        try r.sets.write("minutes_integrated.jsonl", """
+            {"case": "S1b", "summary": "The team discussed the old supplier.", "decisions": [], "tasks": [], "open_questions": []}
+            {"case": "S1c", "summary": "The team compared the supplier change and the shell material.", "decisions": [{"text": "Keep the C-shaped shell", "unconfirmed": false, "citations": [2]}, {"text": "Drop the third supplier", "unconfirmed": true, "reason": "rank", "citations": [1]}], "tasks": [{"text": "Send the revised budget for the supplier change", "owner": "Speaker 1", "due": null, "unconfirmed": true, "reason": "noCommitment", "citations": [3]}, {"text": "Book the factory visit", "owner": null, "due": null}], "open_questions": ["Who signs off the supplier change?"]}
+            """)
+        let fixture = try #require(try BriefEvaluation.loadFixtures(r.options.brief).first?.fixture)
+        let minutes = BriefEvaluation.loadMinutes(r.options.brief.minutes["integrated"])
+        let run = try await BriefEvaluation.runArm(BriefEvaluation.Arm.all[0], fixture: fixture, options: r.options, model: .apple, minutes: ["integrated": minutes])
+        #expect(run.text.contains("- Decision: Keep the C-shaped shell\n"))
+        #expect(!run.text.contains("Drop the third supplier"), "ranked out, so in the app it is among the other possible items, not in the brief")
+        #expect(run.text.contains("- Open task: Send the revised budget for the supplier change (Ana López) [check]"))
+        #expect(run.text.contains("- Open task: Book the factory visit"), "no citation: added on its own, still shown")
+        #expect(run.detail["linksInvalid"] == "0" && run.detail["wrongAttribution"] == "0")
+    }
+
     @Test func aFirstMeetingInventsNoHistory() async throws {
         let r = try Self.rig()
         var fixture = try #require(try BriefEvaluation.loadFixtures(r.options.brief).first?.fixture)
@@ -148,5 +166,23 @@ struct BriefEvaluationTests {
         #expect(shifted.contains("due 2005-05-02"), "a formatter in another zone prints another day")
         #expect(BriefEvaluation.printedDueMismatch(item, rendered: shifted, minutes: minutes) == 1, "and the check against the minutes catches it")
         #expect(BriefEvaluation.independentDay(stored, la) == "2005-05-03")
+    }
+
+    @Test func aTaskWithNoDueDayIsNotAMismatch() throws {
+        var item = BriefItem(id: "b1", kind: .task, text: "Send the budget")
+        let start = Date(timeIntervalSince1970: 1_104_537_600)
+        let snapshot = BriefSnapshot(occurrence: BriefOccurrence(identifier: "e", start: start), title: "T", start: start, end: start, service: nil, seriesName: nil,
+                                     mode: .keyword, relatedSkipped: false, sections: [BriefSection(kind: .openTasks, items: [item])])
+        let rendered = BriefEvaluation.render(snapshot)
+        for due in ["null", #""""#, #""null""#, #"" ""#] {
+            let line = #"{"case": "S1c", "summary": "x", "decisions": [], "tasks": [{"text": "Send the budget", "owner": null, "due": \#(due)}], "open_questions": []}"#
+            let minutes = [try JSONDecoder().decode(BriefEvaluation.StoredMinutes.self, from: Data(line.utf8))]
+            #expect(BriefEvaluation.printedDueMismatch(item, rendered: rendered, minutes: minutes) == 0, "due \(due) is no due day")
+        }
+        item.due = start
+        let dated = BriefEvaluation.render(BriefSnapshot(occurrence: BriefOccurrence(identifier: "e", start: start), title: "T", start: start, end: start, service: nil,
+                                                         seriesName: nil, mode: .keyword, relatedSkipped: false, sections: [BriefSection(kind: .openTasks, items: [item])]))
+        let none = [try JSONDecoder().decode(BriefEvaluation.StoredMinutes.self, from: Data(#"{"case": "S1c", "tasks": [{"text": "Send the budget", "due": ""}]}"#.utf8))]
+        #expect(BriefEvaluation.printedDueMismatch(item, rendered: dated, minutes: none) == 1, "a day printed where the minutes wrote none")
     }
 }
