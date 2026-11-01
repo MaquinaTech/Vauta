@@ -41,6 +41,9 @@ public enum LLMEvaluation {
         public var quietProcessCPU: Double = 50
         public var quietGPU: Int = 10
         public var repetitions = 1
+        /// Prefill the integrated model in chunks of exactly this many tokens (`LanguageModelEngine.setPrefillChunk`) instead of the app's chunks
+        /// sized by speed, which change from run to run and with them the bf16 rounding: the same prompt then decodes the same tokens every time.
+        public var prefillChunk: Int?
         /// A public transcript the search model embeds in a loop in this process while the runs go on (the concurrency measurement:
         /// both MLX models share the one GPU gate). `embeddings.json` in the output folder has the loop's timings.
         public var embeddingTranscript: URL?
@@ -444,6 +447,7 @@ public enum LLMEvaluation {
         // Apple's own token counts against Vauta's estimate: no generation.
         if o.tasks == ["token-count"] { try await TokenCountEvaluation.run(o, log: log); return }
         let engine = LanguageModelEngine(store: store)
+        if let n = o.prefillChunk { await engine.setPrefillChunk(n) }
         if o.tasks == ["ask-retrieval"] {   // no model call: Apple's model object is only handed to the service
             try await runAskRetrieval(o, store: store, engine: engine)
             return

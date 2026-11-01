@@ -108,6 +108,9 @@ jobs:
       - name: Test the human gold of the minutes and its scoring (standard library only)
         run: python3 -I -m unittest discover -s eval/tests -p 'test_ami_gold.py'
 
+      - name: Test the blind grading of minutes items against the transcript (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_item_support.py'
+
       - name: Test the word confidence scoring of the evaluation (standard library only)
         run: python3 -I -m unittest discover -s eval/tests -p 'test_score_wer.py'
 

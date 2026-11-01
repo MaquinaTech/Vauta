@@ -81,7 +81,10 @@ Another session may be using the CPU, GPU and RAM. For every speed, latency, res
 10%, bounded wait, each trace says whether it was met); run the two providers interleaved item by item (ABAB); take GPU energy from the
 chip-level IOReport figure (primary for GPU work, with the foreign load next to it) and CPU time and CPU energy per process
 (`ri_energy_nj`, CPU only: the secondary figure); and say which absolute numbers were taken under foreign load.
-Quality counts are unaffected by load.
+Quality counts are not a measure of load, but they are not fixed either: the integrated model's prefill chunks follow the measured
+speed, so its replies, minutes included, change from run to run (by up to ten points of recall on the 13 AMI meetings with a human
+summary). Run each arm three times or more, or pass `--prefill-chunk <tokens>` so a run repeats token for token
+(docs/LANGUAGE_MODEL.md, "The second pass (A3) against the human gold").
 
 ## The sets (2026-10-12)
 

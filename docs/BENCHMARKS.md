@@ -596,6 +596,11 @@ citations land next to the linked passage more often than on it. With two passag
   person (an attendee, someone in Context).
 - **One annotator, one judge, one run.** One annotator wrote each summary; one LLM judge matched the items, with no human
   review of its matches; each model ran once, on 13 meetings: the intervals are wide.
+- **A run is one draw.** The integrated model's minutes change from run to run (its prefill chunks are sized by speed, and a near
+  tie flips with the rounding): three more runs of the same build found 29.9 %, 32.5 % and 40.3 % of the human decisions and actions
+  together, against 28.6 % in the run above (decisions 18 to 30 %, actions 65 to 76 %). Apple's model was not run again.
+  The second pass of the minutes (A3) was measured against these figures and is not shipped
+  ([LANGUAGE_MODEL.md](LANGUAGE_MODEL.md#the-second-pass-a3-against-the-human-gold-2026-11-01-not-shipped)).
 - **Not held out.** These meetings are in the `llm-eval` sets the minutes were developed on. The 11 scenario meetings that no
   evaluation had used are sealed for the check before a release ([`eval/heldout/README.md`](../eval/heldout/README.md)).
 
