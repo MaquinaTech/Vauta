@@ -40,14 +40,14 @@ struct SpeakerIntroductionSuggestionTests {
         _ = try await Self.person(s, "Bruno Díaz")
         let m = try await Self.meeting(s, [(1, "Good morning. Hi, I'm Ana, from Kobaltix."), (2, "Thanks Ana. Let's look at the budget."),
                                            (2, "I'm sure we can ship it."), (3, "I'm Zoe, I take notes today.")])
-        #expect(try await s.suggestSpeakersFromIntroductions(meetingID: m.id) == 1)
+        #expect(try await s.suggestSpeakersFromTranscript(meetingID: m.id) == 1)
         let speakers = try await s.speakers(of: m.id)
         let first = try #require(speakers.first { $0.id == m.speakers[0] })
         #expect(first.source == .suggested && first.entityID == ana && first.suggestedBySegment == m.lines[0])
         #expect(first.name == nil, "a suggestion is never shown as a name")
         #expect(speakers.first { $0.id == m.speakers[1] }?.entityID == nil, "being thanked is not saying who you are")
         #expect(speakers.first { $0.id == m.speakers[2] }?.entityID == nil, "Zoe is no person of Context")
-        #expect(try await s.suggestSpeakersFromIntroductions(meetingID: m.id) == 0, "once is enough")
+        #expect(try await s.suggestSpeakersFromTranscript(meetingID: m.id) == 0, "once is enough")
     }
 
     @Test func theAnswerTakesTheLineAwayAndAChoiceIsNeverChanged() async throws {
@@ -58,18 +58,18 @@ struct SpeakerIntroductionSuggestionTests {
         let bruno = try await Self.person(s, "Bruno")
         // The person named the second speaker already: it stays as they chose.
         _ = try await s.assignSpeaker(m.speakers[1], toEntity: ana)
-        try await s.suggestSpeakersFromIntroductions(meetingID: m.id)
+        try await s.suggestSpeakersFromTranscript(meetingID: m.id)
         let second = try #require(try await s.speaker(m.speakers[1]))
         #expect(second.source == .user && second.entityID == ana && second.suggestedBySegment == nil)
         #expect(try await s.speaker(m.speakers[0])?.entityID == nil, "Ana belongs to another speaker now")
         // A name the person cleared is their choice too ("nobody"): it is not suggested again.
         _ = try await s.assignSpeaker(m.speakers[1], toEntity: nil)
-        try await s.suggestSpeakersFromIntroductions(meetingID: m.id)
+        try await s.suggestSpeakersFromTranscript(meetingID: m.id)
         #expect(try await s.speaker(m.speakers[1])?.entityID == nil)
 
         // Accepting a suggestion makes it the person's own choice: the line no longer explains it.
         let other = try await Self.meeting(s, [(1, "Hello, I'm Bruno.")])
-        try await s.suggestSpeakersFromIntroductions(meetingID: other.id)
+        try await s.suggestSpeakersFromTranscript(meetingID: other.id)
         let suggested = try #require(try await s.speaker(other.speakers[0]))
         #expect(suggested.suggestedBySegment == other.lines[0] && suggested.entityID == bruno)
         _ = try await s.assignSpeaker(other.speakers[0], toEntity: bruno)
@@ -82,17 +82,17 @@ struct SpeakerIntroductionSuggestionTests {
         let s = f.store!
         let ana = try await Self.person(s, "Ana")
         let m = try await Self.meeting(s, [(1, "Hi, I'm Ana.")])
-        try await s.suggestSpeakersFromIntroductions(meetingID: m.id)
+        try await s.suggestSpeakersFromTranscript(meetingID: m.id)
         #expect(try await s.speaker(m.speakers[0])?.entityID == ana)
         _ = try await s.rejectSuggestion(speakerID: m.speakers[0])
         let rejected = try #require(try await s.speaker(m.speakers[0]))
         #expect(rejected.entityID == nil && rejected.suggestedBySegment == nil)
-        #expect(try await s.suggestSpeakersFromIntroductions(meetingID: m.id) == 0, "\"Not Ana\" holds for this meeting")
+        #expect(try await s.suggestSpeakersFromTranscript(meetingID: m.id) == 0, "\"Not Ana\" holds for this meeting")
 
         let other = try await Self.meeting(s, [(1, "Hello everyone, I'm Lucía.")])
         let me = try await s.selfEntity()
         _ = try await s.saveEntity(EntityDraft(id: me, kind: .person, name: "Lucía"))
-        #expect(try await s.suggestSpeakersFromIntroductions(meetingID: other.id) == 0, "the user is never another speaker")
+        #expect(try await s.suggestSpeakersFromTranscript(meetingID: other.id) == 0, "the user is never another speaker")
     }
 
     @Test func twoNamesForOneSpeakerOrOnePersonForTwoSpeakersSuggestNothing() async throws {
@@ -101,8 +101,8 @@ struct SpeakerIntroductionSuggestionTests {
         _ = try await Self.person(s, "Ana")
         _ = try await Self.person(s, "Bruno")
         let m = try await Self.meeting(s, [(1, "Hi, I'm Ana."), (1, "Hello again, I'm Bruno."), (2, "Hi everyone, I'm Ana.")])
-        #expect(try await s.suggestSpeakersFromIntroductions(meetingID: m.id) == 0)
+        #expect(try await s.suggestSpeakersFromTranscript(meetingID: m.id) == 0)
         let shared = try await Self.meeting(s, [(1, "Hi, I'm Ana."), (2, "Hi, I'm Ana.")])
-        #expect(try await s.suggestSpeakersFromIntroductions(meetingID: shared.id) == 0)
+        #expect(try await s.suggestSpeakersFromTranscript(meetingID: shared.id) == 0)
     }
 }

@@ -100,6 +100,9 @@
 /* Setup: a server that was found; the argument is a model name */
 "%@ on this Mac" = "このMac上の%@";
 
+/* Speaker popover, under “Is this Ana?” when another speaker spoke to this one by that name (asked them something, handed them the floor or thanked them); the arguments are the other speaker’s label (“Speaker 1”, “Me”) and what they said */
+"%@ said to them: “%@”. Vauta never names a speaker from what’s said alone." = "%@からの呼びかけ：「%@」。Vautaは発言だけで話者に名前を付けることはありません。";
+
 /* Status detail; argument is a shortcut */
 "%@ starts and stops recording in any app." = "%@でどのAppでも録音を開始／停止できます。";
 
@@ -7897,6 +7900,9 @@
 
 /* No comment provided by engineer. */
 "You marked the other participants as informed that this meeting was transcribed" = "このミーティングを文字起こししていることを、ほかの参加者に周知済みとして記録しました";
+
+/* Speaker popover, under “Is this Ana?” when the user spoke to this speaker by that name (asked them something, handed them the floor or thanked them); the argument is what the user said */
+"You said to them: “%@”. Vauta never names a speaker from what’s said alone." = "自分からの呼びかけ：「%@」。Vautaは発言だけで話者に名前を付けることはありません。";
 
 /* Why a recording stopped automatically */
 "You switched to another user." = "別のユーザに切り替えました。";
