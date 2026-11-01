@@ -695,6 +695,8 @@ Existing installations must keep working, so these never change meaning:
   (`answer`, `claims`, `sources`, `late`; a citation's `kind` is `thisMeeting`, `pastMeeting` or `document`).
 - `ModelProviderSettings.Embeddings`: the raw value `"searchModel"` is the downloaded model; the retired `"onDevice"`
   (Apple's embeddings) is never reused: loading it gives `.none` and sets the one-time `searchModelRetiredAppleNL` flag.
+- The files: the snapshot envelope (`ACTA` v1 and v2), the journal (`ACTJ` v1) and the backup (`ACTABK` v1, formats 1 and 2).
+  `FormatGoldenTests` opens files written by an earlier build (snapshot v2 with a 3-record journal, a format 2 backup).
 
 ## Testing
 

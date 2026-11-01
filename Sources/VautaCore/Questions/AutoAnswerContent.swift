@@ -83,6 +83,9 @@ public struct AutoAnswerContent: Codable, Sendable, Equatable {
     public var late: Bool
     /// Claims that rested on a meeting or a document that was deleted afterwards were dropped (stored as a new optional key).
     public var removedSources: Bool
+    /// The cited lines of the meetings, as the answer was verified against them, for the previews of the card. In memory only: never
+    /// stored (not in `CodingKeys`), so an answer read back from the meeting has none.
+    public var lines: [Int64: CitableSegment] = [:]
 
     enum CodingKeys: String, CodingKey { case answer, claims, sources, late, removedSources }
 
