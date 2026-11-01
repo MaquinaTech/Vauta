@@ -4204,6 +4204,9 @@
 /* Help of the mark on a task owner; also the note in the task editor */
 "Nothing in the passage the model cited confirms this owner." = "Nada en el fragmento que citó el modelo confirma a este responsable.";
 
+/* Meetings, Upcoming, Today: no event today in the calendars chosen in Settings */
+"Nothing in your calendars today" = "Hoy no hay nada en tus calendarios";
+
 /* No comment provided by engineer. */
 "Nothing is being translated." = "No se está traduciendo nada.";
 
@@ -4435,6 +4438,9 @@
 "Copy protection is on, so meeting text can’t be exported." = "La protección contra copia está activada, así que el texto de las reuniones no se puede exportar.";
 "Couldn’t export the week" = "No se ha podido exportar la semana";
 "Export Week" = "Exportar semana";
+/* Meetings, Upcoming: shows the brief of the meeting about to start and of the next one */
+"Next Meetings" = "Próximas reuniones";
+
 "Next Week" = "Semana siguiente";
 "Nothing This Week" = "Nada esta semana";
 "Nothing was recorded this week." = "No se grabó nada esta semana.";
@@ -7193,6 +7199,9 @@
 /* Settings → Speakers; header of the reminder about saved voices unused for a year */
 "Unused voices" = "Voces sin usar";
 
+/* Meetings, Upcoming, Today: the next event to start today */
+"Up next" = "A continuación";
+
 /* Documents pane: the source is indexed */
 "Up to date" = "Al día";
 
@@ -8416,6 +8425,9 @@
 "Minutes and tasks" = "Actas y tareas";
 
 "Decisions, tasks with owner and date, and open questions." = "Decisiones, tareas con responsable y fecha, y preguntas abiertas.";
+
+/* Meetings, Upcoming, Today: the person declined this event's invitation */
+"Declined" = "Rechazado";
 
 /* Recurring meeting form: the minutes template item that uses the default template in Settings → Models */
 "Default" = "Predeterminada";

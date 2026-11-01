@@ -27,6 +27,12 @@ final class BriefController {
     var recordingBrief: BriefSnapshot?
     /// Which of the Upcoming entries is shown.
     var upcomingIndex = 0
+    /// Upcoming shows the next meetings or the whole of today (`BriefController+Today.swift`).
+    var upcomingMode = UpcomingMode.next
+    /// Every event of today, read while that list is on screen.
+    var today = TodayState.off
+    /// The brief opened from "Today", built on demand.
+    var todayEntry: Entry?
 
     @ObservationIgnored weak var recorder: RecorderModel?
     @ObservationIgnored let cache = BriefCache()
@@ -42,6 +48,8 @@ final class BriefController {
     @ObservationIgnored private var upcomingTask: Task<Void, Never>?
     @ObservationIgnored private var upcomingRun = 0
     @ObservationIgnored private(set) var upcomingBusy = false
+    @ObservationIgnored var todayTask: Task<Void, Never>?
+    @ObservationIgnored var todayBriefTask: Task<Void, Never>?
     @ObservationIgnored private var inputsTask: Task<Void, Never>?
     @ObservationIgnored private var agendaTasks: [BriefOccurrence: Task<Void, Never>] = [:]
     @ObservationIgnored private var expiry: Task<Void, Never>?
@@ -139,7 +147,7 @@ final class BriefController {
 
     var calendarOn: Bool { seams?.calendarOn() ?? (recorder?.calendar.enabled == true) }
 
-    private var calendarAccess: Bool { seams?.hasAccess() ?? (recorder?.calendar.hasAccess == true) }
+    var calendarAccess: Bool { seams?.hasAccess() ?? (recorder?.calendar.hasAccess == true) }
 
     var selectedCalendars: Set<String> { seams?.calendars() ?? recorder?.calendar.selected ?? [] }
 
@@ -402,6 +410,7 @@ final class BriefController {
     /// An agenda arrived: it joins the entry it belongs to.
     private func apply(_ snapshot: BriefSnapshot) {
         if var entry = next, entry.event.occurrence == snapshot.occurrence { entry.snapshot = snapshot; next = entry }
+        if var entry = todayEntry, entry.event.occurrence == snapshot.occurrence { entry.snapshot = snapshot; todayEntry = entry }
         if case .entries(var entries) = upcoming, let index = entries.firstIndex(where: { $0.event.occurrence == snapshot.occurrence }) {
             entries[index].snapshot = snapshot
             upcoming = .entries(entries)
@@ -466,6 +475,8 @@ final class BriefController {
         guard calendarOn else {
             next = nil
             upcoming = .off
+            forgetToday()
+            today = .off
             return
         }
         refreshNext()
@@ -502,6 +513,7 @@ final class BriefController {
         Task { await cache.invalidate(.locked) }
         if let entry = next { next = Entry(event: BriefController.stripped(entry.event)) }
         upcoming = prefs.enabled && calendarOn ? .loading : .off
+        forgetToday()
         recordingBrief = nil
     }
 

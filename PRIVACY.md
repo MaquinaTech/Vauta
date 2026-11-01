@@ -493,12 +493,13 @@ one invented sample sentence, not meeting text.
 
 ## The pre-meeting brief
 
-Before a calendar meeting, Vauta can prepare a brief: who is coming and when you last met, what the last meeting of the series
-decided and left open, the open tasks of the people involved, related meetings, documents and notes, and the reminders you
-chose. It is built on this Mac from what Vauta already holds plus three local sources, and it writes into none of them.
+Before a calendar meeting, Vauta can prepare a brief: who is coming and when you last met, the last meeting of the series and
+related ones, the open tasks of the people involved, documents and notes, and the reminders you chose. It is built on this Mac from what Vauta already holds plus three local sources, and it writes into none of them.
 
-- **Calendar.** Only the event about to start is read in full, and the next one within 12 hours when you open Upcoming; there is no
-  daily read of your calendar. To time the notification, Vauta also looks, in memory and for the events of the next few hours only,
+- **Calendar.** Only the event about to start is read in full, and the next one within 12 hours when you open Upcoming. When you
+  open **Upcoming › Today**, every event of today in the calendars you chose is read, all-day and declined ones too: its title, time,
+  calendar, attendees and meeting link, never its description, in memory while the list is shown, and dropped when Meetings lock. A
+  brief you open from it reads that one event as any brief does. There is no read of your calendar in the background beyond this. To time the notification, Vauta also looks, in memory and for the events of the next few hours only,
   at when they start (and their identifier), never at who is invited, whether you declined, or anything else; when the notification is
   due, only that one event is read in full and checked for whether it qualifies. None of it is stored. With the brief off, one card offers to set it up: only events starting within 10 minutes of now are looked at, and for them only the title, the time and, in memory, whether other people are invited (to decide whether the offer applies); the description is not read. The event's title, attendees, recurrence and meeting link are used in memory; a recording stores
   what it always did (title, attendees and series). People who are only invited are never added to Context: the lookup is

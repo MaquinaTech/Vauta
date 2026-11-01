@@ -319,12 +319,12 @@ struct BriefStoreTests {
         let event = BriefFixtures.event(attendees: [BriefAttendee(name: "Me", email: nil, isCurrentUser: true), BriefAttendee(name: "Ana López", email: "ana@example.com")],
                                         recurring: true)
         let composer = BriefComposer(store: s, retriever: nil, reminders: nil)
-        let before = await composer.build(event, settings: BriefSettings(), environment: BriefEnvironment())
+        let before = await composer.build(event, settings: BriefSettings(), environment: BriefEnvironment(), showsLastTime: true)
         #expect(before.snapshot?.section(.lastTime) != nil)
         let revision = await s.editRevision
         try await s.deleteMeeting(meeting)
         #expect(await s.editRevision != revision, "the cache key sees the deletion")
-        let after = await composer.build(event, settings: BriefSettings(), environment: BriefEnvironment())
+        let after = await composer.build(event, settings: BriefSettings(), environment: BriefEnvironment(), showsLastTime: true)
         #expect(after.snapshot?.section(.lastTime) == nil && after.snapshot?.items.contains { $0.meetingID == meeting } != true)
     }
 

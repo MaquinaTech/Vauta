@@ -154,6 +154,8 @@ public struct BriefSnapshot: Sendable, Equatable {
     public let relatedSkipped: Bool
     public var sections: [BriefSection]
     public var agenda: BriefAgendaState
+    /// "Last time" was left out for this backend (`BriefLastTimeShipping`); the last meeting leads "Related meetings" instead.
+    public var lastTimeHidden = false
 
     public init(occurrence: BriefOccurrence, title: String, start: Date, end: Date, service: ConferencingService?, seriesName: String?,
                 mode: BriefRankingMode, relatedSkipped: Bool, sections: [BriefSection], agenda: BriefAgendaState = .none) {
@@ -188,6 +190,7 @@ public struct BriefSnapshot: Sendable, Equatable {
     /// A stable hash of everything shown (replays of the same inputs must give the same value).
     public var digest: String {
         var lines: [String] = [occurrence.identifier, "\(occurrence.startSeconds)", title, mode.rawValue, "\(relatedSkipped)", seriesName ?? ""]
+        if lastTimeHidden { lines.append("lastTimeHidden") }
         for section in sections {
             lines.append("# \(section.kind.rawValue) \(section.total)")
             for item in section.items {

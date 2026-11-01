@@ -4204,6 +4204,9 @@
 /* Help of the mark on a task owner; also the note in the task editor */
 "Nothing in the passage the model cited confirms this owner." = "모델이 인용한 구간에서는 이 담당자를 확인할 수 없습니다.";
 
+/* Meetings, Upcoming, Today: no event today in the calendars chosen in Settings */
+"Nothing in your calendars today" = "오늘은 캘린더에 일정이 없습니다";
+
 /* No comment provided by engineer. */
 "Nothing is being translated." = "번역 중인 내용이 없습니다.";
 
@@ -4435,6 +4438,9 @@
 "Copy protection is on, so meeting text can’t be exported." = "복사 방지가 켜져 있어 회의 텍스트를 내보낼 수 없습니다.";
 "Couldn’t export the week" = "주를 내보낼 수 없음";
 "Export Week" = "주 내보내기";
+/* Meetings, Upcoming: shows the brief of the meeting about to start and of the next one */
+"Next Meetings" = "다음 회의";
+
 "Next Week" = "다음 주";
 "Nothing This Week" = "이번 주에는 아무것도 없음";
 "Nothing was recorded this week." = "이번 주에는 녹음된 것이 없습니다.";
@@ -7193,6 +7199,9 @@
 /* Settings → Speakers; header of the reminder about saved voices unused for a year */
 "Unused voices" = "사용하지 않은 목소리";
 
+/* Meetings, Upcoming, Today: the next event to start today */
+"Up next" = "다음";
+
 /* Documents pane: the source is indexed */
 "Up to date" = "최신 상태";
 
@@ -8416,6 +8425,9 @@
 "Minutes and tasks" = "회의록과 할 일";
 
 "Decisions, tasks with owner and date, and open questions." = "결정 사항, 담당자와 날짜가 있는 할 일, 남은 질문.";
+
+/* Meetings, Upcoming, Today: the person declined this event's invitation */
+"Declined" = "거절함";
 
 /* Recurring meeting form: the minutes template item that uses the default template in Settings → Models */
 "Default" = "기본";

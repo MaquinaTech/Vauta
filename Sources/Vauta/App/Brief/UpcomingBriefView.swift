@@ -4,9 +4,9 @@
 import VautaCore
 import SwiftUI
 
-/// Meetings › Upcoming: the brief of the meeting about to start and of the next one within 12 hours. Built when it is opened or
-/// refreshed; nothing is read from the calendar when this view is not shown. Suggest-only: its buttons open Calendar or Reminders,
-/// they never change them.
+/// Meetings › Upcoming: the brief of the meeting about to start and of the next one within 12 hours, or every event of today with the
+/// brief of a meeting on demand (`UpcomingTodayView`). Built when it is opened or refreshed; nothing is read from the calendar when this
+/// view is not shown. Suggest-only: its buttons open Calendar or Reminders, they never change them.
 struct UpcomingBriefView: View {
     let model: MeetingsModel
     let brief: BriefController
@@ -25,18 +25,44 @@ struct UpcomingBriefView: View {
                            message: String(localized: "Calendar access is turned off for Vauta in System Settings.", comment: "Settings → Calendar")) {
                 Button("Open System Settings", action: openSystemSettings)
             }
-        case .loading:
+        default:
+            VStack(alignment: .leading, spacing: 0) {
+                Picker(selection: Binding(get: { brief.upcomingMode }, set: { brief.upcomingMode = $0 })) {
+                    Text("Next Meetings", comment: "Meetings, Upcoming: shows the brief of the meeting about to start and of the next one").tag(BriefController.UpcomingMode.next)
+                    Text("Today", comment: "Meetings, Upcoming: shows every event of today").tag(BriefController.UpcomingMode.today)
+                } label: {
+                    Text("Show", comment: "Meetings, Upcoming: label of the choice between the next meetings and today (hidden)")
+                }
+                .pickerStyle(.segmented).labelsHidden().fixedSize()
+                .padding(.horizontal, PaneLayout.pane).padding(.top, 12)
+                if brief.upcomingMode == .today {
+                    UpcomingTodayView(brief: brief) { entry in entries([entry], scrolls: false, refresh: { brief.openTodayBrief(BriefTodayItem(event: entry.event, moment: .later, hasBrief: true), force: true) }) }
+                } else {
+                    nextMeetings
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        }
+    }
+
+    @ViewBuilder private var nextMeetings: some View {
+        switch brief.upcoming {
+        case .off, .calendarDenied, .loading:
             UpcomingLoadingView(locked: brief.isLocked, waited: brief.snapshotWaited, resume: { brief.resumeUpcomingIfIdle() }, refresh: { brief.openUpcoming(force: true) })
         case .none:
             EmptyStateView(Text("No meetings coming up", comment: "Meetings, Upcoming: no meeting with a brief in the next 12 hours"), symbol: "calendar") {
                 Button(String(localized: "Refresh", comment: "Meetings, Upcoming: builds the brief again")) { brief.openUpcoming(force: true) }
             }
-        case .entries(let entries):
-            UpcomingEntriesView(entries: entries, index: Binding(get: { min(brief.upcomingIndex, entries.count - 1) }, set: { brief.upcomingIndex = $0 }),
-                                reminderSettings: { openSettings(.calendar) }, remindersHintDismissed: brief.prefs.remindersHintDismissed,
-                                dismissRemindersHint: { brief.prefs.remindersHintDismissed = true }, linkPerson: { openSettings(.context) },
-                                open: { model.open($0) }, refresh: { brief.openUpcoming(force: true) }, openCalendar: { brief.openCalendar($0) })
+        case .entries(let list):
+            entries(list, refresh: { brief.openUpcoming(force: true) })
         }
+    }
+
+    private func entries(_ list: [BriefController.Entry], scrolls: Bool = true, refresh: @escaping () -> Void) -> UpcomingEntriesView {
+        UpcomingEntriesView(entries: list, index: Binding(get: { min(brief.upcomingIndex, list.count - 1) }, set: { brief.upcomingIndex = $0 }),
+                            reminderSettings: { openSettings(.calendar) }, remindersHintDismissed: brief.prefs.remindersHintDismissed,
+                            dismissRemindersHint: { brief.prefs.remindersHintDismissed = true }, linkPerson: { openSettings(.context) },
+                            open: { model.open($0) }, refresh: refresh, openCalendar: { brief.openCalendar($0) }, scrolls: scrolls)
     }
 }
 
@@ -80,19 +106,23 @@ struct UpcomingEntriesView: View {
     let open: (BriefLink) -> Void
     var refresh: () -> Void = {}
     var openCalendar: (BriefEvent) -> Void = { _ in }
+    /// False under "Today", whose list already scrolls.
+    var scrolls = true
 
     var body: some View {
+        if scrolls { ScrollView { content } } else { content }
+    }
+
+    private var content: some View {
         let entry = entries[min(max(0, index), entries.count - 1)]
-        ScrollView {
-            VStack(alignment: .leading, spacing: PaneLayout.section) {
-                if entries.count > 1 { picker }
-                header(entry)
-                page(entry)
-            }
-            .padding(PaneLayout.pane)
-            .frame(maxWidth: 760, alignment: .leading)
-            .frame(maxWidth: .infinity, alignment: .leading)
+        return VStack(alignment: .leading, spacing: PaneLayout.section) {
+            if entries.count > 1 { picker }
+            header(entry)
+            page(entry)
         }
+        .padding(PaneLayout.pane)
+        .frame(maxWidth: 760, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     /// One compact row per meeting (time and title, one line each, the title cut in the middle), so the second meeting is not anonymous and
@@ -163,7 +193,7 @@ struct UpcomingEntriesView: View {
         } else if let snapshot = entry.snapshot {
             if snapshot.isFirstMeeting {
                 Text("First meeting with these people", comment: "Menu-bar panel, brief card: nobody coming to the meeting was in an earlier meeting of Vauta").foregroundStyle(.secondary)
-            } else if snapshot.section(.lastTime) == nil, snapshot.section(.openTasks) == nil {
+            } else if !snapshot.lastTimeHidden, snapshot.section(.lastTime) == nil, snapshot.section(.openTasks) == nil {
                 Text("Nothing open from earlier meetings", comment: "Menu-bar panel, brief card: earlier meetings left no open task, decision or question").foregroundStyle(.secondary)
             }
             BriefContentView(sections: snapshot.sections, agenda: snapshot.agenda, agendaFirst: true,
@@ -176,7 +206,7 @@ struct UpcomingEntriesView: View {
         } else {
             // The skeleton: the section headings the page will have, until the brief is built.
             VStack(alignment: .leading, spacing: PaneLayout.section) {
-                ForEach([BriefSectionKind.people, .lastTime, .openTasks], id: \.self) { kind in
+                ForEach(BriefLastTimeShipping.shipped.isEmpty ? [BriefSectionKind.people, .openTasks] : [.people, .lastTime, .openTasks], id: \.self) { kind in
                     Label(BriefLabels.title(kind), systemImage: BriefLabels.symbol(kind)).font(.headline).foregroundStyle(.tertiary)
                 }
                 ThinkingOrb()
