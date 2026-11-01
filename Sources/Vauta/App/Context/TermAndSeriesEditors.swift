@@ -73,6 +73,10 @@ struct SeriesEditor: View {
                 if let id = model.seriesForm.id, let count = model.seriesMeetingCounts[id], count > 0 {
                     ContextFieldRow("Recorded meetings", centersLabel: true) { Text(count, format: .number) }
                 }
+                ContextFieldRow("Minutes template", help: String(localized: "The minutes of new meetings in this series use it. “Default” is the template chosen in Settings\u{00A0}→\u{00A0}Models.",
+                                                                 comment: "Help under the minutes template of a recurring meeting").avoidingWidow) {
+                    templatePopUp
+                }
             } header: {
                 ContextFormHeader(title: model.isCreating
                                   ? String(localized: "New Recurring Meeting", comment: "Title of the form for a new recurring meeting")
@@ -111,6 +115,21 @@ struct SeriesEditor: View {
         }
         .formStyle(.grouped)
         .scrollIndicators(.visible)
+    }
+
+    /// The default, Vauta's templates and the person's own, which are not evaluated (their group says so).
+    private var templatePopUp: some View {
+        let custom = model.customTemplates
+        var items: [ContextPopUp<MinutesTemplateChoice?>.Item] = [.init(String(localized: "Default", comment: "Recurring meeting form: the minutes template item that uses the default template in Settings → Models"), value: nil)]
+        items += MinutesTemplate.allCases.map { .init($0.displayName, value: .builtIn($0)) }
+        var breaks: [Int: MenuBreak] = [1: .line]
+        if !custom.isEmpty { breaks[items.count] = .title(CustomMinutesTemplate.label) }
+        items += custom.map { .init($0.name, value: .custom($0.id)) }
+        // A template deleted while the form was open shows as the default, which saving it writes.
+        let chosen = model.seriesForm.template
+        let shown: MinutesTemplateChoice? = if case .custom(let id) = chosen, !custom.contains(where: { $0.id == id }) { nil } else { chosen }
+        return ContextPopUp(label: String(localized: "Minutes template", comment: "Recurring meeting form: the label of the minutes template pop-up"),
+                            selection: Binding(get: { shown }, set: { model.seriesForm.template = $0 }), items: items, breaks: breaks)
     }
 
     /// One sentence under the last toggles list: it covers the people and the projects together.

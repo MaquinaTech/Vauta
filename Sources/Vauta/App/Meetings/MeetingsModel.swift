@@ -338,6 +338,9 @@ final class MeetingsModel {
 
     var jobs: [LLMJob] = []
     var cardSource: String?
+    /// The selected meeting's template, and the templates the person wrote (the Rewrite menu offers them).
+    var minutesTemplate: MinutesTemplateChoice?
+    var customTemplates: [CustomMinutesTemplate] = []
     @ObservationIgnored var llm: LLMService? {
         didSet { ask.llm = llm; importer.llm = llm; notepad.llm = llm }
     }

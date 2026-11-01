@@ -526,6 +526,9 @@ final class RecorderModel {
                 history?.onErased = { [weak recorder = self] in
                     // The meetings the list names are gone, and the new database reuses their ids.
                     recorder?.preferences.questionCleanup.clear()
+                    // The templates the person wrote went with the rest, and the new database reuses their ids.
+                    if recorder?.preferences.minutesTemplate.isCustom == true { recorder?.preferences.minutesTemplate = .general }
+                    if let recorder { Task { await recorder.settingsModel?.minutesTemplates.reload(recorder) } }
                     recorder?.context?.purge()
                     Task { await recorder?.context?.reload() }
                     recorder?.documents?.dataReplaced()

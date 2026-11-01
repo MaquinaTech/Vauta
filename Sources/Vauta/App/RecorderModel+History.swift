@@ -165,7 +165,7 @@ extension RecorderModel {
         let hadOpenWindow = NSApp.windows.contains { $0.identifier?.rawValue.hasPrefix("meetings") == true && $0.isVisible }
         // Settings → Context empties when Meetings lock, too: someone editing there is told as well.
         let hadOpenContext = NSApp.windows.contains { $0.isVisible && $0.identifier?.rawValue.hasPrefix("settings") == true } && settingsModel?.pane == .context
-        let hadOpenSheet = settingsModel.map { ($0.backup.sheet != nil) || $0.showErase || $0.pendingRetention != nil } ?? false
+        let hadOpenSheet = settingsModel.map { ($0.backup.sheet != nil) || $0.showErase || $0.pendingRetention != nil || $0.minutesTemplates.editing != nil } ?? false
         let announce = historyUnlocked && (hadOpenWindow || hadOpenContext || hadOpenSheet)
         unlock.lock()
         historyUnlocked = false
@@ -179,6 +179,7 @@ extension RecorderModel {
         // Back Up and Restore were opened behind Touch ID: an open sheet doesn't outlive the unlock (unless it is
         // working, which finishes).
         if let backup = settingsModel?.backup, backup.stage != .working { backup.reset() }
+        settingsModel?.minutesTemplates.locked(store)
         if let settings = settingsModel, !settings.erasing {
             settings.showErase = false
             settings.pendingRetention = nil

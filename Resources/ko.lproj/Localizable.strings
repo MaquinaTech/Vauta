@@ -220,6 +220,9 @@
 /* No comment provided by engineer. */
 "%lld of %lld" = "%lld/%lld";
 
+/* VoiceOver: how long the instructions of a minutes template are, of the most they can be */
+"%lld of %lld characters" = "%2$lld자 중 %1$lld자";
+
 /* Accessibility value of the search model download progress */
 "%lld of %lld megabytes" = "%lld / %lld메가바이트";
 
@@ -376,6 +379,9 @@
 
 /* Button help and accessibility label */
 "Add Recurring Meeting" = "반복 회의 추가";
+
+/* Settings → Models; button that opens the editor for a new minutes template the person writes */
+"Add Template…" = "템플릿 추가…";
 
 /* Button help and accessibility label */
 "Add Term" = "용어 추가";
@@ -647,6 +653,9 @@
 
 /* No comment provided by engineer. */
 "Apple Intelligence" = "Apple Intelligence";
+
+/* Minutes template editor: small models read only the start of a long template */
+"Apple Intelligence and other models with a small context read only the first 600 characters or so." = "Apple Intelligence와 컨텍스트가 작은 다른 모델은 처음 600자 정도만 읽습니다.";
 
 /* Model error */
 "Apple Intelligence doesn’t support this language." = "Apple Intelligence에서 이 언어를 지원하지 않습니다.";
@@ -1681,6 +1690,9 @@
 /* No comment provided by engineer. */
 "Custom vocabulary" = "사용자 지정 어휘";
 
+/* Minutes template: shown with a template the person wrote, which Vauta has not measured on meetings as it did its own templates */
+"Custom · not evaluated" = "사용자 정의 · 평가되지 않음";
+
 /* Settings → Status; the integrated model files no longer match the checksums */
 "Damaged" = "손상됨";
 
@@ -1811,6 +1823,12 @@
 /* No comment provided by engineer. */
 "Delete Team…" = "팀 삭제…";
 
+/* Confirm button: delete a minutes template the person wrote */
+"Delete Template" = "템플릿 삭제";
+
+/* Minutes template editor; button that opens the confirmation to delete the template */
+"Delete Template…" = "템플릿 삭제…";
+
 /* No comment provided by engineer. */
 "Delete Term" = "용어 삭제";
 
@@ -1862,6 +1880,9 @@
 
 /* No comment provided by engineer. */
 "Delete the selected item" = "선택한 항목 삭제";
+
+/* Confirmation title; the argument is the name of a minutes template the person wrote */
+"Delete the template “%@”?" = "“%@” 템플릿을 삭제할까요?";
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "사용하지 않은 목소리를 삭제할까요?";
@@ -2185,6 +2206,12 @@
 /* Undo menu item */
 "Edit Note" = "메모 편집";
 
+/* Title of the sheet that edits a minutes template the person wrote */
+"Edit Template" = "템플릿 편집";
+
+/* Minutes menu: opens Settings → Models, where the person writes their own minutes templates */
+"Edit Templates…" = "템플릿 편집…";
+
 /* No comment provided by engineer. */
 "Edit and Add…" = "편집 후 추가…";
 
@@ -2193,6 +2220,9 @@
 
 /* No comment provided by engineer. */
 "Edit people, projects and terms in the Context pane" = "“컨텍스트” 패널에서 사람, 프로젝트 및 용어를 편집";
+
+/* VoiceOver: opens the editor of a minutes template the person wrote; the argument is its name */
+"Edit the template %@" = "“%@” 템플릿 편집";
 
 /* No comment provided by engineer. */
 "Edited" = "편집됨";
@@ -2467,6 +2497,9 @@
 
 /* Settings → General */
 "For example, a recording that is about to stop on its own, or a model server that doesn’t answer. Notifications never include transcripts or minutes." = "예를 들어 곧 자동으로 중지될 녹음이나 응답하지 않는 모델 서버 등입니다. 알림에는 녹취록이나 회의록이 포함되지 않습니다.";
+
+/* Placeholder of the instructions of a minutes template the person writes */
+"For example: the feature requests, who asked for each and why; the bugs, with how serious they are; and what the team will look at next." = "예: 기능 요청과 각각 누가 왜 요청했는지, 버그와 그 심각도, 팀이 다음에 살펴볼 내용.";
 
 /* Setup: what to do when Apple Intelligence can't be used */
 "For minutes, set up a model below." = "회의록을 작성하려면 아래에서 모델을 설정하세요.";
@@ -3485,6 +3518,9 @@
    Setup page title */
 "Minutes" = "회의록";
 
+/* Confirmation message when deleting a minutes template the person wrote */
+"Minutes already written stay as they are. Recurring meetings that use it go back to the default template, and if it’s the default, “General meeting” becomes the default." = "이미 작성된 회의록은 그대로 유지됩니다. 이 템플릿을 사용하는 반복 회의는 기본 템플릿으로 돌아가고, 이 템플릿이 기본값이면 “일반 회의”⁠가 기본값이 됩니다.";
+
 /* Settings → Models activity
    Status row for the model provider */
 "Minutes and Ask" = "회의록 및 질문";
@@ -3531,6 +3567,9 @@
 
 /* No comment provided by engineer. */
 "Minutes status" = "회의록 상태";
+
+/* Recurring meeting form: the label of the minutes template pop-up */
+"Minutes template" = "회의록 템플릿";
 
 /* Restore sheet result, note under the missing model server title, on a Mac with Apple Intelligence */
 "Minutes use Apple Intelligence on this Mac until you set one up." = "서버를 설정하기 전까지 회의록은 이 Mac의 Apple Intelligence로 작성됩니다.";
@@ -3649,6 +3688,9 @@
 
 /* Speaker popover: moves this line to a new speaker, because the diarizer put two people in one */
 "New Speaker" = "새 화자";
+
+/* Title of the sheet for a new minutes template the person writes */
+"New Template" = "새 템플릿";
 
 /* Title of the form for a new glossary term */
 "New Term" = "새로운 용어";
@@ -4444,6 +4486,9 @@
 "Participants informed: %@" = "참가자 안내: %@";
 "Say when the participants were informed" = "참가자에게 안내한 시각 표시";
 "Write the time you marked that the participants were told the meeting was being recorded" = "참가자에게 녹음 사실을 안내했다고 표시한 시각을 기록";
+
+/* Error when saving a minutes template whose instructions are empty */
+"Write what the minutes should cover." = "회의록에서 다룰 내용을 적어 주세요.";
 "This recording is from %@. The meeting will be dated today, so its transcript isn’t deleted for its age." = "이 녹음은 %@의 녹음입니다. 오래되어 녹취록이 삭제되지 않도록 회의 날짜는 오늘로 지정됩니다.";
 "The file is dated %@, in the future. The meeting will be dated today." = "파일 날짜(%@)가 미래로 되어 있습니다. 회의 날짜는 오늘로 지정됩니다.";
 
@@ -4618,6 +4663,9 @@
 
 /* Status level, accessibility */
 "Problem" = "문제";
+
+/* Placeholder of the name of a minutes template the person writes */
+"Product review" = "제품 리뷰";
 
 /* Entity kind: a project */
 "Project" = "프로젝트";
@@ -5217,6 +5265,9 @@
    Panel state
    Progress */
 "Saving…" = "저장 중…";
+
+/* Settings → Models; under Your templates */
+"Say in your own words what the minutes should cover and stress. Unlike Vauta’s own templates, these aren’t evaluated." = "회의록에서 다루고 강조할 내용을 직접 적어 주세요. Vauta의 템플릿과 달리 평가되지 않은 템플릿입니다.";
 
 /* Microphone test prompt */
 "Say something…" = "말해 보세요…";
@@ -6245,6 +6296,12 @@
 /* No comment provided by engineer. */
 "The minutes don’t list any tasks.\nAdd one below." = "회의록에 할 일이 없습니다.\n아래에서 추가하세요.";
 
+/* Minutes template editor: what a template the person writes can and can't change */
+"The minutes keep their sections, and every decision and task is still checked against the transcript: a template says what to cover and stress, not what to conclude." = "회의록의 섹션은 그대로이며, 모든 결정 사항과 할 일은 계속 녹취록과 대조해 확인합니다. 템플릿은 무엇을 다루고 강조할지 정할 뿐, 결론을 정하지는 않습니다.";
+
+/* Help under the minutes template of a recurring meeting */
+"The minutes of new meetings in this series use it. “Default” is the template chosen in Settings → Models." = "이 반복 회의의 새 회의록에 사용됩니다. “기본”⁠은 “설정 → 모델”에서 선택한 템플릿입니다.";
+
 /* Notification body; the argument is the meeting's date and time */
 "The minutes of your meeting of %@ are ready." = "%@ 회의의 회의록이 준비되었습니다.";
 
@@ -6976,6 +7033,9 @@
 /* No comment provided by engineer. */
 "Unlock with Touch ID or your password to edit people, projects and the glossary." = "사람, 프로젝트, 용어집을 편집하려면 Touch ID 또는 암호로 잠금 해제하세요.";
 
+/* Settings → Models, under Your templates while Meetings are locked */
+"Unlock with Touch ID or your password to see and edit the templates you wrote." = "Touch ID나 암호로 잠금을 해제하면 직접 작성한 템플릿을 보고 편집할 수 있습니다.";
+
 /* Settings → Speakers, under the saved voices row while locked */
 "Unlock with Touch ID or your password to see whose voices they are." = "Touch ID나 암호로 잠금을 해제하면 누구의 목소리인지 볼 수 있습니다.";
 
@@ -7495,6 +7555,9 @@
 /* Placeholder of the glossary meaning field */
 "What it stands for" = "의미";
 
+/* Label above the instructions of a minutes template the person writes */
+"What the minutes should cover" = "회의록에서 다룰 내용";
+
 /* Section title on a person's card: passages the person said in meetings, from the speakers the user named as them */
 "What they said" = "발언 내용";
 
@@ -7828,6 +7891,12 @@
 
 /* No comment provided by engineer. */
 "Your summary is kept; proposed decisions and tasks are added" = "작성한 요약은 유지되며, 제안된 결정 사항과 할 일이 추가됩니다";
+
+/* Settings → Models; the default minutes template while Meetings are locked, when it is one the person wrote */
+"Your template" = "내 템플릿";
+
+/* Settings → Models; the row of the minutes templates the person wrote */
+"Your templates" = "내 템플릿";
 
 /* Confirmation message when deleting the user’s own saved voice */
 "Your voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. Imported recordings will no longer suggest which speaker is you. Meetings and the names already in them stay as they are." = "내 목소리 지문이 회의에 보관된 목소리 요약과 함께 암호화된 저장소에서 삭제됩니다. 이후 가져온 녹음에서는 어느 화자가 나인지 제안하지 않습니다. 회의와 그 안에 이미 있는 이름은 그대로 유지됩니다.";
@@ -8206,6 +8275,9 @@
 "Minutes and tasks" = "회의록과 할 일";
 
 "Decisions, tasks with owner and date, and open questions." = "결정 사항, 담당자와 날짜가 있는 할 일, 남은 질문.";
+
+/* Recurring meeting form: the minutes template item that uses the default template in Settings → Models */
+"Default" = "기본";
 
 "One question across your meetings, notes and files." = "질문 하나로 회의, 메모, 파일을 함께 찾습니다.";
 

@@ -224,6 +224,9 @@
 /* No comment provided by engineer. */
 "%lld of %lld" = "%lld of %lld";
 
+/* VoiceOver: how long the instructions of a minutes template are, of the most they can be */
+"%lld of %lld characters" = "%lld of %lld characters";
+
 /* Accessibility value of the search model download progress */
 "%lld of %lld megabytes" = "%lld of %lld megabytes";
 
@@ -386,6 +389,9 @@
 
 /* Button help and accessibility label */
 "Add Recurring Meeting" = "Add Recurring Meeting";
+
+/* Settings → Models; button that opens the editor for a new minutes template the person writes */
+"Add Template…" = "Add Template…";
 
 /* Button help and accessibility label */
 "Add Term" = "Add Term";
@@ -675,6 +681,9 @@
 
 /* No comment provided by engineer. */
 "Apple Intelligence" = "Apple Intelligence";
+
+/* Minutes template editor: small models read only the start of a long template */
+"Apple Intelligence and other models with a small context read only the first 600 characters or so." = "Apple Intelligence and other models with a small context read only the first 600 characters or so.";
 
 /* Model error */
 "Apple Intelligence doesn’t support this language." = "Apple Intelligence doesn’t support this language.";
@@ -1741,6 +1750,9 @@
 /* No comment provided by engineer. */
 "Custom vocabulary" = "Custom vocabulary";
 
+/* Minutes template: shown with a template the person wrote, which Vauta has not measured on meetings as it did its own templates */
+"Custom · not evaluated" = "Custom · not evaluated";
+
 /* Settings → Status; the integrated model files no longer match the checksums */
 "Damaged" = "Damaged";
 
@@ -1768,6 +1780,9 @@
 
 /* Welcome card text under “Minutes and tasks” */
 "Decisions, tasks with owner and date, and open questions." = "Decisions, tasks with owner and date, and open questions.";
+
+/* Recurring meeting form: the minutes template item that uses the default template in Settings → Models */
+"Default" = "Default";
 
 /* Settings → Calendar & Reminders: the calendar a new follow-up event starts in */
 "Default calendar" = "Default calendar";
@@ -1881,6 +1896,12 @@
 /* No comment provided by engineer. */
 "Delete Team…" = "Delete Team…";
 
+/* Confirm button: delete a minutes template the person wrote */
+"Delete Template" = "Delete Template";
+
+/* Minutes template editor; button that opens the confirmation to delete the template */
+"Delete Template…" = "Delete Template…";
+
 /* No comment provided by engineer. */
 "Delete Term" = "Delete Term";
 
@@ -1932,6 +1953,9 @@
 
 /* No comment provided by engineer. */
 "Delete the selected item" = "Delete the selected item";
+
+/* Confirmation title; the argument is the name of a minutes template the person wrote */
+"Delete the template “%@”?" = "Delete the template “%@”?";
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "Delete the unused voices?";
@@ -2274,6 +2298,12 @@
 /* Undo menu item */
 "Edit Note" = "Edit Note";
 
+/* Title of the sheet that edits a minutes template the person wrote */
+"Edit Template" = "Edit Template";
+
+/* Minutes menu: opens Settings → Models, where the person writes their own minutes templates */
+"Edit Templates…" = "Edit Templates…";
+
 /* No comment provided by engineer. */
 "Edit and Add…" = "Edit and Add…";
 
@@ -2282,6 +2312,9 @@
 
 /* No comment provided by engineer. */
 "Edit people, projects and terms in the Context pane" = "Edit people, projects and terms in the Context pane";
+
+/* VoiceOver: opens the editor of a minutes template the person wrote; the argument is its name */
+"Edit the template %@" = "Edit the template %@";
 
 /* No comment provided by engineer. */
 "Edited" = "Edited";
@@ -2569,6 +2602,9 @@
 
 /* Settings → General */
 "For example, a recording that is about to stop on its own, or a model server that doesn’t answer. Notifications never include transcripts or minutes." = "For example, a recording that is about to stop on its own, or a model server that doesn’t answer. Notifications never include transcripts or minutes.";
+
+/* Placeholder of the instructions of a minutes template the person writes */
+"For example: the feature requests, who asked for each and why; the bugs, with how serious they are; and what the team will look at next." = "For example: the feature requests, who asked for each and why; the bugs, with how serious they are; and what the team will look at next.";
 
 /* Setup: what to do when Apple Intelligence can't be used */
 "For minutes, set up a model below." = "For minutes, set up a model below.";
@@ -3590,6 +3626,9 @@
    Setup page title */
 "Minutes" = "Minutes";
 
+/* Confirmation message when deleting a minutes template the person wrote */
+"Minutes already written stay as they are. Recurring meetings that use it go back to the default template, and if it’s the default, “General meeting” becomes the default." = "Minutes already written stay as they are. Recurring meetings that use it go back to the default template, and if it’s the default, “General meeting” becomes the default.";
+
 /* Settings → Models activity
    Status row for the model provider */
 "Minutes and Ask" = "Minutes and Ask";
@@ -3639,6 +3678,9 @@
 
 /* No comment provided by engineer. */
 "Minutes status" = "Minutes status";
+
+/* Recurring meeting form: the label of the minutes template pop-up */
+"Minutes template" = "Minutes template";
 
 /* Restore sheet result, note under the missing model server title, on a Mac with Apple Intelligence */
 "Minutes use Apple Intelligence on this Mac until you set one up." = "Minutes use Apple Intelligence on this Mac until you set one up.";
@@ -3757,6 +3799,9 @@
 
 /* Speaker popover: moves this line to a new speaker, because the diarizer put two people in one */
 "New Speaker" = "New Speaker";
+
+/* Title of the sheet for a new minutes template the person writes */
+"New Template" = "New Template";
 
 /* Title of the form for a new glossary term */
 "New Term" = "New Term";
@@ -4793,6 +4838,9 @@
 /* Status level, accessibility */
 "Problem" = "Problem";
 
+/* Placeholder of the name of a minutes template the person writes */
+"Product review" = "Product review";
+
 /* Entity kind: a project */
 "Project" = "Project";
 
@@ -5431,6 +5479,9 @@
    Panel state
    Progress */
 "Saving…" = "Saving…";
+
+/* Settings → Models; under Your templates */
+"Say in your own words what the minutes should cover and stress. Unlike Vauta’s own templates, these aren’t evaluated." = "Say in your own words what the minutes should cover and stress. Unlike Vauta’s own templates, these aren’t evaluated.";
 
 /* Microphone test prompt */
 "Say something…" = "Say something…";
@@ -6459,6 +6510,12 @@
 /* No comment provided by engineer. */
 "The minutes don’t list any tasks.\nAdd one below." = "The minutes don’t list any tasks.\nAdd one below.";
 
+/* Minutes template editor: what a template the person writes can and can't change */
+"The minutes keep their sections, and every decision and task is still checked against the transcript: a template says what to cover and stress, not what to conclude." = "The minutes keep their sections, and every decision and task is still checked against the transcript: a template says what to cover and stress, not what to conclude.";
+
+/* Help under the minutes template of a recurring meeting */
+"The minutes of new meetings in this series use it. “Default” is the template chosen in Settings → Models." = "The minutes of new meetings in this series use it. “Default” is the template chosen in Settings → Models.";
+
 /* Notification body; the argument is the meeting's date and time */
 "The minutes of your meeting of %@ are ready." = "The minutes of your meeting of %@ are ready.";
 
@@ -7240,6 +7297,9 @@
 /* No comment provided by engineer. */
 "Unlock with Touch ID or your password to edit people, projects and the glossary." = "Unlock with Touch ID or your password to edit people, projects and the glossary.";
 
+/* Settings → Models, under Your templates while Meetings are locked */
+"Unlock with Touch ID or your password to see and edit the templates you wrote." = "Unlock with Touch ID or your password to see and edit the templates you wrote.";
+
 /* Settings → Speakers, under the saved voices row while locked */
 "Unlock with Touch ID or your password to see whose voices they are." = "Unlock with Touch ID or your password to see whose voices they are.";
 
@@ -7780,6 +7840,9 @@
 /* Placeholder of the glossary meaning field */
 "What it stands for" = "What it stands for";
 
+/* Label above the instructions of a minutes template the person writes */
+"What the minutes should cover" = "What the minutes should cover";
+
 /* Section title on a person's card: passages the person said in meetings, from the speakers the user named as them */
 "What they said" = "What they said";
 
@@ -7896,6 +7959,9 @@
 
 /* No comment provided by engineer. */
 "Write the time you marked that the participants were told the meeting was being recorded" = "Write the time you marked that the participants were told the meeting was being recorded";
+
+/* Error when saving a minutes template whose instructions are empty */
+"Write what the minutes should cover." = "Write what the minutes should cover.";
 
 /* Model role help */
 "Writes live notes while you record. A small, quick model works best; it can be the same as the main model." = "Writes live notes while you record. A small, quick model works best; it can be the same as the main model.";
@@ -8125,6 +8191,12 @@
 
 /* No comment provided by engineer. */
 "Your summary is kept; proposed decisions and tasks are added" = "Your summary is kept; proposed decisions and tasks are added";
+
+/* Settings → Models; the default minutes template while Meetings are locked, when it is one the person wrote */
+"Your template" = "Your template";
+
+/* Settings → Models; the row of the minutes templates the person wrote */
+"Your templates" = "Your templates";
 
 /* Confirmation message when deleting the user’s own saved voice */
 "Your voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. Imported recordings will no longer suggest which speaker is you. Meetings and the names already in them stay as they are." = "Your voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. Imported recordings will no longer suggest which speaker is you. Meetings and the names already in them stay as they are.";

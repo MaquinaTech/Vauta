@@ -121,12 +121,16 @@ extension LLMService {
         // The zone the meeting was recorded in (the Mac's, for a meeting from before it was stored): the date the model is given, the due
         // days and the summary's date checks all read the meeting's own day.
         let meetingZone = (try? await store.meetingTimeZone(meetingID)) ?? .current
+        // One of Vauta's templates, or the person's own: a template deleted since writes with the general one.
+        let template = try await store.minutesTemplate(meetingID) ?? .general
         var request = VautaPrompts.MinutesRequest(
-            meetingDate: meeting.startedAt, language: OutputLanguage(meeting: meeting),
-            template: try await store.minutesTemplate(meetingID) ?? .general,
+            meetingDate: meeting.startedAt, language: OutputLanguage(meeting: meeting), template: template.base,
             userNotes: Array(marks.prefix(budget.isSmall ? 10 : 30)),
             liveNotes: Array(liveHints.suffix(budget.isSmall ? 10 : 30)),
             priorityNotes: Self.priorityHints(noteRows, budget: budget), timeZone: meetingZone, recall: false, delta: delta)
+        if case .custom(let id) = template, let own = try await store.customMinutesTemplate(id) {
+            request.customInstructions = VautaPrompts.customTemplate(own.instructions, budget: budget)
+        }
         // The release choice for the backend, or what the evaluation forced. The integrated model's request: the items before the summary,
         // the summary rule, the recall wording and the sampling.
         let choices = minutesChoices(for: chat)

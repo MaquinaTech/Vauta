@@ -105,9 +105,9 @@ extension MeetingStore {
     // MARK: Series
 
     public func series() throws -> [MeetingSeries] {
-        try db.query("SELECT id, calendar_key, title_pattern, default_entities FROM series").map {
+        try db.query("SELECT id, calendar_key, title_pattern, default_entities, template FROM series").map {
             MeetingSeries(id: $0.int(0), calendarKey: $0.optionalString(1), titlePattern: $0.string(2),
-                          defaultEntities: Self.ids(fromJSON: $0.string(3)))
+                          defaultEntities: Self.ids(fromJSON: $0.string(3)), template: MinutesTemplateChoice(stored: $0.optionalString(4)))
         }.sorted { $0.titlePattern.localizedStandardCompare($1.titlePattern) == .orderedAscending }
     }
 
@@ -117,13 +117,17 @@ extension MeetingStore {
         guard !title.isEmpty else { throw KnowledgeError.emptySeriesTitle }
         let json = Self.json(ids: s.defaultEntities)
         let id: Int64 = try transaction {
+            // A template deleted since the form was opened: the series goes back to the default.
+            var chosen = s.template
+            if case .custom(let templateID) = chosen, try customMinutesTemplate(templateID) == nil { chosen = nil }
+            let template: SQLiteValue? = chosen.map { .text($0.storedValue) }
             if let id = s.id {
-                try run("UPDATE series SET calendar_key = ?, title_pattern = ?, default_entities = ? WHERE id = ?",
-                        [s.calendarKey.map { .text($0) }, .text(title), .text(json), .integer(id)])
+                try run("UPDATE series SET calendar_key = ?, title_pattern = ?, default_entities = ?, template = ? WHERE id = ?",
+                        [s.calendarKey.map { .text($0) }, .text(title), .text(json), template, .integer(id)])
                 return id
             }
-            try run("INSERT INTO series(calendar_key, title_pattern, default_entities) VALUES (?, ?, ?)",
-                    [s.calendarKey.map { .text($0) }, .text(title), .text(json)])
+            try run("INSERT INTO series(calendar_key, title_pattern, default_entities, template) VALUES (?, ?, ?, ?)",
+                    [s.calendarKey.map { .text($0) }, .text(title), .text(json), template])
             return db.lastInsertRowID
         }
         try await commitEdit()

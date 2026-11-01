@@ -59,9 +59,9 @@ final class Preferences {
     var outputLanguage: OutputLanguage {
         didSet { defaults.set(outputLanguage.storageValue, forKey: Keys.outputLanguage) }
     }
-    /// Default minutes template id (`MinutesTemplate.rawValue`).
-    var minutesTemplate: MinutesTemplate {
-        didSet { defaults.set(minutesTemplate.rawValue, forKey: Keys.minutesTemplate) }
+    /// Default minutes template (`MinutesTemplateChoice.storedValue`: a built-in template's raw value, or a template the person wrote).
+    var minutesTemplate: MinutesTemplateChoice {
+        didSet { defaults.set(minutesTemplate.storedValue, forKey: Keys.minutesTemplate) }
     }
     var relockPolicy: RelockPolicy {
         didSet { defaults.set(relockPolicy.rawValue, forKey: Keys.relockPolicy) }
@@ -279,7 +279,7 @@ final class Preferences {
         if version < 2 { defaults.set(2, forKey: Keys.preferencesVersion) }
         transcriptionLanguage = defaults.string(forKey: Keys.transcriptionLanguage)
         outputLanguage = OutputLanguage(storageValue: defaults.string(forKey: Keys.outputLanguage))
-        minutesTemplate = defaults.string(forKey: Keys.minutesTemplate).flatMap(MinutesTemplate.init(rawValue:)) ?? .general
+        minutesTemplate = MinutesTemplateChoice(stored: defaults.string(forKey: Keys.minutesTemplate)) ?? .general
         relockPolicy = defaults.string(forKey: Keys.relockPolicy).flatMap(RelockPolicy.init(rawValue:)) ?? .fiveMinutes
         stopRecordingOnScreenLock = defaults.object(forKey: Keys.stopOnScreenLock) as? Bool ?? true
         copyProtection = defaults.bool(forKey: Keys.copyProtection)
@@ -328,7 +328,7 @@ final class Preferences {
         }
         update(\.transcriptionLanguage, defaults.string(forKey: Keys.transcriptionLanguage))
         update(\.outputLanguage, OutputLanguage(storageValue: defaults.string(forKey: Keys.outputLanguage)))
-        update(\.minutesTemplate, defaults.string(forKey: Keys.minutesTemplate).flatMap(MinutesTemplate.init(rawValue:)) ?? .general)
+        update(\.minutesTemplate, MinutesTemplateChoice(stored: defaults.string(forKey: Keys.minutesTemplate)) ?? .general)
         update(\.relockPolicy, defaults.string(forKey: Keys.relockPolicy).flatMap(RelockPolicy.init(rawValue:)) ?? .fiveMinutes)
         update(\.stopRecordingOnScreenLock, defaults.object(forKey: Keys.stopOnScreenLock) as? Bool ?? true)
         update(\.copyProtection, defaults.bool(forKey: Keys.copyProtection))

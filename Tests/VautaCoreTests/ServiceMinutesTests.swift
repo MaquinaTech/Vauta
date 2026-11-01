@@ -174,18 +174,18 @@ struct ServiceMinutesTests {
         let service = LLMService(store: f.store, providers: TestProviders(chat: chat))
         let events = EventLog()
         await service.setJobEventHandler { events.append($0) }
-        await service.regenerateMinutes(id, template: .clientCall)
+        await service.regenerateMinutes(id, template: .builtIn(.clientCall))
         #expect(await eventually { !events.events.isEmpty })
-        #expect(try await f.store.minutesTemplate(id) == .clientCall)
+        #expect(try await f.store.minutesTemplate(id) == .builtIn(.clientCall))
         #expect(chat.calls.last?.text.contains(MinutesTemplate.clientCall.promptInstructions) == true)
     }
 
     @Test func theTemplateSurvivesAReopen() async throws {
         let f = try KnowledgeFixture()
         let id = try await f.meeting(["We reviewed the budget"])
-        try await f.store.setMinutesTemplate(.interview, for: id)
+        try await f.store.setMinutesTemplate(.builtIn(.interview), for: id)
         try await f.reopen()
-        #expect(try await f.store.minutesTemplate(id) == .interview)
+        #expect(try await f.store.minutesTemplate(id) == .builtIn(.interview))
         try await f.store.setMinutesTemplate(nil, for: id)
         #expect(try await f.store.minutesTemplate(id) == nil)
         // A value from a newer version reads as "not chosen" (general).

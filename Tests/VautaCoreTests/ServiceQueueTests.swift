@@ -22,10 +22,10 @@ struct ServiceQueueTests {
         let events = EventLog()
         let service = await service(f, chat: chat, events: events)
         let id = try await f.meeting(Self.lines)
-        await service.meetingEnded(id, template: .standup)
+        await service.meetingEnded(id, template: .builtIn(.standup))
         #expect(await eventually { events.events.contains(.init(meetingID: id, kind: .minutes, outcome: .succeeded)) })
         #expect(try await f.store.cardSource(id) == "llm")
-        #expect(try await f.store.minutesTemplate(id) == .standup)
+        #expect(try await f.store.minutesTemplate(id) == .builtIn(.standup))
         #expect(chat.calls.last?.text.contains(MinutesTemplate.standup.promptInstructions) == true)
         // Embeddings are off with these providers: no embed job was queued.
         #expect(!events.events.contains { $0.kind == .embed })

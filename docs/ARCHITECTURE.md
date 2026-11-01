@@ -295,6 +295,15 @@ this Mac (EmbeddingGemma 2 in `VautaMLX`), or are off (Ask then uses keyword sea
   real segment IDs, or it is dropped. What reaches the store is what Swift verified. An answer starts with `found`: `true`
   with at least one claim, or `false`, an explicit refusal; a found answer whose claims all fail the check is unverified, not
   a refusal. Dropped minutes items are counted by reason (`MinutesDiagnostics`: counts and reasons only, never text).
+- **Minutes templates.** A meeting's template is a `MinutesTemplateChoice`: one of Vauta's (`MinutesTemplate`, measured on
+  meetings) or one the person wrote (`CustomMinutesTemplate`, labelled "Custom · not evaluated" wherever it is offered and on
+  the minutes it wrote). A written template takes the place of the general template's instructions only: its text goes in
+  its own block (`<<<THE PERSON'S TEMPLATE … >>>`, defanged, so it cannot close the block) under an instruction that it says
+  what to cover and stress and cannot change the JSON shape, the rules or the evidence; the verification is the same. It is
+  cut to `ContextBudget.customTemplateCharacters` (600 characters on a small window, else the whole 4,000) after the last
+  sentence or line that fits (`VautaPrompts.customTemplate`). The template is stored with the meeting when it ends: the
+  series' template (`series.template`) when it has one, else the default from Settings; a template deleted since writes
+  with the general one.
 - **Minutes and speakers.** A transcript line carries its speaker label (`VautaPrompts.speakerLabel`: name or
   "Speaker k", role, `?` when doubtful; only the name and the assignment's confidence are used). `OwnerResolver`
   (`LLM/OwnerResolution.swift`) decides task owners: a confident speaker who commits (`FirstPerson`: phrases with a verb
@@ -611,6 +620,10 @@ normalized title hashes to `title_hash`. Tests and `llm-eval --tasks actions` us
 day in the meeting's own zone, nine languages) and runs after the minutes succeed, never while recording. The follow-up email is a template filled from stored fields
 (`FollowUpEmail`, with a tracer test that every content line is one of them); the app hands it to the mail app and never sends it.
 
+Migration 37 adds `minutes_templates` (the templates the person writes: name, instructions, creation time; `AUTOINCREMENT`, so a
+meeting that still names a deleted template never meets another one under its id) and `series.template` (NULL = the default in
+Settings). Deleting a template sets the series that used it back to NULL; meetings keep the value they were written with.
+
 **Never edit a published migration.** Add a new one, with a test that opens data written by the previous version
 (see `StorageSchemaTests`).
 
@@ -627,6 +640,8 @@ Existing installations must keep working, so these never change meaning:
 - The search model's embedding space id `embeddinggemma-2@914f7f89/r1` (the `chunks.model` and `passage_vectors.model`
   value). `r1` is the recipe version (prompts, mean pooling, the Matryoshka cut and renormalisation, the chunking rule,
   the tokenizer): any change bumps it and the vectors are embedded again.
+- The template values of `meetings.template`, `series.template` and the `minutesTemplate` preference
+  (`MinutesTemplateChoice.storedValue`): a built-in template's raw value, or `custom:<id>`; any other value reads as the general template.
 - `tasks.due_day` (`YYYY-MM-DD`), the states of `created_actions.state` and `follow_ups.state`, and the pasteboard marks `org.nspasteboard.ConcealedType` and `org.nspasteboard.TransientType`.
 - `NetworkPurpose.modelDownload` (`"modelDownload"`, written to the exported JSON).
 - `NetworkPurpose.liveAnswers` (`"liveAnswers"`), `knowledge_fts` kind 7 (a question the person kept) and the keys of `detected_questions.answer`

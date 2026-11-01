@@ -36,6 +36,9 @@ public struct ContextBudget: Sendable, Equatable {
     var minutesInput: Int { isSmall ? contextTokens - minutesOutput - safety : scaled(18_000) }
     var blockOutput: Int { isSmall ? contextTokens / 5 : 1_200 }
     var blockInput: Int { isSmall ? contextTokens - blockOutput - safety : scaled(11_000) }
+    /// Characters of a template the person wrote that go with the instruction (about 200 tokens on a small window, which the final
+    /// request shares with the digest of the blocks; all of it on a large one).
+    var customTemplateCharacters: Int { isSmall ? 600 : CustomMinutesTemplate.instructionsLimit }
 
     // MARK: Live notes
 

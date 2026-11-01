@@ -117,12 +117,19 @@ struct MinutesStatusBar: View {
                                  : "Minutes proposed by the model: review them and correct anything that’s wrong.").foregroundStyle(.secondary)
         let glyphView = glyph { Image(systemName: "sparkles").foregroundStyle(Brand.sparkle) }
         let writer: AnyView = canWrite ? AnyView(writeButton(retry: false)) : AnyView(EmptyView())
-        // One layout at every width and in every language: the badge sits on a line of its own and the sentence
-        // under it takes the room up to the button.
+        // A template the person wrote is not evaluated as Vauta's are: the minutes say so, with its name in the tooltip.
+        let custom = model.customMinutesTemplate
+        // One layout at every width and in every language: the badges sit on a line of their own and the sentence
+        // under them takes the room up to the button.
         return HStack(alignment: .firstTextBaseline, spacing: 8) {
             glyphView
             VStack(alignment: .leading, spacing: 4) {
-                if onDevice { BadgeCapsule(ModelQuality.badge).fixedSize() }
+                if onDevice || custom != nil {
+                    HStack(spacing: 6) {
+                        if onDevice { BadgeCapsule(ModelQuality.badge).fixedSize() }
+                        if let custom { BadgeCapsule(CustomMinutesTemplate.label).fixedSize().help(custom.name) }
+                    }
+                }
                 text.fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -174,8 +181,19 @@ struct MinutesStatusBar: View {
         Menu {
             Section("Template") {
                 ForEach(MinutesTemplate.allCases) { template in
-                    Button(template.displayName) { Task { await model.regenerateMinutes(template: template) } }
+                    Button(template.displayName) { Task { await model.regenerateMinutes(template: .builtIn(template)) } }
                 }
+            }
+            if !model.customTemplates.isEmpty {
+                Section(CustomMinutesTemplate.label) {
+                    ForEach(model.customTemplates) { template in
+                        Button(template.name) { Task { await model.regenerateMinutes(template: .custom(template.id)) } }
+                    }
+                }
+            }
+            if let models = openModels {
+                Divider()
+                Button(String(localized: "Edit Templates…", comment: "Minutes menu: opens Settings → Models, where the person writes their own minutes templates")) { models() }
             }
         } label: {
             if retry { Text("Try Again") }

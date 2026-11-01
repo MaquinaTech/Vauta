@@ -109,7 +109,7 @@ struct SettingsWindow: View {
                                           setUpModelServer: { model.pane = .models; model.models.guidePresented = true },
                                           showModels: { model.pane = .models },
                                           showRecording: { model.pane = .recording })
-        case .models: ModelsPane(recorder: recorder, preferences: preferences, models: model.models)
+        case .models: ModelsPane(recorder: recorder, preferences: preferences, models: model.models, templates: model.minutesTemplates)
         case .privacy: PrivacyPane(recorder: recorder, preferences: preferences, model: model)
         case .context: ContextPane(recorder: recorder)
         case .documents: DocumentsPane(recorder: recorder)

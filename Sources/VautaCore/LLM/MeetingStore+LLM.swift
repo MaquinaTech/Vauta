@@ -208,20 +208,6 @@ extension MeetingStore {
                       legacyError: code == nil ? r.optionalString(5) : nil)
     }
 
-    // MARK: Minutes template
-
-    /// The template a meeting's minutes are written with. nil = not chosen
-    /// (meetings before templates existed): the general template.
-    public func minutesTemplate(_ meetingID: Int64) throws -> MinutesTemplate? {
-        try db.query("SELECT template FROM meetings WHERE id = ?", [.integer(meetingID)]).first?
-            .optionalString(0).flatMap(MinutesTemplate.init(rawValue:))
-    }
-
-    public func setMinutesTemplate(_ template: MinutesTemplate?, for meetingID: Int64) async throws {
-        try run("UPDATE meetings SET template = ? WHERE id = ?", [template.map { .text($0.rawValue) }, .integer(meetingID)])
-        try await commitEdit()
-    }
-
     // MARK: Embedding spaces
 
     /// The embedding spaces each meeting's chunks are in (normally one).
