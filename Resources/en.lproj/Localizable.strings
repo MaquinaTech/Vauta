@@ -543,7 +543,7 @@
 /* No comment provided by engineer. */
 "All System Audio" = "All System Audio";
 
-/* No comment provided by engineer. */
+/* Meetings, Upcoming, Today: an event that lasts all day, in place of its time */
 "All day" = "All day";
 
 /* No comment provided by engineer. */
@@ -937,7 +937,8 @@
 "Blocks copying, dragging and sharing transcripts and minutes from Vauta’s windows, so meeting text doesn’t end up in other apps or clipboard managers by accident. Turn it off to paste minutes into email or documents." = "Blocks copying, dragging and sharing transcripts and minutes from Vauta’s windows, so meeting text doesn’t end up in other apps or clipboard managers by accident. Turn it off to paste minutes into email or documents.";
 
 /* Menu-bar panel while recording: the row that opens the brief the meeting started with
-   Tab of a meeting with the brief it was recorded with: what Vauta showed before the meeting started */
+   Tab of a meeting with the brief it was recorded with: what Vauta showed before the meeting started
+   VoiceOver, Meetings, Upcoming, Today: this event has a brief that opens under the list */
 "Brief" = "Brief";
 
 /* Menu-bar panel, brief card: the Mac is too hot to build the brief */
@@ -1807,6 +1808,9 @@
 
 /* Welcome card text under “Minutes and tasks” */
 "Decisions, tasks with owner and date, and open questions." = "Decisions, tasks with owner and date, and open questions.";
+
+/* Meetings, Upcoming, Today: the person declined this event's invitation */
+"Declined" = "Declined";
 
 /* Recurring meeting form: the minutes template item that uses the default template in Settings → Models */
 "Default" = "Default";
@@ -3902,6 +3906,9 @@
 /* No comment provided by engineer. */
 "Next Meeting" = "Next Meeting";
 
+/* Meetings, Upcoming: shows the brief of the meeting about to start and of the next one */
+"Next Meetings" = "Next Meetings";
+
 /* This Week: button that shows the week after */
 "Next Week" = "Next Week";
 
@@ -4327,6 +4334,9 @@
 /* Ask: shown under the answer when no passage of the meetings the question names by their place (the last three meetings) matched */
 "Nothing in those meetings matched, so all meetings were searched." = "Nothing in those meetings matched, so all meetings were searched.";
 
+/* Meetings, Upcoming, Today: no event today in the calendars chosen in Settings */
+"Nothing in your calendars today" = "Nothing in your calendars today";
+
 /* No comment provided by engineer. */
 "Nothing is being translated." = "Nothing is being translated.";
 
@@ -4370,7 +4380,8 @@
 /* Settings → Calendar & Reminders: how long before a meeting the notification goes out; the choices are Off, 5, 10, 15 and 30 minutes */
 "Notify me before a meeting" = "Notify me before a meeting";
 
-/* Settings → Models activity */
+/* Meetings, Upcoming, Today: this event is happening now
+   Settings → Models activity */
 "Now" = "Now";
 
 /* No comment provided by engineer. */
@@ -5772,6 +5783,7 @@
 "Shortcut: %@" = "Shortcut: %@";
 
 /* Button on a link to an earlier meeting: opens that meeting at the item the link is about
+   Meetings, Upcoming: label of the choice between the next meetings and today (hidden)
    Tasks mode: label of the control that switches between the open tasks and This Week */
 "Show" = "Show";
 
@@ -7186,7 +7198,9 @@
 /* Settings → Speakers, details in the Learn More popover when it is on: how to save the user’s own voice */
 "To teach Vauta your own voice, import a recording where you speak and choose “This Is My Voice” on your speaker. Later imported recordings can then suggest which speaker is you." = "To teach Vauta your own voice, import a recording where you speak and choose “This Is My Voice” on your speaker. Later imported recordings can then suggest which speaker is you.";
 
-/* Meetings list: the header of the meetings started today */
+/* Meetings list: the header of the meetings started today
+   Meetings, Upcoming: shows every event of today
+   Meetings, Upcoming: the list of every event of today */
 "Today" = "Today";
 
 /* Documents: why a file was skipped; it is bigger than Vauta reads */
@@ -7455,6 +7469,9 @@
 
 /* Settings → Speakers; header of the reminder about saved voices unused for a year */
 "Unused voices" = "Unused voices";
+
+/* Meetings, Upcoming, Today: the next event to start today */
+"Up next" = "Up next";
 
 /* Documents pane: the source is indexed */
 "Up to date" = "Up to date";

@@ -104,9 +104,18 @@ public protocol BriefEventSource: Sendable {
     /// The events of exactly these occurrences, found in `[from, to]`. A reader that limits how many events it returns must not let other
     /// meetings crowd these out (two meetings already in progress would otherwise hide a third that is due).
     func events(from: Date, to: Date, calendarIDs: Set<String>, matching occurrences: Set<BriefOccurrence>) async -> [BriefEvent]
+
+    /// "Today" (`BriefToday`): every event that overlaps `[from, to)` in the chosen calendars, all-day ones and ones that are not meetings
+    /// too, at most `limit`, earliest first, without their notes.
+    func dayEvents(from: Date, to: Date, calendarIDs: Set<String>, limit: Int) async -> [BriefEvent]
 }
 
 extension BriefEventSource {
+    /// A source that only knows meetings lists those.
+    public func dayEvents(from: Date, to: Date, calendarIDs: Set<String>, limit: Int) async -> [BriefEvent] {
+        Array(await events(from: from, to: to, calendarIDs: calendarIDs).prefix(limit))
+    }
+
     public func events(from: Date, to: Date, calendarIDs: Set<String>, matching occurrences: Set<BriefOccurrence>) async -> [BriefEvent] {
         await events(from: from, to: to, calendarIDs: calendarIDs).filter { occurrences.contains($0.occurrence) }
     }

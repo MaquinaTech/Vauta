@@ -33,6 +33,16 @@ final class EventKitBriefEventSource: BriefEventSource, @unchecked Sendable {
         return read(from: from, to: to, calendarIDs: calendarIDs, limit: occurrences.count, matching: occurrences)
     }
 
+    /// "Today": every event of the day in the chosen calendars, all-day ones and ones that are not meetings too. Title, time, calendar,
+    /// attendees and link only: the description is never read here (a brief built on demand reads it as any brief does).
+    func dayEvents(from: Date, to: Date, calendarIDs: Set<String>, limit: Int) async -> [BriefEvent] {
+        guard EKEventStore.authorizationStatus(for: .event) == .fullAccess, !calendarIDs.isEmpty else { return [] }
+        let calendars = store.calendars(for: .event).filter { calendarIDs.contains($0.calendarIdentifier) }
+        guard !calendars.isEmpty else { return [] }
+        return store.events(matching: store.predicateForEvents(withStart: from, end: to, calendars: calendars))
+            .sorted { $0.startDate < $1.startDate }.prefix(limit).map { Self.briefEvent($0, notes: false) }
+    }
+
     private func read(from: Date, to: Date, calendarIDs: Set<String>, limit: Int, matching occurrences: Set<BriefOccurrence>?) -> [BriefEvent] {
         guard EKEventStore.authorizationStatus(for: .event) == .fullAccess, !calendarIDs.isEmpty else { return [] }
         let calendars = store.calendars(for: .event).filter { calendarIDs.contains($0.calendarIdentifier) }
@@ -60,7 +70,7 @@ final class EventKitBriefEventSource: BriefEventSource, @unchecked Sendable {
         }
         let declined = (event.attendees ?? []).contains { $0.isCurrentUser && $0.participantStatus == .declined }
         return BriefEvent(identifier: event.calendarItemExternalIdentifier ?? event.eventIdentifier ?? UUID().uuidString, title: event.title ?? "",
-                          start: event.startDate, end: event.endDate, calendarID: event.calendar.calendarIdentifier, isAllDay: false,
+                          start: event.startDate, end: event.endDate, calendarID: event.calendar.calendarIdentifier, isAllDay: event.isAllDay,
                           currentUserDeclined: declined, attendees: attendees, isRecurring: event.hasRecurrenceRules,
                           service: CalendarWatcher.link(of: event)?.service, invitationNotes: notes ? event.notes : nil,
                           calendarColor: event.calendar.cgColor.flatMap { NSColor(cgColor: $0)?.usingColorSpace(.sRGB) }.map {

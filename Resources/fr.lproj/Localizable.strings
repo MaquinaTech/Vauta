@@ -4204,6 +4204,9 @@
 /* Help of the mark on a task owner; also the note in the task editor */
 "Nothing in the passage the model cited confirms this owner." = "Rien dans le passage cité par le modèle ne confirme ce responsable.";
 
+/* Meetings, Upcoming, Today: no event today in the calendars chosen in Settings */
+"Nothing in your calendars today" = "Rien dans vos calendriers aujourd’hui";
+
 /* No comment provided by engineer. */
 "Nothing is being translated." = "Rien n’est traduit.";
 
@@ -4435,6 +4438,9 @@
 "Copy protection is on, so meeting text can’t be exported." = "La protection contre la copie est activée, le texte des réunions ne peut donc pas être exporté.";
 "Couldn’t export the week" = "Impossible d’exporter la semaine";
 "Export Week" = "Exporter la semaine";
+/* Meetings, Upcoming: shows the brief of the meeting about to start and of the next one */
+"Next Meetings" = "Prochaines réunions";
+
 "Next Week" = "Semaine suivante";
 "Nothing This Week" = "Rien cette semaine";
 "Nothing was recorded this week." = "Rien n’a été enregistré cette semaine.";
@@ -7193,6 +7199,9 @@
 /* Settings → Speakers; header of the reminder about saved voices unused for a year */
 "Unused voices" = "Voix inutilisées";
 
+/* Meetings, Upcoming, Today: the next event to start today */
+"Up next" = "Ensuite";
+
 /* Documents pane: the source is indexed */
 "Up to date" = "À jour";
 
@@ -8416,6 +8425,9 @@
 "Minutes and tasks" = "Comptes rendus et tâches";
 
 "Decisions, tasks with owner and date, and open questions." = "Décisions, tâches avec responsable et date, et questions ouvertes.";
+
+/* Meetings, Upcoming, Today: the person declined this event's invitation */
+"Declined" = "Refusé";
 
 /* Recurring meeting form: the minutes template item that uses the default template in Settings → Models */
 "Default" = "Par défaut";

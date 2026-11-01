@@ -4204,6 +4204,9 @@
 /* Help of the mark on a task owner; also the note in the task editor */
 "Nothing in the passage the model cited confirms this owner." = "モデルが引用した箇所には、この担当者を裏付ける内容がありません。";
 
+/* Meetings, Upcoming, Today: no event today in the calendars chosen in Settings */
+"Nothing in your calendars today" = "今日はカレンダーに予定がありません";
+
 /* No comment provided by engineer. */
 "Nothing is being translated." = "何も翻訳されていません。";
 
@@ -4435,6 +4438,9 @@
 "Copy protection is on, so meeting text can’t be exported." = "コピー防止がオンのため、ミーティングのテキストは書き出せません。";
 "Couldn’t export the week" = "週を書き出せませんでした";
 "Export Week" = "週を書き出す";
+/* Meetings, Upcoming: shows the brief of the meeting about to start and of the next one */
+"Next Meetings" = "次のミーティング";
+
 "Next Week" = "翌週";
 "Nothing This Week" = "今週は何もありません";
 "Nothing was recorded this week." = "今週は何も録音されていません。";
@@ -7193,6 +7199,9 @@
 /* Settings → Speakers; header of the reminder about saved voices unused for a year */
 "Unused voices" = "使われていない声";
 
+/* Meetings, Upcoming, Today: the next event to start today */
+"Up next" = "次";
+
 /* Documents pane: the source is indexed */
 "Up to date" = "最新の状態";
 
@@ -8416,6 +8425,9 @@
 "Minutes and tasks" = "議事録とタスク";
 
 "Decisions, tasks with owner and date, and open questions." = "決定事項、担当者と期日つきのタスク、未解決の質問。";
+
+/* Meetings, Upcoming, Today: the person declined this event's invitation */
+"Declined" = "辞退";
 
 /* Recurring meeting form: the minutes template item that uses the default template in Settings → Models */
 "Default" = "デフォルト";

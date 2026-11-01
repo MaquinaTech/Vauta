@@ -19,6 +19,20 @@ extension BriefController {
     }
 
     /// What the Upcoming view shows.
+    enum UpcomingMode: Hashable {
+        /// The meeting about to start and the next one within 12 hours.
+        case next
+        /// Every event of today (`BriefToday`).
+        case today
+    }
+
+    enum TodayState: Equatable {
+        case off
+        case calendarDenied
+        case loading
+        case items([BriefTodayItem])
+    }
+
     enum UpcomingState: Equatable {
         /// Calendar or the brief is off: the view is not offered.
         case off
