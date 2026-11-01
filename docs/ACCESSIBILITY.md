@@ -158,7 +158,10 @@ Status: designed and unit-tested; the VoiceOver and Full Keyboard Access pass is
 - The window is named "Meeting Companion" and its bar is one group. The state reads "Recording" or "Paused" with the time
   ("12 minutes"); the glyph changes with it (a red dot or a pause sign), so the state is not told by colour alone.
 - Each command is a button with its name for VoiceOver and as a tooltip (Mark a Moment, Open Notepad, Pause or Resume
-  Recording, Stop Recording, Close), and a target of at least 20 × 20 points.
+  Recording, Stop Recording, Show or Hide Details, Close), and a target of at least 20 × 20 points.
+- The details under the bar are one group named "Meeting Companion Details", with the panel's own cards (Answers, Live notes,
+  Transcript) and their labels. What arrives in them never moves the VoiceOver cursor; a new answer is announced once, at low
+  priority, as it is with the panel.
 - The bar never takes the keyboard: every command is also in the Recording menu (with its shortcut where there is one), and
   Recording › Show Meeting Companion brings the bar back after Close.
 

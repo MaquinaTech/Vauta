@@ -2669,6 +2669,9 @@
 "Hears your voice, shown as “%@”." = "사용자의 음성을 듣습니다(표시 이름: “%@”).";
 
 /* No comment provided by engineer. */
+"Hide Details" = "세부 정보 가리기";
+
+/* No comment provided by engineer. */
 "Hide Meeting Companion" = "회의 도우미 숨기기";
 
 /* No comment provided by engineer. */
@@ -3414,6 +3417,9 @@
 
 /* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
 "Meeting Companion" = "회의 도우미";
+
+/* VoiceOver name of the part of the meeting companion with the answers, the live notes and the transcript */
+"Meeting Companion Details" = "회의 도우미 세부 정보";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "회의 오디오";
@@ -5529,6 +5535,9 @@
 "Show %@’s card" = "%@ 카드 보기";
 
 /* No comment provided by engineer. */
+"Show Details" = "세부 정보 보기";
+
+/* No comment provided by engineer. */
 "Show Expansion" = "풀어 쓴 내용 보기";
 
 /* No comment provided by engineer. */
@@ -6143,6 +6152,9 @@
 
 /* Ask: shown under an answer that reached its time or length limit before any of its claims could be checked */
 "The answer was cut short before its sources were written. Check the transcript before relying on it." = "출처가 작성되기 전에 답변이 중간에 끊겼습니다. 믿기 전에 녹취록을 확인하세요.";
+
+/* Meeting companion details, before anything was said or written: what will appear */
+"The answers, the live notes and the transcript show here as the meeting goes on." = "답변, 실시간 메모, 녹취록이 회의가 진행되는 동안 여기에 표시됩니다.";
 
 /* Capture error */
 "The audio devices couldn’t be read." = "오디오 기기를 읽을 수 없습니다.";

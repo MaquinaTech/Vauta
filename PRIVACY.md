@@ -78,6 +78,7 @@ meeting content. The only meeting-related value is a numeric ID (`recordingMeeti
 | `copyProtection` | Copy protection on or off |
 | `notifyMinutesReady`, `notifyProblems` | Which notifications you allow |
 | `recordHotKey`, `markHotKey`, `translationHotKey` | Global keyboard shortcuts |
+| `showsCompanion`, `companionShowsDetails` | Whether the meeting companion opens with each recording (on by default), and whether it shows its details: the answers, the live notes and the newest lines of the transcript (off by default) |
 | `actionsReminderListID`, `actionsReminderListName`, `actionsLastReminderListID`, `actionsEventCalendarID`, `actionsEventCalendarName`, `actionsLastEventCalendarID` | The list and calendar a new reminder or event starts in (opaque identifiers and the names, only to say one is gone); not in a backup |
 | `actionsAlertMinute`, `actionsIncludeMeetingName`, `actionsCalendarWriteNoticeShown` | The alert time (off by default), whether a reminder's note names the meeting, and whether the first-event notice was shown (this one is not in a backup) |
 | `followUpCardEnabled`, `followUpEmailMode`, `followUpEmailSummary`, `followUpEmailOpenQuestions`, `followUpEmailUnconfirmed` | The panel card and the email choices |
@@ -610,7 +611,9 @@ who can see your screen from taking a screenshot.
 
 Vauta asks macOS to keep its windows, the panel, the meeting companion, the Notepad and the captions out of screen sharing
 and screenshots (`sharingType = .none`), which macOS no longer guarantees for every sharing app. The meeting companion shows
-only the recording's time and its controls, no meeting text. Before you share your screen in a call,
+only the recording's time and its controls, no meeting text, unless you click **Show Details** on it: then it also shows the
+answers to questions heard, the live notes and the newest lines of the transcript, as the panel does, until you click **Hide
+Details** (the choice is kept for the next recordings). Before you share your screen in a call,
 **Recording › Hide Vauta Windows** (or **Hide Windows** at the bottom of the panel while recording) takes Vauta's windows,
 the meeting companion, the Notepad and the captions off the screen while the recording goes on. Nothing of Vauta comes on screen by itself
 meanwhile (the Notepad when a recording starts, the captions); a window you open on purpose shows as usual. The menu-bar

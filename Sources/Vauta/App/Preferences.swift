@@ -103,6 +103,11 @@ final class Preferences {
     var showsCompanion: Bool {
         didSet { defaults.set(showsCompanion, forKey: Keys.showsCompanion) }
     }
+    /// The companion shows its details under the bar: the answers, the live notes and the newest passages (off by default; the
+    /// choice is kept for the next recordings).
+    var companionShowsDetails: Bool {
+        didSet { defaults.set(companionShowsDetails, forKey: Keys.companionShowsDetails) }
+    }
     /// Live Translation of the other participants into the user's language.
     /// On means: it starts with every recording and shows the captions panel.
     var liveTranslationEnabled: Bool {
@@ -295,6 +300,7 @@ final class Preferences {
         pauseHotKey = Self.load(defaults, Keys.pauseHotKey) ?? Self.defaultPauseHotKey
         openNotepadOnStart = defaults.bool(forKey: Keys.openNotepadOnStart)
         showsCompanion = defaults.object(forKey: Keys.showsCompanion) as? Bool ?? true
+        companionShowsDetails = defaults.bool(forKey: Keys.companionShowsDetails)
         liveTranslationEnabled = defaults.bool(forKey: Keys.liveTranslation)
         translationTarget = defaults.string(forKey: Keys.translationTarget)
         captionTextSize = defaults.string(forKey: Keys.captionTextSize).flatMap(CaptionTextSize.init(rawValue:)) ?? .medium
@@ -345,6 +351,7 @@ final class Preferences {
         update(\.pauseHotKey, Self.load(defaults, Keys.pauseHotKey) ?? Self.defaultPauseHotKey)
         update(\.openNotepadOnStart, defaults.bool(forKey: Keys.openNotepadOnStart))
         update(\.showsCompanion, defaults.object(forKey: Keys.showsCompanion) as? Bool ?? true)
+        update(\.companionShowsDetails, defaults.bool(forKey: Keys.companionShowsDetails))
         update(\.liveTranslationEnabled, defaults.bool(forKey: Keys.liveTranslation))
         update(\.translationTarget, defaults.string(forKey: Keys.translationTarget))
         update(\.captionTextSize, defaults.string(forKey: Keys.captionTextSize).flatMap(CaptionTextSize.init(rawValue:)) ?? .medium)
@@ -394,6 +401,7 @@ final class Preferences {
         static let pauseHotKey = "pauseHotKey"
         static let openNotepadOnStart = "openNotepadOnStart"
         static let showsCompanion = "showsCompanion"
+        static let companionShowsDetails = "companionShowsDetails"
         static let onboardingVersion = "onboardingCompletedVersion"
         static let liveTranslation = "liveTranslationEnabled"
         static let translationTarget = "translationTarget"

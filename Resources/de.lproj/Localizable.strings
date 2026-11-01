@@ -2669,6 +2669,9 @@
 "Hears your voice, shown as “%@”." = "Hört deine Stimme, angezeigt als „%@“.";
 
 /* No comment provided by engineer. */
+"Hide Details" = "Details ausblenden";
+
+/* No comment provided by engineer. */
 "Hide Meeting Companion" = "Meeting-Begleiter ausblenden";
 
 /* No comment provided by engineer. */
@@ -3414,6 +3417,9 @@
 
 /* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
 "Meeting Companion" = "Meeting-Begleiter";
+
+/* VoiceOver name of the part of the meeting companion with the answers, the live notes and the transcript */
+"Meeting Companion Details" = "Details des Meeting-Begleiters";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "Meeting-Audio";
@@ -5529,6 +5535,9 @@
 "Show %@’s card" = "Karte von %@ anzeigen";
 
 /* No comment provided by engineer. */
+"Show Details" = "Details einblenden";
+
+/* No comment provided by engineer. */
 "Show Expansion" = "Ausformulierung anzeigen";
 
 /* No comment provided by engineer. */
@@ -6143,6 +6152,9 @@
 
 /* Ask: shown under an answer that reached its time or length limit before any of its claims could be checked */
 "The answer was cut short before its sources were written. Check the transcript before relying on it." = "Die Antwort wurde abgebrochen, bevor ihre Quellen geschrieben waren. Prüfe das Transkript, bevor du dich darauf verlässt.";
+
+/* Meeting companion details, before anything was said or written: what will appear */
+"The answers, the live notes and the transcript show here as the meeting goes on." = "Die Antworten, die Live-Notizen und das Transkript erscheinen hier im Lauf des Meetings.";
 
 /* Capture error */
 "The audio devices couldn’t be read." = "Die Audiogeräte konnten nicht gelesen werden.";

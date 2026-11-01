@@ -2765,6 +2765,9 @@
 "Hears your voice, shown as “%@”." = "Hears your voice, shown as “%@”.";
 
 /* No comment provided by engineer. */
+"Hide Details" = "Hide Details";
+
+/* No comment provided by engineer. */
 "Hide Meeting Companion" = "Hide Meeting Companion";
 
 /* No comment provided by engineer. */
@@ -3522,6 +3525,9 @@
 
 /* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
 "Meeting Companion" = "Meeting Companion";
+
+/* VoiceOver name of the part of the meeting companion with the answers, the live notes and the transcript */
+"Meeting Companion Details" = "Meeting Companion Details";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "Meeting audio";
@@ -5752,6 +5758,9 @@
 "Show %@’s card" = "Show %@’s card";
 
 /* No comment provided by engineer. */
+"Show Details" = "Show Details";
+
+/* No comment provided by engineer. */
 "Show Expansion" = "Show Expansion";
 
 /* No comment provided by engineer. */
@@ -6348,6 +6357,9 @@
 
 /* Ask: shown under an answer that reached its time or length limit before any of its claims could be checked */
 "The answer was cut short before its sources were written. Check the transcript before relying on it." = "The answer was cut short before its sources were written. Check the transcript before relying on it.";
+
+/* Meeting companion details, before anything was said or written: what will appear */
+"The answers, the live notes and the transcript show here as the meeting goes on." = "The answers, the live notes and the transcript show here as the meeting goes on.";
 
 /* Capture error */
 "The audio devices couldn’t be read." = "The audio devices couldn’t be read.";

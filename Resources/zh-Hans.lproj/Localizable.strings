@@ -2669,6 +2669,9 @@
 "Hears your voice, shown as “%@”." = "采集你的声音，显示为“%@”。";
 
 /* No comment provided by engineer. */
+"Hide Details" = "隐藏详细信息";
+
+/* No comment provided by engineer. */
 "Hide Meeting Companion" = "隐藏会议助手";
 
 /* No comment provided by engineer. */
@@ -3414,6 +3417,9 @@
 
 /* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
 "Meeting Companion" = "会议助手";
+
+/* VoiceOver name of the part of the meeting companion with the answers, the live notes and the transcript */
+"Meeting Companion Details" = "会议助手详细信息";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "会议音频";
@@ -5529,6 +5535,9 @@
 "Show %@’s card" = "显示“%@”的卡片";
 
 /* No comment provided by engineer. */
+"Show Details" = "显示详细信息";
+
+/* No comment provided by engineer. */
 "Show Expansion" = "显示扩写";
 
 /* No comment provided by engineer. */
@@ -6143,6 +6152,9 @@
 
 /* Ask: shown under an answer that reached its time or length limit before any of its claims could be checked */
 "The answer was cut short before its sources were written. Check the transcript before relying on it." = "回答在写出来源之前就被截断了。在采信之前，请先核对转录文本。";
+
+/* Meeting companion details, before anything was said or written: what will appear */
+"The answers, the live notes and the transcript show here as the meeting goes on." = "回答、实时笔记和转录文本会随会议进行显示在这里。";
 
 /* Capture error */
 "The audio devices couldn’t be read." = "无法读取音频设备。";

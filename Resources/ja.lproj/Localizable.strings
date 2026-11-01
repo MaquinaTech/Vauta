@@ -2669,6 +2669,9 @@
 "Hears your voice, shown as “%@”." = "自分の声を聞き取ります。「%@」として表示されます。";
 
 /* No comment provided by engineer. */
+"Hide Details" = "詳細を隠す";
+
+/* No comment provided by engineer. */
 "Hide Meeting Companion" = "ミーティングコンパニオンを隠す";
 
 /* No comment provided by engineer. */
@@ -3414,6 +3417,9 @@
 
 /* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
 "Meeting Companion" = "ミーティングコンパニオン";
+
+/* VoiceOver name of the part of the meeting companion with the answers, the live notes and the transcript */
+"Meeting Companion Details" = "ミーティングコンパニオンの詳細";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "ミーティングの音声";
@@ -5529,6 +5535,9 @@
 "Show %@’s card" = "%@のカードを表示";
 
 /* No comment provided by engineer. */
+"Show Details" = "詳細を表示";
+
+/* No comment provided by engineer. */
 "Show Expansion" = "詳細文を表示";
 
 /* No comment provided by engineer. */
@@ -6143,6 +6152,9 @@
 
 /* Ask: shown under an answer that reached its time or length limit before any of its claims could be checked */
 "The answer was cut short before its sources were written. Check the transcript before relying on it." = "回答は出典が書かれる前に途中で切れました。信頼する前に文字起こしを確認してください。";
+
+/* Meeting companion details, before anything was said or written: what will appear */
+"The answers, the live notes and the transcript show here as the meeting goes on." = "回答、ライブメモ、文字起こしは、ミーティングの進行に合わせてここに表示されます。";
 
 /* Capture error */
 "The audio devices couldn’t be read." = "オーディオデバイスを読み取れませんでした。";
