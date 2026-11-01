@@ -36,9 +36,10 @@ public struct ContextBudget: Sendable, Equatable {
     var minutesInput: Int { isSmall ? contextTokens - minutesOutput - safety : scaled(18_000) }
     var blockOutput: Int { isSmall ? contextTokens / 5 : 1_200 }
     var blockInput: Int { isSmall ? contextTokens - blockOutput - safety : scaled(11_000) }
-    /// Characters of a template the person wrote that go with the instruction (about 200 tokens on a small window, which the final
-    /// request shares with the digest of the blocks; all of it on a large one).
-    var customTemplateCharacters: Int { isSmall ? 600 : CustomMinutesTemplate.instructionsLimit }
+    /// Tokens of a template the person wrote that go with the instruction (`PromptText.tokens`): on a small window, which the final
+    /// request shares with the digest of the blocks, about 600 characters of English or 200 of Japanese; on a large one, all of a
+    /// template in a Latin script (4,000 characters) and about half of one written in Chinese, Japanese or Korean.
+    var customTemplateTokens: Int { isSmall ? 200 : 2_000 }
 
     // MARK: Live notes
 

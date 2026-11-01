@@ -526,7 +526,8 @@ enum Schema {
             """)),
         // Minutes templates the person writes (`CustomMinutesTemplate`). `meetings.template` and the new `series.template` name one
         // as "custom:<id>" (`MinutesTemplateChoice`); a series' template (NULL = the default in Settings) is used for its meetings.
-        // AUTOINCREMENT: an ID is never reused, so a meeting that names a deleted template never meets another one.
+        // `meetings.card_template` is the template the model's card was written with (what the minutes say they followed).
+        // AUTOINCREMENT: an ID is never reused, so a card that names a deleted template never meets another one.
         Migration(37, .sql("""
             CREATE TABLE minutes_templates (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -535,6 +536,7 @@ enum Schema {
                 created_at REAL NOT NULL
             );
             ALTER TABLE series ADD COLUMN template TEXT;
+            ALTER TABLE meetings ADD COLUMN card_template TEXT;
             """)),
     ]
 

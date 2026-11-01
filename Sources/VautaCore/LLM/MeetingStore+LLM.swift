@@ -307,9 +307,10 @@ extension MeetingStore {
     /// covers: an item with the same normalized text, or a kept item (the
     /// user's, or a closed task) citing the same segment.
     /// Title and card are only set if the user had not written them; open
-    /// questions are always kept in the card.
+    /// questions are always kept in the card. `template` is what the model's card
+    /// was written with (`cardTemplate`).
     @discardableResult
-    public func applyMinutes(_ minutes: ValidatedMinutes, to meetingID: Int64) async throws -> [Int64] {
+    public func applyMinutes(_ minutes: ValidatedMinutes, to meetingID: Int64, template: MinutesTemplateChoice? = nil) async throws -> [Int64] {
         // Later meetings with a suggestion that points into an item this rewrite deletes: their pass runs again.
         let pointing = try meetingsPointingIntoRewrite(of: meetingID)
         try transaction {
@@ -366,8 +367,8 @@ extension MeetingStore {
                 }
             } else {
                 let card = MeetingCard(summary: minutes.summary, topics: minutes.topics, openQuestions: minutes.openQuestions)
-                try run("UPDATE meetings SET card = ?, card_version = card_version + 1, card_source = 'llm' WHERE id = ?",
-                        [.text(try card.json()), .integer(meetingID)])
+                try run("UPDATE meetings SET card = ?, card_version = card_version + 1, card_source = 'llm', card_template = ? WHERE id = ?",
+                        [.text(try card.json()), template.map { .text($0.storedValue) }, .integer(meetingID)])
             }
         }
         try await commitEdit()

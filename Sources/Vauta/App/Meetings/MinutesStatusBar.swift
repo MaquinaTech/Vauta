@@ -117,17 +117,17 @@ struct MinutesStatusBar: View {
                                  : "Minutes proposed by the model: review them and correct anything that’s wrong.").foregroundStyle(.secondary)
         let glyphView = glyph { Image(systemName: "sparkles").foregroundStyle(Brand.sparkle) }
         let writer: AnyView = canWrite ? AnyView(writeButton(retry: false)) : AnyView(EmptyView())
-        // A template the person wrote is not evaluated as Vauta's are: the minutes say so, with its name in the tooltip.
-        let custom = model.customMinutesTemplate
+        // A template the person wrote is not evaluated as Vauta's are: the minutes it wrote say so, with its name in the tooltip.
+        let custom = model.cardFollowedCustomTemplate
         // One layout at every width and in every language: the badges sit on a line of their own and the sentence
         // under them takes the room up to the button.
         return HStack(alignment: .firstTextBaseline, spacing: 8) {
             glyphView
             VStack(alignment: .leading, spacing: 4) {
-                if onDevice || custom != nil {
+                if onDevice || custom.followed {
                     HStack(spacing: 6) {
                         if onDevice { BadgeCapsule(ModelQuality.badge).fixedSize() }
-                        if let custom { BadgeCapsule(CustomMinutesTemplate.label).fixedSize().help(custom.name) }
+                        if custom.followed { BadgeCapsule(CustomMinutesTemplate.label).fixedSize().help(custom.name ?? "") }
                     }
                 }
                 text.fixedSize(horizontal: false, vertical: true)

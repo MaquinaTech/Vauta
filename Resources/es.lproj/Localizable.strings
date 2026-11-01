@@ -654,7 +654,7 @@
 /* No comment provided by engineer. */
 "Apple Intelligence" = "Apple Intelligence";
 
-/* Minutes template editor: small models read only the start of a long template */
+/* Minutes template editor: small models read only the start of a long template (about 600 characters of a Latin script, about 200 of Chinese, Japanese or Korean: use your script's number) */
 "Apple Intelligence and other models with a small context read only the first 600 characters or so." = "Apple Intelligence y otros modelos con un contexto pequeño solo leen los primeros 600 caracteres, aproximadamente.";
 
 /* Model error */

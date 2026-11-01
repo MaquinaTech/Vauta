@@ -338,8 +338,10 @@ final class MeetingsModel {
 
     var jobs: [LLMJob] = []
     var cardSource: String?
-    /// The selected meeting's template, and the templates the person wrote (the Rewrite menu offers them).
+    /// The selected meeting's template (for its next minutes) and the one its model card followed, and the templates the person
+    /// wrote (the Rewrite menu offers them; they go when Meetings lock, like everything read from the store).
     var minutesTemplate: MinutesTemplateChoice?
+    var cardTemplate: MinutesTemplateChoice?
     var customTemplates: [CustomMinutesTemplate] = []
     @ObservationIgnored var llm: LLMService? {
         didSet { ask.llm = llm; importer.llm = llm; notepad.llm = llm }
@@ -528,6 +530,7 @@ final class MeetingsModel {
         suggestionCounts = [:]
         openTasks = []
         entities = []
+        customTemplates = []
         selectedEntityID = nil
         entityRefs = []; entityTimeline = []; entityImpact = []; entityTasks = []; entitySpokeIn = 0; entityQuotes = []; entityVoices = 0
         ask.clear()

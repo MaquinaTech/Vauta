@@ -101,7 +101,7 @@ struct MinutesTemplateSheet: View {
                 SettingsNote(String(localized: "The minutes keep their sections, and every decision and task is still checked against the transcript: a template says what to cover and stress, not what to conclude.",
                                     comment: "Minutes template editor: what a template the person writes can and can't change"))
                 SettingsNote(String(localized: "Apple Intelligence and other models with a small context read only the first 600 characters or so.",
-                                    comment: "Minutes template editor: small models read only the start of a long template"))
+                                    comment: "Minutes template editor: small models read only the start of a long template (about 600 characters of a Latin script, about 200 of Chinese, Japanese or Korean: use your script's number)"))
             }
             if let failure = draft.wrappedValue.failure { NoticeLabel(Text(verbatim: failure), status: .warning) }
             HStack {
@@ -114,7 +114,7 @@ struct MinutesTemplateSheet: View {
                     .keyboardShortcut(.cancelAction)
                 Button("Save") { Task { await templates.save(recorder) } }
                     .keyboardShortcut(.defaultAction)
-                    .disabled(!draft.wrappedValue.canSave)
+                    .disabled(!draft.wrappedValue.canSave || templates.saving)
             }
         }
         .padding(20)

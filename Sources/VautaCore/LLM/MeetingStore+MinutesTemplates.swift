@@ -23,6 +23,24 @@ extension MeetingStore {
                                                    [.integer(meetingID)]).first?.optionalString(0))
     }
 
+    /// The template the meeting's next minutes are written with: its own, else its series' (a meeting from before templates, or one
+    /// whose template was deleted while it was being written). nil: the general template.
+    public func templateToWrite(_ meetingID: Int64) throws -> MinutesTemplateChoice? {
+        for choice in [try minutesTemplate(meetingID), try seriesTemplate(of: meetingID)] {
+            guard let choice else { continue }
+            if case .custom(let id) = choice, try customMinutesTemplate(id) == nil { continue }
+            return choice
+        }
+        return nil
+    }
+
+    /// The template the model's card of the meeting was written with, which its minutes say they followed (nil for a card from before
+    /// templates were recorded, or the person's own card).
+    public func cardTemplate(_ meetingID: Int64) throws -> MinutesTemplateChoice? {
+        MinutesTemplateChoice(stored: try db.query("SELECT card_template FROM meetings WHERE id = ? AND card_source = 'llm'",
+                                                   [.integer(meetingID)]).first?.optionalString(0))
+    }
+
     // MARK: The person's templates
 
     /// By name.
@@ -56,12 +74,19 @@ extension MeetingStore {
         return saved
     }
 
-    /// Deletes a template. The series that used it go back to the default; a meeting still says which template its minutes were
-    /// written with, and minutes written again use the general template.
-    public func deleteCustomMinutesTemplate(_ id: Int64) async throws {
+    /// Deletes a template. The series that used it go back to the default; the meetings that were to be written with it take their
+    /// series' template, else `fallback` (the default in Settings, or the general template when that was this one). Minutes already
+    /// written keep saying which template they followed (`cardTemplate`).
+    public func deleteCustomMinutesTemplate(_ id: Int64, fallback: MinutesTemplateChoice = .general) async throws {
+        let gone = MinutesTemplateChoice.custom(id).storedValue
+        let fallback = fallback == .custom(id) ? .general : fallback
         try transaction {
             try run("DELETE FROM minutes_templates WHERE id = ?", [.integer(id)])
-            try run("UPDATE series SET template = NULL WHERE template = ?", [.text(MinutesTemplateChoice.custom(id).storedValue)])
+            try run("UPDATE series SET template = NULL WHERE template = ?", [.text(gone)])
+            try run("""
+                UPDATE meetings SET template = coalesce((SELECT s.template FROM series s WHERE s.id = meetings.series_id), ?)
+                WHERE template = ?
+                """, [.text(fallback.storedValue), .text(gone)])
         }
         try await commitEdit()
     }

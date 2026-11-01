@@ -654,8 +654,8 @@
 /* No comment provided by engineer. */
 "Apple Intelligence" = "Apple Intelligence";
 
-/* Minutes template editor: small models read only the start of a long template */
-"Apple Intelligence and other models with a small context read only the first 600 characters or so." = "Apple Intelligence 和其他上下文较小的模型只会读取前 600 个字符左右。";
+/* Minutes template editor: small models read only the start of a long template (about 600 characters of a Latin script, about 200 of Chinese, Japanese or Korean: use your script's number) */
+"Apple Intelligence and other models with a small context read only the first 600 characters or so." = "Apple Intelligence 和其他上下文较小的模型只会读取前 200 个字符左右。";
 
 /* Model error */
 "Apple Intelligence doesn’t support this language." = "Apple Intelligence 不支持此语言。";

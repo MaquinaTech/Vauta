@@ -436,7 +436,9 @@ While you record, Vauta looks for questions asked aloud and answers the ones you
 
 Calendar access is optional and off by default. When you turn it on, Vauta reads only the calendars you choose, and
 only events around the current time, to name the meeting and its attendees. Only what concerns the meeting you
-record is stored, encrypted, in the store. Vauta keeps no copy of your calendar. With the brief on, it also reads the event about
+record is stored, encrypted, in the store, and it goes when the last meeting it came with is deleted: the attendees you never
+confirmed who are in no other meeting, and the recurring meeting made from a repeating event, unless you gave that recurring meeting a minutes template (it then
+stays in Context until you delete it there). Vauta keeps no copy of your calendar. With the brief on, it also reads the event about
 to start and the next one within 12 hours in full, and looks only at the start times of the events of the next few hours to time the
 notification (see [The pre-meeting brief](#the-pre-meeting-brief)). Calendar is written to only when you press Add on a follow-up meeting
 (see [After a meeting](#after-a-meeting-reminders-events-and-email)).

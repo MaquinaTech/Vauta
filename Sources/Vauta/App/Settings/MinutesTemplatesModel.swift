@@ -18,6 +18,8 @@ final class MinutesTemplatesModel {
     var editing: MinutesTemplateDraft?
     /// The template waiting for the confirmation of its deletion.
     var pendingDelete: CustomMinutesTemplate?
+    /// A save is under way: Save is off, so a second press can't add the template twice.
+    private(set) var saving = false
 
     func reload(_ recorder: RecorderModel) async {
         guard recorder.historyUnlocked, let store = recorder.store else {
@@ -60,7 +62,9 @@ final class MinutesTemplatesModel {
 
     /// Saves the open draft and closes the editor; on a failure the editor stays open with the reason.
     func save(_ recorder: RecorderModel) async {
-        guard var draft = editing, let store = recorder.store else { return }
+        guard !saving, var draft = editing, let store = recorder.store else { return }
+        saving = true
+        defer { saving = false }
         do {
             _ = try await store.saveCustomMinutesTemplate(id: draft.templateID, name: draft.name, instructions: draft.instructions)
             editing = nil
@@ -77,7 +81,8 @@ final class MinutesTemplatesModel {
         editing = nil
         guard let store = recorder.store else { return }
         do {
-            try await store.deleteCustomMinutesTemplate(template.id)
+            // Its meetings take their series' template, else the default (General when the default was this one).
+            try await store.deleteCustomMinutesTemplate(template.id, fallback: recorder.preferences.minutesTemplate)
             failure = nil
         } catch {
             failure = error.localizedDescription

@@ -254,13 +254,23 @@ extension VautaPrompts {
         return text
     }
 
-    /// A template the person wrote, cut to what the window has room for (`ContextBudget.customTemplateCharacters`): after the last
+    /// A template the person wrote, cut to what the window has room for (`ContextBudget.customTemplateTokens`): after the last
     /// line or sentence that fits, else after the last whole word, when that keeps more than half the room. A model reads a whole
-    /// instruction better than one cut in the middle.
+    /// instruction better than one cut in the middle. Its lines are counted as text, not as transcript lines with their prefix.
     public static func customTemplate(_ instructions: String, budget: ContextBudget) -> String {
         let text = PromptText.clip(instructions, CustomMinutesTemplate.instructionsLimit)
-        let limit = budget.customTemplateCharacters
-        guard text.count > limit else { return text }
+        let room = budget.customTemplateTokens
+        func tokens(_ s: Substring) -> Int { PromptText.tokens(s.replacingOccurrences(of: "\n", with: " ")) }
+        let whole = tokens(text[...])
+        guard whole > room else { return text }
+        // The longest start that fits: the share of the room, then shorter by what it still has too many.
+        var limit = text.count * room / whole
+        while limit > 0 {
+            let used = tokens(text.prefix(limit))
+            guard used > room else { break }
+            limit -= (used - room) * limit / used + 1
+        }
+        guard limit > 0 else { return "" }
         let cut = text.prefix(limit)
         let half = cut.index(cut.startIndex, offsetBy: limit / 2)
         func endsASentence(_ i: String.Index) -> Bool {
