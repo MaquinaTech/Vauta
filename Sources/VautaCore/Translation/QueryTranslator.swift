@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
 import Foundation
+import Synchronization
 
 /// Translates a question into the language of the transcripts so a keyword search can find it (E4). Everything runs on this Mac
 /// through a `TranslationBackend` (Apple's Translation, installed language pairs only: it never downloads a language and never
@@ -136,36 +137,38 @@ public actor QueryTranslator {
     }
 
     /// Resumes the continuation once, whoever finishes first.
-    private final class Finish: @unchecked Sendable {
-        private let lock = NSLock()
-        private var continuation: CheckedContinuation<Outcome, Never>?
-        private var done = false
-        private var cleanup: (@Sendable () -> Void)?
+    private final class Finish: Sendable {
+        private struct State {
+            var continuation: CheckedContinuation<Outcome, Never>?
+            var done = false
+            var cleanup: (@Sendable () -> Void)?
+        }
+        private let state = Mutex(State())
 
         func attach(_ c: CheckedContinuation<Outcome, Never>) {
-            let already = lock.withLock { () -> Bool in
-                if done { return true }
-                continuation = c
+            let already = state.withLock { s in
+                if s.done { return true }
+                s.continuation = c
                 return false
             }
             if already { c.resume(returning: .done(nil)) }
         }
 
         func onFinish(_ body: @escaping @Sendable () -> Void) {
-            let already = lock.withLock { () -> Bool in
-                if done { return true }
-                cleanup = body
+            let already = state.withLock { s in
+                if s.done { return true }
+                s.cleanup = body
                 return false
             }
             if already { body() }
         }
 
         func finish(_ value: Outcome) {
-            let (c, clean) = lock.withLock { () -> (CheckedContinuation<Outcome, Never>?, (@Sendable () -> Void)?) in
-                guard !done else { return (nil, nil) }
-                done = true
-                defer { continuation = nil; cleanup = nil }
-                return (continuation, cleanup)
+            let (c, clean) = state.withLock { s -> (CheckedContinuation<Outcome, Never>?, (@Sendable () -> Void)?) in
+                guard !s.done else { return (nil, nil) }
+                s.done = true
+                defer { s.continuation = nil; s.cleanup = nil }
+                return (s.continuation, s.cleanup)
             }
             c?.resume(returning: value)
             clean?()

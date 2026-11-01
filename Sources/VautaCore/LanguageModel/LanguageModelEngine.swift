@@ -602,34 +602,34 @@ public actor LanguageModelEngine {
     public func residentWeightBytes() -> Int { engine?.model.residentBytes ?? 0 }
 }
 
-private final class TokenCounter: @unchecked Sendable {
-    private var n = 0
-    private(set) var firstTokenAt: Date?
+/// Counts the tokens as the generation makes them, on whichever thread it runs, and when the first one came. The progress is
+/// reported outside the lock.
+private final class TokenCounter: Sendable {
+    private struct State {
+        var count = 0
+        var firstTokenAt: Date?
+    }
+    private let state = Mutex(State())
     private let report: (@Sendable (Int) -> Void)?
     init(report: (@Sendable (Int) -> Void)?) { self.report = report }
+    var firstTokenAt: Date? { state.withLock { $0.firstTokenAt } }
     func add(_ t: Int32) {
-        if n == 0 { firstTokenAt = Date() }
-        n += 1
+        let n = state.withLock { s in
+            if s.count == 0 { s.firstTokenAt = Date() }
+            s.count += 1
+            return s.count
+        }
         if n % 16 == 0 { report?(n) }
     }
 }
 
 /// The reduced kernel self-test of the language model's ops, run once per process (under the gate, before the first load).
 enum LanguageModelKernelCheck {
-    private static let result = LockedBool()
+    private static let result = Mutex<Bool?>(nil)
     static var passed: Bool {
-        if let known = result.value { return known }
+        if let known = result.withLock({ $0 }) { return known }
         let ok = KernelSelfTest.run(.llm).ok
-        result.value = ok
+        result.withLock { $0 = ok }
         return ok
-    }
-}
-
-private final class LockedBool: @unchecked Sendable {
-    private let lock = NSLock()
-    private var stored: Bool?
-    var value: Bool? {
-        get { lock.lock(); defer { lock.unlock() }; return stored }
-        set { lock.lock(); stored = newValue; lock.unlock() }
     }
 }
