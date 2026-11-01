@@ -99,6 +99,10 @@ final class Preferences {
     var openNotepadOnStart: Bool {
         didSet { defaults.set(openNotepadOnStart, forKey: Keys.openNotepadOnStart) }
     }
+    /// The meeting companion (a small floating bar with the time and controls) opens with each recording (on by default).
+    var showsCompanion: Bool {
+        didSet { defaults.set(showsCompanion, forKey: Keys.showsCompanion) }
+    }
     /// Live Translation of the other participants into the user's language.
     /// On means: it starts with every recording and shows the captions panel.
     var liveTranslationEnabled: Bool {
@@ -290,6 +294,7 @@ final class Preferences {
         noteHotKey = Self.load(defaults, Keys.noteHotKey) ?? Self.defaultNoteHotKey
         pauseHotKey = Self.load(defaults, Keys.pauseHotKey) ?? Self.defaultPauseHotKey
         openNotepadOnStart = defaults.bool(forKey: Keys.openNotepadOnStart)
+        showsCompanion = defaults.object(forKey: Keys.showsCompanion) as? Bool ?? true
         liveTranslationEnabled = defaults.bool(forKey: Keys.liveTranslation)
         translationTarget = defaults.string(forKey: Keys.translationTarget)
         captionTextSize = defaults.string(forKey: Keys.captionTextSize).flatMap(CaptionTextSize.init(rawValue:)) ?? .medium
@@ -339,6 +344,7 @@ final class Preferences {
         update(\.noteHotKey, Self.load(defaults, Keys.noteHotKey) ?? Self.defaultNoteHotKey)
         update(\.pauseHotKey, Self.load(defaults, Keys.pauseHotKey) ?? Self.defaultPauseHotKey)
         update(\.openNotepadOnStart, defaults.bool(forKey: Keys.openNotepadOnStart))
+        update(\.showsCompanion, defaults.object(forKey: Keys.showsCompanion) as? Bool ?? true)
         update(\.liveTranslationEnabled, defaults.bool(forKey: Keys.liveTranslation))
         update(\.translationTarget, defaults.string(forKey: Keys.translationTarget))
         update(\.captionTextSize, defaults.string(forKey: Keys.captionTextSize).flatMap(CaptionTextSize.init(rawValue:)) ?? .medium)
@@ -387,6 +393,7 @@ final class Preferences {
         static let noteHotKey = "noteHotKey"
         static let pauseHotKey = "pauseHotKey"
         static let openNotepadOnStart = "openNotepadOnStart"
+        static let showsCompanion = "showsCompanion"
         static let onboardingVersion = "onboardingCompletedVersion"
         static let liveTranslation = "liveTranslationEnabled"
         static let translationTarget = "translationTarget"

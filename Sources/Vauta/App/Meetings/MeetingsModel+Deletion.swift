@@ -16,6 +16,8 @@ enum PendingDeletion: Identifiable {
     case voice(entity: Int64, name: String, isSelf: Bool)
     /// A line of the transcript, taken out of the record (`MeetingStore.deleteSegment`).
     case line(MeetingStore.StoredSegment)
+    /// A highlighted stretch of transcript lines (2 or more, in order), taken out of the record together (`deleteSegments`).
+    case lines([MeetingStore.StoredSegment])
     /// Several meetings chosen in the list; `keepsCreated`: Vauta created reminders or events from some of them.
     case meetings([MeetingStore.Meeting], keepsCreated: Bool)
 
@@ -29,6 +31,7 @@ enum PendingDeletion: Identifiable {
         case .question(let index, _): "question-\(index)"
         case .voice(let entity, _, _): "voice-\(entity)"
         case .line(let s): "line-\(s.id)"
+        case .lines(let list): "lines-" + list.map { String($0.id) }.joined(separator: ",")
         case .meetings(let list, _): "meetings-" + list.map { String($0.id) }.joined(separator: ",")
         }
     }
@@ -69,6 +72,8 @@ enum PendingDeletion: Identifiable {
         case .voice(_, let name, let isSelf):
             isSelf ? Self.ownVoiceTitle : String(localized: "Delete the saved voice of \(name)?", comment: "Confirmation title; the argument is a person's name")
         case .line: String(localized: "Delete this line for good?", comment: "Confirmation title when deleting a line of a meeting’s transcript")
+        case .lines(let list):
+            String(localized: "Delete these \(list.count) lines for good?", comment: "Confirmation title when deleting a highlighted stretch of a meeting’s transcript; the argument is how many lines (2 or more)")
         case .meetings(let list, _):
             String(localized: "Delete \(list.count) meetings?", comment: "Confirmation title when deleting several meetings chosen in the list; the argument is how many (2 or more)")
         }
@@ -89,6 +94,11 @@ enum PendingDeletion: Identifiable {
         case .line(let s):
             s.text + "\n\n" + String(localized: "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line.",
                                       comment: "Confirmation message when deleting a transcript line, under the line’s words")
+        case .lines(let list):
+            // When the stretch starts and ends, as the transcript shows the times of its lines.
+            [list.first, list.last].compactMap { $0.map { ElapsedTime.stamp($0.start) } }.joined(separator: " – ") + "\n\n"
+                + String(localized: "Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines.",
+                         comment: "Confirmation message when deleting a highlighted stretch of transcript lines, under the times it starts and ends")
         case .meetings(_, let keepsCreated):
             String(localized: "Their transcripts, decisions, tasks, notes and marks are removed from the encrypted store. You can’t undo this.",
                    comment: "Confirmation message when deleting several meetings chosen in the list")
@@ -108,6 +118,7 @@ enum PendingDeletion: Identifiable {
         case .question: String(localized: "Delete Question", comment: "Button: confirm deleting an open question")
         case .voice: String(localized: "Delete Voice", comment: "Button: confirm deleting a saved voice")
         case .line: DeleteLineLabel.title
+        case .lines: DeleteLineLabel.plural
         case .meetings: String(localized: "Delete Meetings", comment: "Button: confirm deleting several meetings")
         }
     }
@@ -162,7 +173,8 @@ extension MeetingsModel {
         case .voice(let entity, _, _):
             await perform(String(localized: "Couldn’t delete the saved voice", comment: "Alert title")) { _ = try await store.deleteVoiceProfiles(entityID: entity) }
             await loadEntity()
-        case .line(let s): await deleteLine(s)
+        case .line(let s): await deleteLines([s])
+        case .lines(let list): await deleteLines(list)
         case .meetings(let list, _): await deleteMeetings(list.map(\.id))
         }
     }
@@ -173,38 +185,56 @@ extension MeetingsModel {
         pendingDeletion = .line(segment)
     }
 
-    /// ⌫ and Edit ▸ Delete on the highlighted line of the transcript.
+    /// ⌫ and Edit ▸ Delete on the highlighted line of the transcript, or on the highlighted stretch; also the menu item and the
+    /// VoiceOver action of a line in the stretch.
     func confirmDeleteHighlight() {
-        guard canCorrectHighlight, let segment = highlightedSegment else { return }
-        confirmDelete(segment)
+        let stretch = highlightedStretch
+        guard tab == .transcript, let first = stretch.first, canCorrect(first) else { return }
+        pendingDeletion = stretch.count == 1 ? .line(first) : .lines(stretch)
     }
 
-    /// Deletes a transcript line for good. The undo steps recorded before are dropped: a correction or a speaker change of the
-    /// meeting may need the line, and nothing brings it back.
-    private func deleteLine(_ segment: MeetingStore.StoredSegment) async {
-        if lineDraft?.segmentID == segment.id { lineDraft = nil }
-        if everywhereOffer?.segmentID == segment.id { everywhereOffer = nil }
+    /// Deletes transcript lines of one meeting for good, together. The undo steps recorded before are dropped: a correction or a
+    /// speaker change of the meeting may need the lines, and nothing brings them back.
+    private func deleteLines(_ lines: [MeetingStore.StoredSegment]) async {
+        guard let meetingID = lines.first?.meetingID else { return }
+        let ids = Set(lines.map(\.id))
+        if let draft = lineDraft, ids.contains(draft.segmentID) { lineDraft = nil }
+        if let offer = everywhereOffer, ids.contains(offer.segmentID) { everywhereOffer = nil }
         var deletion: MeetingStore.LineDeletion?
         do {
-            deletion = try await store.deleteSegment(segment.id)
+            deletion = try await store.deleteSegments(Array(ids))
         } catch {
-            // A failure to compact or write comes after the line is gone: the meeting is read again either way.
-            present(String(localized: "Couldn’t delete the line", comment: "Alert title: deleting a transcript line failed"), error)
+            // A failure to compact or write comes after the lines are gone: the meeting is read again either way.
+            present(lines.count == 1 ? String(localized: "Couldn’t delete the line", comment: "Alert title: deleting a transcript line failed")
+                                     : String(localized: "Couldn’t delete the lines", comment: "Alert title: deleting a highlighted stretch of transcript lines failed"),
+                    error)
         }
         undoManager?.removeAllActions(withTarget: self)
-        if highlighted == segment.id { highlighted = nil }
-        if let llm { Task { await llm.lineDeleted(meetingID: segment.meetingID) } }
-        // A follow-up meeting the line set the day of goes with it; another line may still name one.
-        _ = try? await store.redetectFollowUps(segment.meetingID)
-        if selectedID == segment.meetingID {
+        if let h = highlighted, ids.contains(h) { highlighted = nil }
+        if let e = highlightExtent, ids.contains(e) { highlightExtent = nil }
+        if let llm { Task { await llm.lineDeleted(meetingID: meetingID) } }
+        // A follow-up meeting a line set the day of goes with it; another line may still name one.
+        _ = try? await store.redetectFollowUps(meetingID)
+        if selectedID == meetingID {
             await refreshDetail()
             if !hits.isEmpty { await runSearch() }
         }
         guard let deletion else { return }
-        show(MeetingsNotice(text: deletion.marked == 0
-            ? String(localized: "Line deleted", comment: "Confirmation after deleting a transcript line")
-            : String(localized: "Line deleted. What the minutes wrote from it is marked for you to check.",
-                     comment: "Confirmation after deleting a transcript line that decisions, tasks or note expansions were written from")))
+        show(MeetingsNotice(text: Self.deletedNotice(lines: lines.count, marked: deletion.marked > 0)))
+    }
+
+    /// What the notice says once lines are deleted; `marked`: what the minutes wrote from them is marked for the person to check.
+    static func deletedNotice(lines: Int, marked: Bool) -> String {
+        switch (lines == 1, marked) {
+        case (true, false): String(localized: "Line deleted", comment: "Confirmation after deleting a transcript line")
+        case (true, true):
+            String(localized: "Line deleted. What the minutes wrote from it is marked for you to check.",
+                   comment: "Confirmation after deleting a transcript line that decisions, tasks or note expansions were written from")
+        case (false, false): String(localized: "\(lines) lines deleted", comment: "Confirmation after deleting a highlighted stretch of transcript lines; the argument is how many (2 or more)")
+        case (false, true):
+            String(localized: "\(lines) lines deleted. What the minutes wrote from them is marked for you to check.",
+                   comment: "Confirmation after deleting a stretch of transcript lines that decisions, tasks or note expansions were written from; the argument is how many (2 or more)")
+        }
     }
 
     private func deleteMeeting(_ id: Int64) async {

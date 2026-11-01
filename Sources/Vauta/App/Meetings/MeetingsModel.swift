@@ -101,8 +101,10 @@ final class MeetingsModel {
     var suggestionCounts: [Int64: Int] = [:]
     /// The error or notice shown as an alert.
     var alert: MeetingsAlert?
-    /// Segment to highlight (when arriving from a result, a mention or a mark).
-    var highlighted: Int64?
+    /// Segment to highlight (when arriving from a result, a mention or a mark). Highlighting another line ends a stretch.
+    var highlighted: Int64? { didSet { if highlighted != oldValue { highlightExtent = nil } } }
+    /// The other end of a highlighted stretch of lines (⇧-click, ⇧↑ ⇧↓); nil = the highlighted line alone.
+    var highlightExtent: Int64?
     /// The transcript line whose words are being corrected, with what was typed so far.
     var lineDraft: LineDraft?
     /// After a correction: the same words elsewhere in the meeting, offered to correct there too.

@@ -8,6 +8,7 @@ import SwiftUI
 /// The transcript with marks and notes in time order. A passage is
 /// highlighted (to cite it in a new decision or task) by clicking it or with
 /// the arrow keys; with copy protection off its text can also be selected.
+/// ⇧-click and ⇧↑ ⇧↓ highlight a stretch of lines, to delete it at once.
 struct TranscriptTab: View {
     @Bindable var model: MeetingsModel
     let meeting: MeetingStore.Meeting
@@ -53,13 +54,15 @@ struct TranscriptTab: View {
     }
 
     private func transcript(_ cols: Columns) -> some View {
-        ScrollViewReader { proxy in
+        // Once per update, not once per row.
+        let stretch = Set(model.highlightedStretch.map(\.id))
+        return ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
                     header
                     ForEach(items) { item in
                         switch item {
-                        case .segment(let segment): row(segment, cols).id(segment.id)
+                        case .segment(let segment): row(segment, cols, stretch: stretch).id(segment.id)
                         case .mark(let m): markRow(m, cols)
                         case .note(let n): noteRow(n, cols)
                         case .pause(let p): pauseRow(p, cols)
@@ -71,6 +74,14 @@ struct TranscriptTab: View {
             .focusable()
             .focused($focused)
             .focusEffectDisabled()
+            // ⇧↑ and ⇧↓ highlight a stretch of lines, as in a list; ↑ and ↓ alone move the highlight. In the line being corrected
+            // they select its text.
+            .onKeyPress(keys: [.upArrow, .downArrow]) { press in
+                guard model.lineDraft == nil, press.modifiers.contains(.shift), press.modifiers.isDisjoint(with: [.command, .option, .control])
+                else { return .ignored }
+                model.extendHighlight(by: press.key == .upArrow ? -1 : 1)
+                return .handled
+            }
             .onMoveCommand { direction in
                 switch direction {
                 case .up: model.moveHighlight(by: -1)
@@ -84,10 +95,14 @@ struct TranscriptTab: View {
                 model.correctHighlight()
                 return .handled
             }
-            // ⌫ and Edit ▸ Delete ask to delete the highlighted line, as in Finder.
+            // ⌫ and Edit ▸ Delete ask to delete the highlighted line, or the highlighted stretch, as in Finder.
             .onDeleteCommand { model.confirmDeleteHighlight() }
             .onChange(of: model.highlighted, initial: true) {
                 if let h = model.highlighted { withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo(h, anchor: .center) } }
+            }
+            // The moving end of a stretch stays in sight, scrolling no more than needed.
+            .onChange(of: model.highlightExtent) {
+                if let e = model.highlightExtent { proxy.scrollTo(e) }
             }
             .onChange(of: model.transcript) {
                 if let h = model.highlighted { proxy.scrollTo(h, anchor: .center) }
@@ -276,14 +291,21 @@ struct TranscriptTab: View {
 
     private var showsTranslations: Bool { model.preferences?.showTranslationsInTranscript ?? true }
 
-    private func row(_ segment: MeetingStore.StoredSegment, _ cols: Columns) -> some View {
-        let isHighlighted = segment.id == model.highlighted
+    /// A click highlights the line; with ⇧ it highlights the stretch from the highlighted line through this one, as in a list.
+    private func select(_ segment: MeetingStore.StoredSegment) {
+        if NSEvent.modifierFlags.contains(.shift) { model.extendHighlight(to: segment) } else { model.highlight(segment) }
+    }
+
+    /// `stretch`: the highlighted lines (one, or a stretch of several).
+    private func row(_ segment: MeetingStore.StoredSegment, _ cols: Columns, stretch: Set<Int64>) -> some View {
+        let isHighlighted = stretch.contains(segment.id)
+        let inStretch = isHighlighted && stretch.count > 1
         let isEditing = model.lineDraft?.segmentID == segment.id
         let canCorrect = model.canCorrect(segment)
         let translation = showsTranslations ? model.translations[segment.id] : nil
         let time = ElapsedTime.stamp(segment.start)
         return HStack(alignment: .firstTextBaseline, spacing: 8) {
-            TranscriptTime(text: time, width: cols.time, help: "Highlight this passage") { model.highlight(segment) }
+            TranscriptTime(text: time, width: cols.time, help: "Highlight this passage") { select(segment) }
             SpeakerLabel(model: model, segment: segment, width: cols.speaker)
             VStack(alignment: .leading, spacing: 2) {
                 if isEditing {
@@ -308,7 +330,7 @@ struct TranscriptTab: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if isHighlighted, canCorrect, !isEditing {
+            if isHighlighted, !inStretch, canCorrect, !isEditing {
                 CorrectLineButton { model.beginCorrecting(segment) }
             }
         }
@@ -316,13 +338,18 @@ struct TranscriptTab: View {
         .rowInset(fill: isHighlighted ? Color.accentColor.opacity(0.18) : nil, bar: isHighlighted ? Color.accentColor : nil)
         .contentShape(Rectangle())
         // With copy protection off, clicks select text; the time highlights. A click in the line being corrected places the caret.
-        .onTapGesture { if copyProtection, !isEditing { model.highlight(segment) } }
+        .onTapGesture { if copyProtection, !isEditing { select(segment) } }
         .contextMenu {
             if canCorrect, !isEditing { Button(CorrectLineButton.title + "…") { model.beginCorrecting(segment) } }
             if segment.originalText != nil { Button(CorrectedNote.restoreTitle) { Task { await model.restoreOriginal(segment) } } }
             if canCorrect, !isEditing {
                 Divider()
-                Button(DeleteLineLabel.title + "…", role: .destructive) { model.confirmDelete(segment) }
+                // On a line of the highlighted stretch, the whole stretch, as a list's menu acts on its selection.
+                if inStretch {
+                    Button(DeleteLineLabel.lines(stretch.count), role: .destructive) { model.confirmDeleteHighlight() }
+                } else {
+                    Button(DeleteLineLabel.title + "…", role: .destructive) { model.confirmDelete(segment) }
+                }
             }
         }
         // The field of the line being corrected stays reachable.
@@ -343,7 +370,16 @@ struct TranscriptTab: View {
             }
             if canCorrect { Button(CorrectLineButton.title) { model.beginCorrecting(segment) } }
             if segment.originalText != nil { Button(CorrectedNote.restoreTitle) { Task { await model.restoreOriginal(segment) } } }
-            if canCorrect { Button(DeleteLineLabel.title + "…") { model.confirmDelete(segment) } }
+            if canCorrect {
+                if let h = model.highlighted, h != segment.id {
+                    Button(DeleteLineLabel.highlightThrough) { model.extendHighlight(to: segment) }
+                }
+                if inStretch {
+                    Button(DeleteLineLabel.lines(stretch.count)) { model.confirmDeleteHighlight() }
+                } else {
+                    Button(DeleteLineLabel.title + "…") { model.confirmDelete(segment) }
+                }
+            }
         }
         .accessibilityHint(Text("Highlights the passage to cite it"))
     }

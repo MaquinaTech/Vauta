@@ -217,6 +217,12 @@
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "%lld richieste identiche: la prima alle %@, l’ultima alle %@.";
 
+/* Confirmation after deleting a highlighted stretch of transcript lines; the argument is how many (2 or more) */
+"%lld lines deleted" = "%lld righe eliminate";
+
+/* Confirmation after deleting a stretch of transcript lines that decisions, tasks or note expansions were written from; the argument is how many (2 or more) */
+"%lld lines deleted. What the minutes wrote from them is marked for you to check." = "%lld righe eliminate. Ciò che il verbale ne ha tratto è segnato perché tu lo controlli.";
+
 /* VoiceOver: how many of a source's skipped files are Google Drive shortcuts or kept online only by a cloud service */
 "%lld not on this Mac" = "%lld non su questo Mac";
 
@@ -306,6 +312,9 @@
 
 /* Settings → Calendar & Reminders: what the brief is */
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "Una pagina breve sulla riunione che sta per iniziare: chi partecipa, cosa ha lasciato in sospeso l’ultima riunione, e riunioni, documenti e note correlati. Viene preparata su questo Mac. La scheda non modifica mai il tuo calendario, i promemoria o le note.";
+
+/* Settings → General, under the switch that opens the meeting companion with each recording */
+"A small bar beside your meeting app with the recording’s time, Mark a Moment, the notepad, Pause and Stop. It never takes the keyboard. Recording → Hide Vauta Windows takes it off the screen before you share it." = "Una piccola barra accanto all’app della riunione con il tempo della registrazione, Segna un momento, il blocco note, Pausa e Interrompi. Non prende mai la tastiera. Registrazione → Nascondi finestre di Vauta la toglie dallo schermo prima che tu lo condivida.";
 
 /* Settings → General, under the switch that opens the notepad when a recording starts */
 "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "Una piccola finestra mobile per le note brevi. Non toglie la tastiera all’app della riunione finché non ci clicchi o usi l’abbreviazione. Vauta chiede a macOS di tenerla fuori dalla condivisione dello schermo, ma non è garantito.";
@@ -1486,7 +1495,13 @@
 "Couldn’t change the line" = "Impossibile modificare la riga";
 "Couldn’t correct the line" = "Impossibile correggere la riga";
 "Couldn’t delete the line" = "Impossibile eliminare la riga";
+
+/* Alert title: deleting a highlighted stretch of transcript lines failed */
+"Couldn’t delete the lines" = "Impossibile eliminare le righe";
 "Delete Line" = "Elimina riga";
+
+/* Transcript: confirms deleting a highlighted stretch of the transcript for good */
+"Delete Lines" = "Elimina righe";
 "Delete this line for good?" = "Eliminare definitivamente questa riga?";
 "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "Le sue parole vengono cancellate dalla trascrizione, dalla ricerca e da Chiedi, insieme a ciò che era stato trascritto e alla sua traduzione. Ciò che il verbale ne ha tratto viene segnato perché tu lo controlli, e “Riscrivi verbale” lo riscrive senza di essa. Non si può annullare, e un backup fatto prima conserva la riga.";
 "Line deleted" = "Riga eliminata";
@@ -1732,6 +1747,9 @@
 /* No comment provided by engineer. */
 "Delete" = "Elimina";
 
+/* Transcript: menu item and VoiceOver action on a highlighted stretch of lines, which asks first; the argument is how many (2 or more) */
+"Delete %lld Lines…" = "Elimina %lld righe…";
+
 /* No comment provided by engineer. */
 "Delete %lld Meetings…" = "Elimina %lld riunioni…";
 
@@ -1898,6 +1916,9 @@
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "Eliminare le voci inutilizzate?";
+
+/* Confirmation title when deleting a highlighted stretch of a meeting’s transcript; the argument is how many lines (2 or more) */
+"Delete these %lld lines for good?" = "Eliminare definitivamente queste %lld righe?";
 
 /* Confirmation title */
 "Delete this decision?" = "Eliminare questa decisione?";
@@ -2660,6 +2681,9 @@
 "Hears your voice, shown as “%@”." = "Ascolta la tua voce, mostrata come “%@”.";
 
 /* No comment provided by engineer. */
+"Hide Meeting Companion" = "Nascondi compagno di riunione";
+
+/* No comment provided by engineer. */
 "Hide Transcript" = "Nascondi trascrizione";
 
 /* No comment provided by engineer. */
@@ -2679,6 +2703,9 @@
 
 /* VoiceOver hint of the Brief row while recording, when it is open */
 "Hides the brief" = "Nasconde la scheda";
+
+/* Transcript: VoiceOver action on a line, highlighting the stretch from the highlighted line through this one */
+"Highlight Through This Line" = "Evidenzia fino a questa riga";
 
 /* No comment provided by engineer. */
 "Highlight the passage at this moment" = "Evidenzia il passaggio di questo momento";
@@ -3396,6 +3423,9 @@
 
 /* No comment provided by engineer. */
 "Meeting Apps" = "App per riunioni";
+
+/* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
+"Meeting Companion" = "Compagno di riunione";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "Audio della riunione";
@@ -5532,6 +5562,9 @@
 "Show Less" = "Mostra meno";
 
 /* No comment provided by engineer. */
+"Show Meeting Companion" = "Mostra compagno di riunione";
+
+/* No comment provided by engineer. */
 "Show Meetings" = "Mostra riunioni";
 
 /* No comment provided by engineer. */
@@ -5584,6 +5617,9 @@
 
 /* Settings → Calendar & Reminders: the switch that adds related reminders to the brief */
 "Show related reminders in the brief" = "Mostra i promemoria correlati nella scheda";
+
+/* No comment provided by engineer. */
+"Show the meeting companion while recording" = "Mostra il compagno di riunione durante la registrazione";
 
 /* No comment provided by engineer. */
 "Show the original words" = "Mostra le parole originali";
@@ -6626,6 +6662,9 @@
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "Le loro impronte vocali vengono rimosse dall’archivio crittografato, insieme ai riepiloghi vocali conservati nelle riunioni. Puoi salvare di nuovo una voce da una riunione successiva.";
+
+/* Confirmation message when deleting a highlighted stretch of transcript lines, under the times it starts and ends */
+"Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines." = "Le loro parole vengono cancellate dalla trascrizione, dalla ricerca e da Chiedi, insieme a ciò che era stato trascritto e alle loro traduzioni. Ciò che il verbale ne ha tratto viene segnato perché tu lo controlli, e “Riscrivi verbale” lo riscrive senza di esse. Non si può annullare, e un backup fatto prima conserva le righe.";
 
 /* Model guide: reminder in the download step of Ollama once the app runs; the context part of its first step is folded */
 "Then set Context length to 32K in Ollama’s Settings." = "Poi imposta “Context length” su 32K nelle “Settings” di Ollama.";

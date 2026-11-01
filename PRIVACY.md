@@ -627,10 +627,11 @@ who can see your screen from taking a screenshot.
 
 ## Sharing your screen
 
-Vauta asks macOS to keep its windows, the panel, the Notepad and the captions out of screen sharing and screenshots
-(`sharingType = .none`), which macOS no longer guarantees for every sharing app. Before you share your screen in a call,
+Vauta asks macOS to keep its windows, the panel, the meeting companion, the Notepad and the captions out of screen sharing
+and screenshots (`sharingType = .none`), which macOS no longer guarantees for every sharing app. The meeting companion shows
+only the recording's time and its controls, no meeting text. Before you share your screen in a call,
 **Recording › Hide Vauta Windows** (or **Hide Windows** at the bottom of the panel while recording) takes Vauta's windows,
-the Notepad and the captions off the screen while the recording goes on. Nothing of Vauta comes on screen by itself
+the meeting companion, the Notepad and the captions off the screen while the recording goes on. Nothing of Vauta comes on screen by itself
 meanwhile (the Notepad when a recording starts, the captions); a window you open on purpose shows as usual. The menu-bar
 icon shows a crossed-out eye until **Show Vauta Windows** (or **Show Windows** in the panel) brings back what was on screen,
 as it was. A minimized window stays in the Dock, and the panel still opens when you click the menu-bar icon.
@@ -657,6 +658,10 @@ the encrypted store is written at once. What the minutes wrote from the line is 
 sentences are marked for you to check, and **Rewrite Minutes** writes the minutes without the line. It can't be undone. A
 backup or a copy of the encrypted file made before still contains the line, and so does anything you exported, or a reminder
 or event created from it.
+
+To take a stretch off the record, highlight its first line and ⇧-click its last (or press ⇧↑ or ⇧↓), then choose **Delete N
+Lines…** in the menu of a highlighted line, or press ⌫. Each line goes as above, and all of them in one step: if one of them
+can't be deleted, none is.
 
 ## Retention
 

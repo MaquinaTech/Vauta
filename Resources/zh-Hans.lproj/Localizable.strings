@@ -217,6 +217,12 @@
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "%lld 个相同的请求：第一个在 %@，最后一个在 %@。";
 
+/* Confirmation after deleting a highlighted stretch of transcript lines; the argument is how many (2 or more) */
+"%lld lines deleted" = "已删除 %lld 行";
+
+/* Confirmation after deleting a stretch of transcript lines that decisions, tasks or note expansions were written from; the argument is how many (2 or more) */
+"%lld lines deleted. What the minutes wrote from them is marked for you to check." = "已删除 %lld 行。会议纪要中根据它们写下的内容已被标记，供你核对。";
+
 /* VoiceOver: how many of a source's skipped files are Google Drive shortcuts or kept online only by a cloud service */
 "%lld not on this Mac" = "有 %lld 个不在这台 Mac 上";
 
@@ -306,6 +312,9 @@
 
 /* Settings → Calendar & Reminders: what the brief is */
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "关于即将开始的会议的简短页面：谁会参加、上次会议遗留了什么，以及相关的会议、文稿和笔记。它在这台 Mac 上生成。会前简报绝不会更改你的日历、提醒事项或备忘录。";
+
+/* Settings → General, under the switch that opens the meeting companion with each recording */
+"A small bar beside your meeting app with the recording’s time, Mark a Moment, the notepad, Pause and Stop. It never takes the keyboard. Recording → Hide Vauta Windows takes it off the screen before you share it." = "会议 App 旁边的一个小条，包含录音时间、标记时刻、记事本、暂停和停止。它不会抢走键盘输入。共享屏幕前，可以用“录音 → 隐藏 Vauta 窗口”将它移出屏幕。";
 
 /* Settings → General, under the switch that opens the notepad when a recording starts */
 "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "用于输入简短笔记的小型浮动窗口。在你点按它或使用快捷键之前，它不会抢走会议 App 的键盘输入。Vauta 会请求 macOS 不让它出现在屏幕共享中，但这并不能保证。";
@@ -1486,7 +1495,13 @@
 "Couldn’t change the line" = "无法更改此行";
 "Couldn’t correct the line" = "无法修正此行";
 "Couldn’t delete the line" = "无法删除这一行";
+
+/* Alert title: deleting a highlighted stretch of transcript lines failed */
+"Couldn’t delete the lines" = "无法删除这些行";
 "Delete Line" = "删除此行";
+
+/* Transcript: confirms deleting a highlighted stretch of the transcript for good */
+"Delete Lines" = "删除这些行";
 "Delete this line for good?" = "要永久删除这一行吗？";
 "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "这一行的文字会连同转录时的原文和译文，一起从转录文本、搜索和“提问”中删除。会议纪要中根据它写下的内容会被标记，供你核对；“重新生成会议纪要”会在没有这一行的情况下重写。此操作无法撤销，之前制作的备份仍会保留这一行。";
 "Line deleted" = "已删除这一行";
@@ -1732,6 +1747,9 @@
 /* No comment provided by engineer. */
 "Delete" = "删除";
 
+/* Transcript: menu item and VoiceOver action on a highlighted stretch of lines, which asks first; the argument is how many (2 or more) */
+"Delete %lld Lines…" = "删除 %lld 行…";
+
 /* No comment provided by engineer. */
 "Delete %lld Meetings…" = "删除 %lld 个会议…";
 
@@ -1898,6 +1916,9 @@
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "要删除未使用的声音吗？";
+
+/* Confirmation title when deleting a highlighted stretch of a meeting’s transcript; the argument is how many lines (2 or more) */
+"Delete these %lld lines for good?" = "要永久删除这 %lld 行吗？";
 
 /* Confirmation title */
 "Delete this decision?" = "要删除此决定吗？";
@@ -2660,6 +2681,9 @@
 "Hears your voice, shown as “%@”." = "采集你的声音，显示为“%@”。";
 
 /* No comment provided by engineer. */
+"Hide Meeting Companion" = "隐藏会议助手";
+
+/* No comment provided by engineer. */
 "Hide Transcript" = "隐藏转录文本";
 
 /* No comment provided by engineer. */
@@ -2679,6 +2703,9 @@
 
 /* VoiceOver hint of the Brief row while recording, when it is open */
 "Hides the brief" = "隐藏会前简报";
+
+/* Transcript: VoiceOver action on a line, highlighting the stretch from the highlighted line through this one */
+"Highlight Through This Line" = "高亮显示到此行";
 
 /* No comment provided by engineer. */
 "Highlight the passage at this moment" = "高亮显示此时的片段";
@@ -3396,6 +3423,9 @@
 
 /* No comment provided by engineer. */
 "Meeting Apps" = "会议 App";
+
+/* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
+"Meeting Companion" = "会议助手";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "会议音频";
@@ -5532,6 +5562,9 @@
 "Show Less" = "收起";
 
 /* No comment provided by engineer. */
+"Show Meeting Companion" = "显示会议助手";
+
+/* No comment provided by engineer. */
 "Show Meetings" = "显示会议";
 
 /* No comment provided by engineer. */
@@ -5584,6 +5617,9 @@
 
 /* Settings → Calendar & Reminders: the switch that adds related reminders to the brief */
 "Show related reminders in the brief" = "在会前简报中显示相关提醒事项";
+
+/* No comment provided by engineer. */
+"Show the meeting companion while recording" = "录音时显示会议助手";
 
 /* No comment provided by engineer. */
 "Show the original words" = "显示原文";
@@ -6626,6 +6662,9 @@
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "它们的声纹将连同会议中保留的声音摘要一起从加密存储中删除。你可以在之后的会议中重新存储声音。";
+
+/* Confirmation message when deleting a highlighted stretch of transcript lines, under the times it starts and ends */
+"Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines." = "这些行的文字会连同转录时的原文和译文，一起从转录文本、搜索和“提问”中删除。会议纪要中根据它们写下的内容会被标记，供你核对；“重新生成会议纪要”会在没有这些行的情况下重写。此操作无法撤销，之前制作的备份仍会保留这些行。";
 
 /* Model guide: reminder in the download step of Ollama once the app runs; the context part of its first step is folded */
 "Then set Context length to 32K in Ollama’s Settings." = "然后在 Ollama 的“Settings”中将“Context length”设为 32K。";

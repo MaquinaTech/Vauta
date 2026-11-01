@@ -20,8 +20,8 @@ extension MeetingsModel {
         mode == .meetings && segment.meetingID == selectedID && !isActive
     }
 
-    /// The highlighted passage can be corrected (Return, and the menu item for keyboard users).
-    var canCorrectHighlight: Bool { tab == .transcript && highlightedSegment.map(canCorrect) == true }
+    /// The highlighted passage can be corrected (Return, and the menu item for keyboard users); a stretch of lines can't.
+    var canCorrectHighlight: Bool { tab == .transcript && highlightExtent == nil && highlightedSegment.map(canCorrect) == true }
 
     func correctHighlight() {
         guard canCorrectHighlight, let segment = highlightedSegment else { return }

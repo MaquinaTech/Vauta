@@ -217,6 +217,12 @@
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "동일한 요청 %lld건: 처음은 %@, 마지막은 %@.";
 
+/* Confirmation after deleting a highlighted stretch of transcript lines; the argument is how many (2 or more) */
+"%lld lines deleted" = "%lld줄을 삭제했습니다";
+
+/* Confirmation after deleting a stretch of transcript lines that decisions, tasks or note expansions were written from; the argument is how many (2 or more) */
+"%lld lines deleted. What the minutes wrote from them is marked for you to check." = "%lld줄을 삭제했습니다. 이 줄들을 바탕으로 회의록에 쓴 내용은 확인할 수 있도록 표시되었습니다.";
+
 /* VoiceOver: how many of a source's skipped files are Google Drive shortcuts or kept online only by a cloud service */
 "%lld not on this Mac" = "이 Mac에 없는 파일 %lld개";
 
@@ -306,6 +312,9 @@
 
 /* Settings → Calendar & Reminders: what the brief is */
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "곧 시작하는 회의에 대한 짧은 페이지입니다. 참석자, 지난 회의에서 남은 일, 관련 회의, 문서, 메모가 들어 있습니다. 이 Mac에서 만들어집니다. 브리핑은 캘린더, 미리 알림, 메모를 변경하지 않습니다.";
+
+/* Settings → General, under the switch that opens the meeting companion with each recording */
+"A small bar beside your meeting app with the recording’s time, Mark a Moment, the notepad, Pause and Stop. It never takes the keyboard. Recording → Hide Vauta Windows takes it off the screen before you share it." = "회의 앱 옆에 녹음 시간, 순간 북마크, 메모장, 일시 정지, 중지가 있는 작은 막대입니다. 키보드를 가져가지 않습니다. 화면을 공유하기 전에 “녹음 → Vauta 윈도우 숨기기”로 화면에서 치울 수 있습니다.";
 
 /* Settings → General, under the switch that opens the notepad when a recording starts */
 "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "짧은 메모를 위한 작은 플로팅 윈도우입니다. 클릭하거나 단축키를 사용하기 전까지 회의 앱의 키보드 입력을 가져가지 않습니다. Vauta는 macOS에 이 윈도우를 화면 공유에서 제외하도록 요청하지만 보장되지는 않습니다.";
@@ -1486,7 +1495,13 @@
 "Couldn’t change the line" = "줄을 변경할 수 없습니다";
 "Couldn’t correct the line" = "줄을 수정할 수 없습니다";
 "Couldn’t delete the line" = "줄을 삭제할 수 없음";
+
+/* Alert title: deleting a highlighted stretch of transcript lines failed */
+"Couldn’t delete the lines" = "줄을 삭제할 수 없음";
 "Delete Line" = "줄 삭제";
+
+/* Transcript: confirms deleting a highlighted stretch of the transcript for good */
+"Delete Lines" = "줄 삭제";
 "Delete this line for good?" = "이 줄을 완전히 삭제할까요?";
 "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "이 줄의 단어가 변환된 원래 내용, 번역과 함께 녹취록, 검색, 질문에서 지워집니다. 이 줄을 바탕으로 회의록에 쓴 내용은 확인할 수 있도록 표시되며, “회의록 다시 작성”으로 이 줄 없이 다시 쓸 수 있습니다. 이 작업은 실행 취소할 수 없으며, 이전에 만든 백업에는 이 줄이 남아 있습니다.";
 "Line deleted" = "줄을 삭제했습니다";
@@ -1732,6 +1747,9 @@
 /* No comment provided by engineer. */
 "Delete" = "삭제";
 
+/* Transcript: menu item and VoiceOver action on a highlighted stretch of lines, which asks first; the argument is how many (2 or more) */
+"Delete %lld Lines…" = "%lld줄 삭제…";
+
 /* No comment provided by engineer. */
 "Delete %lld Meetings…" = "회의 %lld개 삭제…";
 
@@ -1898,6 +1916,9 @@
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "사용하지 않은 목소리를 삭제할까요?";
+
+/* Confirmation title when deleting a highlighted stretch of a meeting’s transcript; the argument is how many lines (2 or more) */
+"Delete these %lld lines for good?" = "이 %lld줄을 완전히 삭제할까요?";
 
 /* Confirmation title */
 "Delete this decision?" = "이 결정 사항을 삭제할까요?";
@@ -2660,6 +2681,9 @@
 "Hears your voice, shown as “%@”." = "사용자의 음성을 듣습니다(표시 이름: “%@”).";
 
 /* No comment provided by engineer. */
+"Hide Meeting Companion" = "회의 도우미 숨기기";
+
+/* No comment provided by engineer. */
 "Hide Transcript" = "녹취록 숨기기";
 
 /* No comment provided by engineer. */
@@ -2679,6 +2703,9 @@
 
 /* VoiceOver hint of the Brief row while recording, when it is open */
 "Hides the brief" = "브리핑을 숨깁니다";
+
+/* Transcript: VoiceOver action on a line, highlighting the stretch from the highlighted line through this one */
+"Highlight Through This Line" = "이 줄까지 강조 표시";
 
 /* No comment provided by engineer. */
 "Highlight the passage at this moment" = "이 시점의 구간 강조 표시";
@@ -3396,6 +3423,9 @@
 
 /* No comment provided by engineer. */
 "Meeting Apps" = "회의 앱";
+
+/* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
+"Meeting Companion" = "회의 도우미";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "회의 오디오";
@@ -5532,6 +5562,9 @@
 "Show Less" = "간단히 보기";
 
 /* No comment provided by engineer. */
+"Show Meeting Companion" = "회의 도우미 표시";
+
+/* No comment provided by engineer. */
 "Show Meetings" = "회의 보기";
 
 /* No comment provided by engineer. */
@@ -5584,6 +5617,9 @@
 
 /* Settings → Calendar & Reminders: the switch that adds related reminders to the brief */
 "Show related reminders in the brief" = "관련 미리 알림을 브리핑에 표시";
+
+/* No comment provided by engineer. */
+"Show the meeting companion while recording" = "녹음 중에 회의 도우미 표시";
 
 /* No comment provided by engineer. */
 "Show the original words" = "원문 표시";
@@ -6626,6 +6662,9 @@
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "이 목소리 지문들이 회의에 보관된 목소리 요약과 함께 암호화된 저장소에서 삭제됩니다. 나중 회의에서 목소리를 다시 저장할 수 있습니다.";
+
+/* Confirmation message when deleting a highlighted stretch of transcript lines, under the times it starts and ends */
+"Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines." = "이 줄들의 단어가 변환된 원래 내용, 번역과 함께 녹취록, 검색, 질문에서 지워집니다. 이 줄들을 바탕으로 회의록에 쓴 내용은 확인할 수 있도록 표시되며, “회의록 다시 작성”으로 이 줄들 없이 다시 쓸 수 있습니다. 이 작업은 실행 취소할 수 없으며, 이전에 만든 백업에는 이 줄들이 남아 있습니다.";
 
 /* Model guide: reminder in the download step of Ollama once the app runs; the context part of its first step is folded */
 "Then set Context length to 32K in Ollama’s Settings." = "그다음 Ollama의 “Settings”에서 “Context length”를 32K로 설정하세요.";
