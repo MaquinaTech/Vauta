@@ -32,10 +32,13 @@ public struct TranscriptTranslator: Sendable {
         /// Lines done (translated, or left without one), of `total`.
         public var done: Int
         public var total: Int
+        /// The work waits for the meeting being recorded to end.
+        public var waitingForRecording: Bool
 
-        public init(done: Int, total: Int) {
+        public init(done: Int, total: Int, waitingForRecording: Bool = false) {
             self.done = done
             self.total = total
+            self.waitingForRecording = waitingForRecording
         }
     }
 
@@ -75,7 +78,7 @@ public struct TranscriptTranslator: Sendable {
     public func translate(_ meetingID: Int64, into language: Locale.Language, store: MeetingStore, scope: Scope = .missing,
                           progress: @Sendable (Progress) async -> Void = { _ in }) async throws -> Outcome {
         let code = language.storageCode
-        try await waitWhileRecording(store)
+        try await waitWhileRecording(store) { await progress(Progress(done: 0, total: 0, waitingForRecording: true)) }
         var lines = try await store.translationLines(of: meetingID, language: code)
         var rest = lines.indices.filter { index in
             switch scope {
@@ -87,6 +90,10 @@ public struct TranscriptTranslator: Sendable {
         let total = rest.count
         var outcome = Outcome()
         await progress(Progress(done: 0, total: total))
+        // Said while it waits, and the count again once the recording ended.
+        func pause() async throws {
+            try await waitWhileRecording(store) { await progress(Progress(done: total - rest.count, total: total, waitingForRecording: true)) }
+        }
 
         func keep(_ results: [(index: Int, text: String)]) async throws {
             let items = results.map { MeetingStore.LineTranslation(segmentID: lines[$0.index].segmentID, source: lines[$0.index].text, text: $0.text) }
@@ -99,7 +106,7 @@ public struct TranscriptTranslator: Sendable {
 
         if let server {
             while let index = rest.first {
-                try await waitWhileRecording(store)
+                try await pause()
                 let line = lines[index]
                 var text: String
                 do {
@@ -123,7 +130,7 @@ public struct TranscriptTranslator: Sendable {
         // Apple's translation: every line without the server, and what the server left when it stopped answering.
         if let onDevice {
             while !rest.isEmpty {
-                try await waitWhileRecording(store)
+                try await pause()
                 let batch = Array(rest.prefix(Self.batchSize))
                 let outputs = try await Self.translate(batch.map { lines[$0].text }, with: onDevice)
                 var results: [(index: Int, text: String)] = []
@@ -180,8 +187,11 @@ public struct TranscriptTranslator: Sendable {
         return same && !text.isEmpty ? line : text
     }
 
-    private func waitWhileRecording(_ store: MeetingStore) async throws {
+    /// Returns once no meeting is being recorded; `waiting` is called once when it has to wait, and `progress` again after.
+    private func waitWhileRecording(_ store: MeetingStore, waiting: () async -> Void) async throws {
         try Task.checkCancellation()
+        guard await store.activeMeetingID != nil else { return }
+        await waiting()
         while await store.activeMeetingID != nil { try await Task.sleep(for: recordingPoll) }
     }
 }

@@ -110,6 +110,10 @@ struct TranscriptTranslationStatus: View {
             let name = TranslationPair.name(of: language)
             return String(localized: "Downloading \(name) for translation on this Mac…",
                           comment: "Transcript tab: Apple's translation languages are downloading; the argument is a language name in running text")
+        case .waitingForRecording(let language):
+            let name = TranslationPair.name(of: language)
+            return String(localized: "The translation into \(name) goes on when the recording ends.",
+                          comment: "Transcript tab: nothing is translated while a meeting is being recorded; the argument is a language name in running text")
         case .translating(let language, let done, let total, let server):
             let name = TranslationPair.name(of: language)
             guard total > 0 else {

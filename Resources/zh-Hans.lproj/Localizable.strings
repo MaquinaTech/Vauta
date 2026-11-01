@@ -6648,6 +6648,9 @@
    Starts a sentence when the transcript says something different from what the user noted; the sentence follows */
 "The transcript says:" = "转录文本中写道：";
 
+/* Transcript tab: nothing is translated while a meeting is being recorded; the argument is a language name in running text */
+"The translation into %@ goes on when the recording ends." = "录音结束后将继续翻译为%@。";
+
 /* Confirmation message when deleting one person’s saved voice, from Settings or from the person’s card */
 "The voice of this person is removed from the encrypted store, with the voice summaries kept in meetings, and Vauta will no longer suggest them. Meetings and the names already in them stay as they are." = "此人的声音将连同会议中保留的声音摘要一起从加密存储中删除，Vauta 将不再建议此人。会议及其中已有的姓名保持不变。";
 

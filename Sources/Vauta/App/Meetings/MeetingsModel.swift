@@ -493,6 +493,7 @@ final class MeetingsModel {
         notepad.store = store
         translation.store = store
         translation.onStored = { [weak self] id in Task { await self?.reloadTranslations(id) } }
+        translation.canAskForDownload = { [weak self] in self?.isShowing ?? false }
         notepad.addedAfter = true
         notepad.report = { [weak self] title, error in self?.present(title, error) }
         // Clearing a note's words in Meetings asks first, like every other delete here.

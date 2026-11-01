@@ -32,6 +32,8 @@ final class TranscriptTranslationModel {
         case downloading(Locale.Language)
         /// `server`: the model server translates; otherwise Apple's translation on this Mac.
         case translating(Locale.Language, done: Int, total: Int, server: Bool)
+        /// A meeting is being recorded: the work goes on when it ends.
+        case waitingForRecording(Locale.Language)
     }
 
     /// How the last translation of a meeting ended, when there is something to say.
@@ -69,6 +71,8 @@ final class TranscriptTranslationModel {
     @ObservationIgnored var serverConfigured: () -> Bool = { false }
     /// Translations of a meeting were stored: the meeting shown reads them again.
     @ObservationIgnored var onStored: ((Int64) -> Void)?
+    /// Apple's download sheet can show: the Meetings window, which hosts it, is open.
+    @ObservationIgnored var canAskForDownload: () -> Bool = { true }
 
     @ObservationIgnored private let backend: any TranscriptTranslationBackend
     /// At most one request per meeting waits.
@@ -125,7 +129,7 @@ final class TranscriptTranslationModel {
                 } else if !current.quiet {
                     cancel(running)
                 }
-            } else if !current.quiet {
+            } else if !current.quiet, !quiet {
                 cancel(running)
             }
         }
@@ -191,18 +195,21 @@ final class TranscriptTranslationModel {
         let id = request.meetingID
         let availability = await backend.availability(from: request.source, to: request.target)
         var onDevice: (any Translator)?
+        var deviceError: Error?
         if availability == .installed {
-            onDevice = try? await backend.makeTranscriptTranslator(from: request.source, to: request.target)
+            do { onDevice = try await backend.makeTranscriptTranslator(from: request.source, to: request.target) } catch { deviceError = error }
         }
         let server = usesServer ? await llm?.transcriptTranslator(source: request.source, target: request.target,
                                                                   model: preferences?.translationModel) : nil
         guard running?.request == request, !Task.isCancelled else { return finish(request, cancelled: true) }
         if server == nil, onDevice == nil {
-            // A correction never starts a download.
-            guard availability == .downloadable, !request.quiet else {
+            if let deviceError { return finish(request, notice: .failed(deviceError.localizedDescription)) }
+            guard availability == .downloadable else {
                 return finish(request, notice: .failed(String(localized: "This language can’t be translated on this Mac.",
                                                               comment: "Transcript tab: the meeting's language can't be translated into the one chosen")))
             }
+            // A correction never starts a download, and no sheet can show while the Meetings window is closed.
+            guard !request.quiet, canAskForDownload() else { return finish(request, notice: .downloadFailed) }
             // Downloaded first; the translation starts when the system says the languages are here (`downloadEnded`).
             stages[id] = .downloading(request.target)
             let strategy = await backend.transcriptDownloadStrategy(from: request.source, to: request.target)
@@ -233,7 +240,11 @@ final class TranscriptTranslationModel {
 
     private func progressed(_ request: Request, _ progress: TranscriptTranslator.Progress, server: Bool) {
         guard running?.request == request else { return }
-        if !request.quiet { stages[request.meetingID] = .translating(request.target, done: progress.done, total: progress.total, server: server) }
+        if !request.quiet {
+            stages[request.meetingID] = progress.waitingForRecording
+                ? .waitingForRecording(request.target)
+                : .translating(request.target, done: progress.done, total: progress.total, server: server)
+        }
         if progress.done > 0 { onStored?(request.meetingID) }
     }
 

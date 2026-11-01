@@ -209,6 +209,18 @@ struct TranscriptTranslationModelTests {
         #expect(rig.model.stages[id] == nil)
     }
 
+    @Test func noDownloadIsAskedForWhileTheWindowIsClosed() async throws {
+        let rig = try Rig()
+        let (id, _) = try await rig.meeting(["Uno"])
+        rig.backend.statuses = ["fr": .downloadable]
+        rig.model.canAskForDownload = { false }
+        rig.model.translate(id, source: spanish, into: french)
+        try await until { rig.model.notices[id] != nil }
+        #expect(rig.model.notices[id] == .downloadFailed)
+        #expect(rig.model.downloader.running == nil)
+        #expect(rig.model.stages[id] == nil)
+    }
+
     @Test func stoppingEverythingForgetsTheQueue() async throws {
         let rig = try Rig()
         let first = try await rig.meeting(["Uno"])

@@ -6648,6 +6648,9 @@
    Starts a sentence when the transcript says something different from what the user noted; the sentence follows */
 "The transcript says:" = "文字起こしでは：";
 
+/* Transcript tab: nothing is translated while a meeting is being recorded; the argument is a language name in running text */
+"The translation into %@ goes on when the recording ends." = "録音が終わると、%@への翻訳を続けます。";
+
 /* Confirmation message when deleting one person’s saved voice, from Settings or from the person’s card */
 "The voice of this person is removed from the encrypted store, with the voice summaries kept in meetings, and Vauta will no longer suggest them. Meetings and the names already in them stay as they are." = "この人物の声は、ミーティングに保持されている声の要約と⁠と⁠も⁠に暗号化されたストアから削除され、Vautaはこの人物を提案しなくなります。ミーティングと、すでにその中にある名前はそのまま残ります。";
 

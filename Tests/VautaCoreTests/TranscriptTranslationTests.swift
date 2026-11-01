@@ -255,12 +255,18 @@ struct TranscriptTranslationTests {
         let (m, _) = try await meeting(store, ["Uno", "Dos"])
         let recording = try await store.startMeeting(at: .now)
         let apple = StubTranslator()
-        let work = Task { try await TranscriptTranslator(onDevice: apple, server: nil, recordingPoll: .milliseconds(10)).translate(m, into: english, store: store) }
+        let progress = ProgressLog()
+        let work = Task {
+            try await TranscriptTranslator(onDevice: apple, server: nil, recordingPoll: .milliseconds(10))
+                .translate(m, into: english, store: store) { progress.add($0) }
+        }
         try await Task.sleep(for: .milliseconds(200))
         #expect(apple.calls.isEmpty)
+        #expect(progress.items == [.init(done: 0, total: 0, waitingForRecording: true)], "it says why it waits")
         try await store.endMeeting(recording, at: .now)
         let outcome = try await work.value
         #expect(outcome.translated == 2)
+        #expect(progress.items.last == .init(done: 2, total: 2))
     }
 
     @Test func stoppingKeepsWhatWasStored() async throws {
@@ -271,7 +277,7 @@ struct TranscriptTranslationTests {
         let hold = StubGate()
         server.holds = ["Dos": hold]
         let work = Task { try await TranscriptTranslator(onDevice: nil, server: server).translate(m, into: english, store: store) }
-        await eventually { server.calls.count == 2 }
+        #expect(await eventually { server.calls.count == 2 })
         work.cancel()
         await #expect(throws: CancellationError.self) { _ = try await work.value }
         #expect(try await shown(store, m) == [ids[0]: "R(Uno)"])
@@ -286,7 +292,7 @@ struct TranscriptTranslationTests {
         let hold = StubGate()
         server.holds = ["Dos": hold]
         let work = Task { try await TranscriptTranslator(onDevice: nil, server: server).translate(m, into: english, store: store) }
-        await eventually { server.calls.count == 2 }
+        #expect(await eventually { server.calls.count == 2 })
         try await store.deleteMeeting(m)
         hold.open()
         await #expect(throws: CancellationError.self) { _ = try await work.value }
