@@ -28,6 +28,14 @@ struct SpeakerSuggestionTests {
         #expect(voice.contains("voice"))
     }
 
+    @Test func aNameSaidToTheSpeakerSaysWhoSaidIt() {
+        let other = String(describing: SpeakerSuggestion(entityID: 2, name: "Ana", said: "What do you think, Ana?", saidBy: .speaker("Speaker 1")).explanation)
+        #expect(other.contains("said to them") && other.contains("Speaker 1") && other.contains("What do you think, Ana?"))
+        #expect(!other.contains("They said") && !other.contains("You said"))
+        let user = String(describing: SpeakerSuggestion(entityID: 2, name: "Ana", said: "Thanks, Ana.", saidBy: .user).explanation)
+        #expect(user.contains("You said to them") && user.contains("Thanks, Ana."), "the user is \"you\", never \"Me said\"")
+    }
+
     @Test func aPersonsSuggestionCarriesTheirName() {
         let ana = texts(SpeakerSuggestion(entityID: 2, name: "Ana"))
         #expect(ana.allSatisfy { $0.contains("Ana") }, "every wording carries the person’s name")

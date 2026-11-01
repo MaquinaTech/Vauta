@@ -13,8 +13,9 @@ public struct MeetingSpeaker: Sendable, Identifiable, Hashable {
         case auto
         /// The user chose the person. Ground truth: never overwritten.
         case user
-        /// A saved voice resembles this person, or the speaker said they are this person (`suggestedBySegment`): "Is this
-        /// Ana?". `entityID` is only a candidate and is never shown as a name. Accepting it is a user assignment.
+        /// A saved voice resembles this person, the speaker said they are this person, or others spoke to the speaker by the
+        /// person's name (`suggestedBySegment`): "Is this Ana?". `entityID` is only a candidate and is never shown as a name.
+        /// Accepting it is a user assignment.
         case suggested
     }
 
@@ -32,8 +33,9 @@ public struct MeetingSpeaker: Sendable, Identifiable, Hashable {
     public let source: Source
     public let confidence: Double?
     public let talkSeconds: Double
-    /// The line in which the speaker said who they are ("Hi, I'm Ana"), when that is where the suggestion comes from
-    /// (`MeetingStore.suggestSpeakersFromIntroductions`); nil for a voice's suggestion and once the person answered it.
+    /// The line that gave the name, when that is where the suggestion comes from (`MeetingStore.suggestSpeakersFromTranscript`): the
+    /// speaker's own when they said who they are ("Hi, I'm Ana"), another speaker's when that one spoke to them by name ("What do you
+    /// think, Ana?"). nil for a voice's suggestion and once the person answered it.
     public let suggestedBySegment: Int64?
 
     public init(id: Int64, meetingID: Int64, channel: Channel, ordinal: Int, entityID: Int64? = nil, entityName: String? = nil,

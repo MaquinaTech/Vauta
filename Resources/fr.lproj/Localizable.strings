@@ -100,6 +100,9 @@
 /* Setup: a server that was found; the argument is a model name */
 "%@ on this Mac" = "%@ sur ce Mac";
 
+/* Speaker popover, under “Is this Ana?” when another speaker spoke to this one by that name (asked them something, handed them the floor or thanked them); the arguments are the other speaker’s label (“Speaker 1”, “Me”) and what they said */
+"%@ said to them: “%@”. Vauta never names a speaker from what’s said alone." = "%@ lui a dit : « %@ ». Vauta ne nomme jamais un intervenant d’après les seuls propos tenus.";
+
 /* Status detail; argument is a shortcut */
 "%@ starts and stops recording in any app." = "%@ démarre et arrête l’enregistrement dans n’importe quelle app.";
 
@@ -7897,6 +7900,9 @@
 
 /* No comment provided by engineer. */
 "You marked the other participants as informed that this meeting was transcribed" = "Vous avez indiqué que les autres participants ont été prévenus que cette réunion était transcrite";
+
+/* Speaker popover, under “Is this Ana?” when the user spoke to this speaker by that name (asked them something, handed them the floor or thanked them); the argument is what the user said */
+"You said to them: “%@”. Vauta never names a speaker from what’s said alone." = "Vous lui avez dit : « %@ ». Vauta ne nomme jamais un intervenant d’après les seuls propos tenus.";
 
 /* Why a recording stopped automatically */
 "You switched to another user." = "Vous êtes passé à un autre utilisateur.";

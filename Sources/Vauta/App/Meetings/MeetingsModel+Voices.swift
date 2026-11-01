@@ -61,10 +61,21 @@ extension MeetingsModel {
     /// The speaker's suggested person (“Is this Ana?”), if the speaker has one.
     func suggestion(for speaker: MeetingSpeaker) -> SpeakerSuggestion? {
         guard speaker.source == .suggested, let id = speaker.entityID, let name = speaker.entityName else { return nil }
-        // Said, not heard: the line where the speaker gave the name, cut to what fits a sentence.
-        let said = speaker.suggestedBySegment.flatMap { line in transcript.first { $0.id == line }?.text }
-            .map { $0.count > 140 ? String($0.prefix(137)).trimmingCharacters(in: .whitespaces) + "…" : $0 }
-        return SpeakerSuggestion(entityID: id, name: MeetingStore.displayName(name, isSelf: speaker.entityIsSelf), isSelf: speaker.entityIsSelf, said: said)
+        // Said, not heard: the clause of the line that gave the name, cut to what fits a sentence, and who said it when another
+        // speaker did ("What do you think, Ana?").
+        let line = speaker.suggestedBySegment.flatMap { line in transcript.first { $0.id == line } }
+        let said = line.map { SpeakerAddresses.quote($0.text, naming: name) }
+        let saidBy = line.flatMap { line -> SpeakerSuggestion.SaidBy? in
+            guard line.speaker?.id != speaker.id else { return nil }
+            let other = line.speaker?.id.flatMap { roster.entry($0)?.speaker }
+            // The first voice of the user's microphone is the user, unless they named it as somebody else.
+            if line.channel == .me, (other?.ordinal ?? line.speaker?.ordinal) == 1, other.map({ $0.source != .user || $0.entityIsSelf }) ?? true {
+                return .user
+            }
+            return .speaker(other?.displayName ?? line.speaker?.displayName(channel: line.channel) ?? line.channel.displayName)
+        }
+        return SpeakerSuggestion(entityID: id, name: MeetingStore.displayName(name, isSelf: speaker.entityIsSelf), isSelf: speaker.entityIsSelf,
+                                 said: said, saidBy: saidBy)
     }
 
     /// A saved voice was deleted in Settings: the entity card shows it.
@@ -78,14 +89,23 @@ extension MeetingsModel {
     }
 }
 
-/// A person a saved voice, or what the speaker said ("Hi, I'm Ana"), suggests for a speaker. For the user's own voice the question and both answers have their own
-/// wording (“Is this you?”, “Yes, That’s Me”): the localized name “Me” does not fit “It’s %@” in most languages.
+/// A person a saved voice, or what was said ("Hi, I'm Ana", "What do you think, Ana?"), suggests for a speaker. For the user's own voice the question and both
+/// answers have their own wording (“Is this you?”, “Yes, That’s Me”): the localized name “Me” does not fit “It’s %@” in most languages.
 struct SpeakerSuggestion: Equatable {
     let entityID: Int64
     let name: String
     var isSelf = false
-    /// What the speaker said that gave the name ("Hi, I'm Ana"), when the suggestion comes from that and not from a voice.
+    /// What was said that gave the name ("Hi, I'm Ana"), when the suggestion comes from that and not from a voice.
     var said: String?
+    /// Who said it, when someone else spoke to this speaker by the name; nil when the speaker said it of themselves.
+    var saidBy: SaidBy?
+
+    enum SaidBy: Equatable {
+        /// The user ("You said to them: …").
+        case user
+        /// Another speaker, by their label ("Speaker 1").
+        case speaker(String)
+    }
 
     /// The question shown with Yes and No.
     var question: Text {
@@ -96,6 +116,16 @@ struct SpeakerSuggestion: Equatable {
 
     /// Under the question in the popover: why the speaker is not named yet.
     var explanation: Text {
+        if let said, let saidBy {
+            switch saidBy {
+            case .user:
+                return Text("You said to them: “\(said)”. Vauta never names a speaker from what’s said alone.",
+                            comment: "Speaker popover, under “Is this Ana?” when the user spoke to this speaker by that name (asked them something, handed them the floor or thanked them); the argument is what the user said")
+            case .speaker(let label):
+                return Text("\(label) said to them: “\(said)”. Vauta never names a speaker from what’s said alone.",
+                            comment: "Speaker popover, under “Is this Ana?” when another speaker spoke to this one by that name (asked them something, handed them the floor or thanked them); the arguments are the other speaker’s label (“Speaker 1”, “Me 2”) and what they said")
+            }
+        }
         if let said {
             return Text("They said: “\(said)”. Vauta never names a speaker from what they say alone.",
                         comment: "Speaker popover, under “Is this Ana?” when the speaker said who they are; the argument is what they said")

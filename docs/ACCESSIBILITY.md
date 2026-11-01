@@ -92,7 +92,7 @@ Status: designed and unit-tested where logic is involved; **the manual VoiceOver
   only when the user gave it (typed it or answered Yes to a suggestion), and every name is read as written.
 - A suggestion ("Is this Ana?") is not shown as a name: the speaker still reads "Speaker 2". Under the speaker in Who spoke it is a text question with **Yes** and
   **No** link buttons whose spoken labels name the person ("Yes, it’s Ana", "No, not Ana"); the same question and two rows
-  are at the top of the speaker popover. For the user's own saved voice (imported recordings only) the question is "Is this you?" and the labels are "Yes, that’s me" and "No, not me". A No is undoable from the Edit menu (“Undo Reject Voice Suggestion”).
+  are at the top of the speaker popover, with a plain text line under them that says what gave the name: the speaker's own words ("They said: …"), another speaker's ("Speaker 1 said to them: …"), the user's ("You said to them: …") or a saved voice. For the user's own saved voice (imported recordings only) the question is "Is this you?" and the labels are "Yes, that’s me" and "No, not me". A No is undoable from the Edit menu (“Undo Reject Voice Suggestion”).
 - The consent sheet of **Remember This Voice** is a sheet with its title as header, the explanation as plain text lines with
   decorative icons hidden, the checkbox read as “<name> agreed to this.”, and the **Remember This Voice** button dimmed until the box is
   checked (Return only works then; Escape cancels). It has no timer and nothing moves.

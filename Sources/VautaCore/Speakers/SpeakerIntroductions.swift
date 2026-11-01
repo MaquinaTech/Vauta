@@ -4,8 +4,8 @@
 import Foundation
 
 /// A speaker who says who they are ("Hi, I'm Ana", "Soy Ana, de Kobaltix", "私はアナです"): the name they give, read without a model in
-/// the nine languages. It only proposes candidates: `MeetingStore.suggestSpeakersFromIntroductions` keeps a name only when it is a
-/// person of Context, and then only suggests it ("Is this Ana?"); it never names a speaker.
+/// the nine languages. It only proposes candidates: `MeetingStore.suggestSpeakersFromTranscript` keeps a name only when it is a
+/// person of Context or invited to the meeting, and then only suggests it ("Is this Ana?"); it never names a speaker.
 ///
 /// Read only at the start of a clause, so "they told me I'm Ana's backup" or "what I am sure of" say nothing. A Latin-script name is the
 /// capitalized words right after the cue (one to three, never a possessive: "I'm Ana's manager" is not Ana). "This is …" and "it's …"
