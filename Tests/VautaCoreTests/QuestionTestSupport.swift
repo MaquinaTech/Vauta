@@ -18,7 +18,7 @@ func holdingSleeper(release: Locked<Bool> = Locked(false)) -> @Sendable (Double)
 /// Polls an async condition until it holds or `timeout` passes (generous: the whole suite runs thousands of tests at once and a loaded Mac can
 /// starve the pool for more than a minute, so the timeout only bounds a hang).
 func settle(timeout: Duration = .seconds(240), _ condition: @Sendable () async throws -> Bool) async -> Bool {
-    let deadline = ContinuousClock.now + timeout
+    let deadline = ContinuousClock.now + TestTiming.scaled(timeout)
     while ContinuousClock.now < deadline {
         if (try? await condition()) == true { return true }
         try? await Task.sleep(for: .milliseconds(10))

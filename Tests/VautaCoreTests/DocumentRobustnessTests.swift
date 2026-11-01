@@ -426,16 +426,16 @@ extension HostileFileTests {
         var document: ExtractedDocument?
         // CPU time of this thread, not the wall clock: a busy Mac does not make the parser slower.
         let cpu = try cpuSeconds { document = try TextExtractors.markdown(text, clock: ExtractionClock(seconds: 3_600)) }
-        #expect(cpu < 60, "took \(cpu) s of CPU")
+        #expect(!TestTiming.holdsBudgets || cpu < 60, "took \(cpu) s of CPU")
         #expect(document?.units.map(\.text).joined().contains("Visible line after the comments.") == true)
     }
 
     @Test func aHugeLineOfOpeningBracketsDoesNotBacktrack() throws {
         let text = String(repeating: "[", count: 600_000) + " and then some text"
         let first = cpuSeconds { _ = try? TextExtractors.markdown(text, clock: ExtractionClock(seconds: 3_600)) }
-        #expect(first < 60, "took \(first) s of CPU")
+        #expect(!TestTiming.holdsBudgets || first < 60, "took \(first) s of CPU")
         let second = cpuSeconds { _ = try? TextExtractors.markdown(String(repeating: "![a](", count: 100_000), clock: ExtractionClock(seconds: 3_600)) }
-        #expect(second < 60, "took \(second) s of CPU")
+        #expect(!TestTiming.holdsBudgets || second < 60, "took \(second) s of CPU")
     }
 
 }

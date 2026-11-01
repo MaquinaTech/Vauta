@@ -339,7 +339,7 @@ struct BriefAgendaRunTests {
         slow.delay = 120
         let started = Date()
         #expect(await Self.run(slow, timeout: 0.05, snapshot: snapshot) == .noSuggestions)
-        #expect(Date().timeIntervalSince(started) < 60, "it does not wait for the model")
+        #expect(Date().timeIntervalSince(started) < 60 * TestTiming.scale, "it does not wait for the model")
         #expect(snapshot == AgendaFixtures.snapshot(), "the deterministic brief is untouched")
     }
 

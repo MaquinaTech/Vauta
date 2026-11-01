@@ -109,6 +109,90 @@ Defects the judge found and what was done:
 
 Series IB4010 and IB4011 are the same April selection meeting, not an earlier and a later one, and two of the four test Concejo windows barely continue their earlier window; both should be replaced before numbers are published. The server arm, other products, an M1 with 8 GB and the seven languages other than English and Spanish were not measured.
 
+## Re-judged evaluation (November 2026)
+
+The keyword brief (K0) was built again over fresh minutes of the 21 earlier meetings, written by the release build of `f484493` on both
+backends: KA0 over Apple's minutes, KG0 over the integrated model's. It was then judged blind again.
+
+**How it was judged.**
+- **Packets.** 26 packets, 342 item rows, from the 13 series of the first evaluation (8 of them test series).
+- **Judges.** Four judge instances, one per group of series (two of AMI meetings, two of Concejo sessions).
+- **Rubric.** It asks for the transcripts to be read first. Before the grades were sealed, all four applied the same three rules and the same callback rule:
+  - **W1.** A line that the earlier transcripts contradict is `wrong`, even when the stored minutes say it.
+  - **W2.** A line that inflates what was said is `wrong`: a proposal or one person's view shown as a decision, a remark or that meeting's agenda shown as a task, a question already settled shown as open.
+  - **W3.** A true but old line is not `wrong`.
+  - **Callbacks.** A callback counts as surfaced only when a line not labelled `wrong` points to it.
+- **Seals.** The grades were sealed before the key was opened: key `54c3222f…`, item grades `270a4384…`, brief grades `45892dde…` (SHA-256).
+- **Limits.** One label per line, from one judge, with no human review.
+
+**A defect of the evaluation, found while reading the results.** The evaluation stored every item of the minutes as firm, with no segment, so the judged briefs were not the app's:
+- **Ranked-out items were shown.** Apple's ranking had left out 32 decisions and 39 tasks of the 21 meetings, which the app keeps among the other possible items, out of the brief.
+- **Unconfirmed items had no mark.** This hit the integrated model hardest: 48 of its 72 decisions and 42 of its 52 tasks are unconfirmed, and the app marks each one.
+
+The evaluation now stores the minutes as the app does, through the same code as the actions evaluation. The rendered brief marks an unconfirmed task `[check]` and an owner not confirmed, as the app does. The briefs were built again: 23 lines are new, and 52 differ from a judged line only by a mark, so they keep its label. The second table below uses those labels.
+
+**"Last time", P@3 (gate: at least 0.80).**
+
+| Brief | Apple's minutes (KA0), test | All 13 | Integrated model's minutes (KG0), test | All 13 |
+|---|---|---|---|---|
+| As judged | 0.29 | 0.33 | 0.38 | 0.44 |
+| As the app shows it (corrected) | 0.21 to 0.29 (21 lines not judged, counted wrong or relevant) | 0.26 to 0.38 | **0.38** | **0.44** |
+
+Both backends fail the gate, whatever the lines that were not judged turn out to be.
+
+**Wrong lines in "Last time" (as the app shows it).**
+
+| Backend | Wrong lines | Per brief (test) |
+|---|---|---|
+| Apple | at least 48 of 109 (21 not judged) | 3.6 to 4.8 |
+| Integrated | 31 of 103 | 2.3 |
+
+**Where the wrong lines come from.** As judged, the wrong lines of "Last time" split by the kind of line:
+
+| Kind of line | Apple: wrong / lines | Integrated: wrong / lines |
+|---|---|---|
+| The summary line | 4 / 16 | 0 / 13 |
+| Firm decisions and tasks | 30 / 49 | 5 / 17 |
+| Unconfirmed decisions and tasks | 3 / 4 | 16 / 46 |
+| Ranked-out items (not shown in the app) | 13 / 23 | none |
+| Open questions | 11 / 22 | 10 / 27 |
+
+- **The cause is the stored minutes, not the brief's ranking.** The brief repeats what the minutes say. The wrong lines are proposals shown as decisions, tasks nobody took, and questions shown as open that the meeting had settled.
+- **The unconfirmed mark does not separate them.** On the integrated model's minutes, 16 of the 31 wrong lines carry it, and so do 22 of the 43 relevant ones.
+
+**The other sections (as judged, test series).**
+
+| Section | KA0 | KG0 | Gate |
+|---|---|---|---|
+| Documents and notes, P@3 | 0.54 | 0.50 | at least 0.60: **failed** |
+| Related meetings, P@3 | 0.00 | 0.00 | at least 0.60: **failed** |
+| Reminders, P@3 | 0.58 | 0.57 | none |
+| Open tasks, P@3 | 0.17 | 1.00 | too few series to read (2 and 1) |
+
+- **Related meetings.** All 16 of its lines were labelled `marginal`: true and on topic, but not used by the briefed meeting.
+- **Per brief, test series:**
+
+  | Measure | KA0 | KG0 | KG0 − KA0 [95%] |
+  |---|---|---|---|
+  | "Walks in prepared" (1 to 5) | 2.1 | 2.6 | +0.50 [−0.13, 1.13] |
+  | Noise (0 to 3) | 2.3 | 1.9 | −0.38 [−0.88, 0.13] |
+  | Missed callbacks | 1.75 | 1.75 | |
+
+**The deterministic gates, on the corrected briefs (15 briefs per backend, two of them first meetings).**
+
+| Gate | Apple's minutes | Integrated model's minutes |
+|---|---|---|
+| Invalid links | 0 of 300 items | 0 of 279 items |
+| Wrong attribution | 0 | 0 |
+| Distractors shown | 1 in all 15 briefs | 1 in all 15 briefs |
+| Invented history | none | none |
+| Replay | deterministic | deterministic |
+| Compose p90 | 0.49 s | 0.68 s |
+
+**A defect of the wrong-attribution check.** Minutes runs write a task with no due day as `"due": ""`. The check counted that as a day the brief failed to print: every wrong attribution in the first traces of this run (45 on Apple's minutes, 30 on the integrated model's) came from it. It now reads `""` and `"null"` as no day, as the validation does. The traces count wrong attribution by the check that found it (`wrongAttribution.<check>`).
+
+**Not changed yet.** The brief still shows "Last time" on every backend. Whether to hide it until a backend passes its gate, as the agenda is hidden, is open. Hiding it on one backend alone would rest on the minutes provider chosen now, because stored minutes do not record which backend wrote them. No ranking or quality claim rests on these figures. No other product was measured.
+
 ## Rules worth knowing
 
 - Due dates are whole days: a task is overdue only when its day is before the day of the meeting (a task due on the day of the meeting is not).
@@ -121,7 +205,7 @@ Series IB4010 and IB4011 are the same April selection meeting, not an earlier an
 
 ## Not done
 
-- The deterministic brief fails two test gates as specified (wrong attribution before the fixes above, and P@3 Last time); the evaluation has not been re-run after the fixes, and the brief is on by default; no quality claim rests on it.
+- The deterministic brief fails P@3 for "Last time" on both backends, also when re-judged with the minutes stored as the app stores them (see [Re-judged evaluation](#re-judged-evaluation-november-2026)), and "Documents and notes" and "Related meetings" fail their gates in the re-judged run. The brief is on by default; no quality claim rests on it.
 - The model server's agenda is unmeasured.
 - A recording carries the brief when it is linked to the calendar occurrence the brief is for, or, for an in-person event (no meeting link), when it starts from the panel while that event's card is shown (from the lead time to 15 minutes after the start, `BriefController.inPersonEventOnCard`, the same window as `BriefRecordingMatch`). In that case the event's title, attendees and series (never the invitation's notes) are saved with the recording like those of a meeting with a link, so the next occurrence finds it by series or by attendees. A recording of anything else started in that window, such as an unrelated ad-hoc conversation, also takes the card's event; the person who wants none closes the card by recording later or discarding the recording. Recordings near a linked event that is not the card's keep none.
 - **Not verified: Reminders access under the App Sandbox.** Whether `requestFullAccessToReminders` shows its prompt with only `com.apple.security.personal-information.calendars` has to be checked by running a signed, sandboxed build and pressing Allow Reminders Access…. It needs a maintainer with a real Reminders store; the automated checks never run the app against it. The build keeps `NSRemindersFullAccessUsageDescription` in Info.plist and adds no entitlement. If the prompt does not appear, discuss it with the maintainer before changing `Resources/Vauta.entitlements`: until then, Reminders may show "Open System Settings" with nothing to toggle.
