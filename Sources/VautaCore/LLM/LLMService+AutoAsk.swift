@@ -191,11 +191,13 @@ extension LLMService {
             if let meeting = try? await store.meeting(meetingID) { owner[segment] = meeting }
         }
         var claims: [AutoAnswerContent.Claim] = []
+        var lines: [Int64: CitableSegment] = [:]
         for claim in answer.claims where claim.verified {
             var cites: [AutoAnswerContent.Cite] = []
             for id in claim.citations {
                 // The question's own words are not evidence: a claim whose only support is the question is not an answer.
                 guard !uncitable.contains(id), let segment = result.sent[id] else { continue }
+                lines[id] = segment
                 if let meeting = owner[id] {
                     cites.append(.init(kind: .pastMeeting, segmentID: id, meetingID: meeting.id, t: segment.start, title: meeting.displayTitle,
                                        date: meeting.startedAt.timeIntervalSince1970))
@@ -211,6 +213,8 @@ extension LLMService {
             claims.append(.init(text: claim.text, cites: cites))
         }
         guard !claims.isEmpty else { return nil }
-        return AutoAnswerContent(answer: answer.answer, claims: claims)
+        var content = AutoAnswerContent(answer: answer.answer, claims: claims)
+        content.lines = lines
+        return content
     }
 }

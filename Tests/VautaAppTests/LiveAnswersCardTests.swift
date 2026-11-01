@@ -278,6 +278,17 @@ struct LiveAnswersCardTests {
         #expect(text.contains("This meeting (02:03)"))
     }
 
+    @Test func aTimePreviewsTheLineItCitesWhileTheCardHasIt() {
+        let cite = Self.content.claims[0].cites[0]
+        var content = Self.content
+        #expect(AnswerRowView.line(of: cite, in: content) == nil, "an answer read back from the meeting has no lines: a plain button")
+        content.lines[4] = CitableSegment(id: 4, channel: .others, start: 123, text: "The contract expires in March.")
+        #expect(AnswerRowView.line(of: cite, in: content)?.text == "The contract expires in March.")
+        #expect(AnswerRowView.previewLabel(cite, second: 123) == "2:03", "a moment of this meeting is named by its time alone")
+        let past = AutoAnswerContent.Cite(kind: .pastMeeting, segmentID: 7, meetingID: 2, t: 38, title: "Weekly sync", date: 1_790_000_000)
+        #expect(AnswerRowView.previewLabel(past, second: 38) == "Weekly sync · 0:38", "as Ask names a citation")
+    }
+
     @Test func everyPauseHasItsOwnSentence() {
         let texts = [LiveAnswerPause.modelUnavailable, .tooWarm, .transcriptBehind, .noSources].map { AnswersCard.pauseText($0) }
         #expect(Set(texts).count == 4 && texts.allSatisfy { $0.hasPrefix("Live answers paused:") || !$0.isEmpty })

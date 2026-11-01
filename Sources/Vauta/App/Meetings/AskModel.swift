@@ -463,9 +463,14 @@ final class AskModel {
         let time = MinutesEvidence.isMinutes(segment) ? Self.minutesWord : segments[segment].map { ElapsedTime.stamp($0.start) } ?? "?"
         var label = time
         if !thisMeeting, let meeting = segmentMeeting[segment], let title = meetingTitle?(meeting) {
-            label = String(localized: "citation.meeting.time", defaultValue: "\(title) · \(time)", comment: "A citation in an Ask answer: meeting title and time")
+            label = Self.citationLabel(title: title, time: time)
         }
         return withSpeaker(label, of: segment)
+    }
+
+    /// "Weekly sync · 12:34": a citation named by its meeting and its time (in Ask, and in the previews of the Answers card).
+    nonisolated static func citationLabel(title: String, time: String) -> String {
+        String(localized: "citation.meeting.time", defaultValue: "\(title) · \(time)", comment: "A citation in an Ask answer: meeting title and time")
     }
 
     /// The name of the minutes, as the meeting's tab says it ("Weekly sync · Minutes").
