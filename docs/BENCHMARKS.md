@@ -27,8 +27,8 @@ are never committed. This is the only place the README takes accuracy figures fr
 | WER, AMI, simulated remote mix of 3 speakers (Opus-coded), reference turns only | **20.3 %** (8,664 words) / **16.4 %** on 8 other meetings (7,083 words); 1,096 of the 1,757 errors in the first set are deletions | |
 | Who said which words, AMI simulated remote mix of 3 speakers, no-bleed region of the first 10 min: cpWER / WDER | **29.9 %** / **7.5 %** (8,660 words; tcpWER 30.9 %); 21.8 % speaker blind, so about 8 points come from the speakers | [Who said which words](#who-said-which-words-cpwer-tcpwer-and-wder) |
 | WER, Spanish, 35.6 min of parliament speech and audiobooks, Apple's `es-ES` model | **7.6 %** (7.4 % ignoring accents): 9.2 % parliament, 5.4 % audiobooks | Read and parliament speech, not conversation |
-| Minutes, Apple's on-device model, 10 AMI meetings x 3 min of manual transcript: decisions and tasks kept by the app's checks | 13 of the 18 the model proposed; every kept item has a citation that exists and holds its figures; 3 of the 13 (23 %) marked Unconfirmed | Only one model and a small sample: [Minutes](#minutes-citations) |
-| Same, 10 min windows (longer than the model's 4,096-token window, so written block by block) | 0 of 42 proposals kept | |
+| Minutes, Apple's on-device model with the parts the app sends to it, 10 AMI meetings x 3 min of manual transcript: decisions and tasks kept by the app's checks (2026-11-01) | 12 of the 22 the model proposed (7 dropped by the citation check); every kept item has a citation that exists and holds its figures; none marked Unconfirmed | Only one model and a small sample: [Minutes](#minutes-citations) |
+| Same, 10 min windows | 29 of the 59 proposed in 9 meetings (26 dropped), every kept item with a valid citation, 1 marked Unconfirmed; the tenth meeting failed once and wrote its minutes when run again | |
 | Minutes, Apple's model and the integrated model, 20 sealed public meetings, harness phase, measured 2026-10-24 (blind, one LLM judge with no human review, **every switch on**): firm decisions and tasks covered, firm list length | Apple 100 of 167 in a list of 185 items (before: 99 in 518); integrated 51 (before: 42), the request the app runs on the integrated model since 2026-10-24 (items first, outcome rule, recall wording, expected counts with the item floor, greedy decoding); on the development meetings it listed 5.3 items per meeting at recall 0.32 and precision 0.61 (old: 0.22 to 0.25 and 0.66) with a median +14 s and p90 +53 s per meeting on the pairs. Apple's figures are for the ranked extraction with the outcome-first digest switched on, which the app does not ship | Not reproducible from the repository: the test set is sealed. Apple ships a subset that was not judged as such. Date, build, tables, limits and commands: [LANGUAGE_MODEL.md](LANGUAGE_MODEL.md#harness-phase-what-ships-blind-test-2026-10-24) |
 
 The DER figure for AMI uses the "no-bleed" scoring region explained below. With the plain scoring region it is 38.1 %
@@ -470,27 +470,37 @@ set, all four participants, cut into passages (a speaker's words, pauses under o
 - **Unconfirmed**: the share the app marked itself;
 - **proposed / dropped**: what the model proposed in its final answer and how many the app dropped before any of the above.
 
-The model is **Apple's on-device language model** (`SystemLanguageModel.default`, macOS 27.0.1 (26A434), context window 4,096
-tokens), the model people get with no setup. No model server was used, so nothing here says how a larger model does.
+The model is **Apple's on-device language model** (`SystemLanguageModel.default`, macOS 27.2 (26B123), context window 4,096
+tokens), the model people get with no setup, with the parts of the minutes the app sends to it: `minutes-file` forces none, and
+the JSON it writes says which ran (`choices`). No model server was used, so nothing here says how a larger model does.
 
 ### Results
 
-3-minute windows (about 10 to 27 passages each, which fit the model's window in one request, 11 model calls for 10 meetings):
+Measured on 1 November 2026 with a release build of `main` at `f484493` (runs `minutes-rel-180` and `minutes-rel-600`).
+"Not kept" is what passed the citation check but is not in the minutes: the app's later steps on Apple's model left it out (such
+as the ranking that keeps only the best decisions and tasks firm, or a repeat merged); this run does not break it down.
+
+3-minute windows (5 to 27 passages each, one request per meeting: 10 model calls):
 
 | Measure | Result |
 |---|---|
-| Decisions and tasks proposed / kept / dropped by the app | 18 / 13 / 5 (28 % dropped: no real passage cited, or a quote that is not word for word in it) |
-| Kept items with a citation | 13 of 13 (by construction) |
-| Kept items whose citation is valid (exists, holds the item's figures) | **13 of 13 (100 %)**; none was invalid and left unmarked |
-| Kept items marked Unconfirmed by the app | **3 of 13 (23 %)** |
-| Meetings with no decision or task kept | 4 of 10 (the model proposed none, or the app dropped them all) |
+| Decisions and tasks proposed / dropped / not kept / kept | 22 / 7 / 3 / 12 (7 of 22 dropped: no real passage cited, or a quote that is not word for word in it) |
+| Kept items with a citation | 12 of 12 (by construction) |
+| Kept items whose citation is valid (exists, holds the item's figures) | **12 of 12 (100 %)**; none was invalid and left unmarked |
+| Kept items marked Unconfirmed by the app | **0 of 12** |
+| Meetings with no decision or task kept | 2 of 10 (the model proposed none that passed, or the app dropped them all) |
 
-10-minute windows (26 to 108 passages, more than the 4,096-token window, so the app summarises block by block and merges):
+10-minute windows (26 to 108 passages; 12 model calls for 9 meetings):
 
 | Measure | Result |
 |---|---|
-| Proposed / kept / dropped | 42 / **0** / 42 |
-| Meetings with minutes written | 10 of 10 in this run; in an earlier identical run one meeting (ES2004c) failed with "the model's answer was cut off at the length limit" |
+| Proposed / dropped / not kept / kept | 59 / 26 / 4 / **29** (26 of 59 dropped) |
+| Kept items whose citation is valid | **29 of 29 (100 %)**; none was invalid and left unmarked |
+| Kept items marked Unconfirmed by the app | 1 of 29 (3 %) |
+| Meetings with minutes written | 9 of 10, each with at least one decision or task kept. EN2002b (104 passages) failed, and the command did not print the job's message (it does now); run again alone twice, it wrote its minutes both times (11 and 8 items kept), so the failure was not seen again |
+
+The figures published before (18 / 13 / 5 and 3 of 13 Unconfirmed on 3-minute windows; 42 / **0** / 42 on 10-minute windows)
+were measured before #26, when `minutes-file` ran parts of the minutes that the app does not send to Apple's model.
 
 ### What this says, and what it does not
 
@@ -498,11 +508,11 @@ The valid-citation rate is high because the app checks before it keeps: an item 
 reaches the minutes, and the rate counts only what the figure check can see (a digit that is not in the cited passage). It does
 **not** say that a decision is correctly summarised or that the owner is right: that needs the human or judge rubric in
 [`eval/rubric/MINUTES_RUBRIC.md`](../eval/rubric/MINUTES_RUBRIC.md), which has not been scored. What it does show is how much the
-checks cost with this model: with a long meeting Apple's 4,096-token model proposed items whose quotes were not word for word
-in the passages they cite, and the app, correctly, kept none of them, so in this sample the on-device model's minutes of a long meeting
-had no decision or task that passed the checks (the summary and topics are not checked by this measure). A model server with a larger window is the better choice for long
-meetings. Samples are small (13 kept items), the model is not deterministic (a rerun gives other counts), and the manual
-transcript is cleaner than a recogniser's output on a real call. The command uses Apple's on-device model only; a model server is not measured.
+checks cost with this model: on 10-minute windows 26 of the 59 decisions and tasks Apple's 4,096-token model proposed (44 %)
+cited no real passage or quoted it not word for word, and the app dropped them; on 3-minute windows, 7 of 22 (the summary and
+topics are not checked by this measure). A model server with a larger window is the better choice for long meetings. Samples are
+small (12 and 29 kept items), the model is not deterministic (a rerun gives other counts), and the manual transcript is cleaner
+than a recogniser's output on a real call. The command uses Apple's on-device model only; a model server is not measured.
 
 ## Search by meaning (held-out check)
 

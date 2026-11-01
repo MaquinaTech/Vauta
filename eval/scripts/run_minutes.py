@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 """Minutes written by the app about public AMI meetings, with the mechanical citation checks of score_minutes.py.
 
-  python3 -I eval/scripts/run_minutes.py [--bin .build/release/Vauta] [--tag <name>] [--seconds 600]
+  python3 -I eval/scripts/run_minutes.py [--bin .build/release/Vauta] [--tag <name>] [--seconds 600] [--only <meeting> ...]
 
 For each AMI meeting of the word-error-rate set (pins.json, `wer_meetings`), the AMI manual word transcript of the first
 `--seconds` seconds, all four participants, is cut into passages (a speaker's words with pauses under one second, three
@@ -71,6 +71,7 @@ def main():
     ap.add_argument("--bin", default=DEFAULT_BIN)
     ap.add_argument("--tag", default=time.strftime("%Y%m%d-%H%M%S"))
     ap.add_argument("--seconds", type=int, default=PINS["wer_seconds"])
+    ap.add_argument("--only", nargs="*", help="these meetings of the set only (to run a failed one again)")
     a = ap.parse_args()
     zf = zipfile.ZipFile(os.path.join(SRC, "ann", "ami_public_manual_1.6.2.zip"))
     letters = {}
@@ -79,7 +80,7 @@ def main():
     os.makedirs(os.path.join(RUNS, a.tag), exist_ok=True)
     rows, all_items, proposed, dropped, calls, model = [], [], 0, 0, 0, None
     with tempfile.TemporaryDirectory(prefix="vauta-minutes-") as tmp:
-        for m in PINS["wer_meetings"]:
+        for m in [m for m in PINS["wer_meetings"] if not a.only or m in a.only]:
             ps = passages(zf, m, letters[m], a.seconds)
             tpath, mpath = os.path.join(tmp, f"{m}.transcript.json"), os.path.join(tmp, f"{m}.minutes.json")
             json.dump({"passages": ps}, open(tpath, "w"))

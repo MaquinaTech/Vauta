@@ -240,7 +240,7 @@ struct AnswerRowView: View {
                     Image(systemName: Self.symbol(cite.kind)).font(.caption).frame(width: PanelMetrics.titleIconWidth).accessibilityHidden(true)
                     Text(Self.label(cite)).font(.caption).lineLimit(compact ? 1 : 2).fixedSize(horizontal: false, vertical: true)
                     Spacer(minLength: 2)
-                    chips(for: cite)
+                    chips(for: cite, previews: stops)
                 }
                 .foregroundStyle(.secondary)
                 .panelRowStop(if: stops)
@@ -257,7 +257,8 @@ struct AnswerRowView: View {
         .accessibilityHidden(true)
     }
 
-    @ViewBuilder private func chips(for cite: AutoAnswerContent.Cite) -> some View {
+    /// `previews`: a time previews the line it cites, as a citation of Ask does (not on the hidden copy that only measures).
+    @ViewBuilder private func chips(for cite: AutoAnswerContent.Cite, previews: Bool) -> some View {
         let same = row.content.claims.flatMap(\.cites).filter { $0.labelKey == cite.labelKey }
         switch cite.kind {
         case .thisMeeting, .pastMeeting:
@@ -268,6 +269,8 @@ struct AnswerRowView: View {
                         .buttonStyle(.bordered).controlSize(.mini)
                         .accessibilityLabel(Text(verbatim: ElapsedTime.stamp(second)))
                         .accessibilityHint(Text("Opens the transcript at this moment", comment: "Hint of a citation chip"))
+                        .passagePreview(Self.previewLabel(moment, second: second), passage: previews ? Self.line(of: moment, in: row.content) : nil,
+                                        marking: row.question) { model.onOpenMoment?(moment) }
                 }
             }
         case .document:
@@ -286,7 +289,19 @@ struct AnswerRowView: View {
         }
     }
 
-    static func symbol(_ kind: AutoAnswerContent.Cite.Kind) -> String {
+    /// The line a time cites, for its preview; nil for an answer read back from the meeting, which keeps no lines.
+    static func line(of cite: AutoAnswerContent.Cite, in content: AutoAnswerContent) -> PreviewedPassage? {
+        cite.segmentID.flatMap { content.lines[$0] }.map(PreviewedPassage.init)
+    }
+
+    /// The heading of a preview: the time, and for a past meeting its title first, as Ask names a citation ("Weekly sync · 12:34").
+    static func previewLabel(_ cite: AutoAnswerContent.Cite, second: Int) -> String {
+        let time = ElapsedTime.stamp(second)
+        guard cite.kind == .pastMeeting, let title = cite.title, !title.isEmpty else { return time }
+        return AskModel.citationLabel(title: title, time: time)
+    }
+
+    nonisolated static func symbol(_ kind: AutoAnswerContent.Cite.Kind) -> String {
         switch kind {
         case .thisMeeting: "clock"
         case .pastMeeting: "clock.arrow.circlepath"
@@ -294,7 +309,7 @@ struct AnswerRowView: View {
         }
     }
 
-    static func label(_ cite: AutoAnswerContent.Cite) -> String {
+    nonisolated static func label(_ cite: AutoAnswerContent.Cite) -> String {
         switch cite.kind {
         case .thisMeeting:
             String(localized: "From this meeting", comment: "Answers card: the answer was verified in the meeting being recorded")
@@ -305,7 +320,7 @@ struct AnswerRowView: View {
         }
     }
 
-    static func pastDate(_ cite: AutoAnswerContent.Cite) -> String {
+    nonisolated static func pastDate(_ cite: AutoAnswerContent.Cite) -> String {
         cite.date.map { Date(timeIntervalSince1970: $0).formatted(.dateTime.day().month(.abbreviated)) } ?? ""
     }
 

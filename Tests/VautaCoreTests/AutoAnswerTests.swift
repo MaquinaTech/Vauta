@@ -202,7 +202,25 @@ struct AutoAnswerTests {
         #expect(content.labels.map(\.kind) == [.pastMeeting])
         let cite = try #require(content.labels.first)
         #expect(cite.meetingID == past && cite.title != nil && cite.date == 1_790_000_000 && cite.t == 0)
+        #expect(content.lines[cite.segmentID ?? -1]?.text == "The pilot budget was fifty thousand euros", "the line the card previews")
         #expect(Self.autoCalls(r.chat).last?.text.contains("EXCERPTS FROM YOUR MEETINGS") == true)
+    }
+
+    @Test func theCardHasTheCitedLinesForItsPreviewsAndTheyAreNeverStored() async throws {
+        let box = Locked<[Int64]>([])
+        let r = try await Self.rig(lines: Self.withQuestion) { _, _, _ in ScriptedChat.reply(Self.reply([("Budget kept", box.withLock { $0[0] }, "we keep the budget as it is")])) }
+        box.withLock { $0 = [r.segments[1].id] }
+        let outcome = try await r.service.autoAnswer("Did we keep the budget?", meetingID: r.meeting, request: AutoAskRequest(segmentID: r.segments[2].id, sources: .all))
+        guard case .answered(let content) = outcome else { Issue.record("not answered: \(outcome)"); return }
+        #expect(Array(content.lines.keys) == [r.segments[1].id] && content.lines[r.segments[1].id]?.text == "Fine, we keep the budget as it is")
+        #expect(content.marked(late: true).lines == content.lines)
+        let json = try JSONEncoder().encode(content)
+        let text = String(decoding: json, as: UTF8.self)
+        #expect(!text.contains("lines") && !text.contains("Fine, we keep"), "the stored answer holds no words of the meeting")
+        var decoded = try JSONDecoder().decode(AutoAnswerContent.self, from: json)
+        #expect(decoded.lines.isEmpty)
+        decoded.lines = content.lines
+        #expect(decoded == content, "nothing else is lost")
     }
 
     @Test func passagesThatWereOfferedButNotCitedNeverLabelTheAnswer() async throws {
