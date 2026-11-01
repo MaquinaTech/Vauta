@@ -102,6 +102,11 @@ struct GeneralPane: View {
                     Text(description: String(localized: "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed.",
                          comment: "Settings → General, under the switch that opens the notepad when a recording starts"))
                 }
+                Toggle(isOn: $preferences.showsCompanion) {
+                    Text("Show the meeting companion while recording")
+                    Text(description: String(localized: "A small bar beside your meeting app with the recording’s time, Mark a Moment, the notepad, Pause and Stop. It never takes the keyboard. Recording\u{00A0}→\u{00A0}Hide Vauta Windows takes it off the screen before you share it.",
+                         comment: "Settings → General, under the switch that opens the meeting companion with each recording"))
+                }
             }
 
             Section {

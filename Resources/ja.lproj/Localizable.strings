@@ -304,6 +304,9 @@
 /* Settings → Calendar & Reminders: what the brief is */
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "まもなく始まるミーティングの短いページです。参加者、前回のミーティングで未解決だったこと、関連するミーティング、書類、メモが含まれます。このMac上で作成されます。ブリーフィングがカレンダー、リマインダー、メモを変更することはありません。";
 
+/* Settings → General, under the switch that opens the meeting companion with each recording */
+"A small bar beside your meeting app with the recording’s time, Mark a Moment, the notepad, Pause and Stop. It never takes the keyboard. Recording → Hide Vauta Windows takes it off the screen before you share it." = "会議アプリの横に表示される小さなバーで、録音時間、「この瞬間をマーク」、メモ帳、一時停止、停止があります。キーボードを奪うことはありません。画面を共有する前に「録音」→「Vautaのウインドウを隠す」で画面から外せます。";
+
 /* Settings → General, under the switch that opens the notepad when a recording starts */
 "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "短いメモを入力するための小さなフローティングウインドウです。クリックするかショートカットを使うまで、会議アプリからキーボードを奪いません。Vautaはこのウインドウを画面共有に含めないようmacOSに依頼しますが、保証されるわけではありません。";
 
@@ -2615,6 +2618,9 @@
 "Hears your voice, shown as “%@”." = "自分の声を聞き取ります。「%@」として表示されます。";
 
 /* No comment provided by engineer. */
+"Hide Meeting Companion" = "ミーティングコンパニオンを隠す";
+
+/* No comment provided by engineer. */
 "Hide Transcript" = "文字起こしを非表示";
 
 /* No comment provided by engineer. */
@@ -3351,6 +3357,9 @@
 
 /* No comment provided by engineer. */
 "Meeting Apps" = "ミーティングApp";
+
+/* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
+"Meeting Companion" = "ミーティングコンパニオン";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "ミーティングの音声";
@@ -5466,6 +5475,9 @@
 "Show Less" = "表示を減らす";
 
 /* No comment provided by engineer. */
+"Show Meeting Companion" = "ミーティングコンパニオンを表示";
+
+/* No comment provided by engineer. */
 "Show Meetings" = "ミーティングを表示";
 
 /* No comment provided by engineer. */
@@ -5518,6 +5530,9 @@
 
 /* Settings → Calendar & Reminders: the switch that adds related reminders to the brief */
 "Show related reminders in the brief" = "関連するリマインダーをブリーフィングに表示";
+
+/* No comment provided by engineer. */
+"Show the meeting companion while recording" = "録音中にミーティングコンパニオンを表示";
 
 /* No comment provided by engineer. */
 "Show the original words" = "原文を表示";

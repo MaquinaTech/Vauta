@@ -314,6 +314,9 @@
 /* Settings → Calendar & Reminders: what the brief is */
 "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes." = "A short page about the meeting that is about to start: who is coming, what the last meeting left open, and related meetings, documents and notes. It is built on this Mac. The brief never changes your calendar, reminders or notes.";
 
+/* Settings → General, under the switch that opens the meeting companion with each recording */
+"A small bar beside your meeting app with the recording’s time, Mark a Moment, the notepad, Pause and Stop. It never takes the keyboard. Recording → Hide Vauta Windows takes it off the screen before you share it." = "A small bar beside your meeting app with the recording’s time, Mark a Moment, the notepad, Pause and Stop. It never takes the keyboard. Recording → Hide Vauta Windows takes it off the screen before you share it.";
+
 /* Settings → General, under the switch that opens the notepad when a recording starts */
 "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed." = "A small floating window for short notes. It never takes the keyboard from your meeting app until you click it or use the shortcut. Vauta asks macOS to keep it out of screen sharing, but that is not guaranteed.";
 
@@ -2708,6 +2711,9 @@
 "Hears your voice, shown as “%@”." = "Hears your voice, shown as “%@”.";
 
 /* No comment provided by engineer. */
+"Hide Meeting Companion" = "Hide Meeting Companion";
+
+/* No comment provided by engineer. */
 "Hide Transcript" = "Hide Transcript";
 
 /* No comment provided by engineer. */
@@ -3456,6 +3462,9 @@
 
 /* No comment provided by engineer. */
 "Meeting Apps" = "Meeting Apps";
+
+/* Name of the small floating bar with the recording’s time and controls, shown beside the meeting app while recording (window title read by VoiceOver) */
+"Meeting Companion" = "Meeting Companion";
 
 /* No comment provided by engineer. */
 "Meeting audio" = "Meeting audio";
@@ -5689,6 +5698,9 @@
 "Show Less" = "Show Less";
 
 /* No comment provided by engineer. */
+"Show Meeting Companion" = "Show Meeting Companion";
+
+/* No comment provided by engineer. */
 "Show Meetings" = "Show Meetings";
 
 /* No comment provided by engineer. */
@@ -5741,6 +5753,9 @@
 
 /* Settings → Calendar & Reminders: the switch that adds related reminders to the brief */
 "Show related reminders in the brief" = "Show related reminders in the brief";
+
+/* No comment provided by engineer. */
+"Show the meeting companion while recording" = "Show the meeting companion while recording";
 
 /* No comment provided by engineer. */
 "Show the original words" = "Show the original words";

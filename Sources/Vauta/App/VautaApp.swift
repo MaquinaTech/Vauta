@@ -119,6 +119,8 @@ struct AppCommands: Commands {
                                                      set: { model.liveTranslation.setEnabled($0) }))
                 .keyboardShortcut(Self.shortcut(model.preferences.translationHotKey, available: model.translationHotKeyAvailable))
                 .disabled(model.panelDataUnavailable)
+            Button(model.companion.isShown ? "Hide Meeting Companion" : "Show Meeting Companion") { model.toggleCompanion() }
+                .disabled(!model.isRecording)
             Divider()
             // For sharing the screen: Vauta's windows, the notepad and the captions leave it while the recording goes on.
             Button(model.concealer.isOn ? "Show Vauta Windows" : "Hide Vauta Windows") { model.toggleWindowsHidden() }

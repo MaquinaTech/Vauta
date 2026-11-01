@@ -39,6 +39,8 @@ public struct BackupPreferences: Sendable, Equatable {
         "pauseHotKey": .data,
         // The notepad opens by itself when a recording starts
         "openNotepadOnStart": .bool,
+        // The meeting companion opens with each recording
+        "showsCompanion": .bool,
         // Live Translation
         "liveTranslationEnabled": .bool, "translationTarget": .string, "captionTextSize": .string,
         "captionShowOriginal": .bool, "showTranslationsInTranscript": .bool, "readCaptionsWithVoiceOver": .bool,

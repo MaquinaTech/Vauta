@@ -149,6 +149,15 @@ Status: designed and unit-tested; the VoiceOver and Full Keyboard Access pass is
 - Escape in the bar closes it (only there: the window keeps Escape for everything else); **Done** closes it too, and so does leaving the
   Transcript tab or the meeting.
 
+## The meeting companion (the floating bar while recording)
+
+- The window is named "Meeting Companion" and its bar is one group. The state reads "Recording" or "Paused" with the time
+  ("12 minutes"); the glyph changes with it (a red dot or a pause sign), so the state is not told by colour alone.
+- Each command is a button with its name for VoiceOver and as a tooltip (Mark a Moment, Open Notepad, Pause or Resume
+  Recording, Stop Recording, Close), and a target of at least 20 × 20 points.
+- The bar never takes the keyboard: every command is also in the Recording menu (with its shortcut where there is one), and
+  Recording › Show Meeting Companion brings the bar back after Close.
+
 ## Hide Vauta Windows (sharing the screen)
 
 - The command is in the Recording menu (Full Keyboard Access and VoiceOver reach it there) and, while recording, at the

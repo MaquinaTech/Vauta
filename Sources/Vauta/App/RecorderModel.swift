@@ -53,6 +53,7 @@ final class RecorderModel {
             if (oldValue == .recording || oldValue == .starting) != recordingNow { LanguageModelAccess.shared.setRecording(recordingNow) }
             if (oldValue == .recording || oldValue == .starting) != recordingNow, let llm { Task { await llm.environmentChanged() } }
             if (oldValue == .recording || oldValue == .starting) != (phase == .recording || phase == .starting) { documents?.environmentChanged() }
+            if (oldValue == .recording) != (phase == .recording) { companionRecordingChanged() }
         }
     }
     /// When the last recording stopped (see `DocumentsModel`).
@@ -155,6 +156,9 @@ final class RecorderModel {
     /// itself, while they were hidden.
     let concealer = WindowConcealer()
     @ObservationIgnored var notepadComesBack = false
+    /// The meeting companion beside the meeting app while recording (see `+Companion`).
+    var companion = CompanionPresence()
+    @ObservationIgnored let companionWindow = CompanionPanelController()
     /// The Answers card: answers to the questions heard in the meeting (see `+LiveAnswers`).
     let answers = LiveAnswersModel()
     /// The detector of the recording in progress, and the order in which lines reach it.
