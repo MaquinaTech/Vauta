@@ -211,6 +211,9 @@
 /* Model guide status title when a model has too little context; arguments are a model name and a token count like “4K” */
 "%@’s context is too short (%@)" = "La lunghezza del contesto di %@ è troppo corta (%@)";
 
+/* Meetings detail when several meetings are chosen in the list; the argument is how many (2 or more) */
+"%lld Meetings Selected" = "%lld riunioni selezionate";
+
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "%lld richieste identiche: la prima alle %@, l’ultima alle %@.";
 
@@ -1713,6 +1716,12 @@
 
 /* No comment provided by engineer. */
 "Delete" = "Elimina";
+
+/* No comment provided by engineer. */
+"Delete %lld Meetings…" = "Elimina %lld riunioni…";
+
+/* Confirmation title when deleting several meetings chosen in the list; the argument is how many (2 or more) */
+"Delete %lld meetings?" = "Eliminare %lld riunioni?";
 
 /* Settings → Speakers; confirm button: delete every saved voice */
 "Delete All Saved Voices" = "Elimina tutte le voci salvate";
@@ -4180,6 +4189,9 @@
 /* Settings → Privacy backup */
 "One encrypted file with all your meetings, context and settings, protected by a password. Use it to move to a new Mac or keep an offline copy: Time Machine doesn’t include Vauta’s data." = "Un unico file crittografato con tutte le tue riunioni, il contesto e le impostazioni, protetto da una password. Usalo per passare a un nuovo Mac o per tenere una copia offline: Time Machine non include i dati di Vauta.";
 
+/* Meetings detail with several meetings chosen, one of them being recorded */
+"One of them is being recorded. Stop the recording to delete them." = "Una di esse è in registrazione. Interrompi la registrazione per eliminarle.";
+
 /* No comment provided by engineer. */
 "One per owner" = "Una per responsabile";
 
@@ -6404,6 +6416,9 @@
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "La registrazione viene trascritta su questo Mac. Il file non viene modificato, copiato né caricato.";
 
+/* Confirmation message when deleting several meetings, some with reminders or events Vauta created; deleting the meetings does not remove them */
+"The reminders and events Vauta created from them stay in Reminders and Calendar." = "I promemoria e gli eventi che Vauta ha creato da queste riunioni restano in Promemoria e Calendario.";
+
 /* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
 "The saved file is damaged: don’t rely on it. Choose another location and try again." = "Il file salvato è danneggiato: non farci affidamento. Scegli un’altra posizione e riprova.";
 
@@ -6524,6 +6539,9 @@
 
 /* Placeholder: who the other participants are; Return names the match or adds the typed name as a new person */
 "Their name (press Return to add)" = "Nome della persona (premi A capo per aggiungere)";
+
+/* Confirmation message when deleting several meetings chosen in the list */
+"Their transcripts, decisions, tasks, notes and marks are removed from the encrypted store. You can’t undo this." = "Le loro trascrizioni, decisioni, attività, note e segni vengono rimossi dall’archivio crittografato. Questa azione non può essere annullata.";
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "Le loro impronte vocali vengono rimosse dall’archivio crittografato, insieme ai riepiloghi vocali conservati nelle riunioni. Puoi salvare di nuovo una voce da una riunione successiva.";
