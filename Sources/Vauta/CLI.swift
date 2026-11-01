@@ -42,6 +42,9 @@ let usage = """
       diarize <audio> [--rttm <out>] [--threshold <n>] [--none-bias <n>] [--live-agreement]
                                           Separate the speakers of an audio file on this Mac and print RTTM (no text,
                                           no audio is written); --threshold is the clustering cut (default 0.70)
+      attribute-file <audio> --out <words.jsonl> --show-text [--i-understand] [--locale <id>]
+                                          Evaluation: transcribe and separate the speakers of a PUBLIC audio file as an
+                                          import does, and write every word with its time and speaker (cpWER, WDER)
       echo-coupling <me audio> <others audio>
                                           Evaluation: whether the microphone heard the others, measured over two files
                                           as over a recording's two channels (prints counts only)
@@ -144,6 +147,8 @@ func runCLI(_ arguments: [String]) async -> Int32 {
             print(pin)
         case "minutes-file":
             return try await minutesFile(invocation)
+        case "attribute-file":
+            return try await attributeFile(invocation)
         case "mlx-selftest":
             // Hidden from the usage on purpose: a support and release check (see docs/SEARCH_MODEL.md).
             return await mlxSelfTest(invocation)

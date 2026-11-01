@@ -14,7 +14,7 @@ public enum LaunchMode: Equatable, Sendable {
         "help", "--help", "-h", "version", "--version",
         "doctor", "status", "languages",
         "install-speech-assets", "install-dictation-assets", "transcribe-file",
-        "store-stats", "cert-pin", "server-check", "speaker-models", "diarize", "minutes-file", "spike", "mlx-selftest",
+        "store-stats", "cert-pin", "server-check", "speaker-models", "diarize", "attribute-file", "minutes-file", "spike", "mlx-selftest",
     ]
 
     /// Classifies the process arguments (without the executable path).

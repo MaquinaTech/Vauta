@@ -48,6 +48,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Developer tools:
 
+- `Vauta attribute-file <audio> --out <words.jsonl> --show-text` (evaluation, public audio only) transcribes a file and separates its speakers as an imported recording is, splits the lines where the speaker changes as the store does, and writes every word with its time and speaker. `eval/scripts/run_cpwer.py` scores it on the AMI remote mix with `score_cpwer.py`: cpWER, time-constrained cpWER (5 s collar) and WDER, the standard measures of who said which words, which CI tests with worked examples.
 - `Vauta diarize --none-bias <n>` (and `--none-bias` in `eval/scripts/run_diarization.py` and `run_diar_sets.py`) lowers the segmentation's "nobody speaks" class by that much before each frame is decided, to measure calling more frames speech. Swept from -0.5 to 2 on the tuning set and the held-out English files: missed speech turns into as much false alarm or more, and the best value is within noise, so the app keeps the network's own decision (docs/BENCHMARKS.md, "Tried and not changed").
 - `llm-eval --tasks ask-cross` asks each question in the meetings it names by its time or place, as Ask does, with "now" the day after the series' last meeting; its traces say which (`scope`) and whether nothing there matched (`widened`). The live answers' replay writes `pastScope`.
 - `llm-eval --tasks echo` also sweeps the far side's echo judged in Others and writes `echo/far_sweep.tsv`.

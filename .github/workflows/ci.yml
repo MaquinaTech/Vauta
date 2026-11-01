@@ -108,6 +108,9 @@ jobs:
       - name: Test the word confidence scoring of the evaluation (standard library only)
         run: python3 -I -m unittest discover -s eval/tests -p 'test_score_wer.py'
 
+      - name: Test the speaker-attributed scoring of the evaluation (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_score_cpwer.py'
+
       - name: Check shell scripts
         run: |
           for f in scripts/*.sh; do bash -n "$f"; done
