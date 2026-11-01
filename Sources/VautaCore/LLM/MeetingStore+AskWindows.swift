@@ -43,9 +43,14 @@ extension MeetingStore {
         for (rank, moment) in try itemCitedMoments(terms: terms, scope: scope).enumerated() where moment.meeting != excluding {
             hits.append((moment.meeting, moment.t, itemKeyWeight / Double(60 + rank)))
         }
+        // Where the transcript misheard a person or project of the question (`misheardMoments`): as a keyword hit, at half the
+        // weight while the correction is open.
+        let entities = try entitiesNamed(in: question, locale: profile.locale)
+        for (rank, m) in try misheardMoments(of: entities, scope: scope, excluding: excluding).enumerated() {
+            hits.append((m.meeting, m.t, (m.confirmed ? 1 : 0.5) / Double(60 + rank)))
+        }
         guard !hits.isEmpty else { return [] }
 
-        let entities = try entitiesNamed(in: question, locale: profile.locale)
         var ranges: [String: (meeting: Int64, start: Double, end: Double)] = [:]
         var scores: [(key: String, value: Double)] = []
         var seen = Set<String>()

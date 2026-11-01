@@ -113,13 +113,26 @@ extension MeetingStore {
             guard df >= 1, df <= SemanticRanker.rareLimit(rows: rows), let found = try ftsMatches(name, scope: scope, excluding: excluding, space: space) else { continue }
             nameHits.append((name, found))
         }
+        // Where the transcript misheard a person or project of the question (`misheardMoments`).
+        let entities = try entitiesNamed(in: question, locale: profile.locale)
+        let misheard = try misheardMoments(of: entities, scope: scope, excluding: excluding)
+        let holdingMisheard = try chunksHolding(misheard.map(\.segment), space: space)
+        var misheardHits: [Located] = []
+        var confirmedMisheard = Set<String>()
+        for m in misheard {
+            let found = holdingMisheard[m.segment]?.map { Located(chunk: $0, meeting: m.meeting) } ?? [Located(bucketOf: m.t, meeting: m.meeting)]
+            for l in found {
+                if m.confirmed { confirmedMisheard.insert(l.key) }
+                if !misheardHits.contains(where: { $0.key == l.key }) { misheardHits.append(l) }
+            }
+        }
         func keys(_ located: [Located]) -> Set<String> { Set(located.map(\.key)) }
         let codeSets = codeHits.map { keys($0.1) }
         let nameSets = nameHits.map { keys($0.1) }
-        // Candidates found by an exact match join the vector ones, with their own cosine.
+        // Candidates found by an exact match, or by a misheard name, join the vector ones, with their own cosine.
         var extraChunks: [Int64] = []
         var pseudoRank: [String: Int] = [:]
-        for (_, located) in codeHits.map({ ($0.0, $0.1) }) + nameHits.map({ ($0.0, $0.1) }) {
+        for (_, located) in codeHits.map({ ($0.0, $0.1) }) + nameHits.map({ ($0.0, $0.1) }) + [("", misheardHits)] {
             for (rank, l) in located.prefix(SemanticRanker.candidatesPerItem).enumerated() where ranges[l.key] == nil {
                 ranges[l.key] = (l.meeting, l.start, l.end)
                 // Every extra candidate keeps its rank: a chunk that has no vector in this space yet (it waits to be embedded again)
@@ -152,12 +165,16 @@ extension MeetingStore {
             let nameMatched = nameSets.filter { $0.contains(key) }.count
             score[key] = base + SemanticRanker.boost(codesMatched: codeMatched, codesTotal: codeSets.count, namesMatched: nameMatched, namesTotal: nameSets.count)
         }
-        // The context graph: passages that name the question's people or projects, and what a named speaker said.
-        let entities = try entitiesNamed(in: question, locale: profile.locale)
+        // The context graph: passages that name the question's people or projects, and what a named speaker said. A misheard name
+        // lifts its passage as the name does, half as much while the correction is open, and once with the name.
         if !entities.isEmpty {
-            for (key, signal) in try graphSignals(ranges, entities: entities) {
+            let signals = try graphSignals(ranges, entities: entities)
+            for (key, signal) in signals {
                 if signal.named > 0 { score[key, default: 0] += 0.08 }
                 if signal.said { score[key, default: 0] += 0.08 }
+            }
+            for key in keys(misheardHits) where ranges[key] != nil && (signals[key]?.named ?? 0) == 0 {
+                score[key, default: 0] += confirmedMisheard.contains(key) ? 0.08 : 0.04
             }
         }
         for moment in try noteCitedMoments(terms: terms, scope: scope).prefix(40) where moment.meeting != excluding {
