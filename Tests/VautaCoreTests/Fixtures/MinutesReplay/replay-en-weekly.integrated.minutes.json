@@ -1,0 +1,204 @@
+{
+  "dropped" : 0,
+  "items" : [
+    {
+      "citations" : [
+        14
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "figures",
+      "text" : "The 2.4 release is postponed until the calendar crash is fixed and retested.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        143
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "figures",
+      "text" : "The crash fix means the 2.4 release waits for the crash to be fixed and retested.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        102
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "noAgreement",
+      "text" : "The default notification setting will be changed to one reminder, with the option for more reminders available.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        87
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "The group agreed to adopt the legal proposal to keep booking logs for eighteen months.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        38
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "noAgreement",
+      "text" : "The group agreed to hire a temporary person for support for six weeks.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        26
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "noAgreement",
+      "text" : "The payment provider migration will proceed in two phases: card payments in June and saved payment methods in August.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        95
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 5",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Ask Legal if the backups count towards the deletion policy.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        46
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 4",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Book the first week of June for the accessibility audit.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        15
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 3",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Fix the calendar crash by Wednesday.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        75
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "noCommitment",
+      "text" : "Implement per-key monitoring and an alert at eighty percent of the limit.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        41
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 3",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Implement the move button in the next sprint.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        16
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 4",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Rerun the regression suite on Thursday after the build is ready.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        116
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 4",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Send the abstract for the testing meetup by the end of next week.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        63
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 1",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Send the internship offer to the second candidate on Monday.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        90
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Write the deletion job and run the first step at the start of next month.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        39
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 5",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "reason" : "tentative",
+      "text" : "Write the job advertisement for the temporary support role today.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        28
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Write the migration plan with the dates for the payment provider.",
+      "unconfirmed" : false
+    }
+  ],
+  "modelCalls" : 2,
+  "openQuestions" : [
+    "The cost of the accessibility audit needs to be checked against the budget.",
+    "Whether the higher limit for the partner API should be charged as a premium tier.",
+    "Whether the backup logs count towards the data retention deletion policy."
+  ],
+  "proposed" : 21,
+  "summary" : "The meeting covered several key areas, including the 2.4 release, payment migration, support backlog, accessibility audit, office move, intern hiring, partner API limits, and data retention policy. Regarding the 2.4 release, it was decided to postpone shipping until the calendar crash is fixed and retested, with the fix due by Wednesday and regression testing scheduled for Thursday. For payments, the group agreed to stay with the current provider and migrate in two phases: card payments in June and saved methods in August. The support backlog issue was addressed by agreeing to hire a temporary person for six weeks to help clear the tickets. The accessibility audit was tentatively scheduled for the first week of June, pending budget confirmation. The group also decided to offer the internship to the second candidate, who is to receive the offer on Monday. Regarding the partner API, the limit for the two problematic partners will be raised to 300 requests per minute, contingent on new per-key monitoring being in place. Finally, the data retention policy was adopted to keep booking logs for eighteen months, and the default notification setting was lowered to one reminder. Several follow-up tasks were assigned to address remaining open items.",
+  "topics" : [
+    "2.4 Release Status",
+    "Payments Migration",
+    "Support Backlog",
+    "Accessibility Audit",
+    "Office Move",
+    "Internship",
+    "Partner API Limits",
+    "Data Retention Policy"
+  ]
+}

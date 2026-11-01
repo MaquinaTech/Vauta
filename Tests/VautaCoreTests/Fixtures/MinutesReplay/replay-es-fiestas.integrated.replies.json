@@ -1,0 +1,44 @@
+{
+  "calls" : [
+    {
+      "finishReason" : "stop"
+    },
+    {
+      "finishReason" : "length"
+    }
+  ],
+  "contextTokens" : 65536,
+  "diagnostics" : {
+    "blocks" : 0,
+    "blocksOmitted" : 0,
+    "blocksUnreadable" : 0,
+    "counts" : {
+      "closing.addedDecisions" : 0,
+      "closing.addedTasks" : 3,
+      "decision.noAgreement" : 1,
+      "items.owner.group" : 1,
+      "items.owner.self" : 1,
+      "items.owner.withheld" : 1,
+      "owner.self" : 1,
+      "owner.withheld" : 2,
+      "task.noCommitment" : 4,
+      "timing.evidenceMs" : 9
+    },
+    "dropped" : 1,
+    "drops" : {
+      "items.task.quoteTooShort" : 1
+    },
+    "dueGiven" : 2,
+    "dueRuleViolations" : 0,
+    "dueUnreadable" : 1,
+    "kept" : 9,
+    "openQuestions" : 2,
+    "prefixReuse" : 0,
+    "proposed" : 13,
+    "topics" : 6
+  },
+  "replies" : [
+    "{\n  \"title\": \"Cierre Presupuesto Fiestas y Escenario\",\n  \"topics\": [\n    \"Presupuesto fiestas\",\n    \"Elección escenario\",\n    \"Orquesta\",\n    \"Permisos ayuntamiento\",\n    \"Limpieza\",\n    \"Baños portátiles\"\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Se decidió contratar a la empresa de siempre para el escenario.\",\n      \"seg\": 8,\n      \"quote\": \"Pues nos quedamos con la empresa de siempre para el escenario.\"\n    },\n    {\n      \"text\": \"Se acordó reducir la actuación de la orquesta a una sola vez.\",\n      \"seg\": 14,\n      \"quote\": \"Vale, una sola actuación, el sábado por la noche.\"\n    },\n    {\n      \"text\": \"Se aprobó el presupuesto final de once mil doscientos euros.\",\n      \"seg\": 26,\n      \"quote\": \"Pues aprobado así. Nos vemos en dos semanas.\"\n    }\n  ],\n  \"tasks\": [\n    {\n      \"text\": \"Llamar a la empresa del escenario para confirmar la fecha.\",\n      \"owner\": \"Carmen\",\n      \"owner_id\": null,\n      \"due\": \"2005-01-02\" ,\n      \"seg\": 10,\n      \"quote\": \"Sí, les llamo mañana por la mañana y confirmo el sábado catorce.\"\n    },\n    {\n      \"text\": \"Hablar con el representante de la orquesta sobre el cambio de contrato.\",\n      \"owner\": null,\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 15,\n      \"quote\": \"Yo hablo con el representante de la orquesta esta semana para cambiar el contrato.\"\n    },\n    {\n      \"text\": \"Presentar el permiso de ocupación de la plaza del ayuntamiento.\",\n      \"owner\": null,\n      \"owner_id\": null,\n      \"due\": \"2024-05-14\" ,\n      \"seg\": 19,\n      \"quote\": \"Eso lo puedo presentar yo, que tengo el certificado digital.\"\n    }\n  ],\n  \"entities\": [],\n  \"open_questions\": [\n    \"¿Quién se encargará de la limpieza después de las fiestas?\",\n    \"¿Qué se hará respecto a los baños portátiles?\"\n  ],\n  \"summary\": \"La reunión comenzó discutiendo el presupuesto para las fiestas y la elección del escenario. Se determinó que el presupuesto restante era de doce mil euros para todo el evento. Tras comparar precios, se decidió contratar a la empresa de siempre para el escenario, cuyo coste asciende a cinco mil doscientos euros. En cuanto a la orquesta, se acordó reducir su actuación a una sola vez, lo que supone un ahorro de ochocientos euros. Se estableció que el permiso de ocupación de la plaza debe solicitarse con un mes de antelación, es decir, antes del catorce de mayo. Finalmente, tras revisar los costes, se aprobó el presupuesto total en once mil doscientos euros. Las tareas pendientes incluyen confirmar la fecha con la empresa del escenario, negociar con la orquesta y solicitar los permisos municipales.\"\n}",
+    "{\n  \"decisions\": [\n    {\n      \"text\": \"Se decidió contratar a la empresa de siempre para el escenario.\",\n      \"seg\": 8,\n      \"quote\": \"Pues nos quedamos con la empresa de siempre para el escenario.\"\n    },\n    {\n      \"text\": \"Se acordó reducir la actuación de la orquesta a una sola vez.\",\n      \"seg\": 14,\n      \"quote\": \"Vale, una sola actuación, el sábado por la noche.\"\n    },\n    {\n      \"text\": \"Se aprobó el presupuesto final de once mil doscientos euros.\",\n      \"seg\": 26,\n      \"quote\": \"Pues aprobado así. Nos vemos en dos semanas.\"\n    }\n  ],\n  \"tasks\": [\n    {\n      \"text\": \"Carmen llamará para confirmar la fecha.\",\n      \"owner\": \"Carmen\",\n      \"owner_id\": null,\n      \"due\": \"2005-01-02\"\n    ,\n      \"seg\": 10,\n      \"quote\": \"Sí, les llamo mañana por la mañana y confirmo el sábado catorce.\"\n    },\n    {\n      \"text\": \"Alguien debe hablar con el representante de la orquesta esta semana para cambiar el contrato.\",\n      \"owner\": null,\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 15,\n      \"quote\": \"Yo hablo con el representante de la orquesta esta semana para cambiar el contrato.\"\n    },\n    {\n      \"text\": \"Alguien debe solicitar el permiso de ocupación de la plaza con un mes de antelación.\",\n      \"owner\": null,\n      \"owner_id\": null,\n      \"due\": \"2024-04-14\"\n    ,\n      \"seg\": 17,\n      \"quote\": \"El permiso de ocupación de la plaza hay que pedirlo con un mes de antelación.\"\n    },\n    {\n      \"text\": \"Speaker 3 presentará el permiso de ocupación de la plaza.\",\n      \"owner\": null,\n      \"owner_id\": null,\"due\":null,\"seg\":1,\"quote\":\"\"}]}"
+  ]
+}

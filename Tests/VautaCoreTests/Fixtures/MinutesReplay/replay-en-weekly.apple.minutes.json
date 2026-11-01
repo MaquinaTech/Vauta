@@ -1,0 +1,276 @@
+{
+  "dropped" : 6,
+  "items" : [
+    {
+      "citations" : [
+        134
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "Crash fix is first task.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        90
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "rank:noAgreement",
+      "text" : "Delete logs older than three years, then eighteen months.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        127
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "rank:noAgreement",
+      "text" : "Keep support hours unchanged.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        145
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "rank:noAgreement",
+      "text" : "Offer internship to second candidate.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        131
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "Phase one of payments continues next sprint.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        17
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "rank:tentative",
+      "text" : "Set crash fix deadline to the following Monday.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        11
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "rank",
+      "text" : "Set crash fix deadline until Thursday.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        9
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "rank:tentative",
+      "text" : "Set crash fix timeline to two days, regression suite to two days.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        14
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "rank",
+      "text" : "Set crash fix to two point four wait.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        87
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "rank",
+      "text" : "Set data retention to eighteen months.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        26
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "reason" : "rank:noAgreement",
+      "text" : "Stay with current provider and migrate payments in two phases: cards in June, saved methods in August.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        138
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Clean up old builds.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        29
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 3",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "reason" : "rank",
+      "text" : "Estimate screens for mobile part of phase two.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        37
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "rank:noCommitment",
+      "text" : "Hire temporary support for six weeks.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        122
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Move staging alerts to email.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        77
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "reason" : "rank",
+      "text" : "Run per-key traffic monitoring and alert.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        91
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 5",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "reason" : "rank",
+      "text" : "Update privacy page in help centre.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        90
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "reason" : "rank",
+      "text" : "Write deletion job for logs.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        39
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 5",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "reason" : "rank:tentative",
+      "text" : "Write job ad for intern.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        27
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "rank",
+      "text" : "Write migration plan with dates.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        125
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 1",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Write on-call rota.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        122
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "move the staging alerts to email tonight, together with the disk cleanup.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        140
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "rank:noCommitment",
+      "text" : "send feedback on the new icons by Friday.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        125
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 1",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "write the rota and send it by Friday.",
+      "unconfirmed" : false
+    }
+  ],
+  "modelCalls" : 4,
+  "openQuestions" : [
+    "What are the details of the data retention changes?",
+    "How will the internship hiring process be structured?",
+    "What are the specific steps for estimating screens for the mobile part of phase two?"
+  ],
+  "proposed" : 34,
+  "summary" : "Me discusses migration phases for payments, sets crash fix timelines, and addresses audit costs. The team decides to stay with the current provider and migrate payments in two phases: cards in June, saved methods in August. A crash fix is scheduled for Wednesday, with a timeline of two days for the fix and two days for the regression suite. They also discuss internship hiring, data retention changes, and notification settings. Tasks include writing a migration plan, estimating screens, and writing a job ad. Decisions and tasks are documented in the meeting notes.",
+  "topics" : [
+    "payments migration",
+    "crash fix timeline",
+    "accessibility audit",
+    "internship hiring",
+    "notification settings"
+  ]
+}

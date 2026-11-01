@@ -1,0 +1,44 @@
+{
+  "calls" : [
+    {
+      "finishReason" : "unknown"
+    }
+  ],
+  "contextTokens" : 8192,
+  "diagnostics" : {
+    "blocks" : 0,
+    "blocksOmitted" : 0,
+    "blocksUnreadable" : 0,
+    "counts" : {
+      "decision.noAgreement" : 1,
+      "decision.reanchored" : 1,
+      "owner.group" : 1,
+      "owner.self" : 1,
+      "owner.withheld" : 1,
+      "question.dropped.copy" : 2,
+      "rank.limit" : 6,
+      "rank.proposed" : 6,
+      "rank.shown" : 4,
+      "task.dueUnbacked" : 1,
+      "task.noCommitment" : 1,
+      "task.question" : 1,
+      "timing.evidenceMs" : 4,
+      "timing.rankMs" : 1
+    },
+    "dropped" : 1,
+    "drops" : {
+      "decision.duplicate" : 1,
+      "entity.unknownEntity" : 1
+    },
+    "dueGiven" : 2,
+    "dueRuleViolations" : 1,
+    "dueUnreadable" : 0,
+    "kept" : 6,
+    "openQuestions" : 0,
+    "proposed" : 8,
+    "topics" : 6
+  },
+  "replies" : [
+    "```json\n{\n  \"title\": \"Presupuesto fiestas: decisión escenario\",\n  \"summary\": \"Se decidió usar la empresa habitual para el escenario, la orquesta con una actuación y solicitar el permiso de ocupación de la plaza con un mes de antelación. Se aprobaron los gastos, quedando un presupuesto de unos 11.200 euros. Se dejaron pendientes la limpieza y los baños portátiles para la próxima reunión.\",\n  \"topics\": [\n    \"presupuesto\",\n    \"escenario\",\n    \"orquesta\",\n    \"permisos\",\n    \"limpieza\",\n    \"baños portátiles\"\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Se eligió la empresa habitual para el escenario.\",\n      \"seg\": 8,\n      \"quote\": \"Pues nos quedamos con la empresa de siempre para el escenario.\"\n    },\n    {\n      \"text\": \"Se decidió una actuación con la orquesta.\",\n      \"seg\": 14,\n      \"quote\": \"Vale, una sola actuación, el sábado por la noche.\"\n    },\n    {\n      \"text\": \"Se aprobó el presupuesto de 11.200 euros.\",\n      \"seg\": 25,\n      \"quote\": \"Pues aprobado así. Nos vemos en dos semanas.\"\n    },\n    {\n      \"text\": \"Se fijó la fecha del permiso de ocupación de la plaza.\",\n      \"seg\": 18,\n      \"quote\": \"O sea, antes del catorce de mayo.\"\n    }\n  ],\n  \"tasks\": [\n    {\n      \"text\": \"Confirmar la fecha con la empresa habitual.\",\n      \"owner\": \"Carmen\",\n      \"owner_id\": null,\n      \"due\": \"2005-01-02\",\n      \"seg\": 9,\n      \"quote\": \"Carmen, ¿puedes llamarles para confirmar la fecha?\"\n    },\n    {\n      \"text\": \"Contactar con el representante de la orquesta.\",\n      \"owner\": \"Speaker 3\",\n      \"owner_id\": null,\n      \"due\": null,\n      \"seg\": 15,\n      \"quote\": \"Yo hablo con el representante de la orquesta esta semana para cambiar el contrato.\"\n    },\n    {\n      \"text\": \"Pedir el permiso de ocupación de la plaza.\",\n      \"owner\": \"Speaker 3\",\n      \"owner_id\": null,\n      \"due\": \"2005-01-03\",\n      \"seg\": 17,\n      \"quote\": \"El permiso de ocupación de la plaza hay que pedirlo con un mes de antelación.\"\n    }\n  ],\n  \"entities\": [\n    {\n      \"mention\": \"Ana\",\n      \"id\": 0,\n      \"seg\": 0\n    }\n  ],\n  \"open_questions\": [\n    {\n      \"text\": \"¿Quién se encarga de la limpieza después?\",\n      \"seg\": 21,\n      \"quote\": \"Una duda que tengo: ¿quién se encarga de la limpieza después? El año pasado lo hizo el ayuntamiento, pero este año no lo sé.\"\n    },\n    {\n      \"text\": \"¿Hay que pensar en los baños portátiles?\",\n      \"seg\": 23,\n      \"quote\": \"También habría que pensar en los baños portátiles, que siempre se nos olvidan.\"\n    }\n  ]\n}\n```"
+  ]
+}

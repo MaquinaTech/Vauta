@@ -1,0 +1,78 @@
+{
+  "dropped" : 3,
+  "items" : [
+    {
+      "citations" : [
+        25
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "Forty units are lent to Riverside and Hillcrest.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        15
+      ],
+      "kind" : "decision",
+      "ownerUncertain" : false,
+      "text" : "The launch date is the second of March.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        32
+      ],
+      "kind" : "task",
+      "owner" : "Speaker 4",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Ask legal about insurance for lent units.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        26
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "reason" : "question",
+      "text" : "Draft the feedback form for the pilot.",
+      "unconfirmed" : true
+    },
+    {
+      "citations" : [
+        28
+      ],
+      "kind" : "task",
+      "ownerKind" : "none",
+      "ownerUncertain" : false,
+      "text" : "Drive units to Hillcrest.",
+      "unconfirmed" : false
+    },
+    {
+      "citations" : [
+        10
+      ],
+      "due" : "2005-01-07",
+      "kind" : "task",
+      "owner" : "Speaker 2",
+      "ownerKind" : "speaker",
+      "ownerUncertain" : false,
+      "text" : "Send the purchase order for the casing.",
+      "unconfirmed" : false
+    }
+  ],
+  "modelCalls" : 1,
+  "openQuestions" : [
+
+  ],
+  "proposed" : 9,
+  "summary" : "The group discussed the supplier for the casing, deciding on Brightmold for its better samples and shorter delivery. The launch date was moved to the second of March due to translation delays. For the pilot with schools, it was agreed to lend forty units to Riverside and Hillcrest, with Priya tasked to draft a feedback form. The task of driving units was assigned to Me, and the insurance question was deferred to legal.",
+  "topics" : [
+    "Casing supplier",
+    "Launch date",
+    "Pilot with schools"
+  ]
+}
