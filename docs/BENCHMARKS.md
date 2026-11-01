@@ -25,6 +25,7 @@ are never committed. This is the only place the README takes accuracy figures fr
 | Speed of speaker separation | about 158 times faster than real time (25,288 s of audio in 160 s) | |
 | Word error rate (WER), AMI, close-talk headset, reference turns only | **10.8 %** (6,537 words, 10 meetings x 10 min); **11.7 %** on 8 other meetings (4,777 words) | |
 | WER, AMI, simulated remote mix of 3 speakers (Opus-coded), reference turns only | **20.3 %** (8,664 words) / **16.4 %** on 8 other meetings (7,083 words); 1,096 of the 1,757 errors in the first set are deletions | |
+| Who said which words, AMI simulated remote mix of 3 speakers, no-bleed region of the first 10 min: cpWER / WDER | **29.9 %** / **7.5 %** (8,660 words; tcpWER 30.9 %); 21.8 % speaker blind, so about 8 points come from the speakers | [Who said which words](#who-said-which-words-cpwer-tcpwer-and-wder) |
 | WER, Spanish, 35.6 min of parliament speech and audiobooks, Apple's `es-ES` model | **7.6 %** (7.4 % ignoring accents): 9.2 % parliament, 5.4 % audiobooks | Read and parliament speech, not conversation |
 | Minutes, Apple's on-device model, 10 AMI meetings x 3 min of manual transcript: decisions and tasks kept by the app's checks | 13 of the 18 the model proposed; every kept item has a citation that exists and holds its figures; 3 of the 13 (23 %) marked Unconfirmed | Only one model and a small sample: [Minutes](#minutes-citations) |
 | Same, 10 min windows (longer than the model's 4,096-token window, so written block by block) | 0 of 42 proposals kept | |
@@ -339,6 +340,53 @@ to 0.79), and it is lower than the share of right words below 0.9: a word at 0.5
 or a calibration made from these numbers would be fitted on the same 10 meetings; the held-out sets would have to confirm it.
 "Right" is a word aligned to the same reference word, after the normalisation of `score_wer.py`; a scored word is a recognised
 word that has a confidence (insertions included).
+
+### Who said which words: cpWER, tcpWER and WDER
+
+The word error rates above score the words, and the speaker separation figures score who speaks when; neither scores whose
+words each line ends up with. `Vauta attribute-file` (an evaluation command, public audio only) transcribes a file with word
+times and separates its speakers as an imported recording is, splits the lines where the speaker changes as the store does,
+and writes every word with its speaker. `eval/scripts/run_cpwer.py` runs it on the simulated remote mix of the same 10 meetings
+(the first 600 s, not masked) and scores the no-bleed region (where the fourth person is silent, as for DER, judged by the
+middle of each word) against the AMI words of the three remote speakers, with `score_cpwer.py`:
+
+- **cpWER** (CHiME-6): each reference speaker's words against those of the separated speaker assigned to them, with the
+  assignment that gives the fewest errors in total; an extra separated speaker's words are insertions;
+- **tcpWER** (MeetEval's definition): the same, with a word matched only when it was recognised within 5 s of its time;
+- **WDER** (Shafey et al., 2019): of the recognised words, the share given to another speaker than the one that said them;
+- the speaker-blind WER of the same words, for comparison.
+
+Run `cpwer-1`, 1 November 2026, a release build of `95fcc67`, 8,660 reference words:
+
+| Measure | Pooled |
+|---|---:|
+| cpWER | **29.9 %** |
+| tcpWER (5 s collar) | 30.9 % |
+| WDER | **7.5 %** |
+| Speaker-blind WER | 21.8 % |
+| Speakers found, for the 3 people of each mix | 3.9 on average |
+
+| Meeting | Words | cpWER | tcpWER | WDER | WER | Speakers found | Words with no speaker |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| ES2004a | 622 | 37.3 % | 37.6 % | 10.0 % | 23.0 % | 5 | 0 |
+| ES2004c | 889 | 17.1 % | 17.8 % | 2.6 % | 15.4 % | 5 | 3 |
+| IS1009a | 1088 | 30.2 % | 33.0 % | 10.5 % | 21.2 % | 4 | 4 |
+| IS1009c | 1122 | 12.6 % | 12.8 % | 2.1 % | 9.5 % | 2 | 0 |
+| TS3003a | 50 | 80.0 % | 98.0 % | 35.6 % | 60.0 % | 1 | 4 |
+| TS3003c | 716 | 11.7 % | 11.7 % | 0.6 % | 10.9 % | 3 | 0 |
+| EN2002a | 1840 | 33.9 % | 34.6 % | 8.3 % | 26.2 % | 4 | 1 |
+| EN2002b | 1464 | 53.3 % | 54.4 % | 17.5 % | 34.6 % | 7 | 9 |
+| IS1009d | 514 | 20.0 % | 20.8 % | 4.2 % | 16.0 % | 4 | 1 |
+| TS3003b | 355 | 29.9 % | 30.4 % | 3.3 % | 24.5 % | 4 | 3 |
+
+**What this says.** Giving each word its speaker costs about 8 points on top of the recognition errors (29.9 % against 21.8 %):
+7.5 % of the recognised words land with another speaker. The time constraint adds 1 point, so the words are recognised about
+where they were said. The cost is highest where the separation found too many speakers (EN2002b: 7 for 3, cpWER 53.3 %); a
+meeting where it found two for three (IS1009c) still scores 12.6 %: the third remote speaker says 8 of its 1,122 words there. TS3003a has
+only 50 scored words in its first 10 minutes, so its row means little. The speaker-blind WER is above the 20.3 % of the WER
+table because that one masks the audio outside the reference turns and this one runs on the mix as it is. Not checked against
+MeetEval's own implementation, which needs a download this repository does not make; the scorer's tests use worked examples,
+and its edit distance agrees with `score_wer.py`'s.
 
 ## Whether the microphone heard the others
 
