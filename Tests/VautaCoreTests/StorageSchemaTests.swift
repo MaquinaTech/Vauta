@@ -12,7 +12,7 @@ struct StorageSchemaTests {
         #expect(versions.first == 1)
         #expect(versions == Array(1...SchemaVersion(versions.count)))
         #expect(Schema.currentVersion == versions.last)
-        #expect(Schema.currentVersion == 36)
+        #expect(Schema.currentVersion == 37)
     }
 
     // Published migrations are frozen in `SchemaFreezeTests` (the v7 fixtures here rely on it).
@@ -23,7 +23,7 @@ struct StorageSchemaTests {
         #expect(try Schema.version(of: db) == Schema.currentVersion)
         #expect(try !Schema.migrate(db), "migrating again changes nothing")
         let columns = try db.query("SELECT name FROM pragma_table_info('meetings')").map { $0.string(0) }
-        #expect(columns.suffix(9) == ["output_locale", "source_app", "template", "participants_informed_at", "speakers_off", "imported", "time_zone", "follow_ups_recipe", "links_recipe"])
+        #expect(columns.suffix(9) == ["source_app", "template", "participants_informed_at", "speakers_off", "imported", "time_zone", "follow_ups_recipe", "links_recipe", "card_template"])
         let jobColumns = try db.query("SELECT name FROM pragma_table_info('llm_jobs')").map { $0.string(0) }
         #expect(jobColumns.last == "last_error_code")
         #expect(try db.query("PRAGMA foreign_keys")[0].int(0) == 1)
@@ -47,7 +47,7 @@ struct StorageSchemaTests {
         #expect(meeting.transcriptionLocale.identifier == "es-ES")
         #expect(meeting.minutesLocale.identifier == "es-ES")
         #expect(try await store.search("heredado").count == 1)
-        #expect(try await store.columnNames("meetings").suffix(9) == ["output_locale", "source_app", "template", "participants_informed_at", "speakers_off", "imported", "time_zone", "follow_ups_recipe", "links_recipe"])
+        #expect(try await store.columnNames("meetings").suffix(9) == ["source_app", "template", "participants_informed_at", "speakers_off", "imported", "time_zone", "follow_ups_recipe", "links_recipe", "card_template"])
         #expect(try await store.minutesTemplate(1) == nil)
     }
 

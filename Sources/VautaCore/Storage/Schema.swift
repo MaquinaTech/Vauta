@@ -524,6 +524,20 @@ enum Schema {
             ALTER TABLE segments ADD COLUMN original_text TEXT;
             ALTER TABLE segments ADD COLUMN edited_at REAL;
             """)),
+        // Minutes templates the person writes (`CustomMinutesTemplate`). `meetings.template` and the new `series.template` name one
+        // as "custom:<id>" (`MinutesTemplateChoice`); a series' template (NULL = the default in Settings) is used for its meetings.
+        // `meetings.card_template` is the template the model's card was written with (what the minutes say they followed).
+        // AUTOINCREMENT: an ID is never reused, so a card that names a deleted template never meets another one.
+        Migration(37, .sql("""
+            CREATE TABLE minutes_templates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                instructions TEXT NOT NULL,
+                created_at REAL NOT NULL
+            );
+            ALTER TABLE series ADD COLUMN template TEXT;
+            ALTER TABLE meetings ADD COLUMN card_template TEXT;
+            """)),
     ]
 
     /// The schema version this build writes.

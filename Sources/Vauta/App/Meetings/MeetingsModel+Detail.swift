@@ -28,6 +28,9 @@ extension MeetingsModel {
             let topics = try await store.meetingEntities(id, role: .topic)
             let jobs = try await store.jobs(for: id)
             let source = try await store.cardSource(id)
+            let template = try await store.minutesTemplate(id)
+            let followed = try await store.cardTemplate(id)
+            let custom = try await store.customMinutesTemplates()
             let live = try await store.liveNotes(id)
             let title = try await store.meeting(id)?.title
             let brief = try? await store.storedBrief(of: id)
@@ -41,6 +44,9 @@ extension MeetingsModel {
             storedBrief = brief
             if brief == nil, tab == .brief { tab = .summary }
             cardSource = source
+            minutesTemplate = template
+            cardTemplate = followed
+            customTemplates = custom
             transcript = segs
             self.speakers = speakers
             self.speakersOff = speakersOff
@@ -125,6 +131,8 @@ extension MeetingsModel {
         participantsInformedAt = nil
         materials = []; relatedDocuments = []; relatedMeetings = []
         cardSource = nil
+        minutesTemplate = nil
+        cardTemplate = nil
         storedBrief = nil
         draft = nil
         newDecision = ""
@@ -418,14 +426,34 @@ extension MeetingsModel {
 
     /// Writes (or rewrites) the minutes with a template; nil keeps the
     /// meeting's own template (set from the default when it was recorded),
-    /// or uses the default for meetings recorded before templates existed.
-    func regenerateMinutes(template: MinutesTemplate? = nil) async {
+    /// or uses its series' template, else the default, for meetings recorded before templates existed.
+    func regenerateMinutes(template: MinutesTemplateChoice? = nil) async {
         guard let id = selectedID, let llm else { return }
         noteActivity()
         var chosen = template
-        if chosen == nil, (try? await store.minutesTemplate(id)) == nil { chosen = preferences?.minutesTemplate }
+        if chosen == nil, (try? await store.minutesTemplate(id)) == nil {
+            chosen = (try? await store.seriesTemplate(of: id)) ?? preferences?.minutesTemplate
+        }
         await llm.regenerateMinutes(id, template: chosen)
+        guard selectedID == id else { return }
+        if let chosen { minutesTemplate = chosen }
         jobs = (try? await store.jobs(for: id)) ?? jobs
+    }
+
+    /// The templates the person wrote changed in Settings: the Rewrite menu and the open meeting's template follow (a deleted one
+    /// gave its meetings another). Nothing is read while Meetings are locked.
+    func minutesTemplatesChanged() {
+        guard isShowing else { return }
+        Task {
+            customTemplates = (try? await store.customMinutesTemplates()) ?? customTemplates
+            if let id = selectedID, let template = try? await store.minutesTemplate(id), selectedID == id { minutesTemplate = template }
+        }
+    }
+
+    /// The model's card followed a template the person wrote: the minutes say it was not evaluated, with its name while it exists.
+    var cardFollowedCustomTemplate: (followed: Bool, name: String?) {
+        guard case .custom(let id) = cardTemplate else { return (false, nil) }
+        return (true, customTemplates.first { $0.id == id }?.name)
     }
 
     func cancelMinutes() async {

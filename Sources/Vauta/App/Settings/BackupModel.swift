@@ -484,6 +484,10 @@ final class BackupModel {
             recorder.brief.erased()
             // A backup from before the settings were included has none: the settings of this Mac stay as they are.
             settingsRestored = restoreSettings(from: opened, recorder)
+            // The templates are the backup's now: a default this Mac kept (a backup without settings) names one of this Mac's, which
+            // may be another template of the backup under the same id.
+            if !settingsRestored, recorder.preferences.minutesTemplate.isCustom { recorder.preferences.minutesTemplate = .general }
+            await recorder.settingsModel?.minutesTemplates.reload(recorder)
             // The backup may hold voice summaries this Mac's settings do not allow: they go before anything reads them.
             await recorder.maintainVoices()
             stage = .done(Self.restoredMessage(meetings: summary.restoredMeetings))

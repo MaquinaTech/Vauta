@@ -229,6 +229,9 @@
 /* No comment provided by engineer. */
 "%lld of %lld" = "%lld / %lld";
 
+/* VoiceOver: how long the instructions of a minutes template are, of the most they can be */
+"%lld of %lld characters" = "%2$lld文字中%1$lld文字";
+
 /* Accessibility value of the search model download progress */
 "%lld of %lld megabytes" = "%lld／%lldメガバイト";
 
@@ -388,6 +391,9 @@
 
 /* Button help and accessibility label */
 "Add Recurring Meeting" = "定例ミーティングを追加";
+
+/* Settings → Models; button that opens the editor for a new minutes template the person writes */
+"Add Template…" = "テンプレートを追加…";
 
 /* Button help and accessibility label */
 "Add Term" = "用語を追加";
@@ -659,6 +665,9 @@
 
 /* No comment provided by engineer. */
 "Apple Intelligence" = "Apple Intelligence";
+
+/* Minutes template editor: small models read only the start of a long template (about 600 characters of a Latin script, about 200 of Chinese, Japanese or Korean: use your script's number) */
+"Apple Intelligence and other models with a small context read only the first 600 characters or so." = "Apple Intelligenceやコンテキストの小さいほかのモデルは、最初の200文字程度しか読みません。";
 
 /* Model error */
 "Apple Intelligence doesn’t support this language." = "Apple Intelligenceはこの言語に対応していません。";
@@ -1699,6 +1708,9 @@
 /* No comment provided by engineer. */
 "Custom vocabulary" = "カスタム語彙";
 
+/* Minutes template: shown with a template the person wrote, which Vauta has not measured on meetings as it did its own templates */
+"Custom · not evaluated" = "カスタム · 未評価";
+
 /* Settings → Status; the integrated model files no longer match the checksums */
 "Damaged" = "破損";
 
@@ -1838,6 +1850,12 @@
 /* No comment provided by engineer. */
 "Delete Team…" = "チームを削除…";
 
+/* Confirm button: delete a minutes template the person wrote */
+"Delete Template" = "テンプレートを削除";
+
+/* Minutes template editor; button that opens the confirmation to delete the template */
+"Delete Template…" = "テンプレートを削除…";
+
 /* No comment provided by engineer. */
 "Delete Term" = "用語を削除";
 
@@ -1889,6 +1907,9 @@
 
 /* No comment provided by engineer. */
 "Delete the selected item" = "選択した項目を削除";
+
+/* Confirmation title; the argument is the name of a minutes template the person wrote */
+"Delete the template “%@”?" = "テンプレート「%@」を削除しますか？";
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "使われていない声を削除しますか？";
@@ -2215,6 +2236,12 @@
 /* Undo menu item */
 "Edit Note" = "メモを編集";
 
+/* Title of the sheet that edits a minutes template the person wrote */
+"Edit Template" = "テンプレートを編集";
+
+/* Minutes menu: opens Settings → Models, where the person writes their own minutes templates */
+"Edit Templates…" = "テンプレートを編集…";
+
 /* No comment provided by engineer. */
 "Edit and Add…" = "編集して追加…";
 
@@ -2223,6 +2250,9 @@
 
 /* No comment provided by engineer. */
 "Edit people, projects and terms in the Context pane" = "「コンテキスト」ペインで人物、プロジェクト、用語を編集";
+
+/* VoiceOver: opens the editor of a minutes template the person wrote; the argument is its name */
+"Edit the template %@" = "テンプレート「%@」を編集";
 
 /* No comment provided by engineer. */
 "Edited" = "編集済み";
@@ -2497,6 +2527,9 @@
 
 /* Settings → General */
 "For example, a recording that is about to stop on its own, or a model server that doesn’t answer. Notifications never include transcripts or minutes." = "例えば、まもなく自動的に停止する録音や、応答しないモデルサーバなど。通知に文字起こしや議事録が含まれることはありません。";
+
+/* Placeholder of the instructions of a minutes template the person writes */
+"For example: the feature requests, who asked for each and why; the bugs, with how serious they are; and what the team will look at next." = "例：機能の要望と、それぞれ誰がなぜ求めたか。バグとその深刻度。チームが次に検討すること。";
 
 /* Setup: what to do when Apple Intelligence can't be used */
 "For minutes, set up a model below." = "議事録を作成するには、下でモデルをセットアップしてください。";
@@ -3524,6 +3557,9 @@
    Setup page title */
 "Minutes" = "議事録";
 
+/* Confirmation message when deleting a minutes template the person wrote */
+"Minutes already written stay as they are. Recurring meetings that use it go back to the default template, and if it’s the default, “General meeting” becomes the default." = "作成済みの議事録はそのまま残ります。このテンプレートを使う定例ミーティングはデフォルトのテンプレートに戻り、これがデフォルトの場合は「一般的なミーティング」がデフォルトになります。";
+
 /* Settings → Models activity
    Status row for the model provider */
 "Minutes and Ask" = "議事録と質問";
@@ -3570,6 +3606,9 @@
 
 /* No comment provided by engineer. */
 "Minutes status" = "議事録の状況";
+
+/* Recurring meeting form: the label of the minutes template pop-up */
+"Minutes template" = "議事録のテンプレート";
 
 /* Restore sheet result, note under the missing model server title, on a Mac with Apple Intelligence */
 "Minutes use Apple Intelligence on this Mac until you set one up." = "モデルサーバをセットアップするまで、議事録はこのMacのApple Intelligenceで作成されます。";
@@ -3688,6 +3727,9 @@
 
 /* Speaker popover: moves this line to a new speaker, because the diarizer put two people in one */
 "New Speaker" = "新しい話者";
+
+/* Title of the sheet for a new minutes template the person writes */
+"New Template" = "新規テンプレート";
 
 /* Title of the form for a new glossary term */
 "New Term" = "新規用語";
@@ -4486,6 +4528,9 @@
 "Participants informed: %@" = "参加者への周知：%@";
 "Say when the participants were informed" = "参加者に周知した時刻を記載";
 "Write the time you marked that the participants were told the meeting was being recorded" = "参加者に録音を周知したと記録した時刻を書き込み";
+
+/* Error when saving a minutes template whose instructions are empty */
+"Write what the minutes should cover." = "議事録で取り上げる内容を書いてください。";
 "This recording is from %@. The meeting will be dated today, so its transcript isn’t deleted for its age." = "この録音は%@のものです。古いために文字起こしが削除されないよう、会議は今日の日付になります。";
 "The file is dated %@, in the future. The meeting will be dated today." = "ファイルの日付（%@）が未来になっています。会議は今日の日付になります。";
 
@@ -4660,6 +4705,9 @@
 
 /* Status level, accessibility */
 "Problem" = "問題";
+
+/* Placeholder of the name of a minutes template the person writes */
+"Product review" = "製品レビュー";
 
 /* Entity kind: a project */
 "Project" = "プロジェクト";
@@ -5259,6 +5307,9 @@
    Panel state
    Progress */
 "Saving…" = "保存中…";
+
+/* Settings → Models; under Your templates */
+"Say in your own words what the minutes should cover and stress. Unlike Vauta’s own templates, these aren’t evaluated." = "議事録で取り上げて強調すべきことを自分の言葉で書いてください。Vautaのテンプレートとは違い、評価されていません。";
 
 /* Microphone test prompt */
 "Say something…" = "何か話してください…";
@@ -5917,6 +5968,9 @@
 /* Brief: heading of the few lines a model suggests for the meeting */
 "Suggested agenda" = "提案されたアジェンダ";
 
+/* Minutes menu: the section with the template the meeting's title suggests */
+"Suggested by the Title" = "タイトルからのおすすめ";
+
 /* No comment provided by engineer. */
 "Suggested from your calendar. Confirm or dismiss this person." = "カレンダーからの提案です。この人物を確定するか除外してください。";
 
@@ -6293,6 +6347,12 @@
 /* No comment provided by engineer. */
 "The minutes don’t list any tasks.\nAdd one below." = "議事録にタスクはありません。\n下で追加してください。";
 
+/* Minutes template editor: what a template the person writes can and can't change */
+"The minutes keep their sections, and every decision and task is still checked against the transcript: a template says what to cover and stress, not what to conclude." = "議事録のセクションは変わらず、すべての決定事項とタスクは引き続き文字起こしと照合されます。テンプレートが決めるのは取り上げて強調する内容で、結論ではありません。";
+
+/* Help under the minutes template of a recurring meeting */
+"The minutes of new meetings in this series use it. “Default” is the template chosen in Settings → Models." = "このシリーズの新しいミーティングの議事録に使われます。「デフォルト」は「設定」→「モデル」で選んだテンプレートです。";
+
 /* Notification body; the argument is the meeting's date and time */
 "The minutes of your meeting of %@ are ready." = "%@のミーティングの議事録ができました。";
 
@@ -6556,6 +6616,9 @@
 
 /* Error when saving a recurring meeting series without a title */
 "The title can’t be empty." = "タイトルを空にすることはできません。";
+
+/* Recurring meeting form, under the minutes template; the argument is the name of one of Vauta's templates */
+"The title suggests “%@”." = "タイトルからは「%@」がおすすめです。";
 
 /* Notification body when an imported recording has been transcribed */
 "The transcript is ready. Open the meeting to read it." = "文字起こしが完成しました。ミーティングを開いて確認してください。";
@@ -7033,6 +7096,9 @@
 /* No comment provided by engineer. */
 "Unlock with Touch ID or your password to edit people, projects and the glossary." = "人物、プロジェクト、用語集を編集するには、Touch IDまたはパスワードでロックを解除してください。";
 
+/* Settings → Models, under Your templates while Meetings are locked */
+"Unlock with Touch ID or your password to see and edit the templates you wrote." = "Touch IDまたはパスワードでロックを解除すると、自分で書いたテンプレートを確認、編集できます。";
+
 /* Settings → Speakers, under the saved voices row while locked */
 "Unlock with Touch ID or your password to see whose voices they are." = "Touch IDまたはパスワードでロックを解除すると、誰の声か確認できます。";
 
@@ -7091,6 +7157,9 @@
 
 /* No comment provided by engineer. */
 "Use Calendar to suggest and name meetings" = "カレンダーを使ってミーティングを提案し、名前を付ける";
+
+/* Recurring meeting form: gives the series the minutes template its title suggests */
+"Use It" = "これを使用";
 
 /* Model guide: saves the server found, with two models */
 "Use These Models" = "これらのモデルを使用";
@@ -7552,6 +7621,9 @@
 /* Placeholder of the glossary meaning field */
 "What it stands for" = "意味";
 
+/* Label above the instructions of a minutes template the person writes */
+"What the minutes should cover" = "議事録で取り上げる内容";
+
 /* Section title on a person's card: passages the person said in meetings, from the speakers the user named as them */
 "What they said" = "発言内容";
 
@@ -7885,6 +7957,12 @@
 
 /* No comment provided by engineer. */
 "Your summary is kept; proposed decisions and tasks are added" = "要約は保持され、提案された決定事項とタスクが追加されます";
+
+/* Settings → Models; the default minutes template while Meetings are locked, when it is one the person wrote */
+"Your template" = "自分のテンプレート";
+
+/* Settings → Models; the row of the minutes templates the person wrote */
+"Your templates" = "自分のテンプレート";
 
 /* Confirmation message when deleting the user’s own saved voice */
 "Your voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. Imported recordings will no longer suggest which speaker is you. Meetings and the names already in them stay as they are." = "自分の声紋は、ミーティングに保持されている声の要約と⁠と⁠も⁠に暗号化されたストアから削除されます。読み込んだ録音で、どの話者が自分かを提案しなくなります。ミーティングと、すでにその中にある名前はそのまま残ります。";
@@ -8263,6 +8341,9 @@
 "Minutes and tasks" = "議事録とタスク";
 
 "Decisions, tasks with owner and date, and open questions." = "決定事項、担当者と期日つきのタスク、未解決の質問。";
+
+/* Recurring meeting form: the minutes template item that uses the default template in Settings → Models */
+"Default" = "デフォルト";
 
 "One question across your meetings, notes and files." = "ひとつの質問で、会議・メモ・ファイルをまとめて検索。";
 

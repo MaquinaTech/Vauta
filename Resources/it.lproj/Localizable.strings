@@ -229,6 +229,9 @@
 /* No comment provided by engineer. */
 "%lld of %lld" = "%lld di %lld";
 
+/* VoiceOver: how long the instructions of a minutes template are, of the most they can be */
+"%lld of %lld characters" = "%lld di %lld caratteri";
+
 /* Accessibility value of the search model download progress */
 "%lld of %lld megabytes" = "%lld di %lld megabyte";
 
@@ -388,6 +391,9 @@
 
 /* Button help and accessibility label */
 "Add Recurring Meeting" = "Aggiungi riunione ricorrente";
+
+/* Settings → Models; button that opens the editor for a new minutes template the person writes */
+"Add Template…" = "Aggiungi tipo…";
 
 /* Button help and accessibility label */
 "Add Term" = "Aggiungi termine";
@@ -659,6 +665,9 @@
 
 /* No comment provided by engineer. */
 "Apple Intelligence" = "Apple Intelligence";
+
+/* Minutes template editor: small models read only the start of a long template (about 600 characters of a Latin script, about 200 of Chinese, Japanese or Korean: use your script's number) */
+"Apple Intelligence and other models with a small context read only the first 600 characters or so." = "Apple Intelligence e gli altri modelli con un contesto piccolo leggono solo i primi 600 caratteri circa.";
 
 /* Model error */
 "Apple Intelligence doesn’t support this language." = "Apple Intelligence non supporta questa lingua.";
@@ -1699,6 +1708,9 @@
 /* No comment provided by engineer. */
 "Custom vocabulary" = "Vocabolario personalizzato";
 
+/* Minutes template: shown with a template the person wrote, which Vauta has not measured on meetings as it did its own templates */
+"Custom · not evaluated" = "Personalizzato · non valutato";
+
 /* Settings → Status; the integrated model files no longer match the checksums */
 "Damaged" = "Danneggiato";
 
@@ -1838,6 +1850,12 @@
 /* No comment provided by engineer. */
 "Delete Team…" = "Elimina team…";
 
+/* Confirm button: delete a minutes template the person wrote */
+"Delete Template" = "Elimina tipo";
+
+/* Minutes template editor; button that opens the confirmation to delete the template */
+"Delete Template…" = "Elimina tipo…";
+
 /* No comment provided by engineer. */
 "Delete Term" = "Elimina termine";
 
@@ -1889,6 +1907,9 @@
 
 /* No comment provided by engineer. */
 "Delete the selected item" = "Elimina l’elemento selezionato";
+
+/* Confirmation title; the argument is the name of a minutes template the person wrote */
+"Delete the template “%@”?" = "Eliminare il tipo “%@”?";
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "Eliminare le voci inutilizzate?";
@@ -2215,6 +2236,12 @@
 /* Undo menu item */
 "Edit Note" = "Modifica nota";
 
+/* Title of the sheet that edits a minutes template the person wrote */
+"Edit Template" = "Modifica tipo";
+
+/* Minutes menu: opens Settings → Models, where the person writes their own minutes templates */
+"Edit Templates…" = "Modifica i tuoi tipi…";
+
 /* No comment provided by engineer. */
 "Edit and Add…" = "Modifica e aggiungi…";
 
@@ -2223,6 +2250,9 @@
 
 /* No comment provided by engineer. */
 "Edit people, projects and terms in the Context pane" = "Modifica persone, progetti e termini nel pannello Contesto";
+
+/* VoiceOver: opens the editor of a minutes template the person wrote; the argument is its name */
+"Edit the template %@" = "Modifica il tipo %@";
 
 /* No comment provided by engineer. */
 "Edited" = "Modificato";
@@ -2497,6 +2527,9 @@
 
 /* Settings → General */
 "For example, a recording that is about to stop on its own, or a model server that doesn’t answer. Notifications never include transcripts or minutes." = "Per esempio, una registrazione che sta per interrompersi da sola o un server di modelli che non risponde. Le notifiche non includono mai trascrizioni o verbali.";
+
+/* Placeholder of the instructions of a minutes template the person writes */
+"For example: the feature requests, who asked for each and why; the bugs, with how serious they are; and what the team will look at next." = "Per esempio: le richieste di funzionalità, chi ha chiesto ognuna e perché; i bug, con la loro gravità; e cosa esaminerà il team in seguito.";
 
 /* Setup: what to do when Apple Intelligence can't be used */
 "For minutes, set up a model below." = "Per i verbali, configura un modello qui sotto.";
@@ -3524,6 +3557,9 @@
    Setup page title */
 "Minutes" = "Verbali";
 
+/* Confirmation message when deleting a minutes template the person wrote */
+"Minutes already written stay as they are. Recurring meetings that use it go back to the default template, and if it’s the default, “General meeting” becomes the default." = "I verbali già scritti restano come sono. Le riunioni ricorrenti che lo usano tornano al tipo predefinito e, se è quello predefinito, “Riunione generica” diventa il predefinito.";
+
 /* Settings → Models activity
    Status row for the model provider */
 "Minutes and Ask" = "Verbali e Chiedi";
@@ -3570,6 +3606,9 @@
 
 /* No comment provided by engineer. */
 "Minutes status" = "Stato del verbale";
+
+/* Recurring meeting form: the label of the minutes template pop-up */
+"Minutes template" = "Tipo di verbale";
 
 /* Restore sheet result, note under the missing model server title, on a Mac with Apple Intelligence */
 "Minutes use Apple Intelligence on this Mac until you set one up." = "Finché non ne configuri uno, i verbali usano Apple Intelligence su questo Mac.";
@@ -3688,6 +3727,9 @@
 
 /* Speaker popover: moves this line to a new speaker, because the diarizer put two people in one */
 "New Speaker" = "Nuovo interlocutore";
+
+/* Title of the sheet for a new minutes template the person writes */
+"New Template" = "Nuovo tipo di verbale";
 
 /* Title of the form for a new glossary term */
 "New Term" = "Nuovo termine";
@@ -4486,6 +4528,9 @@
 "Participants informed: %@" = "Partecipanti avvisati: %@";
 "Say when the participants were informed" = "Indica quando i partecipanti sono stati avvisati";
 "Write the time you marked that the participants were told the meeting was being recorded" = "Scrivi l’ora in cui hai segnato che i partecipanti sono stati avvisati della registrazione";
+
+/* Error when saving a minutes template whose instructions are empty */
+"Write what the minutes should cover." = "Scrivi cosa deve coprire il verbale.";
 "This recording is from %@. The meeting will be dated today, so its transcript isn’t deleted for its age." = "Questa registrazione è del %@. La riunione avrà la data di oggi, così la trascrizione non viene eliminata perché troppo vecchia.";
 "The file is dated %@, in the future. The meeting will be dated today." = "Il file ha la data del %@, nel futuro. La riunione avrà la data di oggi.";
 
@@ -4660,6 +4705,9 @@
 
 /* Status level, accessibility */
 "Problem" = "Problema";
+
+/* Placeholder of the name of a minutes template the person writes */
+"Product review" = "Revisione del prodotto";
 
 /* Entity kind: a project */
 "Project" = "Progetto";
@@ -5259,6 +5307,9 @@
    Panel state
    Progress */
 "Saving…" = "Salvataggio…";
+
+/* Settings → Models; under Your templates */
+"Say in your own words what the minutes should cover and stress. Unlike Vauta’s own templates, these aren’t evaluated." = "Descrivi con parole tue cosa deve coprire ed evidenziare il verbale. A differenza dei tipi di Vauta, questi non sono valutati.";
 
 /* Microphone test prompt */
 "Say something…" = "Di’ qualcosa…";
@@ -5917,6 +5968,9 @@
 /* Brief: heading of the few lines a model suggests for the meeting */
 "Suggested agenda" = "Ordine del giorno suggerito";
 
+/* Minutes menu: the section with the template the meeting's title suggests */
+"Suggested by the Title" = "Suggerito dal titolo";
+
 /* No comment provided by engineer. */
 "Suggested from your calendar. Confirm or dismiss this person." = "Suggerita dal tuo calendario. Conferma o scarta questa persona.";
 
@@ -6293,6 +6347,12 @@
 /* No comment provided by engineer. */
 "The minutes don’t list any tasks.\nAdd one below." = "Il verbale non contiene attività.\nAggiungine una qui sotto.";
 
+/* Minutes template editor: what a template the person writes can and can't change */
+"The minutes keep their sections, and every decision and task is still checked against the transcript: a template says what to cover and stress, not what to conclude." = "I verbali mantengono le loro sezioni, e ogni decisione e attività viene comunque verificata sulla trascrizione: un tipo dice cosa coprire ed evidenziare, non cosa concludere.";
+
+/* Help under the minutes template of a recurring meeting */
+"The minutes of new meetings in this series use it. “Default” is the template chosen in Settings → Models." = "I verbali delle nuove riunioni di questa serie lo usano. “Predefinito” è il tipo scelto in Impostazioni → Modelli.";
+
 /* Notification body; the argument is the meeting's date and time */
 "The minutes of your meeting of %@ are ready." = "Il verbale della riunione del %@ è pronto.";
 
@@ -6556,6 +6616,9 @@
 
 /* Error when saving a recurring meeting series without a title */
 "The title can’t be empty." = "Il titolo non può essere vuoto.";
+
+/* Recurring meeting form, under the minutes template; the argument is the name of one of Vauta's templates */
+"The title suggests “%@”." = "Il titolo suggerisce “%@”.";
 
 /* Notification body when an imported recording has been transcribed */
 "The transcript is ready. Open the meeting to read it." = "La trascrizione è pronta. Apri la riunione per leggerla.";
@@ -7033,6 +7096,9 @@
 /* No comment provided by engineer. */
 "Unlock with Touch ID or your password to edit people, projects and the glossary." = "Sblocca con Touch ID o con la password per modificare persone, progetti e glossario.";
 
+/* Settings → Models, under Your templates while Meetings are locked */
+"Unlock with Touch ID or your password to see and edit the templates you wrote." = "Sblocca con Touch ID o la tua password per vedere e modificare i tipi che hai scritto.";
+
 /* Settings → Speakers, under the saved voices row while locked */
 "Unlock with Touch ID or your password to see whose voices they are." = "Sblocca con Touch ID o la tua password per vedere di chi sono le voci.";
 
@@ -7091,6 +7157,9 @@
 
 /* No comment provided by engineer. */
 "Use Calendar to suggest and name meetings" = "Usa Calendario per suggerire e assegnare un nome alle riunioni";
+
+/* Recurring meeting form: gives the series the minutes template its title suggests */
+"Use It" = "Usa";
 
 /* Model guide: saves the server found, with two models */
 "Use These Models" = "Usa questi modelli";
@@ -7552,6 +7621,9 @@
 /* Placeholder of the glossary meaning field */
 "What it stands for" = "Cosa significa";
 
+/* Label above the instructions of a minutes template the person writes */
+"What the minutes should cover" = "Cosa deve coprire il verbale";
+
 /* Section title on a person's card: passages the person said in meetings, from the speakers the user named as them */
 "What they said" = "Ciò che ha detto";
 
@@ -7885,6 +7957,12 @@
 
 /* No comment provided by engineer. */
 "Your summary is kept; proposed decisions and tasks are added" = "Il tuo riepilogo viene mantenuto; vengono aggiunte le decisioni e le attività proposte";
+
+/* Settings → Models; the default minutes template while Meetings are locked, when it is one the person wrote */
+"Your template" = "Il tuo tipo";
+
+/* Settings → Models; the row of the minutes templates the person wrote */
+"Your templates" = "I tuoi tipi";
 
 /* Confirmation message when deleting the user’s own saved voice */
 "Your voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. Imported recordings will no longer suggest which speaker is you. Meetings and the names already in them stay as they are." = "Le tue impronte vocali vengono rimosse dall’archivio crittografato, insieme ai riepiloghi vocali conservati nelle riunioni. Le registrazioni importate non ti suggeriranno più quale interlocutore sei tu. Le riunioni e i nomi che contengono già restano come sono.";
@@ -8263,6 +8341,9 @@
 "Minutes and tasks" = "Verbali e attività";
 
 "Decisions, tasks with owner and date, and open questions." = "Decisioni, attività con responsabile e data, e domande aperte.";
+
+/* Recurring meeting form: the minutes template item that uses the default template in Settings → Models */
+"Default" = "Predefinito";
 
 "One question across your meetings, notes and files." = "Una domanda su riunioni, note e file.";
 

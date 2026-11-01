@@ -141,7 +141,8 @@ extension MeetingStore {
     }
 
     /// What came from the Calendar only for meetings that are now deleted:
-    /// unconfirmed people who appear in no meeting and that no speaker or voice profile uses, and series without meetings.
+    /// unconfirmed people who appear in no meeting and that no speaker or voice profile uses, and series without meetings
+    /// (not one the person gave a minutes template: that choice is theirs, and Context keeps it for the next occurrence).
     static let orphanCleanupSQL = [
         """
         DELETE FROM entities WHERE source = 'calendar' AND confirmed = 0
@@ -150,7 +151,7 @@ extension MeetingStore {
             AND NOT EXISTS (SELECT 1 FROM meeting_speakers WHERE entity_id = entities.id)
             AND NOT EXISTS (SELECT 1 FROM voice_profiles WHERE entity_id = entities.id)
         """,
-        "DELETE FROM series WHERE calendar_key IS NOT NULL AND NOT EXISTS (SELECT 1 FROM meetings WHERE series_id = series.id)",
+        "DELETE FROM series WHERE calendar_key IS NOT NULL AND template IS NULL AND NOT EXISTS (SELECT 1 FROM meetings WHERE series_id = series.id)",
     ]
 
     /// Unjournaled variant for `init` (recovery): the snapshot written right after includes it.

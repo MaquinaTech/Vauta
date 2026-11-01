@@ -121,12 +121,18 @@ extension LLMService {
         // The zone the meeting was recorded in (the Mac's, for a meeting from before it was stored): the date the model is given, the due
         // days and the summary's date checks all read the meeting's own day.
         let meetingZone = (try? await store.meetingTimeZone(meetingID)) ?? .current
+        // One of Vauta's templates, or the person's own; a meeting without one takes its series' (`templateToWrite`).
+        let template = try await store.templateToWrite(meetingID) ?? .general
         var request = VautaPrompts.MinutesRequest(
-            meetingDate: meeting.startedAt, language: OutputLanguage(meeting: meeting),
-            template: try await store.minutesTemplate(meetingID) ?? .general,
+            meetingDate: meeting.startedAt, language: OutputLanguage(meeting: meeting), template: template.base,
             userNotes: Array(marks.prefix(budget.isSmall ? 10 : 30)),
             liveNotes: Array(liveHints.suffix(budget.isSmall ? 10 : 30)),
             priorityNotes: Self.priorityHints(noteRows, budget: budget), timeZone: meetingZone, recall: false, delta: delta)
+        if case .custom(let id) = template, let own = try await store.customMinutesTemplate(id) {
+            request.customInstructions = VautaPrompts.customTemplate(own.instructions, budget: budget)
+        }
+        // What the card says it followed: the person's template only when its instructions were sent.
+        let followed: MinutesTemplateChoice = request.customInstructions == nil ? .builtIn(template.base) : template
         // The release choice for the backend, or what the evaluation forced. The integrated model's request: the items before the summary,
         // the summary rule, the recall wording and the sampling.
         let choices = minutesChoices(for: chat)
@@ -367,7 +373,7 @@ extension LLMService {
         // The user's own wording comes first among the topics, word for word (Swift does it, not the model).
         minutes.topics = TopicMerge.withUserNotes(minutes.topics, notes: TopicMerge.promotable(noteRows))
         try Task.checkCancellation()
-        let pointing = try await store.applyMinutes(minutes, to: meetingID)
+        let pointing = try await store.applyMinutes(minutes, to: meetingID, template: followed)
         written = true
         // The minutes are written: the meeting's prefix goes back to the normal idle rules.
         await releaseWarm(meetingID)

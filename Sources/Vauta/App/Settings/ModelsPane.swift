@@ -9,6 +9,7 @@ struct ModelsPane: View {
     @Bindable var recorder: RecorderModel
     @Bindable var preferences: Preferences
     @Bindable var models: ModelsSettingsModel
+    @Bindable var templates: MinutesTemplatesModel
     /// The text column of the form's rows in the pane's coordinates (it widens with the window), so the Save bar
     /// ends on the same edges at every width. Nil until measured.
     @ViewLocalState private var rowColumn: CGRect?
@@ -26,7 +27,7 @@ struct ModelsPane: View {
             if models.usesServer {
                 ServerSections(recorder: recorder, models: models)
             }
-            MinutesSection(recorder: recorder, preferences: preferences)
+            MinutesSection(recorder: recorder, preferences: preferences, templates: templates)
             ActivitySection(recorder: recorder, usesServer: models.usesServer, provider: models.provider,
                             appleAvailable: models.appleAvailable)
         }
@@ -183,6 +184,7 @@ struct ModelsPane: View {
 private struct MinutesSection: View {
     let recorder: RecorderModel
     @Bindable var preferences: Preferences
+    @Bindable var templates: MinutesTemplatesModel
 
     /// A model can write them now, or the on-device model will once it is
     /// ready (downloading, or Apple Intelligence turned off for now).
@@ -219,12 +221,24 @@ private struct MinutesSection: View {
             }
             Picker(selection: $preferences.minutesTemplate) {
                 ForEach(MinutesTemplate.allCases) { template in
-                    Text(template.displayName).tag(template)
+                    Text(template.displayName).tag(MinutesTemplateChoice.builtIn(template))
+                }
+                if templates.loaded, !templates.templates.isEmpty {
+                    Section(CustomMinutesTemplate.label) {
+                        ForEach(templates.templates) { template in
+                            Text(verbatim: template.name).tag(MinutesTemplateChoice.custom(template.id))
+                        }
+                    }
+                } else if preferences.minutesTemplate.isCustom {
+                    // Locked: the name waits for Touch ID, and the choice stays.
+                    Text("Your template", comment: "Settings → Models; the default minutes template while Meetings are locked, when it is one the person wrote")
+                        .tag(preferences.minutesTemplate)
                 }
             } label: {
                 Text("Default template", comment: "Settings → Models minutes template")
                 Text(description: String(localized: "The template decides the sections of the minutes. It applies to minutes written from now on.", comment: "Settings → Models"))
             }
+            if recorder.storeAvailable { CustomTemplateRows(recorder: recorder, templates: templates) }
             LabeledContent {
                 // The on-device model may still be downloading or be turned
                 // off for now: the queue waits for it (not on a Mac that can't run it).
@@ -238,6 +252,8 @@ private struct MinutesSection: View {
         } header: {
             Text("Minutes")
         }
+        .task { await templates.reload(recorder) }
+        .onChange(of: recorder.historyUnlocked) { _, _ in Task { await templates.reload(recorder) } }
     }
 
     private var currentFixed: [String] {

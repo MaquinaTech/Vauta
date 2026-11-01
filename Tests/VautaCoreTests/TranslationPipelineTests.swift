@@ -100,7 +100,10 @@ struct TranslationPipelineTests {
 
     @Test func aFinalTakesOverThePartialsLineAndItsProvisionalText() async {
         let rig = TranslationRig()
-        rig.backend.configure = { $0.delays = ["good morning to everyone here": .milliseconds(150)] }
+        // The final is held until the test has seen it pending: with a delay, a loaded Mac could let it finish first, and the
+        // stream keeps only the newest snapshot, so the pending one would never be seen.
+        let hold = StubGate()
+        rig.backend.configure = { $0.gates = ["good morning to everyone here": hold] }
         await rig.start()
         rig.translator.submit(spoken("good morning to everyone"), key: 0)
         await eventually("partial translated") { rig.recorder.latest?.lines.last?.translation == "«good morning to everyone»" }
@@ -110,6 +113,7 @@ struct TranslationPipelineTests {
             guard let line = rig.recorder.latest?.lines.last else { return false }
             return line.state == .translating && line.id == partialID && line.translation == "«good morning to everyone»"
         }
+        hold.open()
         await eventually("final done") { rig.recorder.latest?.lines.last?.state == .final }
         #expect(rig.recorder.latest?.lines.count == 1)
         #expect(rig.recorder.latest?.lines.last?.id == partialID, "the line is updated in place")

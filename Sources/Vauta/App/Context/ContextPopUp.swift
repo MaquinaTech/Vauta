@@ -20,6 +20,8 @@ struct ContextPopUp<Value: Hashable>: View {
     let label: String
     @Binding var selection: Value
     let items: [Item]
+    /// Above the item at an index: a line, or the title of the group it starts.
+    var breaks: [Int: MenuBreak] = [:]
     /// The button takes the whole width it is given; otherwise it is as wide as its longest item.
     var fillsWidth = false
     /// A cap for a pop-up whose longest item could be very long (a task name): it shrinks, truncating its title,
@@ -34,7 +36,7 @@ struct ContextPopUp<Value: Hashable>: View {
 
     var body: some View {
         Button {
-            anchor.open(items: items.map { ($0.title, $0.symbol) }, selected: items.firstIndex { $0.value == selection }) { index in
+            anchor.open(items: items.map { ($0.title, $0.symbol) }, selected: items.firstIndex { $0.value == selection }, breaks: breaks) { index in
                 if items.indices.contains(index) { selection = items[index].value }
             }
         } label: {
@@ -82,18 +84,29 @@ private struct PopUpWidth: ViewModifier {
     }
 }
 
+/// What separates the groups of a pop-up's menu.
+enum MenuBreak: Hashable {
+    case line
+    case title(String)
+}
+
 /// Finds the button's view, so the menu opens right over it like a pop-up button's.
 final class MenuAnchor {
     weak var view: NSView?
     private var handler: MenuHandler?
 
     @MainActor
-    func open(items: [(String, String?)], selected: Int?, choose: @escaping (Int) -> Void) {
+    func open(items: [(String, String?)], selected: Int?, breaks: [Int: MenuBreak] = [:], choose: @escaping (Int) -> Void) {
         guard let view else { return }
         let handler = MenuHandler(choose: choose)
         self.handler = handler
         let menu = NSMenu()
         for (index, item) in items.enumerated() {
+            switch breaks[index] {
+            case .line?: menu.addItem(.separator())
+            case .title(let title)?: menu.addItem(.sectionHeader(title: title))
+            case nil: break
+            }
             let entry = NSMenuItem(title: item.0, action: #selector(MenuHandler.picked(_:)), keyEquivalent: "")
             entry.target = handler
             entry.tag = index

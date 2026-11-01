@@ -13,15 +13,15 @@ extension LLMService {
 
     // MARK: Enqueueing
 
-    /// When a meeting ends: embeddings and minutes. `template` (the default
-    /// from Preferences) is stored with the meeting; nil keeps the stored one.
+    /// When a meeting ends: embeddings and minutes. The template of the meeting's recurring series, else `template` (the default
+    /// from Preferences), is stored with the meeting; with neither, the stored one is kept.
     /// Speakers come first: a meeting whose speakers were not finalized yet (its recording never reached Stop) is
     /// finalized here (or its voice data dropped when that fails or `speakersEnabled` is off), so the minutes are never
     /// written from a transcript the aligner is still going to split.
-    public func meetingEnded(_ meetingID: Int64, template: MinutesTemplate? = nil, speakersEnabled: Bool = true,
+    public func meetingEnded(_ meetingID: Int64, template: MinutesTemplateChoice? = nil, speakersEnabled: Bool = true,
                              recognizeVoices: Bool = false) async {
         await SpeakerFinalizer.finalizePending(meetingID: meetingID, in: store, enabled: speakersEnabled, recognizeVoices: recognizeVoices)
-        if let template { try? await store.setMinutesTemplate(template, for: meetingID) }
+        if let chosen = (try? await store.seriesTemplate(of: meetingID)) ?? template { try? await store.setMinutesTemplate(chosen, for: meetingID) }
         if case .available = providers.embeddings() { try? await store.enqueueJob(.embed, meeting: meetingID) }
         try? await store.enqueueJob(.minutes, meeting: meetingID)
         await queueChanged()
@@ -33,20 +33,20 @@ extension LLMService {
 
     /// Writes the minutes again; `template` replaces the meeting's template
     /// (nil keeps the stored one, or the general template for older meetings).
-    public func regenerateMinutes(_ meetingID: Int64, template: MinutesTemplate?) async {
+    public func regenerateMinutes(_ meetingID: Int64, template: MinutesTemplateChoice?) async {
         if let template { try? await store.setMinutesTemplate(template, for: meetingID) }
         try? await store.enqueueJob(.minutes, meeting: meetingID)
         await queueChanged()
     }
 
     /// Queues minutes and embeddings for the meetings that do not have them yet.
-    /// `template` (the default from Preferences) is stored for meetings that
-    /// have none yet (recorded before templates existed).
-    public func backfill(template: MinutesTemplate? = nil) async {
+    /// A meeting that has no template yet (recorded before templates existed) gets its series' template, else `template` (the
+    /// default from Preferences).
+    public func backfill(template: MinutesTemplateChoice? = nil) async {
         let embeddings = if case .available = providers.embeddings() { true } else { false }
         for id in (try? await store.meetingsWithoutMinutes()) ?? [] {
-            if let template, (try? await store.minutesTemplate(id)) == nil {
-                try? await store.setMinutesTemplate(template, for: id)
+            if (try? await store.minutesTemplate(id)) == nil, let chosen = (try? await store.seriesTemplate(of: id)) ?? template {
+                try? await store.setMinutesTemplate(chosen, for: id)
             }
             if embeddings { try? await store.enqueueJob(.embed, meeting: id) }
             try? await store.enqueueJob(.minutes, meeting: id)

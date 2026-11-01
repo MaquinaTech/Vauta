@@ -124,18 +124,22 @@ public struct GlossaryTerm: Sendable, Identifiable, Hashable {
     }
 }
 
-/// Recurring meeting: title pattern (or calendar key) and default entities.
+/// Recurring meeting: title pattern (or calendar key), default entities and the minutes template of its meetings (nil: the
+/// default in Settings).
 public struct MeetingSeries: Sendable, Identifiable, Hashable {
     public var id: Int64?
     public var calendarKey: String?
     public var titlePattern: String
     public var defaultEntities: [Int64]
+    public var template: MinutesTemplateChoice?
 
-    public init(id: Int64? = nil, calendarKey: String? = nil, titlePattern: String, defaultEntities: [Int64] = []) {
+    public init(id: Int64? = nil, calendarKey: String? = nil, titlePattern: String, defaultEntities: [Int64] = [],
+                template: MinutesTemplateChoice? = nil) {
         self.id = id
         self.calendarKey = calendarKey
         self.titlePattern = titlePattern
         self.defaultEntities = defaultEntities
+        self.template = template
     }
 }
 

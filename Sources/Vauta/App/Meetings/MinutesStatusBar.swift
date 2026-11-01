@@ -117,12 +117,19 @@ struct MinutesStatusBar: View {
                                  : "Minutes proposed by the model: review them and correct anything that’s wrong.").foregroundStyle(.secondary)
         let glyphView = glyph { Image(systemName: "sparkles").foregroundStyle(Brand.sparkle) }
         let writer: AnyView = canWrite ? AnyView(writeButton(retry: false)) : AnyView(EmptyView())
-        // One layout at every width and in every language: the badge sits on a line of its own and the sentence
-        // under it takes the room up to the button.
+        // A template the person wrote is not evaluated as Vauta's are: the minutes it wrote say so, with its name in the tooltip.
+        let custom = model.cardFollowedCustomTemplate
+        // One layout at every width and in every language: the badges sit on a line of their own and the sentence
+        // under them takes the room up to the button.
         return HStack(alignment: .firstTextBaseline, spacing: 8) {
             glyphView
             VStack(alignment: .leading, spacing: 4) {
-                if onDevice { BadgeCapsule(ModelQuality.badge).fixedSize() }
+                if onDevice || custom.followed {
+                    HStack(spacing: 6) {
+                        if onDevice { BadgeCapsule(ModelQuality.badge).fixedSize() }
+                        if custom.followed { BadgeCapsule(CustomMinutesTemplate.label).fixedSize().help(custom.name ?? "") }
+                    }
+                }
                 text.fixedSize(horizontal: false, vertical: true)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -172,10 +179,27 @@ struct MinutesStatusBar: View {
     /// "Rewrite Minutes" (or "Try Again" after a failure) with the meeting's template; the menu picks another.
     private func writeButton(retry: Bool) -> some View {
         Menu {
+            // Minutes written with the general template, of a meeting whose title points to another one: that one first.
+            if let suggested = suggestedTemplate {
+                Section(String(localized: "Suggested by the Title", comment: "Minutes menu: the section with the template the meeting's title suggests")) {
+                    Button(suggested.displayName) { Task { await model.regenerateMinutes(template: .builtIn(suggested)) } }
+                }
+            }
             Section("Template") {
                 ForEach(MinutesTemplate.allCases) { template in
-                    Button(template.displayName) { Task { await model.regenerateMinutes(template: template) } }
+                    Button(template.displayName) { Task { await model.regenerateMinutes(template: .builtIn(template)) } }
                 }
+            }
+            if !model.customTemplates.isEmpty {
+                Section(CustomMinutesTemplate.label) {
+                    ForEach(model.customTemplates) { template in
+                        Button(template.name) { Task { await model.regenerateMinutes(template: .custom(template.id)) } }
+                    }
+                }
+            }
+            if let models = openModels {
+                Divider()
+                Button(String(localized: "Edit Templates…", comment: "Minutes menu: opens Settings → Models, where the person writes their own minutes templates")) { models() }
             }
         } label: {
             if retry { Text("Try Again") }
@@ -190,6 +214,13 @@ struct MinutesStatusBar: View {
         .help(model.cardSource == "user"
               ? "Your summary is kept; proposed decisions and tasks are added"
               : "The model writes the summary, decisions and tasks, citing the transcript. Choose a template from the menu.")
+    }
+
+    /// The template the meeting's title suggests, when its minutes use the general one.
+    private var suggestedTemplate: MinutesTemplate? {
+        guard (model.minutesTemplate ?? .general) == .general, let title = meeting.title,
+              let suggested = MinutesTemplate.suggested(forTitle: title), suggested != .general else { return nil }
+        return suggested
     }
 
     private func runningText(_ s: LLMService.Status, now: Date) -> String {

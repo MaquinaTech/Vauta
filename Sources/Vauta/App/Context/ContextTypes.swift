@@ -120,6 +120,8 @@ struct SeriesForm: Equatable {
     var calendarKey: String?
     var title = ""
     var entities: Set<Int64> = []
+    /// nil: the default template in Settings.
+    var template: MinutesTemplateChoice?
 
     init() {}
 
@@ -128,11 +130,12 @@ struct SeriesForm: Equatable {
         calendarKey = s.calendarKey
         title = s.titlePattern
         entities = Set(s.defaultEntities)
+        template = s.template
     }
 
     var canSave: Bool { !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     var value: MeetingSeries {
-        MeetingSeries(id: id, calendarKey: calendarKey, titlePattern: title, defaultEntities: entities.sorted())
+        MeetingSeries(id: id, calendarKey: calendarKey, titlePattern: title, defaultEntities: entities.sorted(), template: template)
     }
 }
 

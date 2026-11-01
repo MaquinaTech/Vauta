@@ -11,6 +11,8 @@ public enum KnowledgeError: Error, Equatable, Sendable, LocalizedError, CustomSt
     case emptyNote
     case emptyDecision
     case emptyTask
+    /// A minutes template without instructions.
+    case emptyTemplate
     case relationNeedsTwoNodes
     case suggestionGone
     /// The entity was deleted (or merged) since the screen was loaded.
@@ -26,6 +28,8 @@ public enum KnowledgeError: Error, Equatable, Sendable, LocalizedError, CustomSt
         case .emptyNote: String(localized: "The note is empty.", comment: "Error when adding an empty note to a meeting")
         case .emptyDecision: String(localized: "The decision is empty.", comment: "Error when adding an empty decision")
         case .emptyTask: String(localized: "The task is empty.", comment: "Error when adding an empty task")
+        case .emptyTemplate:
+            String(localized: "Write what the minutes should cover.", comment: "Error when saving a minutes template whose instructions are empty")
         case .relationNeedsTwoNodes:
             String(localized: "A relation needs two different items.", comment: "Error when linking an item to itself")
         case .suggestionGone:

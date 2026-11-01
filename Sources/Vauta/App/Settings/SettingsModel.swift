@@ -89,6 +89,7 @@ final class SettingsModel {
     let afterMeetings = AfterMeetingsSettings()
     let backup = BackupModel()
     let savedVoices = SavedVoicesModel()
+    let minutesTemplates = MinutesTemplatesModel()
 
     private(set) var statusItems: [StatusItem] = []
     private(set) var checking = false

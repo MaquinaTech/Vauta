@@ -25,6 +25,8 @@ final class ContextModel {
     var glossary: [GlossaryTerm] = []
     var series: [MeetingSeries] = []
     var seriesMeetingCounts: [Int64: Int] = [:]
+    /// The minutes templates the person wrote, offered for a recurring meeting.
+    var customTemplates: [CustomMinutesTemplate] = []
     var hasLoaded = false
 
     // MARK: Detail
@@ -289,6 +291,7 @@ final class ContextModel {
             glossary = try await store.glossary()
             series = try await store.series()
             seriesMeetingCounts = try await store.meetingCountsBySeries()
+            customTemplates = try await store.customMinutesTemplates()
             hasLoaded = true
         } catch {
             failure = ContextFailure(error, during: .load)
@@ -363,6 +366,7 @@ final class ContextModel {
         glossary = []
         series = []
         seriesMeetingCounts = [:]
+        customTemplates = []
         searchText = ""
         kindFilter = nil
         pendingNavigation = nil

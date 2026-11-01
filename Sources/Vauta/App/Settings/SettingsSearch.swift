@@ -32,7 +32,7 @@ enum SettingsSearch {
                        "Read captions aloud with VoiceOver", "Transcripts", "Show translations in transcripts", "Better translations",
                        "Improve finished sentences with your model server", "Translation model"],
         .models: ["Provider", "Write minutes with", "Apple Intelligence on this Mac", "A model server on this Mac", "A model server on your network",
-                  "Integrated model", "Minutes", "Minutes language", "Default template", "Meetings without minutes", "Search by meaning",
+                  "Integrated model", "Minutes", "Minutes language", "Default template", "Your templates", "Meetings without minutes", "Search by meaning",
                   "Ask finds passages with", "Server", "Address", "Fast model", "Main model", "Context length", "Key (optional)",
                   "Test Connection", "Find Model Servers", "Set Up a Model Server…", "Paste Configuration", "Certificate pins (optional)",
                   "Private certificate authority (optional)"],
