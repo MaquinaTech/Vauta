@@ -244,6 +244,10 @@ them and read them correctly.
   `llm-bearer-v1`), `UserDefaults` keys, enum raw values stored on disk (for example `MeetingAppFamily`, `ServerKind`)
   and JSON keys already in stored data. Add new fields as optional and decode them with `decodeIfPresent`; never
   rename or reuse an existing key or raw value.
+- **The files themselves** (the encrypted snapshot, its journal and backups) have goldens: `FormatGoldenTests` opens a store
+  with its journal and restores a backup that an earlier build wrote (`Tests/VautaCoreTests/Fixtures/Formats`). A new
+  envelope, journal or backup version keeps reading the old files and adds a golden of its own, written once with
+  `VAUTA_WRITE_FORMAT_GOLDENS` (see the test); an existing golden is never written again.
 
 ## Adding a meeting app
 

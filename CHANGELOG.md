@@ -49,6 +49,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Developer tools:
 
+- Files that an earlier build wrote are kept as goldens in `Tests/VautaCoreTests/Fixtures/Formats`: an encrypted snapshot with the three-record journal of a recording that was going on, and a backup with settings, all of invented content. `FormatGoldenTests` checks that every build opens the store with every write of its journal, recovers the recording and restores the backup, as `SchemaFreezeTests` does for the migrations; a new file version adds a golden of its own.
 - `Vauta diarize --none-bias <n>` (and `--none-bias` in `eval/scripts/run_diarization.py` and `run_diar_sets.py`) lowers the segmentation's "nobody speaks" class by that much before each frame is decided, to measure calling more frames speech. Swept from -0.5 to 2 on the tuning set and the held-out English files: missed speech turns into as much false alarm or more, and the best value is within noise, so the app keeps the network's own decision (docs/BENCHMARKS.md, "Tried and not changed").
 - `llm-eval --tasks ask-cross` asks each question in the meetings it names by its time or place, as Ask does, with "now" the day after the series' last meeting; its traces say which (`scope`) and whether nothing there matched (`widened`). The live answers' replay writes `pastScope`.
 - `llm-eval --tasks echo` also sweeps the far side's echo judged in Others and writes `echo/far_sweep.tsv`.
