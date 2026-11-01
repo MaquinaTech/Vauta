@@ -48,6 +48,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Developer tools:
 
+- Files that an earlier build wrote are kept as goldens in `Tests/VautaCoreTests/Fixtures/Formats`: an encrypted snapshot with the three-record journal of a recording that was going on, and a backup with settings, all of invented content. `FormatGoldenTests` checks that every build opens the store with every write of its journal, recovers the recording and restores the backup, as `SchemaFreezeTests` does for the migrations; a new file version adds a golden of its own.
 - `llm-eval --tasks ask-cross` asks each question in the meetings it names by its time or place, as Ask does, with "now" the day after the series' last meeting; its traces say which (`scope`) and whether nothing there matched (`widened`). The live answers' replay writes `pastScope`.
 - `llm-eval --tasks echo` also sweeps the far side's echo judged in Others and writes `echo/far_sweep.tsv`.
 - Five tests that failed now and then on the CI runners no longer depend on how fast the runner is. One found the race of the document folders fixed above (its wait now also waits for a scan in flight). Two had races with the wall clock: a hand-off dated before a slow line, and a warm-up interval that passed between two lines. On the runners' virtual machines (`TestMachine.isVirtual`), two bounds measured on a Mac are widened, never dropped: the logits of the tiny model, where the paravirtual GPU sometimes rounds differently, and the speaker finalizer's debug time budget.
