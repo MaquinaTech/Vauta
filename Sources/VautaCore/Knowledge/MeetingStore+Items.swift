@@ -50,7 +50,8 @@ public struct Decision: Sendable, Identifiable, Hashable {
 
 /// The stored codes of `unconfirmed_reason` (never meeting text). Anything that is not ranked out (`rank` or `rank:<code>`) is a doubt from a check on the item's words.
 public enum UnconfirmedReason {
-    /// The item did not rank among the minutes' items. Only a question or unbacked figures keep their own reason instead.
+    /// The item did not rank among the minutes' items. Only a question, unbacked figures or a line spoken to the model (`instruction`)
+    /// keep their own reason instead.
     public static let rankedOut = "rank"
 
     /// The reason stored for an item that ranked out: `rank`, followed by the soft doubt the evidence check had put on it (`rank:noAgreement`),

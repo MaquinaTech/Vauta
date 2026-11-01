@@ -456,6 +456,13 @@ extension VautaPrompts {
         out.title = MinutesText.cleanProse(PromptText.clip(raw.title ?? "", 120), language: prose)
         out.summary = MinutesText.cleanProse(PromptText.clip(raw.summary ?? "", 3000), language: prose)
         let allSegments = segments.values.sorted { ($0.start, $0.id) < ($1.start, $1.id) }
+        // A line that speaks to the model, or follows one, backs no firm item (`InstructionCues`).
+        let place = Dictionary(allSegments.enumerated().map { ($1.id, $0) }, uniquingKeysWith: { first, _ in first })
+        func speaksToTheModel(_ seg: CitableSegment) -> Bool {
+            if InstructionCues.addressesModel(seg.text) { return true }
+            guard let i = place[seg.id], i > 0 else { return false }
+            return InstructionCues.addressesModel(allSegments[i - 1].text)
+        }
         out.title = MinutesText.dropMeetingDate(out.title, meetingDate: reference, timeZone: timeZone, language: language, segments: allSegments)
         out.summary = MinutesText.dropMeetingDate(out.summary, meetingDate: reference, timeZone: timeZone, language: language, segments: allSegments)
         if let tail = MinutesText.unfinishedTail(out.summary) { out.counts["summary.unfinished"] = tail }
@@ -506,10 +513,13 @@ extension VautaPrompts {
             guard let seg = backing.segment else { continue }
             if let why = MinutesText.decisionProblem(text: text, quote: d.quote, segmentText: seg.text, language: language) { out.drop("decision", why); continue }
             guard seen.insert("d" + TextKeys.norm(text)).inserted else { out.drop("decision", "duplicate"); continue }
-            let unconfirmed = !MinutesVerifier.figuresAreInSegment(item: text, segment: seg.text)
+            let instructed = speaksToTheModel(seg)
+            if instructed { out.counts["decision.instruction", default: 0] += 1 }
+            let unconfirmed = instructed || !MinutesVerifier.figuresAreInSegment(item: text, segment: seg.text)
                 || !MinutesVerifier.namedPeopleAreBacked(itemText: text, people: others, segment: seg.text,
                                                          speakerEntity: directory.person(of: seg.speaker).flatMap { $0.confident ? $0.entity : nil })
-            out.decisions.append(.init(text: text, segment: seg.id, t: seg.start, unconfirmed: unconfirmed, doubt: unconfirmed ? "figures" : nil, quote: d.quote ?? ""))
+            out.decisions.append(.init(text: text, segment: seg.id, t: seg.start, unconfirmed: unconfirmed,
+                                       doubt: instructed ? "instruction" : unconfirmed ? "figures" : nil, quote: d.quote ?? ""))
         }
         for t in raw.tasks {
             guard let text = t.text.map({ MinutesText.cleanProse(PromptText.clip($0, 600), language: prose) }), !text.isEmpty else { out.drop("task", "emptyText"); continue }
@@ -547,12 +557,14 @@ extension VautaPrompts {
                 }
             }
             let speaker = directory.person(of: seg.speaker)
-            var unconfirmed = !MinutesVerifier.figuresAreInSegment(item: text, segment: seg.text, due: due, timeZone: timeZone)
+            let instructed = speaksToTheModel(seg)
+            if instructed { out.counts["task.instruction", default: 0] += 1 }
+            var unconfirmed = instructed || !MinutesVerifier.figuresAreInSegment(item: text, segment: seg.text, due: due, timeZone: timeZone)
                 || !MinutesVerifier.namedPeopleAreBacked(itemText: text, people: others, segment: seg.text,
                                                          speakerEntity: speaker.flatMap { $0.confident ? $0.entity : nil })
             if let due, !MinutesVerifier.dueIsInSegment(due, segment: dueWords, reference: reference, timeZone: timeZone) { unconfirmed = true }
             out.tasks.append(.init(text: text, owner: verdict.owner, due: due, segment: seg.id, t: seg.start,
-                                   unconfirmed: unconfirmed, doubt: unconfirmed ? "figures" : nil, ownerUncertain: verdict.uncertain, ownerSpeaker: verdict.owner == nil ? ownerSpeaker : nil,
+                                   unconfirmed: unconfirmed, doubt: instructed ? "instruction" : unconfirmed ? "figures" : nil, ownerUncertain: verdict.uncertain, ownerSpeaker: verdict.owner == nil ? ownerSpeaker : nil,
                                    dueDay: due.map { DueDay(written ?? "") ?? DueDay.containing($0, in: timeZone) }, quote: t.quote ?? ""))
         }
         for e in raw.entities {

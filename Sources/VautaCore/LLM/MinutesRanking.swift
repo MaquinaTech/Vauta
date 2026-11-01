@@ -66,8 +66,9 @@ enum MinutesRanking {
             + w.salience * min(f.salience, 0.6) + (f.owner ? w.owner : 0)
     }
 
-    /// The checks found the item a question or its figures unverified: it never goes into the list, whatever its rank.
-    static func neverFirm(_ doubt: String?) -> Bool { doubt == "question" || doubt == "figures" }
+    /// The checks found the item a question, its figures unverified or its line spoken to the model (`InstructionCues`): it never goes
+    /// into the list, whatever its rank.
+    static func neverFirm(_ doubt: String?) -> Bool { doubt == "question" || doubt == "figures" || doubt == "instruction" }
 
     private struct Entry {
         let isTask: Bool
@@ -146,7 +147,8 @@ enum MinutesRanking {
         let shown = Set(ranked.filter { !neverFirm(entries[$0].features.doubt) && !(procedureOut && entries[$0].features.procedure) }.prefix(k))
 
         // An item that did not rank is "ranked out", whether or not a soft check had doubted it (the ranking shows such an item firm when it
-        // ranks in, so its doubt says nothing more than "did not rank"); only a question or unbacked figures keep their own mark.
+        // ranks in, so its doubt says nothing more than "did not rank"); only a question, unbacked figures or a line spoken to the model keep
+        // their own mark.
         var out = minutes
         out.decisions = []
         out.tasks = []
