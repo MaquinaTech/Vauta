@@ -41,8 +41,8 @@ public enum LLMEvaluation {
         public var quietProcessCPU: Double = 50
         public var quietGPU: Int = 10
         public var repetitions = 1
-        /// Prefill the integrated model in chunks of exactly this many tokens (`LanguageModelEngine.setPrefillChunk`) instead of the app's chunks
-        /// sized by speed, which change from run to run and with them the bf16 rounding: the same prompt then decodes the same tokens every time.
+        /// Prefill the integrated model in chunks of this many tokens (`LanguageModelEngine.setPrefillChunk`) instead of the app's 128: the
+        /// bf16 rounding depends on the chunking, so each size is another draw of the same minutes (and each repeats token for token).
         public var prefillChunk: Int?
         /// A public transcript the search model embeds in a loop in this process while the runs go on (the concurrency measurement:
         /// both MLX models share the one GPU gate). `embeddings.json` in the output folder has the loop's timings.

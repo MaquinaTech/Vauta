@@ -95,6 +95,8 @@ public struct IntegratedChatModel: ChatModel {
         breakdown.newPrefillTokens = max(0, out.promptTokens - out.reusedTokens)
         breakdown.prefillChunks = out.prefillChunks
         breakdown.prefillSeconds = out.prefillSeconds
+        breakdown.longestChunkSeconds = out.longestChunkSeconds
+        breakdown.longestBurstSeconds = out.longestBurstSeconds
         result.breakdown = breakdown
         if let schema = used as? SchemaConstraint { result.constraintTiming = Self.timing(schema.stats, setup: setup, upload: out.maskUploadSeconds) }
         return result

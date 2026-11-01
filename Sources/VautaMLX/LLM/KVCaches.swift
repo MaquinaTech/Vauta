@@ -103,6 +103,13 @@ final class LayerCaches {
     var arrays: [MLXArray] { full.values.flatMap(\.arrays) + sliding.values.flatMap(\.arrays) }
     var byteCount: Int { arrays.reduce(0) { $0 + $1.nbytes } }
 
+    /// The keys and values that are in use, layer by layer: the full layers up to `offset` (their buffers hold more), then the windows.
+    var usedArrays: [MLXArray] {
+        let n = offset
+        let fulls = full.keys.sorted().flatMap { i in full[i]?.arrays.map { $0[0..., 0..., 0..<n, 0...] } ?? [] }
+        return fulls + sliding.keys.sorted().flatMap { sliding[$0]?.arrays ?? [] }
+    }
+
     /// What is needed to continue from `length` tokens later: the full layers are truncated, the sliding windows saved.
     struct Snapshot {
         var length: Int

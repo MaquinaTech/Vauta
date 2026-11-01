@@ -73,7 +73,6 @@ struct LanguageModelGenerationTests {
 
     @Test func theTokenLimitInsideAStringOrAnArrayStillGivesValidJSON() async throws {
         let engine = try Self.engine()
-        engine.firstChunk = 512
         let offered = OutputSchemas.Offered(segments: [3, 4, 5, 120], entities: [7, 8], documents: nil)
         var truncated = 0
         for (schema, limit) in [(OutputSchemas.minutes(offered), 420), (OutputSchemas.minutes(offered), 700), (OutputSchemas.liveNotes(offered), 160),
@@ -94,7 +93,6 @@ struct LanguageModelGenerationTests {
 
     @Test func theTimeLimitOfADecodeClosesTheValueLikeTheTokenLimit() async throws {
         let engine = try Self.engine()
-        engine.firstChunk = 512
         let offered = OutputSchemas.Offered(segments: [3, 4, 5, 120], entities: [7, 8], documents: nil)
         for seed in 1...4 as ClosedRange<UInt64> {
             // No time at all: the first step already closes the answer as the shortest valid one of either branch.
@@ -270,28 +268,45 @@ struct LanguageModelGenerationTests {
 
     @Test func checkpointsAreDenseNearTheEndAndSparseFurtherBack() {
         let all = Array(stride(from: 512, through: 30_000, by: 512)) + [30_100]
-        let kept = Gemma4Engine.pruned(all, end: 30_100, nearEnd: 1024, farSpacing: 8192)
+        let kept = Gemma4Engine.pruned(all, end: 30_100, nearEnd: 1024, nearSpacing: 512, farSpacing: 8192)
         #expect(kept.last == 30_100)
         #expect(kept.filter { 30_100 - $0 <= 1024 }.count == 3, "512, 1024 and the end")
         let far = kept.filter { 30_100 - $0 > 1024 }
         #expect(far.count <= 4 && zip(far, far.dropFirst()).allSatisfy { $1 - $0 >= 8192 }, "\(far)")
+        // A recording read every few lines leaves the last chunk boundary of every reading: only the newest one stays, with the
+        // near ones spaced as usual.
+        let readings = [8_192, 8_704, 9_216, 9_344, 9_472, 9_600, 9_728, 9_856, 9_900]
+        let thinned = Gemma4Engine.pruned(readings, end: 9_900, boundary: 9_856, nearEnd: 1024, nearSpacing: 512, farSpacing: 8192)
+        #expect(thinned == [8_192, 9_216, 9_728, 9_856, 9_900], "\(thinned)")
     }
 
     // MARK: Chunks
 
-    @Test func prefillChunksAreSizedByTheMeasuredSpeed() async throws {
-        // 200 tokens a second and 0.35 s: 64 tokens (a multiple of 16); a fast tiny model: the memory rule; no speed yet: the first chunk.
-        #expect(Gemma4Engine.chunk(memoryCap: 512, rate: 200, seconds: 0.35) == 64)
-        #expect(Gemma4Engine.chunk(memoryCap: 512, rate: 224, seconds: 0.35) == 64)
-        #expect(Gemma4Engine.chunk(memoryCap: 512, rate: 100, seconds: 0.35) == 32)
-        #expect(Gemma4Engine.chunk(memoryCap: 512, rate: 10, seconds: 0.35) == 16, "never below 16")
-        #expect(Gemma4Engine.chunk(memoryCap: 128, rate: 50_000, seconds: 0.35) == 128)
-        #expect(Gemma4Engine.chunk(memoryCap: 512, rate: nil, seconds: 0.35) == 64)
-        // A chunk of 64 tokens at the measured 193 to 224 tokens/s is about 0.3 s, so a cancel is seen within the target.
-        #expect(64.0 / 193 < 0.4)
+    @Test func prefillChunksEndAtTheMultiplesOfTheChunkWhereverTheReadingStarts() async throws {
+        #expect(Gemma4Engine.prefillChunk == 128)
+        #expect(Gemma4Engine.chunkEnd(from: 0, end: 1_000, unit: 128) == 128)
+        #expect(Gemma4Engine.chunkEnd(from: 200, end: 1_000, unit: 128) == 256, "a reading that starts inside a chunk ends it where a cold one does")
+        #expect(Gemma4Engine.chunkEnd(from: 256, end: 1_000, unit: 128) == 384)
+        #expect(Gemma4Engine.chunkEnd(from: 900, end: 1_000, unit: 128) == 1_000)
         let engine = try Self.engine()
-        _ = try await engine.lastLogits(Self.prompt(120))
-        #expect(engine.prefillRate != nil, "the speed is measured on the first prompt")
+        #expect(engine.chunkUnit(contextEnd: 4_000) == 128)
+        #expect(engine.chunkUnit(contextEnd: Gemma4Engine.maxContext) == 128, "the memory rule never cuts it within the model's context")
+        engine.fixedChunk = 512
+        #expect(engine.chunkUnit(contextEnd: 4_000) == 512 && engine.chunkUnit(contextEnd: 30_000) == 256, "the goldens' chunk, cut by the memory rule")
+        engine.chunkLimit = 24
+        #expect(engine.chunkUnit(contextEnd: 4_000) == 24)
+    }
+
+    @Test func aColdReadingGivesTheSameBitsWhateverRanBefore() async throws {
+        // The chunks no longer follow the measured speed, which changes with every prompt read.
+        let engine = try Self.engine()
+        let p = Self.prompt(400, seed: 11)
+        let first = try await engine.lastLogits(p)
+        _ = try await engine.lastLogits(Self.prompt(40, seed: 12))
+        _ = try await engine.generate(GenerationRequest(prompt: Self.prompt(300, seed: 13), maxTokens: 20, sampling: .greedy))
+        #expect(try await engine.lastLogits(p) == first)
+        let r = try await engine.generate(GenerationRequest(prompt: p, maxTokens: 20, sampling: .greedy))
+        #expect(r.prefillChunks == 4 && r.longestChunkSeconds > 0 && r.longestBurstSeconds > 0, "400 tokens in chunks of 128; both stretches timed")
     }
 
     // MARK: Sampler

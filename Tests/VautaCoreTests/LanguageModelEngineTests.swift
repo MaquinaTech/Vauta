@@ -70,6 +70,7 @@ struct LanguageModelEngineTests {
 
     @Test func aKeptPrefixGivesTheSameTextAsAFreshRunAndIsReused() async throws {
         let engine = try Self.engine()
+        engine.chunkLimit = 16
         let g = try #require(try Self.goldens().last)
         let prompt = g.ids
         let fresh = try await engine.generate(GenerationRequest(prompt: prompt, maxTokens: 6, sampling: .greedy)).tokens
@@ -82,7 +83,8 @@ struct LanguageModelEngineTests {
         let longer = prompt + [5, 6, 7, 8, 9, 10]
         let c = try await engine.generate(GenerationRequest(prompt: longer, maxTokens: 4, sampling: .greedy, sharedPrefix: 110))
         let d = try await engine.generate(GenerationRequest(prompt: longer, maxTokens: 4, sampling: .greedy))
-        #expect(c.tokens == d.tokens && c.reusedTokens == 100 - 16)
+        // It continues from the kept prefix's last chunk boundary (80), where a cold reading of the longer prefix also stops.
+        #expect(c.tokens == d.tokens && c.reusedTokens == 80)
         let other = Array(prompt.reversed())
         let e = try await engine.generate(GenerationRequest(prompt: other, maxTokens: 4, sampling: .greedy, sharedPrefix: 100))
         #expect(e.reusedTokens == 0, "a prompt that diverges inside the prefix starts again")

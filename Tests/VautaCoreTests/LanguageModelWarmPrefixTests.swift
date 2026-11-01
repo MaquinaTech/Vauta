@@ -34,7 +34,9 @@ struct LanguageModelWarmPrefixTests {
         for tick in 1...5 {
             let p = Self.transcript(200 + tick * 80) + Self.closing
             let reused = try await engine.prefillPrefix(p, prefixLength: p.count, slot: .meeting)
-            if tick > 1 { #expect(reused >= 200 + (tick - 1) * 80 - 20, "tick \(tick) continued from the last one: \(reused)") }
+            // From the last chunk boundary before the previous tick's end, where a cold reading also stops.
+            let previous = 200 + (tick - 1) * 80 + Self.closing.count - 16
+            if tick > 1 { #expect(reused > previous - 64 && reused <= previous && reused % 64 == 0, "tick \(tick) continued from the last one: \(reused)") }
         }
         #expect(engine.keptPrefixTokens(.meeting) == full.count - 16)
         let prompt = full + Self.instruction
@@ -42,6 +44,21 @@ struct LanguageModelWarmPrefixTests {
         #expect(warm.reusedTokens >= full.count - 32, "reused \(warm.reusedTokens) of \(full.count)")
         let coldRun = try await Self.cold(engine, prompt)
         #expect(warm.tokens == coldRun.tokens, "the same text as a cold run")
+    }
+
+    @Test func ticksAndQuestionsInBetweenLeaveTheKeysAndValuesOfOneColdReading() async throws {
+        let engine = try Self.engine()
+        for tick in 1...5 {
+            let p = Self.transcript(200 + tick * 80) + Self.closing
+            try await engine.prefillPrefix(p, prefixLength: p.count, slot: .meeting)
+            // A question in between: its own lines and its answer are read past the prefix, which is then cut back.
+            _ = try await engine.generate(GenerationRequest(prompt: p + Self.instruction, maxTokens: 30, sharedPrefix: p.count, slot: .meeting))
+        }
+        let warm = engine.keptValues(.meeting)
+        engine.dropKeptPrefix()
+        let full = Self.transcript(600) + Self.closing
+        try await engine.prefillPrefix(full, prefixLength: full.count, slot: .meeting)
+        #expect(!warm.isEmpty && engine.keptValues(.meeting) == warm, "the same chunks, so the same bits")
     }
 
     @Test func aChangeNearTheEndOrEarlyRewindsAndStillEqualsACold() async throws {
@@ -99,7 +116,7 @@ struct LanguageModelWarmPrefixTests {
         _ = try await engine.generate(GenerationRequest(prompt: prompt, maxTokens: 3, sharedPrefix: prompt.count - Self.instruction.count, slot: .meeting,
                                                         onPrefill: { done, total in seen.withLock { $0.append((done, total)) } }))
         let values = seen.withLock { $0 }
-        #expect(values.first.map { $0.0 >= first.count - 32 } == true, "the bar starts high with a warm prefix: \(values.first.map { "\($0)" } ?? "")")
+        #expect(values.first.map { $0.0 > first.count - 16 - 64 } == true, "the bar starts high with a warm prefix: \(values.first.map { "\($0)" } ?? "")")
         #expect(zip(values, values.dropFirst()).allSatisfy { $0.0 <= $1.0 }, "monotone")
         #expect(values.last?.0 == prompt.count && values.allSatisfy { $0.1 == prompt.count })
     }

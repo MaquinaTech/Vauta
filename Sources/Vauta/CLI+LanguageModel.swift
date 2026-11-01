@@ -104,7 +104,7 @@ private func throw_usage() { printError("usage: llm-install status|verify|adopt|
 /// recording, with the integrated model reading it as the segments arrive; `--renumber-final` makes the final speaker labelling
 /// number the voices the other way round than the live one; `--after-meeting` (with `--warm`, live-answer) asks the questions
 /// about the finished meeting, whose whole transcript was read while it recorded. `--prefill-chunk n` prefills the integrated model in
-/// chunks of exactly n tokens instead of the app's chunks sized by speed, so a run repeats token for token.
+/// chunks of n tokens instead of the app's 128, another draw of the bf16 rounding (a run repeats token for token with either).
 /// Runs the app's minutes code and Ask with both providers interleaved item by item (ABAB) on PUBLIC transcripts, in a throwaway
 /// store; never the user's store. See docs/LANGUAGE_MODEL.md. The integrated model comes from `VAUTA_LLM_MODEL_DIR`.
 /// `--providers server --server <config.json> [--ask-key]` (minutes, live-answer) adds a model server, from the same file as `server-check`: its

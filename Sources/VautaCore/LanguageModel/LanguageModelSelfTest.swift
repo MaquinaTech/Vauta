@@ -118,7 +118,7 @@ public enum LanguageModelSelfTest {
                 check("logits (512-token chunks, as the goldens): top-1 matches mlx-lm on \(top1)/\(lg.count) prompts", !lg.isEmpty && top1 == lg.count)
                 check("logits: largest |Δ| over the top-20 is \(String(format: "%.4f", worst)) (limit \(logitTolerance); mlx-lm differs from itself by up to 1.09 when its prefill chunk changes from 512 to 128 tokens)", worst <= logitTolerance)
                 check("greedy: the first 32 tokens equal mlx-lm on \(matchedGreedy)/\(lg.count) prompts", !lg.isEmpty && matchedGreedy == lg.count)
-                // 2. The chunking the app uses (about 0.35 s of work per chunk): the logits move by rounding only; top-1 must still agree.
+                // 2. The chunking the app uses (128 tokens): the logits move by rounding only; top-1 must still agree.
                 // A greedy text may leave mlx-lm's at a near tie, so its agreement is reported, not required.
                 await engine.setPrefillChunk(nil)
                 var appWorst = 0.0, appTop1 = 0, appGreedy = 0
@@ -129,7 +129,7 @@ public enum LanguageModelSelfTest {
                     let gen = try await generateGreedy(engine, ids: g.ids, count: max(1, min(32, g.greedy.count)))
                     if gen == Array(g.greedy.prefix(gen.count)) && gen.count >= min(32, g.greedy.count) { appGreedy += 1 }
                 }
-                check("logits with the app's time-sized chunks: top-1 matches on \(appTop1)/\(lg.count) prompts, largest |Δ| \(String(format: "%.4f", appWorst)) (limit \(logitTolerance))", !lg.isEmpty && appTop1 == lg.count && appWorst <= logitTolerance)
+                check("logits with the app's 128-token chunks: top-1 matches on \(appTop1)/\(lg.count) prompts, largest |Δ| \(String(format: "%.4f", appWorst)) (limit \(logitTolerance))", !lg.isEmpty && appTop1 == lg.count && appWorst <= logitTolerance)
                 out.append("llm-selftest:      greedy with the app's chunks: the first 32 tokens equal mlx-lm on \(appGreedy)/\(lg.count) prompts (informational: a near tie can flip with rounding)")
             }
         } catch { check("model run", false, "\(error)") }
@@ -166,7 +166,7 @@ public enum LanguageModelSelfTest {
                     let before = MLXRuntime.physFootprintMB()
                     do {
                         let r = try await engine.generateTimed(ids, maxTokens: 32)
-                        out.append("llm-selftest: long \(ids.count) tokens: prefill \(String(format: "%.1f", r.prefillSeconds)) s (\(Int(Double(ids.count) / max(r.prefillSeconds, 0.001))) tok/s), first token \(String(format: "%.1f", r.firstTokenSeconds)) s, decode \(String(format: "%.1f", Double(max(r.tokens.count - 1, 1)) / max(r.decodeSeconds, 0.001))) tok/s, footprint \(before) MB before, peak \(r.peakFootprintMB) MB, resident weights \(await engine.residentWeightBytes() >> 20) MB")
+                        out.append("llm-selftest: long \(ids.count) tokens: prefill \(String(format: "%.1f", r.prefillSeconds)) s (\(Int(Double(ids.count) / max(r.prefillSeconds, 0.001))) tok/s), first token \(String(format: "%.1f", r.firstTokenSeconds)) s, decode \(String(format: "%.1f", Double(max(r.tokens.count - 1, 1)) / max(r.decodeSeconds, 0.001))) tok/s, footprint \(before) MB before, peak \(r.peakFootprintMB) MB, resident weights \(await engine.residentWeightBytes() >> 20) MB, GPU held at most \(String(format: "%.2f", r.longestChunkSeconds)) s per chunk and \(String(format: "%.2f", r.longestBurstSeconds)) s per burst")
                     } catch { check("long prompt of \(target) tokens", false, "\(error)") }
                 }
             }
