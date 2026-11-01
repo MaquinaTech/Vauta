@@ -12,7 +12,7 @@ or to the directory named by `VAUTA_EVAL_WORK`. Text only is committed under `ev
 |---|---|---|---|
 | AMI Meeting Corpus, IHM headset audio (official mirror, 10 meetings x 4 headsets) | audio | CC BY 4.0 | SHA-256 of each file in `manifests/AMI_AUDIO.sha256.txt` |
 | `pyannote/AMI-diarization-setup` (only_words RTTMs, UEMs, split lists) | reference speaker turns | repo Apache-2.0, labels derive from AMI (CC BY 4.0) | git commit in `pins.json` |
-| AMI manual annotations 1.6.2 (`ami_public_manual_1.6.2.zip`) | speaker-to-headset map and the manual word transcripts | CC BY 4.0 | SHA-256 in `pins.json` |
+| AMI manual annotations 1.6.2 (`ami_public_manual_1.6.2.zip`) | speaker-to-headset map, the manual word transcripts, and the abstractive summaries with their summary links and dialogue acts (the human gold of the minutes) | CC BY 4.0 | SHA-256 in `pins.json` |
 | VoxConverse test set (8 wavs, read by HTTP range requests from the official zip) | comparability with published diarization numbers | CC BY 4.0 (copyright stays with the video owners) | SHA-256 of each file in `manifests/VOXCONVERSE_AUDIO.sha256.txt` |
 | `joonson/voxconverse` (test RTTMs, corrected labels) | reference speaker turns | CC BY 4.0 | git commit in `pins.json` |
 
@@ -53,6 +53,8 @@ eval/.venv/bin/python -I eval/scripts/score_der.py --ref <rttm dir> --hyp <rttm 
 eval/.venv/bin/python -I -m unittest discover -s eval/tests                                              # scorer tests, and those of tools/llm-eval/stats.py (that file alone needs no numpy)
 eval/.venv/bin/python -I eval/scripts/run_minutes.py --bin .build/release/Vauta --seconds 180 [--tag name]   # minutes for the 10 AMI windows (3-minute headline; --seconds 600 for the 10-minute table) (Apple's on-device model), then the citation checks below
 eval/.venv/bin/python -I eval/scripts/score_minutes.py --minutes m.json --transcript t.json                       # citation checks on minutes of a PUBLIC transcript (rubric: eval/rubric/)
+python3 -I eval/scripts/build_ami_gold.py --sets <folder of <meeting>.json> --out <gold>                          # human gold of the minutes: AMI's decisions and actions with the passages the annotators linked them to
+python3 -I eval/scripts/score_minutes_gold.py --gold <gold> --minutes apple=<minutes.apple.jsonl> [--minutes integrated=<…>] [--out <dir>]   # where the minutes of `llm-eval --tasks minutes` point, against that gold
 ```
 
 `Vauta diarize`, `Vauta echo-coupling` and `Vauta transcribe-file` are offline evaluation commands: they read their files
@@ -71,6 +73,16 @@ reports DER with and without the 0.25 s collar. It was cross-checked once (10 Oc
 pyannote.metrics 4.1 and a second frame-based scorer on the same engine output: the per-file figures agree to 0.1 point (see
 BENCHMARKS.md). Those cross-check scripts are not committed, so the harness does not reproduce that check.
 `score_wer.py` documents its text normalisation at the top of the file. `run_wer.py` mutes the audio outside the scored speakers' reference turns before transcribing ("oracle masking", explained at the top of the script) and also reports the unmasked figure.
+
+`build_ami_gold.py` takes, for each meeting of an `llm-eval` set (`tools/llm-eval/data/build_ami_long.py`) that AMI has an
+abstractive summary for, the summary's sentences with the dialogue acts the annotators linked to each one, as passages of that
+set's transcript, and the owners an action's subject names by role ("The industrial designer will ..."). It refuses a zip
+whose SHA-256 is not the pinned one and copies no name from the corpus ids; the gold stays in the work folder.
+`score_minutes_gold.py` counts a decision or task of the minutes as grounded in a human sentence when the passage it cites is
+within one passage of a passage linked to the sentence: the human decisions and actions found (recall), the items grounded in
+one (supported), the items grounded anywhere in the human summary, the same rates for a citation drawn at random, and the
+owners of the tasks grounded in an action that names roles. An AMI sentence often holds several decisions, so there is no
+one-to-one matching. It scores where an item points, not what it says. Tests: `python3 -I -m unittest discover -s eval/tests -p 'test_ami_gold.py'` (an invented meeting).
 
 ## Limits
 

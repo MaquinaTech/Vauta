@@ -53,6 +53,21 @@ Download size: about 4 GB in all (about 2.8 GB for AMI, 0.5 GB for the VoxConver
 sources); the built sets take about 1.7 GB, and about 8 GB of disk are in use while they are built (the same figures as in
 `docs/BENCHMARKS.md` and `eval/run_all.sh`). Needs Apple's `en-US` and `es-ES` speech models for WER.
 
+## Sealed: minutes against AMI's human gold
+
+The minutes are scored against the decisions and actions of AMI's abstractive summaries (`eval/scripts/build_ami_gold.py` and
+`score_minutes_gold.py`; figures in [docs/BENCHMARKS.md](../../docs/BENCHMARKS.md#minutes-against-amis-human-summaries)). For a
+check on meetings nothing was tuned or measured on, 11 AMI scenario meetings with a summary were set aside on 1 November 2026:
+those that no evaluation had used by then. Every other scenario meeting with a summary had been used by an earlier run, which is
+why there are 11 and not more. The list is kept outside the repository. Its SHA-256 (the ids sorted, one per line, ending with a
+newline) is:
+
+```text
+47335c981533d4fce249b0d32672d3744e7c37a424e94b51ed21ac836876ebee
+```
+
+The meetings are opened once, for the check before a release, and the list is published then with the figures.
+
 ## Limits
 
 - **Held out for the app, not for every model.** None of these files is in the 18-file tuning set, but the diarization
