@@ -44,6 +44,7 @@ eval/.venv/bin/python -I eval/scripts/fetch.py [--only ami|vox|ann|refs] [--jobs
 eval/.venv/bin/python -I eval/scripts/build_sets.py
 eval/.venv/bin/python -I eval/scripts/run_diarization.py --bin .build/release/Vauta [--tag name] [--threshold 0.70] [--none-bias 0]
 eval/.venv/bin/python -I eval/scripts/run_wer.py --bin .build/release/Vauta [--locale en-US] [--confidence]   # --confidence: one more masked pass with each word's confidence (WER and time against the plain pass, reliability bins, ECE, Brier, AUROC)
+eval/.venv/bin/python -I eval/scripts/run_cpwer.py --bin .build/release/Vauta [--locale en-US] [--collar 5] [--only <meeting> ...]   # cpWER, tcpWER and WDER of the remote mix: the app's transcript with its speakers (attribute-file) against the AMI words, in the no-bleed region of the first 600 s
 eval/.venv/bin/python -I eval/scripts/run_echo_coupling.py --bin .build/release/Vauta [--seconds 600]   # whether the microphone heard the others (EchoCoupling) on the AMI meetings: room cross-talk, speakers, headphones
 eval/.venv/bin/python -I eval/scripts/check_doc_tables.py <run dir>                                               # the per-file tables of docs/BENCHMARKS.md equal the run's (run it after editing them)
 eval/.venv/bin/python -I eval/scripts/compare_runs.py --sets-dir <sets> --before <run dir> --after <run dir>                  # paired DER comparison of two runs (pooled, per-file change, bootstrap interval); --sets-dir eval/heldout/sets for the held-out groups, the main harness's $VAUTA_EVAL_WORK/sets for the tuning_set group
@@ -59,13 +60,15 @@ python3 -I eval/scripts/gold_match_packets.py --gold <gold> --minutes apple=<…
 python3 -I eval/scripts/score_minutes_gold.py --gold <gold> --minutes apple=<…> [--minutes integrated=<…>] --matches <packets>/blind/items_graded.tsv --key <packets>/sealed/key.json [--out <dir>]   # adds what the items say, from the judge's grades
 ```
 
-`Vauta diarize`, `Vauta echo-coupling` and `Vauta transcribe-file` are offline evaluation commands: they read their files
+`Vauta diarize`, `Vauta echo-coupling`, `Vauta transcribe-file` and `Vauta attribute-file` are offline evaluation commands: they read their files
 (two for `echo-coupling`), never contact a network and never write audio. `run_wer.py` uses `transcribe-file --show-text
 --i-understand` on a **public** corpus; never do that with a real meeting (see [AGENTS.md](../AGENTS.md)). The same goes for
 `--out <words.jsonl>`, which writes every recognised word with its time and confidence and is accepted only with
-`--show-text`; `run_wer.py --confidence` deletes each file once it is scored.
+`--show-text`; `run_wer.py --confidence` deletes each file once it is scored. `attribute-file <audio> --out <words.jsonl> --show-text`
+transcribes and separates the speakers of a public file as an imported recording is, and writes every word with its time and
+speaker; `run_cpwer.py` deletes each file once it is scored.
 
-Results land in `$VAUTA_EVAL_WORK/runs/<tag>/`: the RTTMs, `timings_*.json`, `der_*.md`, `summary.json`, `wer.json`, `wer.md`.
+Results land in `$VAUTA_EVAL_WORK/runs/<tag>/`: the RTTMs, `timings_*.json`, `der_*.md`, `summary.json`, `wer.json`, `wer.md`, `cpwer.json`, `cpwer.md`.
 
 ## The scorers
 
