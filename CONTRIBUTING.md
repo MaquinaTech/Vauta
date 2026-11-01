@@ -102,6 +102,10 @@ for f in scripts/*.sh; do bash -n "$f"; done   # and shellcheck, if installed
 ```
 
 CI also assembles the app bundle with an ad-hoc signature (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+Once a week [`sanitizers.yml`](.github/workflows/sanitizers.yml) runs the tests under the thread and the address sanitizers,
+without the suites that run a model on the GPU (a suite you mark `.gpuExclusive` goes in its `GPU_SUITES`, which a test
+checks), and [`codeql.yml`](.github/workflows/codeql.yml) fails a run in which CodeQL analysed no Swift file. To run a
+sanitizer locally: `swift test --sanitize=thread --skip "<GPU_SUITES>"` (add the plugin path with the Command Line Tools).
 
 ### Run the app
 

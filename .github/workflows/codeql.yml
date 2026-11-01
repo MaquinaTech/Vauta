@@ -7,8 +7,8 @@
 # check Security > Code scanning > Tools that Swift files were analysed (the maintainer's release checks). The build step uses
 # the native build system without the manifest sandbox; if Swift is still not analysed, run this job on macos-26 with
 # Xcode 26 selected. Swift 6.4's `swift build` defaults to the swiftbuild backend, whose compiles run
-# in a separate build-service process that the extractor may not trace, and a run can then finish green with no Swift file
-# analysed (nothing here fails it: check Tools after the first run).
+# in a separate build-service process that the extractor may not trace, and a run could then finish green with no Swift file
+# analysed: the last step fails such a run.
 name: CodeQL
 
 on:
@@ -44,6 +44,7 @@ jobs:
           persist-credentials: false
 
       - name: Initialize CodeQL
+        id: init
         uses: github/codeql-action/init@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
           languages: swift
@@ -57,6 +58,39 @@ jobs:
         run: swift build --build-system native --disable-sandbox --arch arm64
 
       - name: Analyze
+        id: analyze
         uses: github/codeql-action/analyze@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
         with:
           category: "/language:swift"
+
+      # A green run proves nothing if the extractor saw no Swift file. Count them two ways, from what the analysis kept: the
+      # sources in the database's archive and the files the results report as extracted. Fail only when both are zero.
+      - name: Check that Swift files were analysed
+        env:
+          CODEQL: ${{ steps.init.outputs.codeql-path }}
+          SARIF_DIR: ${{ steps.analyze.outputs.sarif-output }}
+        run: |
+          set -euo pipefail
+          python3 - <<'EOF'
+          import glob, json, os, zipfile
+          archived = 0
+          for db in glob.glob(os.path.join(os.environ["RUNNER_TEMP"], "codeql_databases", "swift*")):
+              zipped, folder = os.path.join(db, "src.zip"), os.path.join(db, "src")
+              if os.path.isfile(zipped):
+                  with zipfile.ZipFile(zipped) as z:
+                      archived += sum(name.endswith(".swift") for name in z.namelist())
+              elif os.path.isdir(folder):
+                  archived += sum(f.endswith(".swift") for _, _, files in os.walk(folder) for f in files)
+          extracted = 0
+          for path in glob.glob(os.path.join(os.environ.get("SARIF_DIR") or "../results", "*.sarif")):
+              with open(path, encoding="utf-8") as f:
+                  for run in json.load(f).get("runs", []):
+                      for invocation in run.get("invocations", []):
+                          extracted += sum(n.get("descriptor", {}).get("id", "").endswith("successfully-extracted-files")
+                                           for n in invocation.get("toolExecutionNotifications", []))
+          print(f"Swift files in the database's source archive: {archived}; reported as extracted: {extracted}")
+          if archived == 0 and extracted == 0:
+              print("::error::CodeQL analysed no Swift file, so this run checked nothing (see the top of codeql.yml)")
+              raise SystemExit(1)
+          EOF
+          if [[ -n "${CODEQL:-}" ]]; then "$CODEQL" database print-baseline "$RUNNER_TEMP/codeql_databases/swift" || true; fi
