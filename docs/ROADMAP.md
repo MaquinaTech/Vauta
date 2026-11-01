@@ -55,7 +55,6 @@ An optional [Model Context Protocol](https://modelcontextprotocol.io) server, so
 
 ## Later
 
-- **Custom minutes templates**: write your own instructions for a kind of meeting, next to the six built-in templates.
 - **More languages for the interface**: see [TRANSLATING.md](TRANSLATING.md) to add one.
 
 ## Considered, not planned
