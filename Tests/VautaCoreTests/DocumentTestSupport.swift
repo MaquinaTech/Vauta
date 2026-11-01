@@ -298,7 +298,7 @@ final class DocsFixture {
     }
 
     func settle(timeout: Duration = .seconds(240)) async throws {
-        let deadline = ContinuousClock.now + timeout
+        let deadline = ContinuousClock.now + TestTiming.scaled(timeout)
         while ContinuousClock.now < deadline {
             let snapshot = await indexer.snapshot()
             // A scan in flight (the folder's own watcher may have started one) has not queued what it lists yet: nothing pending is

@@ -223,7 +223,7 @@ struct ItemEvidenceTests {
             }
         } * 1000
         #expect(out.tasks.count + out.decisions.count > 0)
-        #expect(elapsed < 250, "\(Int(elapsed)) ms for \(tasks.count + decisions.count) items in a debug build (the design budget is 50 ms in release)")
+        #expect(!TestTiming.holdsBudgets || elapsed < 250, "\(Int(elapsed)) ms for \(tasks.count + decisions.count) items in a debug build (the design budget is 50 ms in release)")
     }
 
     // MARK: Review fixes

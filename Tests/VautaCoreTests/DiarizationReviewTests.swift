@@ -147,7 +147,7 @@ struct DiarizationReviewTests {
         var result: FinalClusterer.Result!
         let elapsed = Duration.seconds(cpuSeconds { result = FinalClusterer.cluster(records: records, config: DiarizationConfig()) })
         #expect(result.speakerCount >= 6 && result.speakerCount <= 8, "\(result.speakerCount) speakers")
-        #expect(elapsed < budget, "clustering \(result.embeddingCount) embeddings took \(elapsed)")
+        #expect(!TestTiming.holdsBudgets || elapsed < budget, "clustering \(result.embeddingCount) embeddings took \(elapsed)")
     }
 
     // MARK: Provisional labels while re-clustering

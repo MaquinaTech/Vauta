@@ -111,6 +111,13 @@ for f in scripts/*.sh; do bash -n "$f"; done   # and shellcheck, if installed
 ```
 
 CI also assembles the app bundle with an ad-hoc signature (see [`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+Once a week [`sanitizers.yml`](.github/workflows/sanitizers.yml) runs the tests under the thread and the address sanitizers,
+without the suites that run a model on the GPU (a suite you mark `.gpuExclusive` goes in its `GPU_SUITES`, which a test
+checks), and [`codeql.yml`](.github/workflows/codeql.yml) fails a run in which CodeQL analysed no Swift file. To run a
+sanitizer locally: `VAUTA_TEST_TIME_SCALE=5 swift test --sanitize=thread --skip "<GPU_SUITES>"` (add the plugin path with the
+Command Line Tools). The factor stretches the tests' waits, and a test of a time budget runs without holding the budget
+(`TestTiming`); with the thread sanitizer, also set `TSAN_OPTIONS=suppressions=.github/tsan-suppressions.txt`. A new wait helper
+uses `TestTiming.scaled`, and a new budget is held only when `TestTiming.holdsBudgets`.
 
 ### Run the app
 

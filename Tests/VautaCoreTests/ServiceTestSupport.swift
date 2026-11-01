@@ -199,7 +199,7 @@ actor Gate {
 
 /// Polls `condition` until it holds or `timeout` passes (a throwing check counts as false).
 func eventually(timeout: Duration = .seconds(240), _ condition: @Sendable () async throws -> Bool) async -> Bool {
-    let deadline = ContinuousClock.now + timeout
+    let deadline = ContinuousClock.now + TestTiming.scaled(timeout)
     while ContinuousClock.now < deadline {
         if (try? await condition()) == true { return true }
         try? await Task.sleep(for: .milliseconds(20))

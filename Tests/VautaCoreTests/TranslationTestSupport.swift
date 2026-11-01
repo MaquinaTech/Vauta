@@ -173,7 +173,7 @@ final class CaptionRecorder: @unchecked Sendable {
 /// Polls until `condition` holds (or fails the test after `timeout`). The timeout only bounds a hang: the
 /// suite runs hundreds of tests at once and a loaded machine can starve the pool for seconds.
 func eventually(timeout: Duration = .seconds(120), _ message: Comment = "condition", _ condition: () async -> Bool) async {
-    let deadline = ContinuousClock.now + timeout
+    let deadline = ContinuousClock.now + TestTiming.scaled(timeout)
     while !(await condition()) {
         if ContinuousClock.now > deadline {
             Issue.record("Timed out waiting for \(message)")
