@@ -50,6 +50,15 @@ struct DiarizationFrontEndTests {
         #expect(huge.allSatisfy { $0.isFinite } && huge[1] > huge[0])
     }
 
+    @Test func aBiasAgainstNobodySpeakingTurnsCloseFramesIntoSpeech() {
+        // Frame 0: "nobody" 0.5, speaker 0 0.4; frame 1: "nobody" 0.9. Lowering "nobody" by 0.5 flips the first frame only.
+        let scores = [Float]([0.5, 0.4, 0.04, 0.02, 0.02, 0.01, 0.01, 0.9, 0.04, 0.02, 0.01, 0.01, 0.01, 0.01].map { logf($0) })
+        #expect(Powerset.argmaxClasses(Powerset.biased(scores, frames: 2, noneLogBias: 0), frames: 2) == [0, 0])
+        #expect(Powerset.argmaxClasses(Powerset.biased(scores, frames: 2, noneLogBias: 0.5), frames: 2) == [1, 0])
+        #expect(Powerset.biased(scores, frames: 2, noneLogBias: 0) == scores, "0 is the network's own decision")
+        #expect(DiarizationConfig().noneLogBias == 0)
+    }
+
     @Test func masksDropOverlapAndFallBackWhenTooShort() {
         // frames 0..199 speaker 0 alone, 200..399 speakers 0+1, 400..588 speaker 2 alone for 0.5 s then none
         var classes = [UInt8](repeating: 0, count: SegmentationGeometry.frames)

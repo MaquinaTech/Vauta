@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 """Run `Vauta diarize` over one or more sets and score with score_der.py (the repo's scorer).
-  python3 -I eval/scripts/run_diar_sets.py --bin <Vauta> --tag baseline --sets ami_dev_others es_conv ... [--uem-dirs uem uem_nobleed] [--threshold 0.70]
+  python3 -I eval/scripts/run_diar_sets.py --bin <Vauta> --tag baseline --sets ami_dev_others es_conv ... [--uem-dirs uem uem_nobleed] [--threshold 0.70] [--none-bias 0]
 Per set: $VAUTA_EVAL_WORK/runs/<tag>/<set>/*.rttm, timings_<set>.json, der_<set>[_<uem>].md / .json."""
 import argparse, json, os, re, subprocess, sys, time, wave
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -10,9 +10,9 @@ import score_der as sd, hpins as P, common as C
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--bin", required=True); ap.add_argument("--tag", required=True)
-    ap.add_argument("--sets", nargs="+", required=True); ap.add_argument("--threshold")
+    ap.add_argument("--sets", nargs="+", required=True); ap.add_argument("--threshold"); ap.add_argument("--none-bias")
     ap.add_argument("--no-run", action="store_true"); a = ap.parse_args()
-    extra = ["--threshold", a.threshold] if a.threshold else []
+    extra = (["--threshold", a.threshold] if a.threshold else []) + (["--none-bias", a.none_bias] if a.none_bias else [])
     base = os.path.join(P.RUNS, a.tag); os.makedirs(base, exist_ok=True)
     json.dump(C.environment(a.bin), open(f"{base}/environment.json", "w"), indent=1)
     summary = {}

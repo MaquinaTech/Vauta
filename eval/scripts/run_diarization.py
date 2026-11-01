@@ -2,7 +2,7 @@
 # SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 """Run the app's `diarize` command over the 18-file set and score the result with score_der.py.
 
-  python3 -I eval/scripts/run_diarization.py [--bin .build/release/Vauta] [--tag <name>] [--threshold 0.70]
+  python3 -I eval/scripts/run_diarization.py [--bin .build/release/Vauta] [--tag <name>] [--threshold 0.70] [--none-bias 0]
 
 Needs a release build (`swift build -c release --arch arm64`), the sets from build_sets.py and numpy. `Vauta diarize`
 is an evaluation command: offline, no network, it writes only the RTTM named with --rttm and never audio. Output:
@@ -53,10 +53,11 @@ def main():
     ap.add_argument("--bin", default=DEFAULT_BIN)
     ap.add_argument("--tag", default=time.strftime("%Y%m%d-%H%M%S"))
     ap.add_argument("--threshold")
+    ap.add_argument("--none-bias", help="lower the segmentation's \"nobody speaks\" class by this (DiarizationConfig.noneLogBias)")
     ap.add_argument("--allow-missing", action="store_true", help="score files without a hypothesis RTTM as all missed")
     ap.add_argument("--no-run", action="store_true", help="only score the RTTMs already in the run directory")
     a = ap.parse_args()
-    extra = ["--threshold", a.threshold] if a.threshold else []
+    extra = (["--threshold", a.threshold] if a.threshold else []) + (["--none-bias", a.none_bias] if a.none_bias else [])
     base = os.path.join(RUNS, a.tag)
     summary, raw, per_file = {}, {}, {}
     os.makedirs(base, exist_ok=True)

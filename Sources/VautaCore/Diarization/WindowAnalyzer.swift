@@ -24,7 +24,7 @@ public final class WindowAnalyzer: WindowAnalyzing, @unchecked Sendable {
     }
 
     public func analyze(window: [Float], startSample: Int) throws -> WindowRecord {
-        let classes = try segmenter.classes(window: window)
+        let classes = try segmenter.classes(window: window, noneLogBias: config.noneLogBias)
         let speakers = SegmentationGeometry.localSpeakers
         let (masks, seconds) = MaskBuilder.masks(classes: classes, excludeOverlap: config.excludeOverlap,
                                                  minSeconds: config.minEmbeddingSeconds)

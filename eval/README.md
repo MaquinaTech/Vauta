@@ -42,7 +42,7 @@ or step by step (each script says what it does at the top):
 ```sh
 eval/.venv/bin/python -I eval/scripts/fetch.py [--only ami|vox|ann|refs] [--jobs 4]
 eval/.venv/bin/python -I eval/scripts/build_sets.py
-eval/.venv/bin/python -I eval/scripts/run_diarization.py --bin .build/release/Vauta [--tag name] [--threshold 0.70]
+eval/.venv/bin/python -I eval/scripts/run_diarization.py --bin .build/release/Vauta [--tag name] [--threshold 0.70] [--none-bias 0]
 eval/.venv/bin/python -I eval/scripts/run_wer.py --bin .build/release/Vauta [--locale en-US] [--confidence]   # --confidence: one more masked pass with each word's confidence (WER and time against the plain pass, reliability bins, ECE, Brier, AUROC)
 eval/.venv/bin/python -I eval/scripts/run_echo_coupling.py --bin .build/release/Vauta [--seconds 600]   # whether the microphone heard the others (EchoCoupling) on the AMI meetings: room cross-talk, speakers, headphones
 eval/.venv/bin/python -I eval/scripts/check_doc_tables.py <run dir>                                               # the per-file tables of docs/BENCHMARKS.md equal the run's (run it after editing them)
