@@ -211,6 +211,38 @@ The share rises by about 0.3 points and the same one speaker per set fails the g
 
 The time is the whole command (analysis of every window plus the final clustering); the final clustering alone is a small part of it (the earlier estimate is 33 to 66 ms for 43 to 60 minutes). Memory was read with `/usr/bin/time -l` and does not include the models' weights mapped by Core ML on every run (a 5-minute file shows 274 MB resident), so read it as "does not grow with length", not as the app's memory use. A unit test (`theFoldCeilingKeepsAGuestInALongMeeting`) pins the reason for the 30 s ceiling: with a ceiling above the guest's speech time, a voice with 32 s of speech in a long meeting is merged into another speaker. **Not tested on real data:** such a guest in a real hour-long meeting.
 
+### Tried and not changed: calling more frames speech
+
+Most of the error left is missed speech, so on 1 November 2026 one build swept a bias against "nobody speaks". The segmentation
+network decides each frame by its most likely class, one of which is "nobody speaks"; `DiarizationConfig.noneLogBias` lowers that
+class's log-probability first, so a positive bias calls more frames speech and a negative one fewer (`Vauta diarize --none-bias <n>`,
+and `--none-bias` in `run_diarization.py` and `run_diar_sets.py`). At 0, the network's own decision, the run reproduces the published
+figures exactly. The tuning set and the 19 held-out English files, pooled as above; the last two columns compare each value with 0 on
+the held-out files:
+
+| Bias | Tuning set: DER (miss / false alarm) | No collar | Held-out English: DER (miss / false alarm) | No collar | Held-out files better / worse | Mean change per held-out file [95 % interval] |
+|---|---|---|---|---|---|---|
+| -0.5 | 9.93 (5.47 / 2.40) | 15.46 | 9.58 (3.88 / 2.53) | 15.60 | 8 / 7 | -0.03 [-0.22, +0.17] |
+| -0.25 | 9.64 (4.90 / 2.63) | 15.23 | 9.47 (3.53 / 2.74) | 15.61 | 9 / 3 | -0.04 [-0.13, +0.05] |
+| **0 (shipped)** | **9.53 (4.36 / 3.01)** | 15.22 | **9.46 (3.20 / 3.08)** | 15.78 | | |
+| 0.25 | 9.43 (3.92 / 3.32) | 15.25 | 9.43 (2.93 / 3.44) | 15.88 | 4 / 8 | -0.04 [-0.29, +0.14] |
+| 0.5 | 9.55 (3.53 / 3.76) | 15.51 | 9.72 (2.67 / 3.83) | 16.34 | 4 / 14 | +0.26 [-0.02, +0.60] |
+| 1 | 10.18 (2.95 / 4.77) | 16.48 | 10.44 (2.22 / 4.93) | 17.45 | 1 / 16 | +0.96 [+0.44, +1.66] |
+| 1.5 | 11.16 (2.51 / 5.97) | 17.74 | 11.73 (1.77 / 6.52) | 19.07 | 0 / 18 | +2.08 [+1.05, +3.46] |
+| 2 | 12.68 (2.21 / 7.48) | 19.55 | 13.63 (1.48 / 8.59) | 21.16 | 0 / 18 | +3.70 [+2.09, +5.79] |
+
+- **Missed speech becomes false alarm.** Each step towards speech trades missed speech for as much false alarm or more: from 0 to 0.5
+  the held-out miss falls by 0.53 points and the false alarm rises by 0.75. A negative bias does the opposite.
+- **The best value is within noise.** The best value on the tuning set, 0.25, is 0.10 point lower there and 0.03 lower on the held-out
+  files. Its interval spans zero there, 8 held-out files get worse against 4 better, and the figure with no collar is worse on both
+  sets. So the setting stays at 0.
+- **The speaker count does not move it either.** It is exact in 10 of the 19 held-out files at 0.25, against 9 at 0, and within one
+  in all 19 against 18.
+- **Not measured:** the call-impaired and Spanish sets, whose audio was not built for this sweep. The option stays so that they can be.
+
+`eval/heldout/results/none_bias.jsonl` holds the `compare_runs.py` lines behind the table, each with its `none_bias`: every value
+against 0, for the tuning set and the held-out groups.
+
 ## Word error rate
 
 ### Method

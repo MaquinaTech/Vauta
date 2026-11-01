@@ -47,6 +47,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 Developer tools:
 
+- `Vauta diarize --none-bias <n>` (and `--none-bias` in `eval/scripts/run_diarization.py` and `run_diar_sets.py`) lowers the segmentation's "nobody speaks" class by that much before each frame is decided, to measure calling more frames speech. Swept from -0.5 to 2 on the tuning set and the held-out English files: missed speech turns into as much false alarm or more, and the best value is within noise, so the app keeps the network's own decision (docs/BENCHMARKS.md, "Tried and not changed").
 - `llm-eval --tasks ask-cross` asks each question in the meetings it names by its time or place, as Ask does, with "now" the day after the series' last meeting; its traces say which (`scope`) and whether nothing there matched (`widened`). The live answers' replay writes `pastScope`.
 - `llm-eval --tasks echo` also sweeps the far side's echo judged in Others and writes `echo/far_sweep.tsv`.
 - Five tests that failed now and then on the CI runners no longer depend on how fast the runner is. One found the race of the document folders fixed above (its wait now also waits for a scan in flight). Two had races with the wall clock: a hand-off dated before a slow line, and a warm-up interval that passed between two lines. On the runners' virtual machines (`TestMachine.isVirtual`), two bounds measured on a Mac are widened, never dropped: the logits of the tiny model, where the paravirtual GPU sometimes rounds differently, and the speaker finalizer's debug time budget.
