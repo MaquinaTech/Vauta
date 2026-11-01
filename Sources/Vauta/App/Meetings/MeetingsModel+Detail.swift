@@ -257,16 +257,25 @@ extension MeetingsModel {
         highlighted.flatMap { h in transcript.first { $0.id == h } }
     }
 
+    /// A click on a line highlights it, and a second click takes the highlight off; in a highlighted stretch, it highlights that
+    /// line alone, as in a list.
     func highlight(_ segment: MeetingStore.StoredSegment) {
         noteActivity()
-        highlighted = highlighted == segment.id ? nil : segment.id
+        if highlightExtent != nil {
+            highlightExtent = nil
+            highlighted = segment.id
+        } else {
+            highlighted = highlighted == segment.id ? nil : segment.id
+        }
     }
 
-    /// Moves the highlight to the previous or next segment (arrow keys).
+    /// Moves the highlight to the previous or next segment (arrow keys). A stretch ends, and the line next to its moving end is
+    /// highlighted, as in a list.
     func moveHighlight(by step: Int) {
         guard !transcript.isEmpty else { return }
-        let index = highlighted.flatMap { h in transcript.firstIndex { $0.id == h } }
+        let index = (highlightExtent ?? highlighted).flatMap { h in transcript.firstIndex { $0.id == h } }
         let next = index.map { min(max($0 + step, 0), transcript.count - 1) } ?? (step > 0 ? 0 : transcript.count - 1)
+        highlightExtent = nil
         highlighted = transcript[next].id
     }
 

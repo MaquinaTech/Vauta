@@ -37,6 +37,10 @@ Status: designed and unit-tested where logic is involved; **the manual VoiceOver
   keyboard way into the popover is the action above or the Edit menu item **Speaker Options for Highlighted Passage**
   (the passage is highlighted with ↑↓); with the pointer the visible label is a button. Escape goes back one page of the
   popover, then closes it. Full Keyboard Access on the line is still to be checked by hand (an open acceptance item, with the VoiceOver pass).
+- A stretch of lines is highlighted from the keyboard with ⇧↑ and ⇧↓ (↑ or ↓ alone ends it), and with VoiceOver by the
+  action **Highlight Through This Line** on another line; every line of the stretch has the selected trait. On a line of
+  the stretch the action **Delete N Lines…** (and ⌫) asks to delete the whole stretch; elsewhere **Delete Line…** asks for
+  that line only, as a list's menu acts on its selection.
 - Return in the popover's name field assigns only a person whose name or alias is exactly what was typed; otherwise it adds
   a new person, which is what the row says. A name that two people answer to shows a warning and lists them, and nothing
   is assigned until one is picked.

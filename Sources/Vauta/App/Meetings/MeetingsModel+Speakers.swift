@@ -90,7 +90,7 @@ extension MeetingsModel {
 
     /// The highlighted passage has a speaker whose options can be opened.
     var canOpenSpeakerOptionsOfHighlight: Bool {
-        mode == .meetings && tab == .transcript && highlightedSegment?.speaker?.id != nil
+        mode == .meetings && tab == .transcript && highlightExtent == nil && highlightedSegment?.speaker?.id != nil
     }
 
     /// Opens the popover of the highlighted passage's speaker (the menu item for keyboard users).

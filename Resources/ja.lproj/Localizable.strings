@@ -217,6 +217,12 @@
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "同一のリクエスト%lld⁠件：最初は%@、最後は%@。";
 
+/* Confirmation after deleting a highlighted stretch of transcript lines; the argument is how many (2 or more) */
+"%lld lines deleted" = "%lld行を削除しました";
+
+/* Confirmation after deleting a stretch of transcript lines that decisions, tasks or note expansions were written from; the argument is how many (2 or more) */
+"%lld lines deleted. What the minutes wrote from them is marked for you to check." = "%lld行を削除しました。これらの行をもとに議事録に書かれた内容は確認用にマークされています。";
+
 /* VoiceOver: how many of a source's skipped files are Google Drive shortcuts or kept online only by a cloud service */
 "%lld not on this Mac" = "このMacにないファイル：%lld";
 
@@ -1480,7 +1486,13 @@
 "Couldn’t change the line" = "行を変更できませんでした";
 "Couldn’t correct the line" = "行を修正できませんでした";
 "Couldn’t delete the line" = "行を削除できませんでした";
+
+/* Alert title: deleting a highlighted stretch of transcript lines failed */
+"Couldn’t delete the lines" = "行を削除できませんでした";
 "Delete Line" = "行を削除";
+
+/* Transcript: confirms deleting a highlighted stretch of the transcript for good */
+"Delete Lines" = "行を削除";
 "Delete this line for good?" = "この行を完全に削除しますか？";
 "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "この行の語句は、文字起こしされた元の内容と翻訳とともに、文字起こし・検索・「質問」から消去されます。この行をもとに議事録に書かれた内容は確認用にマークされ、「議事録を再作成」でこの行なしに書き直せます。この操作は取り消せません。以前に作成したバックアップにはこの行が残ります。";
 "Line deleted" = "行を削除しました";
@@ -1720,6 +1732,9 @@
 /* No comment provided by engineer. */
 "Delete" = "削除";
 
+/* Transcript: menu item and VoiceOver action on a highlighted stretch of lines, which asks first; the argument is how many (2 or more) */
+"Delete %lld Lines…" = "%lld行を削除…";
+
 /* No comment provided by engineer. */
 "Delete %lld Meetings…" = "%lld件のミーティングを削除…";
 
@@ -1877,6 +1892,9 @@
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "使われていない声を削除しますか？";
+
+/* Confirmation title when deleting a highlighted stretch of a meeting’s transcript; the argument is how many lines (2 or more) */
+"Delete these %lld lines for good?" = "これらの%lld行を完全に削除しますか？";
 
 /* Confirmation title */
 "Delete this decision?" = "この決定事項を削除しますか？";
@@ -2640,6 +2658,9 @@
 
 /* VoiceOver hint of the Brief row while recording, when it is open */
 "Hides the brief" = "ブリーフィングを非表示にします";
+
+/* Transcript: VoiceOver action on a line, highlighting the stretch from the highlighted line through this one */
+"Highlight Through This Line" = "この行まで強調表示";
 
 /* No comment provided by engineer. */
 "Highlight the passage at this moment" = "この時点の箇所を強調表示";
@@ -6560,6 +6581,9 @@
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "これらの声紋は、ミーティングに保持されている声の要約と⁠と⁠も⁠に暗号化されたストアから削除されます。あとのミーティングから、あらためて声を保存できます。";
+
+/* Confirmation message when deleting a highlighted stretch of transcript lines, under the times it starts and ends */
+"Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines." = "これらの行の語句は、文字起こしされた元の内容と翻訳とともに、文字起こし・検索・「質問」から消去されます。これらの行をもとに議事録に書かれた内容は確認用にマークされ、「議事録を再作成」でこれらの行なしに書き直せます。この操作は取り消せません。以前に作成したバックアップにはこれらの行が残ります。";
 
 /* Model guide: reminder in the download step of Ollama once the app runs; the context part of its first step is folded */
 "Then set Context length to 32K in Ollama’s Settings." = "その後、Ollamaの「Settings」で「Context length」を32Kにしてください。";

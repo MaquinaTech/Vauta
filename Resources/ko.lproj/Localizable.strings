@@ -217,6 +217,12 @@
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "동일한 요청 %lld건: 처음은 %@, 마지막은 %@.";
 
+/* Confirmation after deleting a highlighted stretch of transcript lines; the argument is how many (2 or more) */
+"%lld lines deleted" = "%lld줄을 삭제했습니다";
+
+/* Confirmation after deleting a stretch of transcript lines that decisions, tasks or note expansions were written from; the argument is how many (2 or more) */
+"%lld lines deleted. What the minutes wrote from them is marked for you to check." = "%lld줄을 삭제했습니다. 이 줄들을 바탕으로 회의록에 쓴 내용은 확인할 수 있도록 표시되었습니다.";
+
 /* VoiceOver: how many of a source's skipped files are Google Drive shortcuts or kept online only by a cloud service */
 "%lld not on this Mac" = "이 Mac에 없는 파일 %lld개";
 
@@ -1480,7 +1486,13 @@
 "Couldn’t change the line" = "줄을 변경할 수 없습니다";
 "Couldn’t correct the line" = "줄을 수정할 수 없습니다";
 "Couldn’t delete the line" = "줄을 삭제할 수 없음";
+
+/* Alert title: deleting a highlighted stretch of transcript lines failed */
+"Couldn’t delete the lines" = "줄을 삭제할 수 없음";
 "Delete Line" = "줄 삭제";
+
+/* Transcript: confirms deleting a highlighted stretch of the transcript for good */
+"Delete Lines" = "줄 삭제";
 "Delete this line for good?" = "이 줄을 완전히 삭제할까요?";
 "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "이 줄의 단어가 변환된 원래 내용, 번역과 함께 녹취록, 검색, 질문에서 지워집니다. 이 줄을 바탕으로 회의록에 쓴 내용은 확인할 수 있도록 표시되며, “회의록 다시 작성”으로 이 줄 없이 다시 쓸 수 있습니다. 이 작업은 실행 취소할 수 없으며, 이전에 만든 백업에는 이 줄이 남아 있습니다.";
 "Line deleted" = "줄을 삭제했습니다";
@@ -1720,6 +1732,9 @@
 /* No comment provided by engineer. */
 "Delete" = "삭제";
 
+/* Transcript: menu item and VoiceOver action on a highlighted stretch of lines, which asks first; the argument is how many (2 or more) */
+"Delete %lld Lines…" = "%lld줄 삭제…";
+
 /* No comment provided by engineer. */
 "Delete %lld Meetings…" = "회의 %lld개 삭제…";
 
@@ -1877,6 +1892,9 @@
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "사용하지 않은 목소리를 삭제할까요?";
+
+/* Confirmation title when deleting a highlighted stretch of a meeting’s transcript; the argument is how many lines (2 or more) */
+"Delete these %lld lines for good?" = "이 %lld줄을 완전히 삭제할까요?";
 
 /* Confirmation title */
 "Delete this decision?" = "이 결정 사항을 삭제할까요?";
@@ -2640,6 +2658,9 @@
 
 /* VoiceOver hint of the Brief row while recording, when it is open */
 "Hides the brief" = "브리핑을 숨깁니다";
+
+/* Transcript: VoiceOver action on a line, highlighting the stretch from the highlighted line through this one */
+"Highlight Through This Line" = "이 줄까지 강조 표시";
 
 /* No comment provided by engineer. */
 "Highlight the passage at this moment" = "이 시점의 구간 강조 표시";
@@ -6560,6 +6581,9 @@
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "이 목소리 지문들이 회의에 보관된 목소리 요약과 함께 암호화된 저장소에서 삭제됩니다. 나중 회의에서 목소리를 다시 저장할 수 있습니다.";
+
+/* Confirmation message when deleting a highlighted stretch of transcript lines, under the times it starts and ends */
+"Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines." = "이 줄들의 단어가 변환된 원래 내용, 번역과 함께 녹취록, 검색, 질문에서 지워집니다. 이 줄들을 바탕으로 회의록에 쓴 내용은 확인할 수 있도록 표시되며, “회의록 다시 작성”으로 이 줄들 없이 다시 쓸 수 있습니다. 이 작업은 실행 취소할 수 없으며, 이전에 만든 백업에는 이 줄들이 남아 있습니다.";
 
 /* Model guide: reminder in the download step of Ollama once the app runs; the context part of its first step is folded */
 "Then set Context length to 32K in Ollama’s Settings." = "그다음 Ollama의 “Settings”에서 “Context length”를 32K로 설정하세요.";

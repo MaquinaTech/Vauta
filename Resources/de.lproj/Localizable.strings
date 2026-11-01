@@ -217,6 +217,12 @@
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "%lld identische Anfragen: die erste um %@, die letzte um %@.";
 
+/* Confirmation after deleting a highlighted stretch of transcript lines; the argument is how many (2 or more) */
+"%lld lines deleted" = "%lld Zeilen gelöscht";
+
+/* Confirmation after deleting a stretch of transcript lines that decisions, tasks or note expansions were written from; the argument is how many (2 or more) */
+"%lld lines deleted. What the minutes wrote from them is marked for you to check." = "%lld Zeilen gelöscht. Was das Protokoll daraus geschrieben hat, ist zur Prüfung markiert.";
+
 /* VoiceOver: how many of a source's skipped files are Google Drive shortcuts or kept online only by a cloud service */
 "%lld not on this Mac" = "%lld nicht auf diesem Mac";
 
@@ -1480,7 +1486,13 @@
 "Couldn’t change the line" = "Die Zeile konnte nicht geändert werden";
 "Couldn’t correct the line" = "Die Zeile konnte nicht korrigiert werden";
 "Couldn’t delete the line" = "Zeile konnte nicht gelöscht werden";
+
+/* Alert title: deleting a highlighted stretch of transcript lines failed */
+"Couldn’t delete the lines" = "Zeilen konnten nicht gelöscht werden";
 "Delete Line" = "Zeile löschen";
+
+/* Transcript: confirms deleting a highlighted stretch of the transcript for good */
+"Delete Lines" = "Zeilen löschen";
 "Delete this line for good?" = "Diese Zeile endgültig löschen?";
 "Its words are erased from the transcript, search and Ask, with what was transcribed and its translation. What the minutes wrote from it is marked for you to check, and Rewrite Minutes writes them without it. You can’t undo this, and a backup made before keeps the line." = "Die Wörter der Zeile werden aus dem Transkript, der Suche und „Fragen“ gelöscht, zusammen mit dem, was transkribiert wurde, und der Übersetzung. Was das Protokoll daraus geschrieben hat, wird zur Prüfung markiert, und „Protokoll neu schreiben“ schreibt es ohne sie. Das lässt sich nicht widerrufen, und ein zuvor erstelltes Backup enthält die Zeile weiterhin.";
 "Line deleted" = "Zeile gelöscht";
@@ -1720,6 +1732,9 @@
 /* No comment provided by engineer. */
 "Delete" = "Löschen";
 
+/* Transcript: menu item and VoiceOver action on a highlighted stretch of lines, which asks first; the argument is how many (2 or more) */
+"Delete %lld Lines…" = "%lld Zeilen löschen …";
+
 /* No comment provided by engineer. */
 "Delete %lld Meetings…" = "%lld Meetings löschen …";
 
@@ -1877,6 +1892,9 @@
 
 /* Confirmation title for deleting the saved voices that were not used for a year */
 "Delete the unused voices?" = "Die ungenutzten Stimmen löschen?";
+
+/* Confirmation title when deleting a highlighted stretch of a meeting’s transcript; the argument is how many lines (2 or more) */
+"Delete these %lld lines for good?" = "Diese %lld Zeilen endgültig löschen?";
 
 /* Confirmation title */
 "Delete this decision?" = "Diese Entscheidung löschen?";
@@ -2640,6 +2658,9 @@
 
 /* VoiceOver hint of the Brief row while recording, when it is open */
 "Hides the brief" = "Blendet das Briefing aus";
+
+/* Transcript: VoiceOver action on a line, highlighting the stretch from the highlighted line through this one */
+"Highlight Through This Line" = "Bis zu dieser Zeile hervorheben";
 
 /* No comment provided by engineer. */
 "Highlight the passage at this moment" = "Die Textstelle zu diesem Zeitpunkt hervorheben";
@@ -6560,6 +6581,9 @@
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "Die Stimmabdrücke dieser Personen werden samt den in Meetings aufbewahrten Stimmzusammenfassungen aus dem verschlüsselten Speicher entfernt. Aus einem späteren Meeting kannst du eine Stimme erneut speichern.";
+
+/* Confirmation message when deleting a highlighted stretch of transcript lines, under the times it starts and ends */
+"Their words are erased from the transcript, search and Ask, with what was transcribed and their translations. What the minutes wrote from them is marked for you to check, and Rewrite Minutes writes the minutes without them. You can’t undo this, and a backup made before keeps the lines." = "Die Wörter der Zeilen werden aus dem Transkript, der Suche und „Fragen“ gelöscht, zusammen mit dem, was transkribiert wurde, und den Übersetzungen. Was das Protokoll daraus geschrieben hat, wird zur Prüfung markiert, und „Protokoll neu schreiben“ schreibt es ohne sie. Das lässt sich nicht widerrufen, und ein zuvor erstelltes Backup enthält die Zeilen weiterhin.";
 
 /* Model guide: reminder in the download step of Ollama once the app runs; the context part of its first step is folded */
 "Then set Context length to 32K in Ollama’s Settings." = "Stelle danach „Context length“ in Ollamas „Settings“ auf 32K.";

@@ -638,6 +638,10 @@ sentences are marked for you to check, and **Rewrite Minutes** writes the minute
 backup or a copy of the encrypted file made before still contains the line, and so does anything you exported, or a reminder
 or event created from it.
 
+To take a stretch off the record, highlight its first line and ⇧-click its last (or press ⇧↑ or ⇧↓), then choose **Delete N
+Lines…** in the menu of a highlighted line, or press ⌫. Each line goes as above, and all of them in one step: if one of them
+can't be deleted, none is.
+
 ## Retention
 
 Retention has two speeds:
