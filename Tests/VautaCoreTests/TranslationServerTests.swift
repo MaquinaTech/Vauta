@@ -233,6 +233,25 @@ struct TranslationPriorityTests {
         #expect(try await service.liveNotes(meetingID: id, at: 10) != nil)
     }
 
+    @Test func aTranscriptTranslationWaitsForEveryOtherRequest() async throws {
+        let f = try KnowledgeFixture()
+        let none = LLMService(store: f.store, providers: TestProviders(chat: ScriptedChat { _, _, _ in ScriptedChat.reply("x") }))
+        #expect(await none.transcriptTranslator(source: english, target: spanish, model: nil) == nil)
+        let server = ScriptedChat { _, _, _ in ScriptedChat.reply("Hola.") }
+        let providers = TestProviders(chat: ScriptedChat { _, _, _ in ScriptedChat.reply("x") })
+        providers.refinementChat = server
+        let service = LLMService(store: f.store, providers: providers)
+        let translator = try #require(await service.transcriptTranslator(source: english, target: spanish, model: nil))
+        // The minutes, say, hold the lane: the line waits for them.
+        try await service.acquire(.background)
+        let translation = Task { try await translator.refine("Hello.", context: []) }
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(server.calls.isEmpty)
+        await service.release()
+        #expect(try await translation.value == "Hola.")
+        #expect(await !service.laneBusy, "it gives the lane back")
+    }
+
     @Test func requestsUseTheClientsRulesNotANewSession() async throws {
         // The translator is built on the provider's chat model (the audited LLMClient in the app).
         let f = try KnowledgeFixture()

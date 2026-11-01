@@ -141,6 +141,20 @@
 			<string>모델 서버를 기다리는 작업 %lld개</string>
 		</dict>
 	</dict>
+	<key>%lld lines couldn’t be translated.</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@count@</string>
+		<key>count</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>lld</string>
+			<key>other</key>
+			<string>줄 %lld개를 번역할 수 없습니다.</string>
+		</dict>
+	</dict>
 	<key>%lld meetings</key>
 	<dict>
 		<key>NSStringLocalizedFormatKey</key>

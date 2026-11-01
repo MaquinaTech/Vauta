@@ -7,8 +7,9 @@ extension MeetingStore {
     /// Reads everything an export of the meeting needs. nil if the meeting no
     /// longer exists. Speaker names: the user's own name for "Me" (the self
     /// entity, unless it still has the default name) and the people the user
-    /// said "Others" stands for.
-    public func meetingExport(_ meetingID: Int64, translationLanguage: String? = nil) throws -> MeetingExport? {
+    /// said "Others" stands for. The translation is the one in `shownTranslation` (the language the transcript shows) when given,
+    /// else the language with the most translated lines (`translationLanguage` wins a tie).
+    public func meetingExport(_ meetingID: Int64, translationLanguage: String? = nil, shownTranslation: String? = nil) throws -> MeetingExport? {
         guard let meeting = try meeting(meetingID) else { return nil }
         let card = try card(meetingID)
         let attendees = try meetingEntities(meetingID, role: .attendee)
@@ -19,7 +20,9 @@ extension MeetingStore {
            me.name != Self.legacySelfName {
             myName = me.name
         }
-        let translations = TranslationDisplay.texts(from: try translations(of: meetingID), preferred: translationLanguage)
+        let stored = try translations(of: meetingID)
+        let translated = TranslationDisplay.chooseLanguage(from: stored, preferred: translationLanguage, chosen: shownTranslation)
+        let translations = TranslationDisplay.texts(from: stored, preferred: translationLanguage, chosen: translated)
         let speakerRows = try speakers(of: meetingID)
         let othersName = others.isEmpty ? nil : others.map(\.displayName).joined(separator: ", ")
         return MeetingExport(
@@ -56,6 +59,7 @@ extension MeetingStore {
             questions: try detectedQuestions(meetingID, keptOnly: true).compactMap { q in
                 guard let answer = q.answer else { return nil }
                 return MeetingExport.QuestionEntry(time: q.t, channel: q.channel, text: q.text, answer: answer.answer, sources: answer.exportSources())
-            })
+            },
+            translationLanguage: translations.isEmpty ? nil : translated)
     }
 }

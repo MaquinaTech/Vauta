@@ -41,10 +41,6 @@ A model-based follow-up extraction is a candidate, measured as an experiment arm
 
 Before a release, the maintainer checks the signed build on macOS 26 and macOS 27 (permission prompts and the compatibility table in [COMPATIBILITY.md](COMPATIBILITY.md)).
 
-### Translated transcripts
-
-Read a transcript in another language: for example, a meeting held in Japanese, read in English. The original text stays as it was; the translation is shown alongside it and can be exported. It would use the model you already chose for minutes, or Apple's on-device translation where macOS offers it.
-
 ### Vauta for local agents (MCP)
 
 An optional [Model Context Protocol](https://modelcontextprotocol.io) server, so agents and tools running on your Mac can search your meetings, read minutes and list tasks, with your permission.

@@ -14,11 +14,12 @@ import Translation
 /// A session that can request downloads only exists inside a SwiftUI
 /// `.translationTask`, so a view hosts it (`TranslationDownloadHost`): the
 /// captions panel and the Settings pane each host one (every `Requester` has
-/// its host), and only the one that asked reacts.
+/// its host), and only the one that asked reacts. The Meetings window hosts
+/// the one that translated transcripts use (`TranscriptTranslationModel`).
 @MainActor
 @Observable
 final class TranslationDownloader {
-    enum Requester: Sendable, CaseIterable { case panel, settings }
+    enum Requester: Sendable, CaseIterable { case panel, settings, meetings }
 
     /// The pair being downloaded, if any.
     private(set) var running: TranslationPair?

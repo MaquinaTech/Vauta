@@ -1690,6 +1690,9 @@
 /* Alert title */
 "Couldn’t save your changes" = "No se han podido guardar los cambios";
 
+/* Transcript tab: translating the transcript failed; the reason follows */
+"Couldn’t translate the transcript." = "No se ha podido traducir la transcripción.";
+
 /* Alert title: taking back a speaker edit failed */
 "Couldn’t undo the change" = "No se ha podido deshacer el cambio";
 
@@ -2126,6 +2129,9 @@
 /* Model guide: summary of the finished download step */
 "Downloaded" = "Descargado";
 
+/* Transcript tab: Apple's translation languages are downloading; the argument is a language name in running text */
+"Downloading %@ for translation on this Mac…" = "Descargando el idioma %@ para traducir en este Mac…";
+
 /* No comment provided by engineer. */
 "Downloading %@…" = "%@: descargando…";
 
@@ -2200,11 +2206,17 @@
 /* Network Activity column */
 "Duration" = "Duración";
 
+/* Settings → Translation: privacy note about the model server */
+"During a meeting, only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. When you translate a transcript in Meetings, its lines go the same way. Nothing is sent anywhere else." = "Durante una reunión, solo las frases terminadas de los demás participantes van a tu servidor de modelos, con las tres frases anteriores y sus traducciones como contexto. Cuando traduces una transcripción en Reuniones, sus líneas van de la misma forma. No se envía nada a ningún otro sitio.";
+
 /* Recovery suggestion for a duplicate email */
 "Each email address can belong to only one person." = "Cada dirección de correo solo puede pertenecer a una persona.";
 
 /* Settings → Translation */
 "Each language downloads once from Apple. After that, Apple’s translation runs on this Mac." = "Cada idioma se descarga una sola vez de Apple. Después, la traducción de Apple funciona en este Mac.";
+
+/* Exported transcript: note under the Transcript title when translations are included; the argument is a language name in running text, e.g. English */
+"Each line is followed by its machine translation into %@." = "Cada línea va seguida de su traducción automática al %@.";
 
 /* Settings → Speakers, under the saved voices; the argument is the maximum number of fingerprints per person */
 "Each person keeps up to %lld fingerprints; beyond that, saving another one replaces the oldest." = "Cada persona conserva hasta %lld huellas; a partir de ahí, guardar otra sustituye la más antigua.";
@@ -4294,9 +4306,6 @@
 /* Documents: a long file whose first pages, rows or text were indexed */
 "Only the first part was indexed" = "Solo se ha indexado la primera parte";
 
-/* Settings → Translation: privacy note about the model server */
-"Only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. Nothing is sent anywhere else." = "Solo las frases terminadas de los demás participantes van a tu servidor de modelos, con las tres frases anteriores y sus traducciones como contexto. No se envía nada a ningún otro sitio.";
-
 /* No comment provided by engineer. */
 "Only the reminder Vauta added is removed." = "Solo se quita el recordatorio que añadió Vauta.";
 
@@ -4528,6 +4537,9 @@
 "Participants informed: %@" = "Participantes avisados: %@";
 "Say when the participants were informed" = "Indicar cuándo se avisó a los participantes";
 "Write the time you marked that the participants were told the meeting was being recorded" = "Escribir la hora en que marcaste que se avisó a los participantes de que la reunión se estaba grabando";
+
+/* No comment provided by engineer. */
+"Write the translation under each line" = "Escribir la traducción bajo cada línea";
 
 /* Error when saving a minutes template whose instructions are empty */
 "Write what the minutes should cover." = "Escribe qué deben cubrir las actas.";
@@ -4800,6 +4812,9 @@
 
 /* No comment provided by engineer. */
 "Read text in images and scanned pages" = "Leer texto en imágenes y páginas escaneadas";
+
+/* Transcript tab: tooltip of the Translate menu */
+"Read the transcript in another language. The lines keep their words, with the translation under each one." = "Lee la transcripción en otro idioma. Las líneas conservan sus palabras, con la traducción debajo de cada una.";
 
 /* Documents pane: the second pass reads text in images and scanned pages with text recognition; the argument is how many are left */
 "Reading text in images, %lld left" = "Leyendo texto en imágenes, quedan %lld";
@@ -5613,10 +5628,10 @@
 "Show the original words under each caption" = "Mostrar las palabras originales bajo cada subtítulo";
 
 /* No comment provided by engineer. */
-"Show the stored translation in gray under each line of “Others”" = "Mostrar la traducción guardada en gris bajo cada línea de «Otros»";
+"Show the transcript" = "Mostrar la transcripción";
 
 /* No comment provided by engineer. */
-"Show the transcript" = "Mostrar la transcripción";
+"Show the translation in gray under each line" = "Mostrar la traducción en gris bajo cada línea";
 
 /* No comment provided by engineer. */
 "Show translation" = "Mostrar traducción";
@@ -6284,6 +6299,9 @@
 /* Settings → Models result */
 "The key was removed from the Keychain." = "La clave se ha eliminado del llavero.";
 
+/* Transcript tab: Apple’s download of the translation languages didn’t finish */
+"The language download didn’t finish." = "La descarga del idioma no ha terminado.";
+
 /* Settings → Models note under the minutes language */
 "The language minutes are written in. Ask always answers in the language of your question." = "El idioma en el que se redactan las actas. «Preguntar» siempre responde en el idioma de tu pregunta.";
 
@@ -6630,6 +6648,9 @@
    Starts a sentence when the transcript says something different from what the user noted; the sentence follows */
 "The transcript says:" = "La transcripción dice:";
 
+/* Transcript tab: nothing is translated while a meeting is being recorded; the argument is a language name in running text */
+"The translation into %@ goes on when the recording ends." = "La traducción al %@ continuará cuando termine la grabación.";
+
 /* Confirmation message when deleting one person’s saved voice, from Settings or from the person’s card */
 "The voice of this person is removed from the encrypted store, with the voice summaries kept in meetings, and Vauta will no longer suggest them. Meetings and the names already in them stay as they are." = "La voz de esta persona se elimina del almacén cifrado, junto con los resúmenes de voz guardados en las reuniones, y Vauta ya no la sugerirá. Las reuniones y los nombres que ya contienen se quedan como están.";
 
@@ -6777,6 +6798,9 @@
 
 /* Settings → Models; a file chosen for import is not the model; Gemma 4 E4B and the revision are not translated */
 "This isn’t the Gemma 4 E4B file Vauta needs (revision %@)." = "Este no es el archivo de Gemma 4 E4B que necesita Vauta (revisión %@).";
+
+/* Transcript tab: the meeting's language can't be translated into the one chosen */
+"This language can’t be translated on this Mac." = "Este idioma no se puede traducir en este Mac.";
 
 /* Speaker popover: explains what Split From Here moves */
 "This line and the ones after it in the same turn move to a new speaker." = "Esta frase y las siguientes del mismo turno pasan a un hablante nuevo.";
@@ -6957,6 +6981,12 @@
 /* No comment provided by engineer. */
 "Transcripts and minutes don’t change." = "Las transcripciones y las actas no cambian.";
 
+/* Transcript tab: the menu of languages to read the transcript in */
+"Translate" = "Traducir";
+
+/* Transcript tab, Translate menu: translates every line again into the language shown */
+"Translate Again" = "Traducir de nuevo";
+
 /* Settings → Translation */
 "Translate into" = "Traducir a";
 
@@ -6968,6 +6998,18 @@
 
 /* Settings → Translation */
 "Translating from" = "Idioma de origen";
+
+/* Transcript tab: Apple's translation on this Mac; the arguments are a language name in running text and how much is done, in percent */
+"Translating into %@ on this Mac (%lld%%)" = "Traduciendo al %@ en este Mac (%lld%%)";
+
+/* Transcript tab: Apple's translation on this Mac; the argument is a language name in running text */
+"Translating into %@ on this Mac…" = "Traduciendo al %@ en este Mac…";
+
+/* Transcript tab: the arguments are a language name in running text and how much is done, in percent */
+"Translating into %@ with your model server (%lld%%)" = "Traduciendo al %@ con tu servidor de modelos (%lld%%)";
+
+/* Transcript tab: the argument is a language name in running text */
+"Translating into %@ with your model server…" = "Traduciendo al %@ con tu servidor de modelos…";
 
 /* No comment provided by engineer. */
 "Translating…" = "Traduciendo…";
@@ -7579,6 +7621,9 @@
 /* Documents pane: a source whose files are queued */
 "Waiting to index" = "Esperando para indexar";
 
+/* Transcript tab: another meeting is being translated first; the argument is a language name in running text */
+"Waiting to translate into %@…" = "Esperando para traducir al %@…";
+
 /* Settings → Models; why indexing for search by meaning is paused */
 "Waits for the charger." = "Espera a que conectes el cargador.";
 
@@ -7734,9 +7779,6 @@
 
 /* Settings → Models provider picker */
 "Write minutes with" = "Redactar actas con";
-
-/* No comment provided by engineer. */
-"Write the stored translation under each line of “Others”" = "Escribir la traducción guardada bajo cada línea de «Otros»";
 
 /* Model role help */
 "Writes live notes while you record. A small, quick model works best; it can be the same as the main model." = "Redacta notas en directo mientras grabas. Lo mejor es un modelo pequeño y rápido; puede ser el mismo que el principal.";
@@ -7921,6 +7963,12 @@
 
 /* Captions panel tooltip and VoiceOver: the model server improved the latest translation */
 "Your model server improved the latest sentence. Its version is the one saved." = "Tu servidor de modelos ha mejorado la última frase. Su versión es la que se guarda.";
+
+/* Transcript tab: after translating with the model server */
+"Your model server stopped answering, so Apple’s translation on this Mac did the rest." = "Tu servidor de modelos ha dejado de responder, así que la traducción de Apple en este Mac ha hecho el resto.";
+
+/* Transcript tab: after translating with the model server, when Apple’s translation can’t do the rest */
+"Your model server stopped answering. The rest of the lines have no translation." = "Tu servidor de modelos ha dejado de responder. Las demás líneas no tienen traducción.";
 
 /* Placeholder of the name field when editing the user themselves */
 "Your name" = "Tu nombre";

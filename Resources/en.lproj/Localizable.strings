@@ -1747,6 +1747,9 @@
 /* Alert title */
 "Couldn’t save your changes" = "Couldn’t save your changes";
 
+/* Transcript tab: translating the transcript failed; the reason follows */
+"Couldn’t translate the transcript." = "Couldn’t translate the transcript.";
+
 /* Alert title: taking back a speaker edit failed */
 "Couldn’t undo the change" = "Couldn’t undo the change";
 
@@ -2208,6 +2211,9 @@
 /* Model guide: summary of the finished download step */
 "Downloaded" = "Downloaded";
 
+/* Transcript tab: Apple's translation languages are downloading; the argument is a language name in running text */
+"Downloading %@ for translation on this Mac…" = "Downloading %@ for translation on this Mac…";
+
 /* No comment provided by engineer. */
 "Downloading %@…" = "Downloading %@…";
 
@@ -2283,11 +2289,17 @@
 /* Network Activity column */
 "Duration" = "Duration";
 
+/* Settings → Translation: privacy note about the model server */
+"During a meeting, only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. When you translate a transcript in Meetings, its lines go the same way. Nothing is sent anywhere else." = "During a meeting, only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. When you translate a transcript in Meetings, its lines go the same way. Nothing is sent anywhere else.";
+
 /* Recovery suggestion for a duplicate email */
 "Each email address can belong to only one person." = "Each email address can belong to only one person.";
 
 /* Settings → Translation */
 "Each language downloads once from Apple. After that, Apple’s translation runs on this Mac." = "Each language downloads once from Apple. After that, Apple’s translation runs on this Mac.";
+
+/* Exported transcript: note under the Transcript title when translations are included; the argument is a language name in running text, e.g. English */
+"Each line is followed by its machine translation into %@." = "Each line is followed by its machine translation into %@.";
 
 /* Settings → Speakers, under the saved voices; the argument is the maximum number of fingerprints per person */
 "Each person keeps up to %lld fingerprints; beyond that, saving another one replaces the oldest." = "Each person keeps up to %lld fingerprints; beyond that, saving another one replaces the oldest.";
@@ -4438,9 +4450,6 @@
 /* Ask: help on the toggle of the meetings the question names by their place, when it is on */
 "Only the meetings the question names are searched. Click to search all meetings." = "Only the meetings the question names are searched. Click to search all meetings.";
 
-/* Settings → Translation: privacy note about the model server */
-"Only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. Nothing is sent anywhere else." = "Only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. Nothing is sent anywhere else.";
-
 /* No comment provided by engineer. */
 "Only the reminder Vauta added is removed." = "Only the reminder Vauta added is removed.";
 
@@ -4977,6 +4986,9 @@
 
 /* No comment provided by engineer. */
 "Read text in images and scanned pages" = "Read text in images and scanned pages";
+
+/* Transcript tab: tooltip of the Translate menu */
+"Read the transcript in another language. The lines keep their words, with the translation under each one." = "Read the transcript in another language. The lines keep their words, with the translation under each one.";
 
 /* Documents pane: the second pass reads text in images and scanned pages with text recognition; the argument is how many are left */
 "Reading text in images, %lld left" = "Reading text in images, %lld left";
@@ -5836,10 +5848,10 @@
 "Show the original words under each caption" = "Show the original words under each caption";
 
 /* No comment provided by engineer. */
-"Show the stored translation in gray under each line of “Others”" = "Show the stored translation in gray under each line of “Others”";
+"Show the transcript" = "Show the transcript";
 
 /* No comment provided by engineer. */
-"Show the transcript" = "Show the transcript";
+"Show the translation in gray under each line" = "Show the translation in gray under each line";
 
 /* No comment provided by engineer. */
 "Show translation" = "Show translation";
@@ -6062,7 +6074,8 @@
 /* Ask: shown while the documents are still being indexed; the arguments are the files read and the files to read */
 "Still indexing your documents (%lld of %lld). Answers use what’s indexed so far." = "Still indexing your documents (%lld of %lld). Answers use what’s indexed so far.";
 
-/* Button that stops finding an answer */
+/* Button that stops finding an answer
+   Transcript tab: stops translating the transcript; what was translated stays */
 "Stop" = "Stop";
 
 /* No comment provided by engineer. */
@@ -6492,6 +6505,9 @@
 /* Settings → Models result */
 "The key was removed from the Keychain." = "The key was removed from the Keychain.";
 
+/* Transcript tab: Apple’s download of the translation languages didn’t finish */
+"The language download didn’t finish." = "The language download didn’t finish.";
+
 /* Settings → Models note under the minutes language */
 "The language minutes are written in. Ask always answers in the language of your question." = "The language minutes are written in. Ask always answers in the language of your question.";
 
@@ -6856,6 +6872,9 @@
    Starts a sentence when the transcript says something different from what the user noted; the sentence follows */
 "The transcript says:" = "The transcript says:";
 
+/* Transcript tab: nothing is translated while a meeting is being recorded; the argument is a language name in running text */
+"The translation into %@ goes on when the recording ends." = "The translation into %@ goes on when the recording ends.";
+
 /* Confirmation message when deleting one person’s saved voice, from Settings or from the person’s card */
 "The voice of this person is removed from the encrypted store, with the voice summaries kept in meetings, and Vauta will no longer suggest them. Meetings and the names already in them stay as they are." = "The voice of this person is removed from the encrypted store, with the voice summaries kept in meetings, and Vauta will no longer suggest them. Meetings and the names already in them stay as they are.";
 
@@ -7009,6 +7028,9 @@
 
 /* Settings → Models; a file chosen for import is not the model; Gemma 4 E4B and the revision are not translated */
 "This isn’t the Gemma 4 E4B file Vauta needs (revision %@)." = "This isn’t the Gemma 4 E4B file Vauta needs (revision %@).";
+
+/* Transcript tab: the meeting's language can't be translated into the one chosen */
+"This language can’t be translated on this Mac." = "This language can’t be translated on this Mac.";
 
 /* Speaker popover: explains what Split From Here moves */
 "This line and the ones after it in the same turn move to a new speaker." = "This line and the ones after it in the same turn move to a new speaker.";
@@ -7218,6 +7240,12 @@
 /* No comment provided by engineer. */
 "Transcripts and minutes don’t change." = "Transcripts and minutes don’t change.";
 
+/* Transcript tab: the menu of languages to read the transcript in */
+"Translate" = "Translate";
+
+/* Transcript tab, Translate menu: translates every line again into the language shown */
+"Translate Again" = "Translate Again";
+
 /* Settings → Translation */
 "Translate into" = "Translate into";
 
@@ -7229,6 +7257,18 @@
 
 /* Settings → Translation */
 "Translating from" = "Translating from";
+
+/* Transcript tab: Apple's translation on this Mac; the arguments are a language name in running text and how much is done, in percent */
+"Translating into %@ on this Mac (%lld%%)" = "Translating into %@ on this Mac (%lld%%)";
+
+/* Transcript tab: Apple's translation on this Mac; the argument is a language name in running text */
+"Translating into %@ on this Mac…" = "Translating into %@ on this Mac…";
+
+/* Transcript tab: the arguments are a language name in running text and how much is done, in percent */
+"Translating into %@ with your model server (%lld%%)" = "Translating into %@ with your model server (%lld%%)";
+
+/* Transcript tab: the argument is a language name in running text */
+"Translating into %@ with your model server…" = "Translating into %@ with your model server…";
 
 /* No comment provided by engineer. */
 "Translating…" = "Translating…";
@@ -7249,7 +7289,8 @@
 
 /* Notification button: write the minutes again
    Retry button
-   Status action button */
+   Status action button
+   Transcript tab: translates the lines without a translation again */
 "Try Again" = "Try Again";
 
 /* Captions: retry the language download. The ellipsis is on purpose: it asks for Apple’s download confirmation again, unlike the retry of a stopped translation (“Try Again”) */
@@ -7861,6 +7902,9 @@
 /* Documents pane: a source whose files are queued */
 "Waiting to index" = "Waiting to index";
 
+/* Transcript tab: another meeting is being translated first; the argument is a language name in running text */
+"Waiting to translate into %@…" = "Waiting to translate into %@…";
+
 /* Settings → Models; why indexing for search by meaning is paused */
 "Waits for the charger." = "Waits for the charger.";
 
@@ -8021,10 +8065,10 @@
 "Write minutes with" = "Write minutes with";
 
 /* No comment provided by engineer. */
-"Write the stored translation under each line of “Others”" = "Write the stored translation under each line of “Others”";
+"Write the time you marked that the participants were told the meeting was being recorded" = "Write the time you marked that the participants were told the meeting was being recorded";
 
 /* No comment provided by engineer. */
-"Write the time you marked that the participants were told the meeting was being recorded" = "Write the time you marked that the participants were told the meeting was being recorded";
+"Write the translation under each line" = "Write the translation under each line";
 
 /* Error when saving a minutes template whose instructions are empty */
 "Write what the minutes should cover." = "Write what the minutes should cover.";
@@ -8221,6 +8265,12 @@
 
 /* Captions panel tooltip and VoiceOver: the model server improved the latest translation */
 "Your model server improved the latest sentence. Its version is the one saved." = "Your model server improved the latest sentence. Its version is the one saved.";
+
+/* Transcript tab: after translating with the model server */
+"Your model server stopped answering, so Apple’s translation on this Mac did the rest." = "Your model server stopped answering, so Apple’s translation on this Mac did the rest.";
+
+/* Transcript tab: after translating with the model server, when Apple’s translation can’t do the rest */
+"Your model server stopped answering. The rest of the lines have no translation." = "Your model server stopped answering. The rest of the lines have no translation.";
 
 /* Placeholder of the name field when editing the user themselves */
 "Your name" = "Your name";

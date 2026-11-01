@@ -79,7 +79,8 @@ public actor LLMService {
 
     public enum Priority: Int, Comparable, Sendable {
         /// `auto`: the answer to a question heard in the meeting (live answers): after the person's own question, before the live notes.
-        case ask = 0, auto = 1, live = 2, background = 3
+        /// `translation`: a transcript translated line by line (`transcriptTranslator`), after everything else.
+        case ask = 0, auto = 1, live = 2, background = 3, translation = 4
         public static func < (a: Priority, b: Priority) -> Bool { a.rawValue < b.rawValue }
     }
 

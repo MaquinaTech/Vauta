@@ -151,6 +151,7 @@ struct TranscriptTab: View {
                 controls
                 // The notice that explains the checkbox sits right under it, above the hint about passages.
                 SpeakerSeparationNote(model: model)
+                TranscriptTranslationStatus(model: model, meetingID: meeting.id)
                 hint.fixedSize(horizontal: false, vertical: true)
             }
             .padding(.bottom, 4)
@@ -173,8 +174,9 @@ struct TranscriptTab: View {
                 Toggle("Show translation", isOn: $preferences.showTranslationsInTranscript)
                     .toggleStyle(.checkbox)
                     .controlSize(.small)
-                    .help("Show the stored translation in gray under each line of “Others”")
+                    .help("Show the translation in gray under each line")
             }
+            if model.canTranslateTranscript { TranscriptTranslateMenu(model: model, meeting: meeting) }
             if model.reanalyzing {
                 ThinkingOrb().accessibilityElement().accessibilityLabel(Text("Finding names…"))
             }

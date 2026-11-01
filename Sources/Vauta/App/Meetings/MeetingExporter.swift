@@ -88,7 +88,9 @@ extension MeetingsModel {
         guard let id = shownMeeting?.id else { return nil }
         await saveDraft()
         do {
-            return try await store.meetingExport(id, translationLanguage: preferences?.translationTarget)
+            // The translation the transcript shows is the one exported.
+            return try await store.meetingExport(id, translationLanguage: preferences?.translationTarget,
+                                                 shownTranslation: id == selectedID ? translationLanguage : nil)
         } catch {
             present(String(localized: "Couldn’t read the meeting", comment: "Alert title"), error)
             return nil

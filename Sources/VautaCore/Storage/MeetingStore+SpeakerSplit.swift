@@ -98,8 +98,8 @@ extension MeetingStore {
         }
         let editedAt = { (original: String?) in original == nil ? nil : seg.optionalDouble(10).map { SQLiteValue.real($0) } }
         var undo = SpeakerUndo(segments: try segmentStates("WHERE id = ?", [.integer(segmentID)]))
-        let translations = try db.query("SELECT lang, text FROM segment_translations WHERE segment_id = ?", [.integer(segmentID)])
-            .map { ($0.string(0), $0.string(1)) }
+        let translations = try db.query("SELECT lang, text, source FROM segment_translations WHERE segment_id = ?", [.integer(segmentID)])
+            .map { (language: $0.string(0), text: $0.string(1), source: $0.optionalString(2)) }
         // External-content FTS5: the index is told what it held and what it holds now.
         try run("INSERT INTO segments_fts(segments_fts, rowid, text) VALUES ('delete', ?, ?)", [.integer(segmentID), .text(text)])
         try run("UPDATE segments SET end = ?, text = ?, speaker_locked = ?, original_text = ?, edited_at = ? WHERE id = ?",
@@ -117,20 +117,23 @@ extension MeetingStore {
                   .integer(byUser ? 1 : seg.int(8)), originals.right.map { .text($0) }, editedAt(originals.right)])
         let id = db.lastInsertRowID
         if !byUser {
-            for (language, whole) in translations {
-                guard let (l, r) = Self.cutTranslation(whole, at: Double(offset) / Double(characters.count)) else {
-                    try run("INSERT INTO segment_translations(segment_id, lang, text) VALUES (?, ?, ?)",
-                            [.integer(segmentID), .text(language), .text(whole)])
+            // A translation of the line as it reads is cut with it, and each part is one of its own words; one stored before
+            // translations recorded their source stays without one. One of an earlier text of the line, shown by neither part, goes.
+            for t in translations where t.source == nil || t.source == text {
+                let sources: (left: SQLiteValue?, right: SQLiteValue?) = t.source == nil ? (nil, nil) : (.text(left), .text(right))
+                guard let (l, r) = Self.cutTranslation(t.text, at: Double(offset) / Double(characters.count)) else {
+                    try run("INSERT INTO segment_translations(segment_id, lang, text, source) VALUES (?, ?, ?, ?)",
+                            [.integer(segmentID), .text(t.language), .text(t.text), sources.left])
                     continue
                 }
-                try run("INSERT INTO segment_translations(segment_id, lang, text) VALUES (?, ?, ?), (?, ?, ?)",
-                        [.integer(segmentID), .text(language), .text(l), .integer(id), .text(language), .text(r)])
+                try run("INSERT INTO segment_translations(segment_id, lang, text, source) VALUES (?, ?, ?, ?), (?, ?, ?, ?)",
+                        [.integer(segmentID), .text(t.language), .text(l), sources.left, .integer(id), .text(t.language), .text(r), sources.right])
             }
         }
         try moveCitations(from: segmentID, to: id, leftText: left, rightText: right, at: at)
         undo.split = .init(left: segmentID, right: id, text: text, end: end, leftText: left, rightText: right, at: at,
                            leftSpeaker: seg.optionalInt(5), rightSpeaker: rightSpeakerID,
-                           translations: translations.map { (language: $0.0, text: $0.1) },
+                           translations: translations,
                            original: seg.optionalString(9), editedAt: seg.optionalDouble(10))
         try recomputeTalkTimeInTransaction(meeting)
         return (id, undo)

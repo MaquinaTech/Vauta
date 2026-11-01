@@ -36,17 +36,16 @@ extension MeetingStore {
         return db.lastInsertRowID
     }
 
-    /// Stores the translation of a segment into `language` (replaces an earlier one).
-    /// A segment that no longer exists (purged meanwhile) stores nothing. With `source` (the text
-    /// that was translated), nothing is stored when the segment's text is no longer that: the
-    /// aligner may have split it meanwhile, and a translation of the whole text would repeat the
-    /// part that now belongs to the right segment.
+    /// Stores the translation of a segment into `language` (replaces an earlier one), with the segment's text as what it was
+    /// made from (it stops showing when the line changes). A segment that no longer exists (purged meanwhile) stores nothing.
+    /// With `source` (the text that was translated), nothing is stored when the segment's text is no longer that: the aligner
+    /// may have split it meanwhile, and a translation of the whole text would repeat the part that now belongs to the right segment.
     public func saveTranslation(_ text: String, language: String, of segmentID: Int64, source: String? = nil) throws {
         var args: [SQLiteValue] = [.text(language), .text(text), .integer(segmentID)]
         if let source { args.append(.text(source)) }
         try run("""
-            INSERT OR REPLACE INTO segment_translations(segment_id, lang, text)
-            SELECT id, ?1, ?2 FROM segments WHERE id = ?3\(source == nil ? "" : " AND text = ?4")
+            INSERT OR REPLACE INTO segment_translations(segment_id, lang, text, source)
+            SELECT id, ?1, ?2, text FROM segments WHERE id = ?3\(source == nil ? "" : " AND text = ?4")
             """, args)
     }
 

@@ -59,7 +59,7 @@ struct TranslationRefinementSection: View {
         } footer: {
             // Nothing is sent without a server, or while the feature is off: the note appears when it applies.
             if serverConfigured && preferences.translationRefinementEnabled {
-                SettingsNote(String(localized: "Only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. Nothing is sent anywhere else.",
+                SettingsNote(String(localized: "During a meeting, only the other participants’ finished sentences go to your model server, with the three previous sentences and their translations as context. When you translate a transcript in Meetings, its lines go the same way. Nothing is sent anywhere else.",
                                     comment: "Settings → Translation: privacy note about the model server"))
             }
         }

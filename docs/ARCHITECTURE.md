@@ -179,7 +179,7 @@ At Stop:
 | `Transcription/` | On-device speech recognition and speech models | `ChannelTranscriber`, `Segment`, `TranscriptionEngine`, `SpeechLanguages`, `SpeechAssets`, `transcribeFile` |
 | `MeetingCapture.swift` | Orchestrates both channels | `MeetingCapture`, `ChannelLocales` |
 | `Model/` | Shared value types | `Channel` |
-| `Translation/` | Live Translation engine: pipeline actor, backends, cache, caption layout | `LiveTranslator`, `Translator`, `TranslationBackend`, `AppleTranslationBackend`, `TranslationPair`, `CaptionSnapshot`, `CaptionFrameStore` |
+| `Translation/` | Live Translation engine: pipeline actor, backends, cache, caption layout; translated transcripts | `LiveTranslator`, `Translator`, `TranslationBackend`, `AppleTranslationBackend`, `TranslationPair`, `CaptionSnapshot`, `CaptionFrameStore`, `TranscriptTranslator` |
 | `Network/` | The audited network choke point and its in-memory log | `AuditedSession`, `AuditedBytes`, `NetworkActivityLog`, `NetworkActivityEntry`, `NetworkPurpose`, `NetworkDestination` |
 | `Backup/` | Encrypted backup file and restore | `BackupArchive`, `BackupManifest`, `BackupPreferences`, `OpenedBackup`, `BackupPassword`, `MeetingStore+Backup` |
 | `Storage/` | Encrypted store, schema, persistence | `MeetingStore`, `SQLiteDatabase`, `Schema`, `Migration`, `SnapshotEnvelope`, `Journal`, `AtomicFile`, `KeychainDatabaseKeyStore`, `KeychainSecret`, `StoreError`, `BackupExclusion` |
@@ -535,18 +535,41 @@ changed.
 - **Priority over live notes.** `LLMService.refinementTranslator` wraps the client so the service counts requests in
   flight; `liveNotes` waits (at most 20 s) while any is in flight. They do not queue in the single lane: a caption is
   useful for a few seconds.
-- **Storage.** `segment_translations(segment_id → segments ON DELETE CASCADE, lang, text)`, migration 11.
+- **Storage.** `segment_translations(segment_id → segments ON DELETE CASCADE, lang, text, source)`, migrations 11 and 38.
+  `source` is the line's text the translation was made from: `translations(of:)` shows one only while its line reads that way
+  (`MeetingStore.translationIsCurrent`; a row from before 38 has none and stands for what was transcribed), and leaves out one
+  that reads exactly as its line.
 - **Settings.** `translationRefinementEnabled` (default on; effective only with a server: `LLMService.Status.serverConfigured`)
   and `translationModel` (empty = fast model). `RefinementTest` backs the Test button (real latency of one sample sentence).
 - **Measuring.** `Vauta translate-bench` (diagnostics build only) reports latency, CPU and main-thread cost.
+
+### Translated transcripts
+
+- **The job.** `TranscriptTranslator` (VautaCore) translates a finished meeting into one language, by `Scope`: `missing` (lines
+  without a current translation: Translate Into), `all` (Translate Again) or `changed` (lines whose translation is of an earlier
+  text: a correction). `MeetingStore.translationLines` lists the lines (no echoes, no empty lines) with their current translation or
+  a `stale` mark; `saveLineTranslations` stores each with its `source` only while the line still reads it, in the meeting asked.
+- **Engines.** With `translationRefinementEnabled` and a server, `LLMService.transcriptTranslator` sends each line through the
+  lane at `Priority.translation` (after questions, live work and background jobs) with the three lines before it and their
+  translations (`ServerTranslator`, as Live Translation). A `RefinementError` for one line takes Apple's translation of it; any
+  other error ends the server's part and Apple's translation does the rest in batches of 24 (`AppleTranslationBackend.
+  makeTranscriptTranslator` prefers the high-fidelity family; a batch that fails goes line by line). Without a server, Apple's
+  translation does every line. A translation that reads as its line but for case and spaces is stored as the line's own text.
+- **Recording.** The job waits while any meeting is recorded (`activeMeetingID`) and stops when its meeting is gone.
+- **The app.** `TranscriptTranslationModel` runs one request at a time, keeps at most one waiting per meeting, offers the
+  languages (Apple's targets, plus every picker language when the server translates), hosts the download sheet in the Meetings
+  window and shows progress, Stop and the notices; a request after a correction is quiet (no progress, no notice, no download).
+  `MeetingsModel.chosenTranslations` holds the language the person picked per meeting for the session (`TranslationDisplay`
+  shows it even before its first line); the export takes the language shown, and the JSON says it in `translationLanguage`.
 
 ### Transcript corrections
 
 - **Storage.** `segments.text` is the corrected line, so every reader (search, Ask, chunks, the graph, the minutes, the
   exports) reads it with no change, and the JSON export flags the line `corrected` without `original_text`; `original_text` keeps what the transcriber wrote (NULL = never corrected, or restored)
   and `edited_at` when the line first differed from it (migration 36). `segments_fts` is external-content, so
-  `MeetingStore.correctSegment` tells it the old text and the new one. Translations stay stored and `translations(of:)`
-  leaves out corrected lines: they translate what was transcribed and come back with Restore Original.
+  `MeetingStore.correctSegment` tells it the old text and the new one. Translations stay stored, and `translations(of:)` shows
+  only those of what a line reads now (`segment_translations.source`): a corrected line's translation hides, the line is
+  translated again into the language the transcript shows, and one from before migration 38 comes back with Restore Original.
 - **What the model wrote.** `TranscriptCorrection` aligns the words of two versions of a line (LCS on `TextKeys.norm`, the
   same words at both ends first, a cap of 2 M cells beyond which the middle counts as replaced). `touches(_:)` says whether
   an item written from the old line may no longer say what the line says: a figure gone (`MinutesVerifier`), a change other
@@ -642,6 +665,10 @@ Settings) and `meetings.card_template` (the template the model's card followed).
 back to NULL and the meetings that were to be written with it to their series' template, else the default the app passes. A
 series made from a repeating event survives its last meeting when it has a template (the orphan cleanup keeps it).
 
+Migration 38 adds `segment_translations.source`, the line's text a translation was made from (see "Translated transcripts"). Rows
+from before it keep NULL, which means what the transcriber wrote; a split carries each part's own text, and its undo puts back
+what the line had.
+
 **Never edit a published migration.** Add a new one, with a test that opens data written by the previous version
 (see `StorageSchemaTests`).
 
@@ -662,6 +689,7 @@ Existing installations must keep working, so these never change meaning:
   (`MinutesTemplateChoice.storedValue`): a built-in template's raw value, or `custom:<id>`; any other value reads as the general template.
 - `tasks.due_day` (`YYYY-MM-DD`), the states of `created_actions.state` and `follow_ups.state`, and the pasteboard marks `org.nspasteboard.ConcealedType` and `org.nspasteboard.TransientType`.
 - `NetworkPurpose.modelDownload` (`"modelDownload"`, written to the exported JSON).
+- `segment_translations.source` (NULL = a translation of what was transcribed) and the JSON export's optional `translationLanguage`.
 - `NetworkPurpose.liveAnswers` (`"liveAnswers"`), `knowledge_fts` kind 7 (a question the person kept) and the keys of `detected_questions.answer`
   (`answer`, `claims`, `sources`, `late`; a citation's `kind` is `thisMeeting`, `pastMeeting` or `document`).
 - `ModelProviderSettings.Embeddings`: the raw value `"searchModel"` is the downloaded model; the retired `"onDevice"`

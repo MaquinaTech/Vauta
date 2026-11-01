@@ -42,12 +42,15 @@ struct MeetingsWindow: View {
         .environment(\.openModelsSettings, openModelsSettings)
         .environment(\.openModelGuide, { settings.pane = .models; settings.models.guidePresented = true; openSettings() })
         .focusedSceneValue(\.meetingsModel, model)
+        // Apple's sheet for a language that translated transcripts need first.
+        .translationDownloads(model.translation.downloader, host: .meetings)
         .onChange(of: undoManager.map(ObjectIdentifier.init), initial: true) { model.undoManager = undoManager }
         .task {
             model.isShowing = true
             model.llm = recorder.llm
             model.documentsModel = recorder.documents
             model.preferences = preferences
+            model.translation.serverConfigured = { [weak recorder = recorder] in recorder?.llmStatus.serverConfigured ?? false }
             model.actions.backend = { "\(recorder.llmStatus.chatProvider)" }
             await model.reload()
             // Like Mail or Notes: open on the latest meeting instead of an empty pane.

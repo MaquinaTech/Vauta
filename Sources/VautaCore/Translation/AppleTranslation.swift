@@ -12,11 +12,22 @@ public enum TranslationStrategy: Sendable, Equatable {
     case highFidelity
 }
 
+/// What translated transcripts need from Apple's translation (`TranscriptTranslator`): `AppleTranslationBackend` in the app, a
+/// stub in tests.
+public protocol TranscriptTranslationBackend: TranslationBackend {
+    /// Every language Apple can translate.
+    func supportedLanguages() async -> [Locale.Language]
+    /// A translator for a whole transcript, from the best family installed.
+    func makeTranscriptTranslator(from source: Locale.Language, to target: Locale.Language) async throws -> any Translator
+    /// The family to download for translating transcripts.
+    func transcriptDownloadStrategy(from source: Locale.Language, to target: Locale.Language) async -> TranslationStrategy
+}
+
 /// Apple's Translation framework, on device. Nothing here touches the network:
 /// `TranslationSession(installedSource:target:)` only works with language
 /// models already on this Mac, and downloads go through the system's own
 /// consent sheet (see `TranslationDownloader` in the app).
-public struct AppleTranslationBackend: TranslationBackend {
+public struct AppleTranslationBackend: TranscriptTranslationBackend {
     public init() {}
 
     /// Every language Apple can translate, as the system reports them.
@@ -46,6 +57,18 @@ public struct AppleTranslationBackend: TranslationBackend {
         // The faster family when it is installed, otherwise the one that is.
         let strategy: TranslationStrategy = await status(.lowLatency, source, target) == .installed ? .lowLatency : .highFidelity
         return try await makeTranslator(from: source, to: target, strategy: strategy)
+    }
+
+    /// A translator for a whole transcript (`TranscriptTranslator`): the family that translates best when it is installed, else
+    /// the one that is. A transcript is read after the meeting, so quality matters more than the time a caption has.
+    public func makeTranscriptTranslator(from source: Locale.Language, to target: Locale.Language) async throws -> any Translator {
+        let strategy: TranslationStrategy = await status(.highFidelity, source, target) == .installed ? .highFidelity : .lowLatency
+        return try await makeTranslator(from: source, to: target, strategy: strategy)
+    }
+
+    /// The family to download for translating transcripts: the one that translates best.
+    public func transcriptDownloadStrategy(from source: Locale.Language, to target: Locale.Language) async -> TranslationStrategy {
+        await status(.highFidelity, source, target) == .supported ? .highFidelity : .lowLatency
     }
 
     public func makeTranslator(from source: Locale.Language, to target: Locale.Language, strategy: TranslationStrategy) async throws -> any Translator {

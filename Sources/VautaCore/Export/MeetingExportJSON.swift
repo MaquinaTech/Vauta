@@ -73,6 +73,9 @@ import Foundation
 /// correction; what the transcriber wrote stays in Vauta and is never exported, since a correction may be there to take a word
 /// out.
 ///
+/// With the translation included, `translationLanguage` (an optional key, version 1) says which language the lines'
+/// `translation` is in: a BCP-47 code such as "en", "pt-PT" or "zh-Hans". It is written only when some line has one.
+///
 /// Questions heard in the meeting that the person kept are written only when there are some (an optional key, version 1):
 ///
 /// ```
@@ -228,6 +231,8 @@ public enum MeetingExportJSON {
         let speakers: [Speaker]
         /// The questions the person kept; empty = not written.
         let questions: [Question]
+        /// The language of the transcript's translations; nil = not written.
+        let translationLanguage: String?
 
         init(_ e: MeetingExport, options: MeetingExportOptions) {
             title = e.title
@@ -266,6 +271,7 @@ public enum MeetingExportJSON {
                 Speaker(id: $0.id, label: $0.label, name: $0.name, channel: $0.channel.rawValue, talkSeconds: Self.round($0.talkSeconds))
             }
             questions = e.questions.map { Question(t: Self.round($0.time), by: $0.channel.rawValue, text: $0.text, answer: $0.answer, sources: $0.sources) }
+            translationLanguage = options.includeTranscript && options.includeTranslation && e.hasTranslation ? e.translationLanguage : nil
         }
 
         func encode(to encoder: Encoder) throws {
@@ -289,11 +295,12 @@ public enum MeetingExportJSON {
             if !pauses.isEmpty { try c.encode(pauses, forKey: .pauses) }
             if !speakers.isEmpty { try c.encode(speakers, forKey: .speakers) }
             if !questions.isEmpty { try c.encode(questions, forKey: .questions) }
+            if let translationLanguage { try c.encode(translationLanguage, forKey: .translationLanguage) }
         }
 
         enum CodingKeys: String, CodingKey {
             case format, version, title, startedAt, endedAt, durationSeconds, language, participantsInformedAt, attendees, summary, topics,
-                 openQuestions, decisions, tasks, notes, transcript, pauses, speakers, questions
+                 openQuestions, decisions, tasks, notes, transcript, pauses, speakers, questions, translationLanguage
         }
 
         struct Pause: Encodable {

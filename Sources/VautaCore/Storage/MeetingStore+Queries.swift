@@ -28,14 +28,20 @@ extension MeetingStore {
         }
     }
 
-    /// The stored translations of a meeting's segments, in segment order. A corrected line has none: its translation is of
-    /// what the transcriber wrote, and comes back with Restore Original.
+    /// The stored translations of a meeting's segments, in segment order. Each shows only while its line reads as it did when it
+    /// was translated (`translationIsCurrent`): a line corrected since has none until it is translated again. A translation that
+    /// reads exactly as its line (a line already in that language) is left out.
     public func translations(of meetingID: Int64) throws -> [StoredTranslation] {
         try db.query("""
             SELECT t.segment_id, t.lang, t.text FROM segment_translations t
-            JOIN segments s ON s.id = t.segment_id WHERE s.meeting_id = ? AND s.original_text IS NULL ORDER BY s.start, s.id, t.lang
+            JOIN segments s ON s.id = t.segment_id WHERE s.meeting_id = ? AND \(Self.translationIsCurrent) AND t.text <> s.text
+            ORDER BY s.start, s.id, t.lang
             """, [.integer(meetingID)]).map { StoredTranslation(segmentID: $0.int(0), language: $0.string(1), text: $0.string(2)) }
     }
+
+    /// Whether translation `t` was made from what line `s` reads now. One stored before translations recorded their source
+    /// (version 38) is of what the transcriber wrote: it holds while the line is not corrected, and comes back with Restore Original.
+    static let translationIsCurrent = "(t.source = s.text OR (t.source IS NULL AND s.original_text IS NULL))"
 
     /// For diagnostics: size of the encrypted files and row counts.
     public func stats() throws -> (fileBytes: Int, journalBytes: Int, meetings: Int, segments: Int) {

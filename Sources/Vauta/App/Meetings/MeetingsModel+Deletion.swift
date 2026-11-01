@@ -268,6 +268,7 @@ extension MeetingsModel {
             taskDraft = nil
             try await store.eraseEverything()
             await llm?.forgetKeptTranscripts()
+            erasedTranslations()
             purgeVisible()
             onErased?()
             result.erased = true
@@ -278,6 +279,7 @@ extension MeetingsModel {
         } catch let e as StoreError where e.kind == .newKeyPending {
             // The history is gone, but without a new key nothing is recorded or saved.
             await llm?.forgetKeptTranscripts()
+            erasedTranslations()
             purgeVisible()
             onErased?()
             result.erased = true

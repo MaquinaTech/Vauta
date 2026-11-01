@@ -128,7 +128,7 @@ Live Translation uses Apple's on-device Translation framework. The translation l
 from Apple, with the system's own consent sheet, the first time you ask for a pair; macOS stores and removes them
 (System Settings → General → Language & Region → Translation Languages). Vauta only creates translation sessions for
 languages already installed, so Apple's translation never sends text anywhere. (If you also use your model server to improve
-translations, see "Live Translation" below.)
+translations, see "Live Translation" and "Translated transcripts" below.)
 
 ### 5. The search model (optional, in Application Support)
 
@@ -178,7 +178,7 @@ These are all the connections Vauta makes. Nothing else is contacted.
 
 | Destination | When | What is sent |
 |---|---|---|
-| **The model server you configure** | Live notes while recording, expanding your notes (see below), live answers to the questions heard while recording (when you turn them on), improved live translations (when a server is set up and the setting is on), minutes after a meeting, Ask (including the few passages of your documents it needs), the suggested agenda of a pre-meeting brief, search vectors, status checks, "Test Connection" and the translation "Test" | Transcript text, your notes, names and glossary terms from your context, the meeting title and date, the instructions of a minutes template you wrote when the meeting uses one, and instructions. With documents: the few passages of your files that Ask picked for a question, and, only if you turn on "Also use the model server to find passages by meaning" for a server on your network, every indexed passage once (purpose "Indexing your documents"). For improved translations: each finished sentence of the **Others** channel and the three before it (with their translations), nothing else. What live answers and the brief send is in [Live answers](#live-answers) and [The pre-meeting brief](#the-pre-meeting-brief). Allowed destinations: this Mac (`127.0.0.1`, `::1`, `localhost`), or another computer on your local network over HTTPS with TLS 1.3. Only the OpenAI-compatible endpoints (`/v1/models`, `/v1/chat/completions`, `/v1/embeddings`) and a few read-only identification endpoints of the server type you chose |
+| **The model server you configure** | Live notes while recording, expanding your notes (see below), live answers to the questions heard while recording (when you turn them on), improved live translations (when a server is set up and the setting is on), minutes after a meeting, Ask (including the few passages of your documents it needs), the suggested agenda of a pre-meeting brief, search vectors, status checks, "Test Connection" and the translation "Test" | Transcript text, your notes, names and glossary terms from your context, the meeting title and date, the instructions of a minutes template you wrote when the meeting uses one, and instructions. With documents: the few passages of your files that Ask picked for a question, and, only if you turn on "Also use the model server to find passages by meaning" for a server on your network, every indexed passage once (purpose "Indexing your documents"). For improved translations: each finished sentence of the **Others** channel and the three before it (with their translations), nothing else. For a transcript you translate (Meetings → Transcript → Translate, when the setting is on): each line of that meeting, with the three before it and their translations. What live answers and the brief send is in [Live answers](#live-answers) and [The pre-meeting brief](#the-pre-meeting-brief). Allowed destinations: this Mac (`127.0.0.1`, `::1`, `localhost`), or another computer on your local network over HTTPS with TLS 1.3. Only the OpenAI-compatible endpoints (`/v1/models`, `/v1/chat/completions`, `/v1/embeddings`) and a few read-only identification endpoints of the server type you chose |
 | **Loopback discovery** | Only when you click **Find Servers** (in Settings or setup) | Read-only requests to `http://127.0.0.1` on ports 1234, 11434, 8080, 8000 and 1337 (`GET`, plus Ollama's `POST /api/show` to read a model's details), to list the models of servers running on this Mac. Never any other address |
 | **Guided model setup** | Only while the **Set Up a Model Server** guide is open | The same read-only requests as loopback discovery, only to `http://127.0.0.1` ports 1234 (LM Studio) and 11434 (Ollama), about every 3 seconds; they stop when the guide closes, its window is hidden or Meetings relocks. The guide's **Get** button opens the app's official website (`lmstudio.ai` or `ollama.com`) in your default browser; Vauta itself downloads nothing and sends nothing to those sites |
 | **Hugging Face** (`huggingface.co`, and the one download server it names, currently `us.aws.cdn.hf.co`) | Only when you click **Download** in Settings → Models → Search by meaning or → Integrated model (or **Try Again** / **Resume** / **Repair**), never at launch and never in the background | Plain `GET` requests whose User-Agent is just `Vauta` (no build, and no version of macOS or of its network stack) for two fixed files of one pinned revision of `google/embeddinggemma-2` (the tokenizer, and the text part of the weights in 32 MiB ranges), or of `google/gemma-4-E4B-it` (the tokenizer, and the language tower of the weights in 64 MiB ranges). No token, no cookie, no account, no identifier, nothing about you, your meetings or your documents. The purpose is "Search model download" or "Integrated model download"; the signed download address Hugging Face returns is kept in memory only and its query string is never logged. A redirect to any other host is refused (a Blocked row) and nothing is sent to it |
@@ -467,6 +467,25 @@ one invented sample sentence, not meeting text.
 - The sentence still being spoken is translated and shown but never stored. Nothing is translated or stored while
   captions are paused or turned off.
 - The only extra thing on disk outside the store is the panel's position (see Preferences).
+
+### Translated transcripts
+
+**Translate** in a meeting's **Transcript** translates a finished meeting into the language you choose, only when you ask.
+
+- Without your model server (or with **Improve finished sentences with your model server** off), Apple's Translation framework
+  translates every line on this Mac, as for Live Translation. A language that isn't on this Mac yet is downloaded by macOS,
+  after its own sheet asks you.
+- With it on, each line goes to **your model server** with the three lines before it and their translations, through the same
+  connection and under the same rules as every other request, and after any other request is answered. The lines of both
+  channels go (**Me** and **Others**); never the echoes, your notes, the minutes or your context. A line the server can't
+  translate, and the rest of the meeting when the server stops answering, take Apple's translation on this Mac.
+- Nothing is sent or translated while a meeting is being recorded: the work goes on when the recording ends. **Stop** ends it,
+  and what was translated stays.
+- A line you correct is translated again, the same way, into the language the transcript shows; a line that never had a
+  translation is not.
+- The translations are stored as Live Translation's are (the same table, deleted, backed up and exported the same way), each with
+  the text of the line it was made from, so a translation never shows under words it doesn't translate. An export that includes
+  it says which language it is in and that it is a machine translation.
 
 ## The pre-meeting brief
 

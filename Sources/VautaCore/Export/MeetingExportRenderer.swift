@@ -49,6 +49,7 @@ public enum MeetingExportRenderer {
 
         if options.includeTranscript && !e.transcript.isEmpty {
             blocks.append("## \(Labels.transcript)")
+            if let note = translationNote(e, options: options) { blocks.append("*" + Markdown.inline(note) + "*") }
             let paused = MeetingPause.places(of: e.pauses, among: e.transcript.map(\.start))
             for (i, line) in e.transcript.enumerated() {
                 blocks += (paused[i] ?? []).map { "*— " + Markdown.inline($0.text(clock: ExportTimestamp.clock)) + " —*" }
@@ -139,7 +140,7 @@ public enum MeetingExportRenderer {
         if options.includeTranscript && !e.transcript.isEmpty {
             let paused = MeetingPause.places(of: e.pauses, among: e.transcript.map(\.start))
             func pauses(at i: Int) -> [String] { (paused[i] ?? []).map { "— " + $0.text(clock: ExportTimestamp.clock) + " —" } }
-            section(Labels.transcript, e.transcript.enumerated().flatMap { i, line in
+            section(Labels.transcript, (translationNote(e, options: options).map { [$0, ""] } ?? []) + e.transcript.enumerated().flatMap { i, line in
                 var entry = "[\(ExportTimestamp.clock(line.start))] \(SingleLineText.flatten(options.speaker(of: line))): \(SingleLineText.flatten(line.text))"
                 if let translation = line.translation(options) { entry += "\n    " + SingleLineText.flatten(translation) }
                 return pauses(at: i) + [entry]
@@ -151,6 +152,15 @@ public enum MeetingExportRenderer {
     // MARK: Shared pieces
 
     /// "Tuesday, October 7, 2026 at 10:00 AM – 10:45 AM (45 min)".
+    /// The sentence under the transcript's title when the translation is written: which language it is in, and that a machine
+    /// made it. nil without a translation.
+    public static func translationNote(_ e: MeetingExport, options: MeetingExportOptions) -> String? {
+        guard options.includeTranslation, e.hasTranslation, let code = e.translationLanguage else { return nil }
+        let name = TranslationPair.name(of: Locale.Language(identifier: code))
+        return String(localized: "Each line is followed by its machine translation into \(name).",
+                      comment: "Exported transcript: note under the Transcript title when translations are included; the argument is a language name in running text, e.g. English")
+    }
+
     public static func dateLine(_ e: MeetingExport, options: MeetingExportOptions) -> String {
         var calendar = options.locale.calendar
         calendar.timeZone = options.timeZone

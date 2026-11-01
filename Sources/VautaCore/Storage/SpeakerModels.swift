@@ -176,7 +176,8 @@ public struct SpeakerUndo: Sendable {
         /// What the split left behind, so undo can tell that the data moved on (split again, edited, reassigned).
         var leftText: String, rightText: String, at: Double
         var leftSpeaker: Int64?, rightSpeaker: Int64?
-        var translations: [(language: String, text: String)]
+        /// The line's translations as they were, with what each was made from.
+        var translations: [(language: String, text: String, source: String?)]
         /// What the transcriber wrote and since when, for a split of a corrected line.
         var original: String? = nil, editedAt: Double? = nil
     }
