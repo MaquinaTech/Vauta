@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
 import Foundation
+import Synchronization
 
 /// The "Test" button in Settings → Translation: one invented sentence goes
 /// through the real path and the real latency is shown.
@@ -74,12 +75,11 @@ public struct RefinementTest: Sendable, Equatable {
         }
     }
 
-    private final class FailureBox: @unchecked Sendable {
-        private let lock = NSLock()
-        private var _message: String?
+    private final class FailureBox: Sendable {
+        private let stored = Mutex<String?>(nil)
         var message: String? {
-            get { lock.withLock { _message } }
-            set { lock.withLock { _message = newValue } }
+            get { stored.withLock { $0 } }
+            set { stored.withLock { $0 = newValue } }
         }
     }
 }

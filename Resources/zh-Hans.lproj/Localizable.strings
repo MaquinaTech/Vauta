@@ -211,6 +211,9 @@
 /* Model guide status title when a model has too little context; arguments are a model name and a token count like “4K” */
 "%@’s context is too short (%@)" = "%@ 的上下文长度太短（%@）";
 
+/* Meetings detail when several meetings are chosen in the list; the argument is how many (2 or more) */
+"%lld Meetings Selected" = "已选择 %lld 个会议";
+
 /* Network Activity tooltip; arguments are a count and two times */
 "%lld identical requests: the first at %@, the latest at %@." = "%lld 个相同的请求：第一个在 %@，最后一个在 %@。";
 
@@ -1716,6 +1719,12 @@
 
 /* No comment provided by engineer. */
 "Delete" = "删除";
+
+/* No comment provided by engineer. */
+"Delete %lld Meetings…" = "删除 %lld 个会议…";
+
+/* Confirmation title when deleting several meetings chosen in the list; the argument is how many (2 or more) */
+"Delete %lld meetings?" = "删除 %lld 个会议？";
 
 /* Settings → Speakers; confirm button: delete every saved voice */
 "Delete All Saved Voices" = "删除所有已存储的声音";
@@ -4189,6 +4198,9 @@
 /* Settings → Privacy backup */
 "One encrypted file with all your meetings, context and settings, protected by a password. Use it to move to a new Mac or keep an offline copy: Time Machine doesn’t include Vauta’s data." = "将所有会议、背景⁠信息和设置存入一个受密码保护的加密文件。可用于迁移到新 Mac 或保留离线副本：时间机器不包含 Vauta 的数据。";
 
+/* Meetings detail with several meetings chosen, one of them being recorded */
+"One of them is being recorded. Stop the recording to delete them." = "其中一个正在录音。请先停止录音再删除。";
+
 /* No comment provided by engineer. */
 "One per owner" = "每位负责人一封";
 
@@ -6419,6 +6431,9 @@
 /* No comment provided by engineer. */
 "The recording is transcribed on this Mac. The file isn’t changed, copied or uploaded." = "录音会在这台 Mac 上转录。该文件不会被更改、拷贝或上传。";
 
+/* Confirmation message when deleting several meetings, some with reminders or events Vauta created; deleting the meetings does not remove them */
+"The reminders and events Vauta created from them stay in Reminders and Calendar." = "Vauta 从这些会议创建的提醒事项和日历事件会保留在“提醒事项”和“日历”中。";
+
 /* Backup sheet: advice when the saved file failed the check and couldn't be deleted */
 "The saved file is damaged: don’t rely on it. Choose another location and try again." = "存储的文件已损坏，请不要依赖它。请选择其他位置，然后重试。";
 
@@ -6539,6 +6554,9 @@
 
 /* Placeholder: who the other participants are; Return names the match or adds the typed name as a new person */
 "Their name (press Return to add)" = "输入姓名（按 Return 键添加）";
+
+/* Confirmation message when deleting several meetings chosen in the list */
+"Their transcripts, decisions, tasks, notes and marks are removed from the encrypted store. You can’t undo this." = "它们的转录、决定、任务、备注和标记将从加密存储中删除。此操作无法撤销。";
 
 /* Confirmation message when deleting the saved voices that were not used for a year */
 "Their voice fingerprints are removed from the encrypted store, with the voice summaries kept in meetings. You can save a voice again from a later meeting." = "它们的声纹将连同会议中保留的声音摘要一起从加密存储中删除。你可以在之后的会议中重新存储声音。";

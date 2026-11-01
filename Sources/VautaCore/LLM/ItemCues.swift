@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
 import Foundation
+import Synchronization
 
 /// The words that tell a task or a decision from talk about one, in the nine languages Vauta is translated into. Phrase lists, not
 /// grammar, like `FirstPerson`: every entry is a `TextKeys.norm` key (lowercase, no accents, apostrophes as spaces), matched as whole
@@ -16,16 +17,15 @@ enum ItemCues {
     /// Drops the remembered texts (transcript clauses): called when a minutes run ends, so no decrypted text stays in memory after it.
     static func forgetTexts() { normCache.removeAll() }
 
-    private final class NormCache: @unchecked Sendable {
-        private let lock = NSLock()
-        private var known: [String: String] = [:]
+    private final class NormCache: Sendable {
+        private let known = Mutex<[String: String]>([:])
 
-        func removeAll() { lock.withLock { known.removeAll() } }
+        func removeAll() { known.withLock { $0.removeAll() } }
 
         func norm(_ raw: String) -> String {
-            if let hit = lock.withLock({ known[raw] }) { return hit }
+            if let hit = known.withLock({ $0[raw] }) { return hit }
             let made = TextKeys.norm(raw)
-            lock.withLock {
+            known.withLock { known in
                 if known.count >= 4_096 { known.removeAll(keepingCapacity: true) }
                 known[raw] = made
             }

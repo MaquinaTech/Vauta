@@ -4,6 +4,7 @@
 import CoreGraphics
 import Foundation
 import ImageIO
+import Synchronization
 import Vision
 
 /// Text from pixels, on this Mac, with Vision. Nothing is written to disk and nothing leaves the Mac: the image only
@@ -88,10 +89,9 @@ enum VisionOCR {
 }
 
 /// A value shared between threads.
-final class SharedValue<Value: Sendable>: @unchecked Sendable {
-    private let lock = NSLock()
-    private var stored: Value
-    init(_ value: Value) { stored = value }
-    var value: Value { lock.withLock { stored } }
-    func set(_ new: Value) { lock.withLock { stored = new } }
+final class SharedValue<Value: Sendable>: Sendable {
+    private let stored: Mutex<Value>
+    init(_ value: Value) { stored = Mutex(value) }
+    var value: Value { stored.withLock { $0 } }
+    func set(_ new: Value) { stored.withLock { $0 = new } }
 }

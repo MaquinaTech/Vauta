@@ -3,6 +3,7 @@
 
 import Compression
 import Foundation
+import Synchronization
 
 /// A strict reader of the ZIP files that Office documents are. It trusts nothing in the archive.
 ///
@@ -39,13 +40,13 @@ public struct SafeZip: Sendable {
     private let counter = Counter()
 
     /// Running total of what was decompressed from this archive.
-    private final class Counter: @unchecked Sendable {
-        private let lock = NSLock()
-        private var total = 0
+    private final class Counter: Sendable {
+        private let total = Mutex(0)
         func add(_ n: Int, limit: Int) -> Bool {
-            lock.lock(); defer { lock.unlock() }
-            total += n
-            return total <= limit
+            total.withLock { total in
+                total += n
+                return total <= limit
+            }
         }
     }
 
