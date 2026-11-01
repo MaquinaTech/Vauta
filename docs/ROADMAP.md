@@ -1,6 +1,6 @@
 # Roadmap
 
-This is where Vauta is heading after 0.9.0. It is a direction, not a promise: plans change with what users need and what macOS makes possible. Every item has to keep Vauta's principles:
+This is where Vauta is heading next. It is a direction, not a promise: plans change with what users need and what macOS makes possible. Every item has to keep Vauta's principles:
 
 - **Local first.** Meeting audio and text stay on your Mac, or go only to a server you run on your local network.
 - **No telemetry**, no account, no cloud service of our own.

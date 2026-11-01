@@ -26,14 +26,14 @@ Good details get faster answers:
 - **Transcription language** and **model provider** (Apple Intelligence, LM Studio, Ollama…), with the model name if
   you use a model server.
 - **What you did, what you expected and what happened.**
-- **Diagnostics**: Settings › Status › **Copy Diagnostics** copies versions and the setup checklist, without meeting
+- **Diagnostics**: Settings → Status → **Copy Diagnostics** copies versions and the setup checklist, without meeting
   content. From Terminal, this read-only check gives a similar report:
 
   ```sh
-  /Applications/Vauta.app/Contents/MacOS/Vauta doctor
+  ~/Applications/Vauta.app/Contents/MacOS/Vauta doctor
   ```
 
-  (For a build from source, use `~/Applications/Vauta.app/Contents/MacOS/Vauta`.) For capture problems, also run
+  For capture problems, also run
   `Vauta status` the same way while the call is playing audio. It lists the processes playing or recording audio,
   without any audio or text.
 

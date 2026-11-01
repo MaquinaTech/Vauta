@@ -44,19 +44,23 @@ announced in the release notes.
 
 ## Repository controls
 
-What the project requires of its GitHub repository and of the people who can change it. The project lead enables these when the
-repository goes public; branch protection and
-two-factor authentication are settings only a repository administrator can change, so this section is the standard they are held to.
+What the project requires of its GitHub repository and of the people who can change it. The rulesets below are in force on the
+public repository (Settings → Rules); two-factor authentication is an account setting, so for it this section is the standard
+maintainers are held to.
 
 - **Two-factor authentication** is required for every maintainer and for anyone with write access. Prefer a passkey or a
   hardware security key to SMS.
-- **Branch protection on `main`**: pull requests only (no direct pushes), at least one approving review from someone other
-  than the author once there is a second maintainer, the CI workflow (build, test, string and header checks) must pass,
-  conversations must be resolved, force pushes and branch deletion are blocked. Until a second maintainer exists the
-  project lead reviews their own pull requests and CI is the independent check; this is stated openly, not hidden.
-- **Signed commits** are not required; contributions carry a DCO sign-off ([CONTRIBUTING.md](CONTRIBUTING.md)), checked by the DCO GitHub app once it is installed.
+- **A ruleset on `main`**: pull requests only (no direct pushes; a repository administrator can bypass the rules only when
+  merging a pull request), the CI build and tests (`Build and test`, which also runs the string and header checks) and CodeQL
+  (`Analyze (Swift)`) must pass, conversations must be resolved, commits must be signed, and force pushes and branch deletion
+  are blocked. At least one approving review from someone other than the author will be required once there is a second
+  maintainer. Until then the project lead reviews their own pull requests and CI is the independent check; this is stated
+  openly, not hidden.
+- **Signed commits** are required on `main` by that ruleset: every commit must show as Verified, signed with a key of its
+  author's GitHub account (merges made on GitHub are signed by GitHub). Contributions also carry a DCO sign-off
+  ([CONTRIBUTING.md](CONTRIBUTING.md#developer-certificate-of-origin)), which the project lead checks before merging.
 - **Signed tags**: every release tag is signed with the maintainer's SSH key, ED25519 `SHA256:exvRtcRtqxp/AHhadgXr7PAHe9itjHFPqVVCoGaOrU4`, published as a
-  signing key on the MaquinaTech GitHub account and committed as [`.github/allowed_signers`](.github/allowed_signers) ([verify a tag](SECURITY.md#verifying-what-you-run)). Verifiers should confirm the key file against the fingerprint above or the GitHub account's signing keys, not trust the checkout alone.
+  signing key on the MaquinaTech GitHub account and committed as [`.github/allowed_signers`](.github/allowed_signers) ([verify a tag](SECURITY.md#verifying-what-you-run)). Verifiers should confirm the key file against the fingerprint above or the GitHub account's signing keys, not trust the checkout alone. A second ruleset lets only a repository administrator create, move or delete `v*` tags.
 - **Releases** are source-only: a tag on `main` and a draft GitHub release created by the release workflow, which the
   project lead publishes by hand ([docs/RELEASING.md](docs/RELEASING.md)). No binaries are published.
 - **Actions** are pinned by full commit SHA and updated through Dependabot pull requests that are reviewed like any other.
@@ -65,10 +69,12 @@ two-factor authentication are settings only a repository administrator can chang
 
 ### Continuity
 
-Vauta currently has one maintainer. If that person cannot continue: the source remains Apache-2.0 and anyone can fork
-and build it; there is no signing key or account that has to be handed over, because the project publishes no signed
-binaries. A second maintainer with admin rights on the repository is the way to remove this single point of failure,
-and inviting one is a project goal.
+Vauta currently has one maintainer. If that person cannot continue, the source remains Apache-2.0 and anyone can fork
+and build it. The project publishes no signed binaries, but one key matters: `update.sh` installs only releases whose
+tag is signed with the maintainer's SSH key (above), so that key is a single point of failure for updates. If it is lost,
+or if someone else continues the project, users have to check the new key by hand once before `update.sh` accepts it
+([SECURITY.md](SECURITY.md#if-the-release-key-changes)). A second maintainer with admin rights on the repository is the
+way to remove these single points of failure, and inviting one is a project goal.
 
 ## Security reports
 

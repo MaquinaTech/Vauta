@@ -391,11 +391,12 @@ Builds from source default to the bundle ID `local.vauta.app`. A different bundl
 
 ## Uninstalling
 
-1. Quit Vauta.
+1. If **Settings → General → Open Vauta at login** is on, the user turns it off; then quit Vauta.
 2. Delete `~/Applications/Vauta.app` and `~/Library/Containers/<bundle-id>/` (this deletes all meetings). The optional
    search model and the integrated language model (the `gemma-4-e4b-it` folder) live inside that container, in
    `Data/Library/Application Support/Vauta Models`; they hold no meeting content, so the user can also remove it first with Settings → Models → Delete. You still must not open the container:
    tell the user the path.
 3. In Keychain Access, delete the items whose service is `<bundle-id>`.
-4. Optional: delete the signing keychain `~/Library/Keychains/vauta-signing.keychain-db` and
+4. The user runs `tccutil reset All <bundle-id>` in their own Terminal to remove the permissions macOS keeps for Vauta.
+5. Optional: delete the signing keychain `~/Library/Keychains/vauta-signing.keychain-db` and
    `scripts/signing-identity.txt`.
