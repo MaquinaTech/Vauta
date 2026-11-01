@@ -8,7 +8,8 @@ Vauta is a free, open-source project maintained by one person. There is no paid 
 |---|---|
 | Ask how to do something, or get help with your setup | [GitHub Discussions, Q&A](https://github.com/MaquinaTech/Vauta/discussions/categories/q-a) |
 | Share an idea or discuss a direction before it is a request | [GitHub Discussions, Ideas](https://github.com/MaquinaTech/Vauta/discussions/categories/ideas) |
-| Report something that doesn't work | [A bug report](https://github.com/MaquinaTech/Vauta/issues/new/choose) |
+| Report something that doesn't work | [A bug report](https://github.com/MaquinaTech/Vauta/issues/new/choose), or **Settings → Status → Report a Problem…**, which copies the diagnostics and opens one with your versions filled in |
+| Say whether a meeting app or browser worked with Vauta | [A compatibility report](https://github.com/MaquinaTech/Vauta/issues/new?template=compatibility.yml) |
 | Suggest an improvement | [A feature request](https://github.com/MaquinaTech/Vauta/issues/new/choose) |
 | Report a wrong or missing translation | [A translation issue](https://github.com/MaquinaTech/Vauta/issues/new/choose) |
 | Report a security vulnerability | [Private vulnerability reporting](https://github.com/MaquinaTech/Vauta/security/advisories/new), **never** a public issue |

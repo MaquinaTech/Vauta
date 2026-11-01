@@ -105,7 +105,7 @@ Tapped processes: the app's bundle ID and its `<bundle ID>.helper` processes (El
 | Webex | `Cisco-Systems.Spark`, `com.webex.meetingmanager`, `com.cisco.webexmeetingsapp` | | Expected — needs verification |
 | FaceTime | `com.apple.FaceTime`, `com.apple.avconferenced` | Call audio may run in the `avconferenced` system daemon, which may report no bundle ID. If "Others" stays silent, use **All system audio**. | Expected — needs verification |
 
-Any other app works with **All system audio**. To have an app listed, open an issue with the results described below.
+Any other app works with **All system audio**. To have an app listed, open a [compatibility report](https://github.com/MaquinaTech/Vauta/issues/new?template=compatibility.yml) with the results described below.
 
 ## Meeting links in your calendar
 
@@ -220,7 +220,7 @@ Replace "not yet verified" with the outcome. Do not delete a row: add a new date
 
 ## How to report
 
-Open a [bug report](https://github.com/MaquinaTech/Vauta/issues/new/choose), whether it worked or not, and include:
+Open a [compatibility report](https://github.com/MaquinaTech/Vauta/issues/new?template=compatibility.yml), whether it worked or not. Its form asks for:
 
 - the app or browser and its version, and the meeting service for web calls (for example "Chrome 141, Google Meet");
 - your Vauta version (`Vauta --version`), macOS version and Mac model;

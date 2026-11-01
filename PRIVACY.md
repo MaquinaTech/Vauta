@@ -166,7 +166,10 @@ Command-line and developer builds run unsandboxed and keep it in `~/Library/Cach
   microphone indicator off); what is said until you resume is never heard by Vauta. Only the times of the pause are kept.
 - **No telemetry or analytics.** Vauta does not measure how you use it.
 - **No crash reporting.** Vauta sends no crash or diagnostic reports. (macOS's own crash reporting is controlled by
-  your system settings, not by Vauta.)
+  your system settings, not by Vauta.) **Settings → Status → Report a Problem…** copies the diagnostics (versions and the
+  checklist, no meeting content, names or addresses) and opens a new bug report on GitHub in your default browser, with
+  only your Vauta and macOS versions in the address. Vauta sends nothing itself: you paste the diagnostics and decide
+  whether to submit.
 - **No accounts, no cloud sync, no update checks.** Vauta has no servers of its own.
 - **No third-party code except MLX.** Vauta uses Apple frameworks, the system SQLite library and one package, MLX (MIT),
   which runs the optional search model on this Mac's GPU; MLX makes no connections. It does bundle two third-party

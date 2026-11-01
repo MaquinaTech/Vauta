@@ -215,14 +215,15 @@ final class SettingsModel {
     }
 
     /// The checklist as text for a support request (no meeting content).
-    func diagnostics() -> String {
+    func diagnostics() -> String { diagnosticsReport().text }
+
+    func diagnosticsReport() -> DiagnosticsReport {
         let info = Bundle.main.infoDictionary
-        let report = DiagnosticsReport(
+        return DiagnosticsReport(
             appVersion: info?["CFBundleShortVersionString"] as? String ?? "dev",
             build: info?["CFBundleVersion"] as? String ?? "0",
             system: "macOS " + ProcessInfo.processInfo.operatingSystemVersionString,
             entries: statusItems.map { DiagnosticsReport.Entry($0.kind.rawValue, $0.diagnostic) }
                 + [DiagnosticsReport.Entry("sqlite", SQLiteLibrary.version)])
-        return report.text
     }
 }
