@@ -324,7 +324,10 @@ this Mac (EmbeddingGemma 2 in `VautaMLX`), or are off (Ask then uses keyword sea
   numerals are parsed), due date (`DateWords`: whole phrases bounded by the calendar, weekdays within the coming days)
   and named people literally against the cited segment; a mismatch sets `decisions.unconfirmed` / `tasks.unconfirmed`, an unbacked owner sets
   `tasks.owner_uncertain` (schema 16), the separate owner counterpart of `unconfirmed`; `markDecisionChecked` / `markTaskChecked` clear
-  both when the user verified the item. Items are marked, never dropped; the marks reach the Markdown, text and PDF
+  both when the user verified the item. An item whose cited line, or the line just before it, speaks to the model (an override such as
+  "ignore all previous instructions", the model re-cast as something else, a note to the AI: `InstructionCues`, patterns over `TextKeys.norm`
+  and, for Japanese, Korean and Chinese, over the NFKC text) is `unconfirmed` too, with the reason `instruction`, on every backend: the
+  check is in `validateMinutes`, which all of them go through. Items are marked, never dropped; the marks reach the Markdown, text and PDF
   exports as notes and the JSON as optional keys, and `MeetingStore.refreshOwnerMarks` recomputes the owner marks when
   speakers change (also when separation is turned off: the resolver then runs with no speaker data). A meeting without
   speakers exports its existing items and transcript byte for byte as before; minutes written again can carry the marks. `SpeakerDirectory` holds IDs only. The offline
@@ -649,7 +652,7 @@ one day off), `meetings.time_zone` (the zone a meeting was recorded in; the zone
 `orphaned`, `removed`, `missing`; a unique index allows one live row per source and target; deleting a task or a follow-up marks its live row `orphaned`
 instead of deleting it, and deleting a meeting removes its rows).
 
-Migration 29 adds `decisions.unconfirmed_reason` and `tasks.unconfirmed_reason`: why a model-proposed item is `unconfirmed`, as a short internal code (`rank` for an item that did not make the ranked list; `rank:<code>` when the evidence check had also doubted it softly, for example `rank:noAgreement`; otherwise the check that doubted it and that the ranking never overrides: `figures` or `question`; a row with another code or none is a doubted or old one) and never meeting text. NULL for every row written before and for an item that is not unconfirmed; editing an item or marking it checked sets it back to NULL together with `unconfirmed`. `unconfirmed` keeps its meaning everywhere; only the Minutes tab reads the reason, to show the `rank` items apart (`OtherPossibleItems`).
+Migration 29 adds `decisions.unconfirmed_reason` and `tasks.unconfirmed_reason`: why a model-proposed item is `unconfirmed`, as a short internal code (`rank` for an item that did not make the ranked list; `rank:<code>` when the evidence check had also doubted it softly, for example `rank:noAgreement`; otherwise the check that doubted it and that the ranking never overrides: `figures`, `question` or `instruction`, the cited line or the one just before it speaking to the model, `InstructionCues`; a row with another code or none is a doubted or old one) and never meeting text. NULL for every row written before and for an item that is not unconfirmed; editing an item or marking it checked sets it back to NULL together with `unconfirmed`. `unconfirmed` keeps its meaning everywhere; only the Minutes tab reads the reason, to show the `rank` items apart (`OtherPossibleItems`).
 
 **Post-meeting actions.** Every write to Reminders or Calendar goes through `ActionService` and the `ActionWriter` protocol, whose surface is the policy: add one
 reminder, add one event, remove by the identifier the ledger recorded, and read back titles, states and dates of the list or calendar asked about. There is no call
