@@ -28,19 +28,19 @@ extension BriefEvaluation {
                   let transcript = try? JSONDecoder().decode(MinutesEvaluation.Transcript.self, from: data) else { throw Failure.missingTranscript(name) }
             let when = start.addingTimeInterval(-Double(f.earlier.count - i) * 7 * 86_400)
             let id = try await store.startMeeting(at: when, locale: locale, outputLocale: locale)
+            var dbID: [Int64: Int64] = [:]
             for l in LLMEvaluation.replayLines(transcript) {
-                _ = try await store.append(Segment(channel: .others, start: l.start, end: l.end, text: l.stored, isFinal: true), to: id)
+                dbID[l.id] = try await store.append(Segment(channel: .others, start: l.start, end: l.end, text: l.stored, isFinal: true), to: id)
             }
             let calendar = event(f, start: when, briefed: false).calendarMeeting
             _ = try await store.applyCalendar(calendar, to: id)
             try await store.endMeeting(id, at: when.addingTimeInterval(2_700))
             if let m = minutes[name] {
-                try await store.saveCard(MeetingCard(summary: m.summary ?? "", topics: [], openQuestions: m.open_questions ?? []), of: id)
-                for d in m.decisions ?? [] { _ = try await store.addDecision(id, text: d.text, source: "llm") }
-                for t in m.tasks ?? [] {
-                    var owner: Int64?
-                    if let label = t.owner, let person = f.speakers?[label] { owner = try await store.entities(.person).first { $0.name == person }?.id }
-                    _ = try await store.addTask(id, text: t.text, ownerID: owner, due: t.due.flatMap { PromptText.parseDay($0, reference: when) }, source: "llm")
+                // As the app stores them: an item the ranking left out stays out of the brief, and an unconfirmed one keeps its mark.
+                let people = try await store.entities(.person)
+                _ = try await m.seed(into: store, meeting: id, segments: dbID, zone: .current) { t in
+                    guard let label = t.owner, let person = f.speakers?[label] else { return nil }
+                    return people.first { $0.name == person }?.id
                 }
             }
             ids.append(id)
@@ -208,6 +208,7 @@ extension BriefEvaluation {
         detail["items"] = "\(checks.items)"
         detail["linksInvalid"] = "\(checks.linksInvalid)"
         detail["wrongAttribution"] = "\(checks.wrongAttribution)"
+        for (check, n) in checks.wrongBy { detail["wrongAttribution." + check] = "\(n)" }
         detail["distractorsShown"] = "\(checks.distractorsShown)"
         detail["inventedHistory"] = "\(checks.inventedHistory)"
         detail["relatedSkipped"] = "\(snapshot.relatedSkipped)"

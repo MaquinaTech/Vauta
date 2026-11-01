@@ -172,14 +172,14 @@ public enum BriefEvaluation {
                     switch i.kind {
                     case .summary: out.append("- \(day(i.meetingDate)) \(i.source ?? ""): \(i.text)")
                     case .decision: out.append("- Decision: \(i.text)" + (i.unconfirmed ? " [check]" : ""))
-                    case .task: out.append("- Open task: \(i.text)" + [i.owner.map { " (\($0))" }, i.due.map { ", due \(day($0))" }].compactMap { $0 }.joined() + (i.overdue ? " [overdue]" : ""))
+                    case .task: out.append("- Open task: \(i.text)" + taskMarks(i, day: day))
                     default: out.append("- Open question: \(i.text)")
                     }
                 }
             case .openTasks:
                 out.append("Open tasks:")
                 for i in section.items {
-                    out.append("- \(i.isYours ? "[you] " : "")\(i.text)" + [i.owner.map { " (\($0))" }, i.due.map { ", due \(day($0))" }].compactMap { $0 }.joined() + (i.overdue ? " [overdue]" : ""))
+                    out.append("- \(i.isYours ? "[you] " : "")\(i.text)" + taskMarks(i, day: day))
                 }
             case .relatedMeetings:
                 out.append("Related meetings:")
@@ -202,14 +202,28 @@ public enum BriefEvaluation {
         return out.joined(separator: "\n")
     }
 
+    /// Owner, due day and the marks the app shows on a task: overdue, unconfirmed ("[check]", as on a decision) and an owner not confirmed.
+    static func taskMarks(_ i: BriefItem, day: (Date?) -> String) -> String {
+        [i.owner.map { " (\($0))" }, i.due.map { ", due \(day($0))" }].compactMap { $0 }.joined() + (i.overdue ? " [overdue]" : "")
+            + (i.unconfirmed ? " [check]" : "") + (i.ownerUncertain && i.owner != nil ? " [owner not confirmed]" : "")
+    }
+
     // MARK: Deterministic checks
 
     struct Checks: Sendable {
         var items = 0
         var linksInvalid = 0
         var wrongAttribution = 0
+        /// `wrongAttribution` by the check that found it (`decision`, `task`, `due`, `summaryDay`, `summaryDate`): counts, never text.
+        var wrongBy: [String: Int] = [:]
         var distractorsShown = 0
         var inventedHistory = false
+
+        mutating func wrong(_ check: String, _ n: Int = 1) {
+            guard n > 0 else { return }
+            wrongAttribution += n
+            wrongBy[check, default: 0] += n
+        }
     }
 
     /// Link validity (every shown item opens something that exists), attribution against the store, distractors shown and invented history.
@@ -234,19 +248,19 @@ public enum BriefEvaluation {
             // A decision or task is exactly what the store holds for that meeting (same text, owner and date).
             if let id = item.decisionID, let meeting = item.meetingID {
                 let held = ((try? await store.decisions(meeting)) ?? []).first { $0.id == id }
-                if held.map({ BriefText.line($0.text) != item.text }) ?? true { c.wrongAttribution += 1 }
+                if held.map({ BriefText.line($0.text) != item.text }) ?? true { c.wrong("decision") }
             }
             if let id = item.taskID, let meeting = item.meetingID {
                 let held = ((try? await store.tasks(meeting)) ?? []).first { $0.id == id }
-                if held.map({ BriefText.line($0.text) != item.text || $0.ownerName != item.owner || $0.due != item.due }) ?? true { c.wrongAttribution += 1 }
+                if held.map({ BriefText.line($0.text) != item.text || $0.ownerName != item.owner || $0.due != item.due }) ?? true { c.wrong("task") }
             }
             // The day printed in the brief is the day the stored minutes wrote (`due`), read from the rendered text, not recomputed from the item.
-            if item.kind == .task { c.wrongAttribution += printedDueMismatch(item, rendered: rendered, minutes: minutes) }
+            if item.kind == .task { c.wrong("due", printedDueMismatch(item, rendered: rendered, minutes: minutes)) }
             if item.kind == .summary, let id = item.meetingID, let held = (try? await store.meeting(id))?.startedAt,
-               !rendered.contains("- \(independentDay(held, calendar)) \(item.source ?? ""): ") { c.wrongAttribution += 1 }
+               !rendered.contains("- \(independentDay(held, calendar)) \(item.source ?? ""): ") { c.wrong("summaryDay") }
             if item.kind == .summary, let when = item.meetingDate {
                 let held = independentDay(when, calendar)
-                if BriefText.isoDays(in: item.text).contains(where: { $0 != held }) { c.wrongAttribution += 1 }
+                if BriefText.isoDays(in: item.text).contains(where: { $0 != held }) { c.wrong("summaryDate") }
             }
             if item.kind == .reminder, fixture.reminders.first(where: { $0.id == reminderIDOf(item) })?.relevant == false { c.distractorsShown += 1 }
             if item.kind == .note || item.kind == .document, fixture.notes.contains(where: { $0.name == item.text && !$0.relevant })
@@ -271,7 +285,8 @@ public enum BriefEvaluation {
         guard let source = minutes.lazy.flatMap({ $0.tasks ?? [] }).first(where: { BriefText.line($0.text) == item.text }) else { return 0 }
         let lines = rendered.split(separator: "\n").filter { $0.contains(item.text) }
         guard !lines.isEmpty else { return 1 }
-        let written = source.due.map { String($0.trimmingCharacters(in: .whitespaces).prefix(10)) }
+        // No due day is written as null, "" or "null" (the minutes runs write "" since the extraction phase), as `validateMinutes` reads it.
+        let written = source.due.map { String($0.trimmingCharacters(in: .whitespaces).prefix(10)) }.flatMap { $0.isEmpty || $0.lowercased() == "null" ? nil : $0 }
         let ok = lines.contains { line in
             guard let range = line.range(of: ", due ") else { return written == nil }
             return written != nil && line[range.upperBound...].hasPrefix(written!)

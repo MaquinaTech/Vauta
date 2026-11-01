@@ -132,13 +132,8 @@ public enum ActionsEvaluation {
         }
         try await store.endMeeting(id, at: start.addingTimeInterval(last + 60))
         if let m = minutes {
-            try await store.saveCard(MeetingCard(summary: m.summary ?? "", topics: [], openQuestions: m.open_questions ?? []), of: id)
             let people = try await store.entities(.person)
-            let starts = Dictionary(uniqueKeysWithValues: try await store.segments(of: id).map { ($0.id, $0.start) })
-            // Minutes written since the extraction phase carry the flags and citations the app stores: each item with a cited segment goes in
-            // through `applyMinutes`, exactly as the app writes it, so the email is the one the app's default settings would draft. An item
-            // without a mapped citation is added on its own (with its flags, no segment) and counted in `unmapped`; older files have no
-            // citations at all and every item goes that way.
+            // The minutes go in as the app writes them (`StoredMinutes.seed`), so the email is the one the app's default settings would draft.
             func owner(of t: BriefEvaluation.StoredMinutes.Task) -> Int64? {
                 guard let label = t.owner, !label.isEmpty else { return nil }
                 // A speaker label ("Speaker 2"): in the app the task has an unnamed speaker, and no name goes into an email. The fixture's name for
@@ -164,39 +159,7 @@ public enum ActionsEvaluation {
                 speakerRows[label] = row.speaker.id
                 return row.speaker.id
             }
-            var validated = ValidatedMinutes()
-            validated.summary = m.summary ?? ""
-            validated.openQuestions = m.open_questions ?? []
-            var lone: [(decision: BriefEvaluation.StoredMinutes.Decision?, task: BriefEvaluation.StoredMinutes.Task?)] = []
-            for d in m.decisions ?? [] {
-                if let seg = d.citations?.first.flatMap({ dbID[$0] }) {
-                    var item = ValidatedMinutes.Item(text: d.text, segment: seg, t: starts[seg] ?? 0, unconfirmed: d.unconfirmed ?? false)
-                    item.doubt = d.reason
-                    validated.decisions.append(item)
-                } else { lone.append((d, nil)) }
-            }
-            for t in m.tasks ?? [] {
-                if let seg = t.citations?.first.flatMap({ dbID[$0] }) {
-                    let day = t.due.flatMap { DueDay(String($0.trimmingCharacters(in: .whitespaces).prefix(10))) }
-                    var item = ValidatedMinutes.Task(text: t.text, owner: owner(of: t), due: day?.startOfDay(in: zone), segment: seg, t: starts[seg] ?? 0, unconfirmed: t.unconfirmed ?? false,
-                                                     ownerUncertain: t.owner_uncertain ?? false, ownerSpeaker: await ownerSpeaker(of: t), dueDay: day)
-                    item.doubt = t.reason
-                    validated.tasks.append(item)
-                } else { lone.append((nil, t)) }
-            }
-            if !validated.decisions.isEmpty || !validated.tasks.isEmpty { try await store.applyMinutes(validated, to: id) }
-            unmapped = lone.count
-            for item in lone {
-                if let d = item.decision {
-                    let row = try await store.addDecision(id, text: d.text, source: "llm")
-                    if d.unconfirmed == true { try await store.flagForEvaluation(decision: row, reason: d.reason) }
-                } else if let t = item.task {
-                    // No citation, so no segment: addTask stores the owner as a person only, and an unnamed speaker owner is not kept (the run reports these as `unmapped`).
-                    let day = t.due.flatMap { DueDay(String($0.trimmingCharacters(in: .whitespaces).prefix(10))) }
-                    let row = try await store.addTask(id, text: t.text, ownerID: owner(of: t), due: day?.startOfDay(in: zone), dueDay: day, source: "llm")
-                    if t.unconfirmed == true || t.owner_uncertain == true { try await store.flagForEvaluation(task: row, unconfirmed: t.unconfirmed ?? false, ownerUncertain: t.owner_uncertain ?? false, reason: t.reason) }
-                }
-            }
+            unmapped = try await m.seed(into: store, meeting: id, segments: dbID, zone: zone, owner: owner(of:), ownerSpeaker: ownerSpeaker(of:))
         }
         return Seeded(store: store, meetingID: id, start: start, zone: zone, locale: locale, tasks: try await store.tasks(id), unmapped: unmapped)
     }
