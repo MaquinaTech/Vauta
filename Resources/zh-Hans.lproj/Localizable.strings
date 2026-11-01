@@ -5920,6 +5920,9 @@
 /* Brief: heading of the few lines a model suggests for the meeting */
 "Suggested agenda" = "建议议程";
 
+/* Minutes menu: the section with the template the meeting's title suggests */
+"Suggested by the Title" = "根据标题推荐";
+
 /* No comment provided by engineer. */
 "Suggested from your calendar. Confirm or dismiss this person." = "根据你的日历建议。请确认或舍弃此人。";
 
@@ -6563,6 +6566,9 @@
 /* Error when saving a recurring meeting series without a title */
 "The title can’t be empty." = "标题不能为空。";
 
+/* Recurring meeting form, under the minutes template; the argument is the name of one of Vauta's templates */
+"The title suggests “%@”." = "标题建议使用“%@”。";
+
 /* Notification body when an imported recording has been transcribed */
 "The transcript is ready. Open the meeting to read it." = "转录已完成。打开会议即可阅读。";
 
@@ -7094,6 +7100,9 @@
 
 /* No comment provided by engineer. */
 "Use Calendar to suggest and name meetings" = "使用日历来建议和命名会议";
+
+/* Recurring meeting form: gives the series the minutes template its title suggests */
+"Use It" = "使用";
 
 /* Model guide: saves the server found, with two models */
 "Use These Models" = "使用这些模型";

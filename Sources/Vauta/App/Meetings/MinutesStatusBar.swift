@@ -179,6 +179,12 @@ struct MinutesStatusBar: View {
     /// "Rewrite Minutes" (or "Try Again" after a failure) with the meeting's template; the menu picks another.
     private func writeButton(retry: Bool) -> some View {
         Menu {
+            // Minutes written with the general template, of a meeting whose title points to another one: that one first.
+            if let suggested = suggestedTemplate {
+                Section(String(localized: "Suggested by the Title", comment: "Minutes menu: the section with the template the meeting's title suggests")) {
+                    Button(suggested.displayName) { Task { await model.regenerateMinutes(template: .builtIn(suggested)) } }
+                }
+            }
             Section("Template") {
                 ForEach(MinutesTemplate.allCases) { template in
                     Button(template.displayName) { Task { await model.regenerateMinutes(template: .builtIn(template)) } }
@@ -208,6 +214,13 @@ struct MinutesStatusBar: View {
         .help(model.cardSource == "user"
               ? "Your summary is kept; proposed decisions and tasks are added"
               : "The model writes the summary, decisions and tasks, citing the transcript. Choose a template from the menu.")
+    }
+
+    /// The template the meeting's title suggests, when its minutes use the general one.
+    private var suggestedTemplate: MinutesTemplate? {
+        guard (model.minutesTemplate ?? .general) == .general, let title = meeting.title,
+              let suggested = MinutesTemplate.suggested(forTitle: title), suggested != .general else { return nil }
+        return suggested
     }
 
     private func runningText(_ s: LLMService.Status, now: Date) -> String {

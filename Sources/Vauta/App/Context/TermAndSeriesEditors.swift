@@ -75,7 +75,22 @@ struct SeriesEditor: View {
                 }
                 ContextFieldRow("Minutes template", help: String(localized: "The minutes of new meetings in this series use it. “Default” is the template chosen in Settings\u{00A0}→\u{00A0}Models.",
                                                                  comment: "Help under the minutes template of a recurring meeting").avoidingWidow) {
-                    templatePopUp
+                    VStack(alignment: .leading, spacing: 6) {
+                        templatePopUp
+                        // Only offered: the series keeps the default until the person chooses.
+                        if model.seriesForm.template == nil, let suggested = MinutesTemplate.suggested(forTitle: model.seriesForm.title) {
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Text("The title suggests “\(suggested.displayName)”.",
+                                     comment: "Recurring meeting form, under the minutes template; the argument is the name of one of Vauta's templates")
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                                Button(String(localized: "Use It", comment: "Recurring meeting form: gives the series the minutes template its title suggests")) {
+                                    model.seriesForm.template = .builtIn(suggested)
+                                }
+                                .controlSize(.small)
+                            }
+                        }
+                    }
                 }
             } header: {
                 ContextFormHeader(title: model.isCreating

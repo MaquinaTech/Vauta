@@ -306,6 +306,9 @@ this Mac (EmbeddingGemma 2 in `VautaMLX`), or are off (Ask then uses keyword sea
   Settings. The job writes with `templateToWrite` (the meeting's, else its series', skipping a deleted one) and records what
   the card followed in `meetings.card_template`, so the badge is the truth about the minutes on screen, also after the
   template is deleted or while a rewrite with another one waits.
+  `MinutesTemplate.suggested(forTitle:)` names one of Vauta's templates from the title's words (nine languages; whole words,
+  or substrings in the scripts written without spaces and in Korean; words that also mean something else in a title are left
+  out). It is only offered, in the Rewrite menu and the recurring meeting's form; nothing is written with it on its own.
 - **Minutes and speakers.** A transcript line carries its speaker label (`VautaPrompts.speakerLabel`: name or
   "Speaker k", role, `?` when doubtful; only the name and the assignment's confidence are used). `OwnerResolver`
   (`LLM/OwnerResolution.swift`) decides task owners: a confident speaker who commits (`FirstPerson`: phrases with a verb

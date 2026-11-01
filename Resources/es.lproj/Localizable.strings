@@ -5920,6 +5920,9 @@
 /* Brief: heading of the few lines a model suggests for the meeting */
 "Suggested agenda" = "Agenda sugerida";
 
+/* Minutes menu: the section with the template the meeting's title suggests */
+"Suggested by the Title" = "Sugerida por el título";
+
 /* No comment provided by engineer. */
 "Suggested from your calendar. Confirm or dismiss this person." = "Sugerida por tu calendario. Confirma o descarta a esta persona.";
 
@@ -6563,6 +6566,9 @@
 /* Error when saving a recurring meeting series without a title */
 "The title can’t be empty." = "El título no puede estar vacío.";
 
+/* Recurring meeting form, under the minutes template; the argument is the name of one of Vauta's templates */
+"The title suggests “%@”." = "El título sugiere «%@».";
+
 /* Notification body when an imported recording has been transcribed */
 "The transcript is ready. Open the meeting to read it." = "La transcripción está lista. Abre la reunión para leerla.";
 
@@ -7094,6 +7100,9 @@
 
 /* No comment provided by engineer. */
 "Use Calendar to suggest and name meetings" = "Usar Calendario para sugerir reuniones y ponerles título";
+
+/* Recurring meeting form: gives the series the minutes template its title suggests */
+"Use It" = "Usarla";
 
 /* Model guide: saves the server found, with two models */
 "Use These Models" = "Usar estos modelos";
