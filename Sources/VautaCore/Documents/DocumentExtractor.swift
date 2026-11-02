@@ -70,7 +70,7 @@ public struct DocumentExtractor: DocumentExtracting {
     }
 
     public func recognize(_ url: URL, format: DocumentFormat, pages: [Int]) async throws -> [DocumentUnit] {
-        let clock = ExtractionClock(seconds: VisionOCR.pageDeadline + DocumentLimits.ocrPageSeconds * Double(max(1, min(pages.count, DocumentLimits.maxOCRPagesPerFile))))
+        let clock = ExtractionClock(seconds: VisionOCR.pageDeadline + VisionOCR.pagesBudget(max(1, min(pages.count, DocumentLimits.maxOCRPagesPerFile))))
         switch format {
         case .pdf:
             return try await PDFExtractor.recognize(url, pages: pages, clock: clock)

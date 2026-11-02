@@ -13,7 +13,12 @@ enum VisionOCR {
     /// The first request of a process loads and compiles the recognition model, which can take most of a minute on a Mac
     /// that has never run it (measured: 42 s, then 0.1 to 0.2 s per image). Until one request has finished, the deadline is long.
     private static let warmed = SharedValue(false)
-    static var pageDeadline: TimeInterval { warmed.value ? DocumentLimits.ocrPageSeconds : 240 }
+    static var pageDeadline: TimeInterval { (warmed.value ? DocumentLimits.ocrPageSeconds : 240) * deadlineScale }
+    /// What `count` more pages may take: `DocumentLimits.ocrPageSeconds` each, stretched like the page deadline.
+    static func pagesBudget(_ count: Int) -> TimeInterval { DocumentLimits.ocrPageSeconds * Double(count) * deadlineScale }
+    /// Stretches every OCR deadline: 1 in the app. The tests that read text run alongside the rest of the suite, which can keep a
+    /// Mac so busy that one page takes longer than 20 s (seen on an M2 while `update.sh` would have run them).
+    @TaskLocal static var deadlineScale: Double = 1
 
     /// The recognized text in reading order, or an empty string when there is none. Vision's document reader is used first
     /// (it joins the lines of a paragraph and keeps Japanese and Chinese free of stray spaces: on a sample of five scripts
