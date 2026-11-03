@@ -144,6 +144,24 @@ made again with mlx-lm on the new file from the same prompt ids (`make-goldens.p
 (top-1 8 of 8, largest difference 0.78; 31,617 tokens: top-1 equal, 0.25). Speed on the M2 is the same within noise: prefill 348 to
 393 tokens/s, decode 17.0 to 21.9 tokens/s from 30k to 2k tokens.
 
+**The minutes.** On the 13 AMI meetings with a human summary, release arms, the same three draws for each file (prefill chunks of
+128, 64 and 96 tokens), the release build of this tree:
+
+| | All-4-bit file | 4/8-bit file |
+|---|---|---|
+| Human decisions found (the cited passage within one of a linked one) | 27, 28, 25 % (mean 26.7 %) | **37, 38, 35 % (mean 36.7 %)** |
+| Decisions grounded in a human decision | 44, 46, 35 % | 42, 42, 43 % |
+| Human actions found | 59, 59, 71 % | 71, 71, 65 % |
+| Items the transcript supports (one blind judge, the 128-token draws, both mixed: 62 and 92 items) | 37 % | **56 %** (per meeting +18.4 points, 90 % interval [+1.4, +35.5]) |
+| Firm items supported | 8 of 15 | 18 of 19 |
+| Wall time of the minutes, mean | 83 s | 84 s |
+
+The judge was Claude Sonnet, blind to the files (`eval/scripts/item_support.py`, the rubric in
+[MINUTES_ITEM_SUPPORT.md](../eval/rubric/MINUTES_ITEM_SUPPORT.md); key and grades sealed with their SHA-256 before scoring). One draw
+of the new file finds about as many human decisions as the union of three draws of the old one (40 %); uniting draws of the new file
+adds little (40 % with two, 42 % with three) and lowers the share grounded in a human decision, so a second background draw is not
+shipped.
+
 **Installs of the earlier file.** Vauta recognises the earlier all-4-bit file by its size and hashes (`LanguageModelSpec.earlier`),
 keeps loading it (its header hash on every load, its whole-file hash once per launch), and offers **Update Model** in Settings →
 Models. The update (`LanguageModelUpdate`) copies every tensor whose name, type and shape did not change from the installed file,
