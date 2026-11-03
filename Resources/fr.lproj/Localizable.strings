@@ -8443,3 +8443,8 @@
 
 /* Panel tip under “The meeting is playing through speakers” */
 "The microphone hears the other participants too. Vauta leaves their echo out of the minutes, and headphones avoid it." = "Le microphone entend aussi les autres participants. Vauta exclut leur écho des comptes rendus, et un casque l’évite.";
+"A more accurate conversion of this model is available. Updating downloads only the parts that changed (%@), and the model stays in use until it is done." = "Une conversion plus précise de ce modèle est disponible. La mise à jour ne télécharge que les parties modifiées (%@), et le modèle reste utilisable jusqu’à la fin.";
+"Update Model" = "Mettre à jour le modèle";
+"Update progress" = "Progression de la mise à jour";
+"Updating (%lld%%)" = "Mise à jour (%lld %%)";
+"Updating · downloading only the parts that changed · %@ of %@" = "Mise à jour · téléchargement des seules parties modifiées · %@ sur %@";

@@ -243,6 +243,9 @@ import Testing
 
     // MARK: OCR
 
+    // The rest of the suite runs alongside these, and can keep Vision waiting longer than a page's 20 s: the deadlines are stretched,
+    // so only a real hang fails them.
+
     @Test func anImageIsReadWithOCR() async throws {
         guard await TestHardware.requireVision() else { return }
         let image = try #require(PDFFixtures.textImage("Quarterly budget approved", size: CGSize(width: 1400, height: 300)))
@@ -250,7 +253,7 @@ import Testing
         let url = folder.write("scan.png", PDFFixtures.png(image))
         let doc = try await extractor.extract(url, format: .image)
         #expect(doc.pagesNeedingOCR == [1] && doc.units.isEmpty)
-        let units = try await extractor.recognize(url, format: .image, pages: [1])
+        let units = try await VisionOCR.$deadlineScale.withValue(10) { try await extractor.recognize(url, format: .image, pages: [1]) }
         #expect(units.first?.locator == .image)
         #expect(units.first?.ocr == true)
         let read = TextKeys.norm(units.first?.text ?? "")
@@ -263,7 +266,7 @@ import Testing
         let url = folder.write("scan.pdf", PDFFixtures.scanned(text: "Invoice total due on delivery", size: CGSize(width: 1800, height: 300)))
         let doc = try await extractor.extract(url, format: .pdf)
         #expect(doc.pagesNeedingOCR == [1])
-        let units = try await extractor.recognize(url, format: .pdf, pages: [1])
+        let units = try await VisionOCR.$deadlineScale.withValue(10) { try await extractor.recognize(url, format: .pdf, pages: [1]) }
         #expect(units.first?.locator == .page(1))
         let read = TextKeys.norm(units.first?.text ?? "")
         #expect(read.contains("invoice"))

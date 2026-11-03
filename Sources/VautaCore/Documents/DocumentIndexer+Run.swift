@@ -265,7 +265,7 @@ extension DocumentIndexer {
             tracker.begin()
             // Opening the file and drawing its pages are inside the deadline too: a page that never finishes drawing ends as
             // "took too long" for these pages, so the file is finished (partial) and not tried again at every launch.
-            let budget = VisionOCR.pageDeadline + DocumentLimits.ocrPageSeconds * Double(pages.count) + 30
+            let budget = VisionOCR.pageDeadline + VisionOCR.pagesBudget(pages.count) + 30
             let units = try await withDeadline(seconds: ocrDeadline ?? budget) {
                 defer { tracker.end() }
                 return try await extractor.recognize(fileURL, format: format, pages: pages)

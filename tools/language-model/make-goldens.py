@@ -14,6 +14,11 @@ With <long-out.jsonl> it also writes one golden of about 30,000 tokens (`ami_30k
 top 20 last-position logits and no greedy ids, which `Vauta llm-selftest --model --long` checks: the many-chunk growth of the
 full-attention caches and the windowed masks past the 8.5k tokens of the other goldens.
 Needs mlx 0.32.3, mlx-lm 0.32.0, tokenizers, jinja2 (requirements-tools.txt).
+
+usage: make-goldens.py --again <model-folder> <goldens.jsonl> <out.jsonl>
+
+Makes the goldens of an earlier file again for another conversion of the model: the same prompts (their stored ids and messages),
+new greedy ids and logits. That is how the goldens followed the 8-bit tensors (2026-11), without the AMI windows they were cut from.
 """
 import json, os, sys, glob
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -23,12 +28,17 @@ from mlx_lm.utils import load_model
 from mlx_lm.models.cache import make_prompt_cache
 from gemma_chat import GemmaChat
 
-folder, template, sets, out = sys.argv[1:5]
-long_out = sys.argv[5] if len(sys.argv) > 5 else None
-chat = GemmaChat(os.path.join(folder, "tokenizer.json"), template)
-model, _ = load_model(Path(folder))
 STOP = {1, 106, 50}
 CHUNK = 512
+AGAIN = sys.argv[1] == "--again"
+if AGAIN:
+    folder, previous, out = sys.argv[2:5]
+    template = sets = long_out = None
+else:
+    folder, template, sets, out = sys.argv[1:5]
+    long_out = sys.argv[5] if len(sys.argv) > 5 else None
+    chat = GemmaChat(os.path.join(folder, "tokenizer.json"), template)
+model, _ = load_model(Path(folder))
 
 
 def amI(name, upto=None):
@@ -51,7 +61,7 @@ def transcript(files, tokens):
 
 
 SYSTEM = "You write faithful meeting minutes. Use only what the transcript says."
-prompts = [
+prompts = [] if AGAIN else [
     ("en_short", [("system", "You are a helpful assistant."), ("user", "Explain in three sentences why the sky is blue.")]),
     ("es_short", [("user", "Resume en tres frases por qué las reuniones largas suelen ser poco productivas.")]),
     ("de_short", [("user", "Nenne drei Vorteile von regelmäßigen Teambesprechungen.")]),
@@ -77,31 +87,46 @@ def run(ids):
     return cache, last
 
 
+def golden(name, msgs, ids, steps=64):
+    cache, logits = run(ids)
+    l32 = logits.astype(mx.float32)
+    top = mx.argsort(-l32)[:20]
+    topv = l32[top]
+    greedy, finished = [], False
+    cur = l32
+    for _ in range(steps):
+        t = int(mx.argmax(cur).item())
+        if t in STOP:
+            finished = True
+            break
+        greedy.append(t)
+        o = model(mx.array([[t]]), cache=cache)
+        cur = o[0, -1, :].astype(mx.float32)
+        mx.eval(cur)
+    return {"name": name, "messages": msgs, "ids": ids, "greedy": greedy, "finished": finished,
+            "top20": [[int(a), float(b)] for a, b in zip(top.tolist(), topv.tolist())], "logitsDType": str(logits.dtype)}
+
+
+if AGAIN:
+    with open(previous, encoding="utf-8") as f:
+        old = [json.loads(l) for l in f if l.strip()]
+    with open(out, "w", encoding="utf-8") as f:
+        for r in old:
+            rec = golden(r["name"], r["messages"], r["ids"], steps=64 if r["greedy"] or r["finished"] else 0)
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+            f.flush()
+            print(r["name"], len(r["ids"]), "tokens;", len(rec["greedy"]), "greedy (was", len(r["greedy"]), ")", flush=True)
+    sys.exit(0)
+
 if out != "-":  # "-" skips the 8 standard goldens (only the long one is made)
     with open(out, "w", encoding="utf-8") as f:
         for name, msgs in prompts:
             m = [{"role": r, "content": c} for r, c in msgs]
             ids, text = chat.ids(m)
-            cache, logits = run(ids)
-            l32 = logits.astype(mx.float32)
-            top = mx.argsort(-l32)[:20]
-            topv = l32[top]
-            greedy, finished = [], False
-            cur = l32
-            for _ in range(64):
-                t = int(mx.argmax(cur).item())
-                if t in STOP:
-                    finished = True
-                    break
-                greedy.append(t)
-                o = model(mx.array([[t]]), cache=cache)
-                cur = o[0, -1, :].astype(mx.float32)
-                mx.eval(cur)
-            rec = {"name": name, "messages": msgs, "ids": ids, "greedy": greedy, "finished": finished,
-                   "top20": [[int(a), float(b)] for a, b in zip(top.tolist(), topv.tolist())], "logitsDType": str(logits.dtype)}
+            rec = golden(name, msgs, ids)
             f.write(json.dumps(rec, ensure_ascii=False) + "\n")
             f.flush()
-            print(name, len(ids), "tokens;", len(greedy), "greedy;", rec["logitsDType"], flush=True)
+            print(name, len(ids), "tokens;", len(rec["greedy"]), "greedy;", rec["logitsDType"], flush=True)
 
 if long_out:
     files = sorted(glob.glob(os.path.join(sets, "ami_*_600.json")))

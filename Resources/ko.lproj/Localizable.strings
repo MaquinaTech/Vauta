@@ -8443,3 +8443,8 @@
 
 /* Panel tip under “The meeting is playing through speakers” */
 "The microphone hears the other participants too. Vauta leaves their echo out of the minutes, and headphones avoid it." = "마이크가 다른 참가자의 목소리도 듣고 있습니다. Vauta는 그 에코를 회의록에서 제외하며, 헤드폰을 사용하면 방지할 수 있습니다.";
+"A more accurate conversion of this model is available. Updating downloads only the parts that changed (%@), and the model stays in use until it is done." = "이 모델의 더 정확한 변환이 있습니다. 업데이트하면 변경된 부분만 다운로드하며(%@), 완료될 때까지 모델을 계속 사용할 수 있습니다.";
+"Update Model" = "모델 업데이트";
+"Update progress" = "업데이트 진행률";
+"Updating (%lld%%)" = "업데이트 중(%lld%%)";
+"Updating · downloading only the parts that changed · %@ of %@" = "업데이트 중 · 변경된 부분만 다운로드하는 중 · %@ / %@";

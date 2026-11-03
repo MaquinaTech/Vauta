@@ -45,6 +45,40 @@ enum LanguageModelVerifier {
         guard hex(all.finalize()) == spec.assembledSHA256 else { throw IntegratedModelError.mismatch }
     }
 
+    /// Size and header hash of a file of an earlier conversion.
+    static func quickCheck(file: URL, conversion c: LanguageModelSpec.Conversion) -> Bool {
+        guard let fh = try? FileHandle(forReadingFrom: file) else { return false }
+        defer { try? fh.close() }
+        guard let size = try? fh.seekToEnd(), Int(size) == c.assembledSize, (try? fh.seek(toOffset: 0)) != nil,
+              let head = try? fh.read(upToCount: c.headerSize), head.count == c.headerSize else { return false }
+        return hex(SHA256.hash(data: head)) == c.headerSHA256
+    }
+
+    /// The whole file of an earlier conversion against its hash.
+    static func fullVerify(file: URL, conversion c: LanguageModelSpec.Conversion) throws {
+        guard let fh = try? FileHandle(forReadingFrom: file) else { throw IntegratedModelError.ioError }
+        defer { try? fh.close() }
+        guard let size = try? fh.seekToEnd(), Int(size) == c.assembledSize, (try? fh.seek(toOffset: 0)) != nil else { throw IntegratedModelError.mismatch }
+        var all = SHA256()
+        while let d = try? fh.read(upToCount: readSize), !d.isEmpty {
+            try Task.checkCancellation()
+            all.update(data: d)
+        }
+        guard hex(all.finalize()) == c.assembledSHA256 else { throw IntegratedModelError.mismatch }
+    }
+
+    /// The installed weights against what their record says they are: the pinned conversion, or an earlier one still waiting for its
+    /// update. A record of any other conversion fails.
+    static func quickCheckInstalled(_ store: LanguageModelStore) -> Bool {
+        if let c = store.installedEarlierConversion { return quickCheck(file: store.weightsURL, conversion: c) }
+        return quickCheck(file: store.weightsURL, spec: store.spec)
+    }
+
+    static func fullVerifyInstalled(_ store: LanguageModelStore) throws {
+        if let c = store.installedEarlierConversion { return try fullVerify(file: store.weightsURL, conversion: c) }
+        try fullVerify(file: store.weightsURL, spec: store.spec)
+    }
+
     static func verifyTokenizer(file: URL, spec: LanguageModelSpec) throws {
         guard let fh = try? FileHandle(forReadingFrom: file) else { throw IntegratedModelError.ioError }
         defer { try? fh.close() }

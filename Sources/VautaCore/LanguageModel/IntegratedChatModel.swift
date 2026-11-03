@@ -147,7 +147,7 @@ public final class LanguageModelAccess: Sendable {
 
     /// Looks at the disk (quick check only) and makes the model available when it is installed and the Mac qualifies.
     public func refresh(store: LanguageModelStore, engine: LanguageModelEngine? = nil) {
-        guard case .installed = store.disk(), LanguageModelVerifier.quickCheck(file: store.weightsURL, spec: store.spec) else {
+        guard case .installed = store.disk(), LanguageModelVerifier.quickCheckInstalled(store) else {
             state.withLock { $0 = State() }
             return
         }

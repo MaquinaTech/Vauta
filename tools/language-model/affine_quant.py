@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
-"""Reference (numpy) port of Vauta's deterministic 4-bit affine quantizer, group 64.
+"""Reference (numpy) port of Vauta's deterministic affine quantizer, group 64, 4 or 8 bits.
 
 It mirrors the semantics of MLX's Metal `affine_quantize` kernel (what `mlx_lm convert` runs on the GPU): the group minimum
 starts at the bf16 maximum and the group maximum starts at 0, rounding is half away from zero, the scale is clamped at 1e-7,
@@ -31,15 +31,17 @@ def round_half_away(x):
     return t + np.sign(x) * ((np.abs(x - t)) >= np.float32(0.5))
 
 
-def quantize_rows(bf16_bits, cols):
-    """bf16_bits: uint16 array [rows, cols] (cols % 64 == 0). Returns (weight uint32 [rows, cols/8], scales u16, biases u16)."""
+def quantize_rows(bf16_bits, cols, bits=BITS):
+    """bf16_bits: uint16 array [rows, cols] (cols % 64 == 0). Returns (weight uint32 [rows, cols * bits / 32], scales u16, biases u16)."""
+    assert bits in (4, 8)
+    top = np.float32((1 << bits) - 1)
     rows = bf16_bits.shape[0]
     g = bf16_to_f32(bf16_bits).reshape(-1, GROUP)
     if not np.isfinite(g).all():
         raise ValueError("non-finite weight")
     wmin = np.minimum(BF16_MAX, g.min(axis=1))
     wmax = np.maximum(np.float32(0), g.max(axis=1))
-    scale = np.maximum((wmax - wmin) / np.float32(15), np.float32(1e-7))
+    scale = np.maximum((wmax - wmin) / top, np.float32(1e-7))
     side = np.abs(wmin) > np.abs(wmax)
     scale = np.where(side, scale, -scale).astype(np.float32)
     edge = np.where(side, wmin, wmax).astype(np.float32)
@@ -48,8 +50,9 @@ def quantize_rows(bf16_bits, cols):
     with np.errstate(divide="ignore", invalid="ignore"):
         scale = np.where(at_zero, scale, edge / np.where(at_zero, np.float32(1), q0)).astype(np.float32)
     bias = np.where(at_zero, np.float32(0), edge).astype(np.float32)
-    q = np.clip(round_half_away((g - bias[:, None]) / scale[:, None]), np.float32(0), np.float32(15))
-    q = q.astype(np.uint8).reshape(rows, cols // 8, 8).astype(np.uint32)
-    shifts = (np.arange(8, dtype=np.uint32) * 4)[None, None, :]
+    q = np.clip(round_half_away((g - bias[:, None]) / scale[:, None]), np.float32(0), top)
+    per = 32 // bits
+    q = q.astype(np.uint8).reshape(rows, cols // per, per).astype(np.uint32)
+    shifts = (np.arange(per, dtype=np.uint32) * bits)[None, None, :]
     packed = (q << shifts).sum(axis=2, dtype=np.uint32)
     return packed, f32_to_bf16_bits(scale).reshape(rows, cols // GROUP), f32_to_bf16_bits(bias).reshape(rows, cols // GROUP)

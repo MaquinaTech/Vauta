@@ -138,11 +138,15 @@ struct IntegratedModelSection: View {
         case .ready:
             Text(description: chosen ? IntegratedModelText.ready(installedBytes: status.installedBytes)
                                      : IntegratedModelText.notChosen(provider: models.savedSettings.chat == .server ? .localServer : .onDevice))
+            if let bytes = status.updateBytes { Text(description: IntegratedModelText.updateAvailable(downloadBytes: bytes)) }
+            if let error = status.lastError { ModelFailureLabel(text: IntegratedModelText.failure(error, appleAvailable: appleAvailable)) }
         case .damaged:
             ModelFailureLabel(text: IntegratedModelText.damaged(appleAvailable: appleAvailable))
             Text(description: IntegratedModelText.repairSize)
         case .repairing(let received, let total):
             Text(description: IntegratedModelText.repairing(received: received, total: total))
+        case .updating(let received, let total):
+            Text(description: IntegratedModelText.updating(received: received, total: total))
         case .failed(let error):
             ModelFailureLabel(text: IntegratedModelText.failure(error, appleAvailable: appleAvailable))
         }
@@ -175,6 +179,15 @@ struct IntegratedModelSection: View {
                     .accessibilityValue(Text(paused ? IntegratedModelText.spokenPaused(spoken) : spoken))
                 if !paused { ActionButton("Pause") { model.pause() } }
                 ActionButton("Cancel…") { confirmingCancel = true }
+            }
+        case .updating:
+            HStack(spacing: 8) {
+                ProgressView(value: status.fraction ?? 0)
+                    .frame(width: 120)
+                    .accessibilityLabel(Text("Update progress", comment: "Accessibility label of the progress of updating the integrated model"))
+                    .accessibilityValue(Text((status.fraction ?? 0).formatted(.percent.precision(.fractionLength(0)))))
+                // Nothing to keep: the installed model stays as it was.
+                ActionButton("Cancel") { model.cancelAndDiscard() }
             }
         case .checkingPartial:
             ProgressView().controlSize(.small).accessibilityLabel(Text(IntegratedModelText.checkingPartial))
@@ -211,6 +224,7 @@ struct IntegratedModelSection: View {
         case .ready:
             HStack(spacing: 8) {
                 if chosen { StatusSymbol.ok.image } else { Button("Use for Minutes") { model.useForMinutes() } }
+                if status.updateBytes != nil { Button("Update Model") { model.update() } }
                 Button("Delete…") { confirmingDelete = true }
             }
         case .damaged:

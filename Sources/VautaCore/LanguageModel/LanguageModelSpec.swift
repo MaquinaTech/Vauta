@@ -32,7 +32,7 @@ public struct LanguageModelSpec: Sendable, Equatable {
         public var outputName: String { LanguageModelSpec.outputName(forSource: name) }
     }
 
-    /// A tensor of the assembled 4-bit file, at `offset` inside its data (after the header).
+    /// A tensor of the assembled file, at `offset` inside its data (after the header).
     public struct OutputTensor: Sendable, Equatable {
         public let name: String
         public let dtype: String
@@ -47,6 +47,21 @@ public struct LanguageModelSpec: Sendable, Equatable {
             self.offset = offset
             self.size = size
             self.sha256 = sha256
+        }
+    }
+
+    /// An earlier conversion of the same revision that an install may still hold: recognised by its size and hashes, loaded until the
+    /// person updates it (`LanguageModelUpdate`), never written again.
+    public struct Conversion: Sendable, Equatable {
+        public let assembledSize: Int
+        public let headerSize: Int
+        public let headerSHA256: String
+        public let assembledSHA256: String
+        public init(assembledSize: Int, headerSize: Int, headerSHA256: String, assembledSHA256: String) {
+            self.assembledSize = assembledSize
+            self.headerSize = headerSize
+            self.headerSHA256 = headerSHA256
+            self.assembledSHA256 = assembledSHA256
         }
     }
 
@@ -70,11 +85,13 @@ public struct LanguageModelSpec: Sendable, Equatable {
     public var tokenizerFile: String
     public var tokenizerSize: Int
     public var tokenizerSHA256: String
+    /// The earlier conversions an install can be updated from.
+    public var earlier: [Conversion]
 
     public init(repository: String, revision: String, sourceFile: String, sourceSize: Int, sourceSHA256: String, sourceHeaderSize: Int,
                 sourceHeaderSHA256: String, spanStart: Int, spanEnd: Int, blockSize: Int, blocks: [String], sources: [SourceTensor],
                 outputs: [OutputTensor], assembledSize: Int, assembledSHA256: String, tokenizerFile: String, tokenizerSize: Int,
-                tokenizerSHA256: String) {
+                tokenizerSHA256: String, earlier: [Conversion] = []) {
         self.repository = repository
         self.revision = revision
         self.sourceFile = sourceFile
@@ -93,6 +110,7 @@ public struct LanguageModelSpec: Sendable, Equatable {
         self.tokenizerFile = tokenizerFile
         self.tokenizerSize = tokenizerSize
         self.tokenizerSHA256 = tokenizerSHA256
+        self.earlier = earlier
     }
 
     public static let sourcePrefix = "model.language_model."
@@ -156,10 +174,15 @@ public struct LanguageModelSpec: Sendable, Equatable {
     public var headerSize: Int { headerBytes().count }
     public func resolvePath(_ file: String) -> String { "/\(repository)/resolve/\(revision)/\(file)" }
 
-    /// The outputs of a source tensor that is quantised: weight, scales and biases (by name).
-    public func outputs(forStem stem: String) -> (weight: OutputTensor, scales: OutputTensor, biases: OutputTensor)? {
+    /// The outputs of a source tensor that is quantised: weight, scales and biases (by name), and the bits their shapes give (4 or
+    /// 8). Nil when one is missing or the shapes do not describe 4 or 8 bits in groups of 64.
+    public func outputs(forStem stem: String) -> (weight: OutputTensor, scales: OutputTensor, biases: OutputTensor, bits: Int)? {
         guard let w = outputIndex[stem + ".weight"], let s = outputIndex[stem + ".scales"], let b = outputIndex[stem + ".biases"] else { return nil }
-        return (outputs[w], outputs[s], outputs[b])
+        let weight = outputs[w], scales = outputs[s]
+        guard weight.shape.count == 2, scales.shape.count == 2, scales.shape[1] > 0 else { return nil }
+        let bits = weight.shape[1] * 32 / (scales.shape[1] * AffineQuantizer.groupSize)
+        guard bits == 4 || bits == 8, weight.shape[1] * 32 == bits * scales.shape[1] * AffineQuantizer.groupSize else { return nil }
+        return (weight, scales, outputs[b], bits)
     }
 
     /// Output tensors by name.
@@ -208,15 +231,26 @@ extension LanguageModelSpec {
         return .copy
     }
 
-    /// The tensors of the assembled file for these source tensors (names, dtypes, shapes and sorted byte offsets; hashes empty).
-    public static func derivedOutputs(from sources: [SourceTensor]) -> [OutputTensor] {
+    /// The bits a quantised tensor is stored with. 4-bit affine quantisation costs Gemma 4 E4B the most where a tensor is small and
+    /// its error reaches every token: the per-layer path (the gate and projection of each layer's per-layer input and the model's
+    /// projection into them) and the attention projections. Those stay at 8 bits, 376 MB more than 4 bits everywhere; on 9 public
+    /// AMI meetings (88,338 tokens, docs/LANGUAGE_MODEL.md) the per-token KL divergence from an 8-bit copy fell from 0.667 to 0.132.
+    public static func bits(forOutputStem stem: String) -> Int {
+        if stem.hasSuffix(".per_layer_input_gate") || stem.hasSuffix(".per_layer_projection") || stem.hasSuffix(".per_layer_model_projection") { return 8 }
+        if stem.contains(".self_attn."), ["q_proj", "k_proj", "v_proj", "o_proj"].contains(where: { stem.hasSuffix(".self_attn." + $0) }) { return 8 }
+        return AffineQuantizer.bits
+    }
+
+    /// The tensors of the assembled file for these source tensors (names, dtypes, shapes and sorted byte offsets; hashes empty), with
+    /// each quantised tensor at `bits` of its output stem.
+    public static func derivedOutputs(from sources: [SourceTensor], bits: (String) -> Int = bits(forOutputStem:)) -> [OutputTensor] {
         var items: [(String, String, [Int])] = []
         for t in sources {
             switch t.action {
             case .drop: continue
             case .copy: items.append((t.outputName, "BF16", t.shape))
             case .quantize:
-                items.append((t.outputStem + ".weight", "U32", [t.shape[0], t.shape[1] / 8]))
+                items.append((t.outputStem + ".weight", "U32", [t.shape[0], t.shape[1] * bits(t.outputStem) / 32]))
                 items.append((t.outputStem + ".scales", "BF16", [t.shape[0], t.shape[1] / AffineQuantizer.groupSize]))
                 items.append((t.outputStem + ".biases", "BF16", [t.shape[0], t.shape[1] / AffineQuantizer.groupSize]))
             }
@@ -251,6 +285,11 @@ extension LanguageModelSpec {
             sourceHeaderSize: M.sourceHeaderSize, sourceHeaderSHA256: M.sourceHeaderSHA256, spanStart: M.spanStart, spanEnd: M.spanEnd,
             blockSize: M.blockSize, blocks: LanguageModelTable.blockTable.split(separator: "\n").map(String.init), sources: sources,
             outputs: outputs, assembledSize: M.assembledSize, assembledSHA256: M.assembledSHA256, tokenizerFile: M.tokenizerFile,
-            tokenizerSize: M.tokenizerSize, tokenizerSHA256: M.tokenizerSHA256)
+            tokenizerSize: M.tokenizerSize, tokenizerSHA256: M.tokenizerSHA256, earlier: [allFourBit])
     }()
+
+    /// The conversion Vauta made until November 2026: every quantised tensor at 4 bits (the mlx-community layout, 4,198,926,892 bytes).
+    public static let allFourBit = Conversion(assembledSize: 4_198_926_892, headerSize: 176_600,
+                                              headerSHA256: "f93f5167742498c27b6507ab9a09a50f5e802ef228f7ab5586ba0bb2282ecdaf",
+                                              assembledSHA256: "caa8395988a8f687482ee9be5a9bd1e71f71509685a2590134e9a64f135871f3")
 }

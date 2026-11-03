@@ -60,7 +60,9 @@ struct SyntheticLanguageModel: Sendable {
         ("model.language_model.embed_tokens.weight", [80, 128]),
     ]
 
-    init(blockSize: Int = 8192, tokenizerSize: Int = 300, firstSharedLayer: Int = 1, tower: [(String, [Int])] = SyntheticLanguageModel.towerShapes) {
+    /// `bits` gives the bits of each quantised output stem: the shipped rule, or 4 everywhere for an earlier conversion.
+    init(blockSize: Int = 8192, tokenizerSize: Int = 300, firstSharedLayer: Int = 1, tower: [(String, [Int])] = SyntheticLanguageModel.towerShapes,
+         bits: (String) -> Int = LanguageModelSpec.bits(forOutputStem:)) {
         var sources: [LanguageModelSpec.SourceTensor] = []
         var span = Data()
         var offset = 0
@@ -87,8 +89,8 @@ struct SyntheticLanguageModel: Sendable {
         let source = header + before + span + after
         let tokenizer = Data((0..<tokenizerSize).map { UInt8(truncatingIfNeeded: $0 &* 31 &+ 3) })
 
-        // The 4-bit file, made directly with the quantizer.
-        var outs = LanguageModelSpec.derivedOutputs(from: sources)
+        // The assembled file, made directly with the quantizer.
+        var outs = LanguageModelSpec.derivedOutputs(from: sources, bits: bits)
         var dataBuffer = [UInt8](repeating: 0, count: outs.last.map { $0.offset + $0.size } ?? 0)
         let index = Dictionary(uniqueKeysWithValues: outs.enumerated().map { ($1.name, $0) })
         for t in sources where t.action != .drop {
@@ -98,10 +100,11 @@ struct SyntheticLanguageModel: Sendable {
                 let o = outs[index[t.outputName]!]
                 dataBuffer.replaceSubrange(o.offset..<(o.offset + o.size), with: raw)
             case .quantize:
-                let rows = t.shape[0], cols = t.shape[1]
-                var w = [UInt32](repeating: 0, count: rows * cols / 8), sc = [UInt16](repeating: 0, count: rows * cols / 64), bi = sc
+                let rows = t.shape[0], cols = t.shape[1], stemBits = bits(t.outputStem)
+                var w = [UInt32](repeating: 0, count: rows * cols * stemBits / 32), sc = [UInt16](repeating: 0, count: rows * cols / 64), bi = sc
                 raw.withUnsafeBytes { r in
-                    try! AffineQuantizer.quantize(rows: rows, cols: cols, source: r.bindMemory(to: UInt16.self).baseAddress!, weights: &w, scales: &sc, biases: &bi)
+                    try! AffineQuantizer.quantize(rows: rows, cols: cols, bits: stemBits, source: r.bindMemory(to: UInt16.self).baseAddress!, weights: &w, scales: &sc,
+                                                  biases: &bi)
                 }
                 for (suffix, bytes) in [(".weight", w.withUnsafeBytes { Data($0) }), (".scales", sc.withUnsafeBytes { Data($0) }), (".biases", bi.withUnsafeBytes { Data($0) })] {
                     let o = outs[index[t.outputStem + suffix]!]

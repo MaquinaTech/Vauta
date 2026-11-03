@@ -13,18 +13,20 @@ download and import code this follows.
 ## What is installed
 
 `google/gemma-4-E4B-it` at revision `ee0ef6023621cff504d758262d4e04895a5af4a2` (Apache-2.0), language tower only, quantised on the
-Mac to 4-bit affine (group size 64, the scheme of `mlx_lm convert -q`).
+Mac to affine 4 and 8 bits (group size 64, the scheme of `mlx_lm convert -q`): 8 bits for the per-layer path and the attention
+projections, 4 bits elsewhere ([The 8-bit tensors](#the-8-bit-tensors-2026-11-03)).
 
 | File | Size | SHA-256 |
 |---|---|---|
 | `model.safetensors` of the repository (never stored) | 15,992,595,884 | `cfbd3d2f1cd71bd471c37fe2bf8546d5028d41e5736f64e1ca6c6b8893125503` |
 | its header | 281,048 | `0e2afcbea913d0136ba0311f469f4ec0e80db5de4d39f95cfe38f9a3521f4f66` |
 | its language tower: 719 `model.language_model.*` BF16 tensors, bytes `[621,727,704, 15,657,865,772)` | 15,036,138,068 | per 64 MiB block (225 blocks) and per tensor |
-| the assembled 4-bit `model.safetensors` Vauta stores: 1,355 tensors | 4,198,926,892 | `caa8395988a8f687482ee9be5a9bd1e71f71509685a2590134e9a64f135871f3` |
-| its deterministic header | 176,600 | `f93f5167742498c27b6507ab9a09a50f5e802ef228f7ab5586ba0bb2282ecdaf` |
+| the assembled `model.safetensors` Vauta stores: 1,355 tensors | 4,533,815,860 | `e34a76b113ca573f2c975c27c17825d7f20bf4a2e855f081aaaf62c01a416382` |
+| its deterministic header | 176,608 | `c3b15a9f2a99c3d56986c6f74ce305f9f5895898c8540ba0a446f834526ce9f3` |
+| the earlier all-4-bit file (installs of before November 2026, until updated) | 4,198,926,892 | `caa8395988a8f687482ee9be5a9bd1e71f71509685a2590134e9a64f135871f3` |
 | `tokenizer.json` | 32,169,626 | `cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f` |
 
-The download is 15,068,307,694 bytes (the tower and the tokenizer); the install is 4,231,096,518 bytes. The audio and vision towers
+The download is 15,068,307,694 bytes (the tower and the tokenizer); the install is 4,565,985,486 bytes. The audio and vision towers
 (0.95 GB) are never fetched. The 54 key/value tensors of layers 24 to 41 (about 94 MB) are inside the tower, so they are downloaded
 and verified, then dropped, as mlx-lm's `sanitize` drops them (those layers read the keys and values of layers 22 and 23).
 Of the 1,355 output tensors, 345 modules are quantised (weight `U32`, scales and biases `BF16`) and 320 norms and scalars are copied.
@@ -117,15 +119,67 @@ The result does not depend on the number of threads or on how rows are chunked, 
 GPU for the whole model (above) and for 69 edge rows (`quantizer_goldens.json`: all negative, all positive, zero, constant, rounding
 ties, extremes near the bf16 maximum, subnormals). A NaN or infinity in a source tensor is a hard failure.
 
+## The 8-bit tensors (2026-11-03)
+
+4-bit affine quantisation costs this model far more than its size suggests. Measured with mlx-lm 0.32.0 against an 8-bit copy of
+the same pinned file (every tensor at 8 bits, made by streaming the original once), teacher-forced on minutes requests built from
+public AMI transcripts (`tools/language-model`-style scripts kept with the evaluation archive, not shipped):
+
+| Kept at 8 bits | Size added | KL from the 8-bit copy, per token | Same top token | NLL of the transcript text |
+|---|---|---|---|---|
+| nothing (the earlier all-4-bit file) | 0 | 0.667 | 71.5 % | 3.933 |
+| the per-layer path: each layer's `per_layer_input_gate` and `per_layer_projection`, and `per_layer_model_projection` | about 40 MB | 0.286 | 79.6 % | 3.425 |
+| the per-layer path and the attention `o_proj` and `v_proj` | about 190 MB | 0.182 | 83.9 % | 3.363 |
+| **the per-layer path and all attention projections (shipped)** | **335 MB** | **0.132** | **86.0 %** | **3.336** |
+
+The 9 test meetings of the 13 AMI meetings with a human summary (88,338 tokens); the choice was made on the 4 development
+meetings (36,495 tokens), where the 8-bit copy itself reads the transcript text at 3.073 and the shipped mix recovers 95 % of the gap
+from the 4-bit file (3.807). The weight-space error is the same everywhere (about 9.5 % relative for every kind of tensor); what
+differs is how far an error travels: the per-layer path and attention are small and every token goes through them. The 1.4 GB
+per-layer embedding table and the MLP at 8 bits added little for their size (the MLP's `down_proj`, 550 MB more: 3.124).
+
+The rule is `LanguageModelSpec.bits(forOutputStem:)` and `bits_for` in `make-manifest.py`; the numpy quantiser matches MLX's GPU
+kernel byte for byte at 8 bits too (0 differing words in the derivation, and `quantizer_goldens_8bit.json`). The parity goldens were
+made again with mlx-lm on the new file from the same prompt ids (`make-goldens.py --again`): `llm-selftest --model --long` passes
+(top-1 8 of 8, largest difference 0.78; 31,617 tokens: top-1 equal, 0.25). Speed on the M2 is the same within noise: prefill 348 to
+393 tokens/s, decode 17.0 to 21.9 tokens/s from 30k to 2k tokens.
+
+**The minutes.** On the 13 AMI meetings with a human summary, release arms, the same three draws for each file (prefill chunks of
+128, 64 and 96 tokens), the release build of this tree:
+
+| | All-4-bit file | 4/8-bit file |
+|---|---|---|
+| Human decisions found (the cited passage within one of a linked one) | 27, 28, 25 % (mean 26.7 %) | **37, 38, 35 % (mean 36.7 %)** |
+| Decisions grounded in a human decision | 44, 46, 35 % | 42, 42, 43 % |
+| Human actions found | 59, 59, 71 % | 71, 71, 65 % |
+| Items the transcript supports (one blind judge, the 128-token draws, both mixed: 62 and 92 items) | 37 % | **56 %** (per meeting +18.4 points, 90 % interval [+1.4, +35.5]) |
+| Firm items supported | 8 of 15 | 18 of 19 |
+| Wall time of the minutes, mean | 83 s | 84 s |
+
+The judge was Claude Sonnet, blind to the files (`eval/scripts/item_support.py`, the rubric in
+[MINUTES_ITEM_SUPPORT.md](../eval/rubric/MINUTES_ITEM_SUPPORT.md); key and grades sealed with their SHA-256 before scoring). One draw
+of the new file finds about as many human decisions as the union of three draws of the old one (40 %); uniting draws of the new file
+adds little (40 % with two, 42 % with three) and lowers the share grounded in a human decision, so a second background draw is not
+shipped.
+
+**Installs of the earlier file.** Vauta recognises the earlier all-4-bit file by its size and hashes (`LanguageModelSpec.earlier`),
+keeps loading it (its header hash on every load, its whole-file hash once per launch), and offers **Update Model** in Settings →
+Models. The update (`LanguageModelUpdate`) copies every tensor whose name, type and shape did not change from the installed file,
+each compared with its pinned hash, and fetches only the original tensors of the 217 modules now at 8 bits: Range requests of the
+pinned file, each held in memory and checked against its pinned SHA-256 before it is quantised (1.34 GB, the largest tensor 55 MB).
+The whole new file is checked before it replaces the installed one; the model stays in use meanwhile, a recording pauses the update,
+and stopping or a mismatch leaves the installed file as it was.
+
 ## Running it
 
-`Sources/VautaMLX/LLM` (the only place MLX is used) is a port of mlx-lm 0.32.0's `gemma4_text.py` for the pinned 4-bit file (MIT
+`Sources/VautaMLX/LLM` (the only place MLX is used) is a port of mlx-lm 0.32.0's `gemma4_text.py` for the pinned file (MIT
 notice in each file, NOTICE, THIRD_PARTY_LICENSES.txt): 42 layers, 8 query heads and 2 key/value heads, head dimension 256 for the
 sliding layers (window 512, RoPE 10,000) and 512 for the seven full-attention layers (proportional RoPE, 64 rotated pairs,
 `freqs = 10^6^(2i/512)` then infinity), GeGLU, per-layer inputs, layers 24 to 41 reading the keys and values of layers 22 and 23, a
-tied 4-bit output head with `tanh(x/30)*30`, bf16 activations and bf16 key/value caches.
+tied 4-bit output head with `tanh(x/30)*30`, bf16 activations and bf16 key/value caches. Each quantised layer reads its bits
+(4 or 8) from the shapes of its weight and scales.
 
-- **Weights**: 2,492 MB resident. The 1.6 GB per-layer embedding table is never loaded: the rows of the tokens in a prompt are read
+- **Weights**: 2,811 MB resident (2,492 MB with the earlier all-4-bit file). The 1.6 GB per-layer embedding table is never loaded: the rows of the tokens in a prompt are read
   from the memory map and dequantised on the GPU (about 6.2 KB per token).
 - **Sliding caches** keep the last 511 tokens before a chunk; attention runs over those and the chunk with a windowed mask. This is
   the same set of keys as mlx-lm's rotating cache. **Full caches** grow in steps of 1,024 tokens.

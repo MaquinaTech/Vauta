@@ -7,41 +7,53 @@ import MLX
 import MLXFast
 import MLXNN
 
-/// A 4-bit affine quantised linear layer (group 64): `x @ W.T` on the packed weights.
+/// The bits of a weight packed in 32-bit words with one scale per group of 64: 4 or 8, from the shapes of the two.
+func packedBits(_ w: MLXArray, _ scales: MLXArray, _ path: String) throws -> Int {
+    guard w.ndim == 2, scales.ndim == 2, scales.dim(1) > 0 else { throw Gemma4Error.badWeights(path) }
+    let bits = w.dim(1) * 32 / (scales.dim(1) * 64)
+    guard bits == 4 || bits == 8, w.dim(1) * 32 == bits * scales.dim(1) * 64 else { throw Gemma4Error.badWeights(path) }
+    return bits
+}
+
+/// An affine quantised linear layer (group 64, 4 or 8 bits as the file stores it): `x @ W.T` on the packed weights.
 struct QuantizedLinear {
     let w: MLXArray, scales: MLXArray, biases: MLXArray
+    let bits: Int
 
     init(_ file: SafetensorsFile, _ path: String) throws {
         w = try file.array(path + ".weight")
         scales = try file.array(path + ".scales")
         biases = try file.array(path + ".biases")
+        bits = try packedBits(w, scales, path)
     }
 
     func callAsFunction(_ x: MLXArray) -> MLXArray {
-        quantizedMM(x, w, scales: scales, biases: biases, transpose: true, groupSize: 64, bits: 4)
+        quantizedMM(x, w, scales: scales, biases: biases, transpose: true, groupSize: 64, bits: bits)
     }
 
     var arrays: [MLXArray] { [w, scales, biases] }
 }
 
-/// A quantised embedding table kept resident (the token embedding, also the tied output head).
+/// A quantised embedding table kept resident (4 or 8 bits) (the token embedding, also the tied output head).
 struct QuantizedEmbedding {
     let w: MLXArray, scales: MLXArray, biases: MLXArray
+    let bits: Int
 
     init(_ file: SafetensorsFile, _ path: String) throws {
         w = try file.array(path + ".weight")
         scales = try file.array(path + ".scales")
         biases = try file.array(path + ".biases")
+        bits = try packedBits(w, scales, path)
     }
 
     /// Rows for `ids` ([n] int32), dequantised to bf16.
     func rows(_ ids: MLXArray) -> MLXArray {
-        dequantized(w[ids], scales: scales[ids], biases: biases[ids], groupSize: 64, bits: 4)
+        dequantized(w[ids], scales: scales[ids], biases: biases[ids], groupSize: 64, bits: bits)
     }
 
     /// The tied head: `x @ E.T`.
     func asLinear(_ x: MLXArray) -> MLXArray {
-        quantizedMM(x, w, scales: scales, biases: biases, transpose: true, groupSize: 64, bits: 4)
+        quantizedMM(x, w, scales: scales, biases: biases, transpose: true, groupSize: 64, bits: bits)
     }
 }
 

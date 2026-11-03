@@ -104,6 +104,16 @@ enum IntegratedModelText {
                       comment: "Settings → Models; progress of the integrated model download: size done of total size, then the time left, e.g. 25 min")
     }
 
+    static func updateAvailable(downloadBytes: Int) -> String {
+        String(localized: "A more accurate conversion of this model is available. Updating downloads only the parts that changed (\(size(downloadBytes))), and the model stays in use until it is done.",
+               comment: "Settings → Models; the integrated model is installed in an earlier, less accurate conversion; the argument is a size, e.g. 1.3 GB")
+    }
+
+    static func updating(received: Int, total: Int) -> String {
+        String(localized: "Updating · downloading only the parts that changed · \(size(received)) of \(size(total))",
+               comment: "Settings → Models; progress of the update of the integrated model to its more accurate conversion; the arguments are sizes, e.g. 0.4 GB and 1.3 GB")
+    }
+
     static func repairing(received: Int, total: Int) -> String {
         String(localized: "Repairing · downloading only the damaged part · \(size(received)) of \(size(total))",
                comment: "Settings → Models; progress of the repair of the integrated model; the arguments are sizes, e.g. 1.2 GB and 9.8 GB")
@@ -302,6 +312,9 @@ enum IntegratedModelText {
     }
     static func statusRepairing(_ percent: Int) -> String {
         String(localized: "Repairing (\(percent)%)", comment: "Settings → Status; the integrated model is being repaired; the argument is a percentage without the sign")
+    }
+    static func statusUpdating(_ percent: Int) -> String {
+        String(localized: "Updating (\(percent)%)", comment: "Settings → Status; the integrated model is being updated to its more accurate conversion; the argument is a percentage without the sign")
     }
     static var statusDamaged: String { String(localized: "Damaged", comment: "Settings → Status; the integrated model files no longer match the checksums") }
     static var statusNotDownloaded: String { String(localized: "Not downloaded", comment: "Settings → Status; the integrated model is chosen but not downloaded") }

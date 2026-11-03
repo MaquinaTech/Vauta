@@ -5,7 +5,7 @@ import CryptoKit
 import Foundation
 import Synchronization
 
-/// Turns the verified bytes of the original file's language tower into the assembled 4-bit file, tensor by tensor, as they
+/// Turns the verified bytes of the original file's language tower into the assembled file (4 and 8 bits), tensor by tensor, as they
 /// arrive: the bf16 matrices are quantised (`AffineQuantizer`, row chunks of at most 16 MiB), norms and scalars are copied,
 /// and the k/v projections of the layers that share keys and values are dropped. Each output goes to its pinned offset of the
 /// preallocated file, so the order of the sorted output does not matter, and each output tensor is checked against its pinned
@@ -165,18 +165,20 @@ public final class StreamingQuantizer {
             try write(buffer, bytes, at: base + o.offset + rowsDone * rowBytes)
         case .quantize:
             guard let o = spec.outputs(forStem: t.outputStem) else { throw IntegratedModelError.mismatch }
-            let cols = t.cols
-            let words = rows * cols / 8, groups = rows * cols / AffineQuantizer.groupSize
+            let cols = t.cols, bits = o.bits
+            let rowWords = cols * bits / 32
+            let words = rows * rowWords, groups = rows * cols / AffineQuantizer.groupSize
             let w = UnsafeMutablePointer<UInt32>.allocate(capacity: words)
             let s = UnsafeMutablePointer<UInt16>.allocate(capacity: groups)
             let b = UnsafeMutablePointer<UInt16>.allocate(capacity: groups)
             defer { w.deallocate(); s.deallocate(); b.deallocate() }
             do {
-                try AffineQuantizer.quantize(rows: rows, cols: cols, source: buffer.assumingMemoryBound(to: UInt16.self), weights: w, scales: s, biases: b)
+                try AffineQuantizer.quantize(rows: rows, cols: cols, bits: bits, source: buffer.assumingMemoryBound(to: UInt16.self), weights: w, scales: s,
+                                             biases: b)
             } catch AffineQuantizerError.nonFinite {
                 throw IntegratedModelError.nonFiniteWeights
             }
-            try write(w, words * 4, at: base + o.weight.offset + rowsDone * (cols / 8) * 4)
+            try write(w, words * 4, at: base + o.weight.offset + rowsDone * rowWords * 4)
             try write(s, groups * 2, at: base + o.scales.offset + rowsDone * (cols / 64) * 2)
             try write(b, groups * 2, at: base + o.biases.offset + rowsDone * (cols / 64) * 2)
         }
@@ -225,6 +227,31 @@ public final class StreamingQuantizer {
     /// All span bytes were fed: flush to disk and check the whole assembled file against its pinned hash.
     public func finish() throws {
         guard isComplete else { throw IntegratedModelError.mismatch }
+        try finishAssembled()
+    }
+
+    /// One whole source tensor out of span order (`LanguageModelUpdate`): quantised or copied chunk by chunk to its outputs, which are
+    /// then checked against their pinned hashes. The in-order position is left as it was.
+    public func convert(_ t: LanguageModelSpec.SourceTensor, raw: UnsafeRawBufferPointer) throws {
+        guard raw.count == t.size, let start = raw.baseAddress else { throw IntegratedModelError.mismatch }
+        let saved = rowsDone
+        defer { rowsDone = saved }
+        rowsDone = 0
+        let matrix = t.shape.count == 2
+        var offset = 0
+        while offset < t.size {
+            let rows = matrix ? min(chunkRows(shape: t.shape), t.rows - rowsDone) : 1
+            let n = matrix ? rows * t.shape[1] * 2 : t.size
+            memcpy(buffer, start + offset, n)
+            try process(t, rows: rows, bytes: n)
+            rowsDone += rows
+            offset += n
+        }
+        try finishTensor(t)
+    }
+
+    /// Flushes to disk and checks the whole assembled file against its pinned hash, however it was written.
+    public func finishAssembled() throws {
         guard fsync(fd) == 0 else { throw Self.ioError(errno) }
         guard try hashRange(0, spec.assembledSize) == spec.assembledSHA256 else { throw IntegratedModelError.mismatch }
     }

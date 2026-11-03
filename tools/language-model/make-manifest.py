@@ -8,10 +8,12 @@ usage: make-manifest.py --out-dir DIR [--source-file PATH] [--reference PATH] [-
 Streams google/gemma-4-E4B-it@ee0ef602 model.safetensors (16 GB, never stored) with HTTP Range, and in that single pass:
   * hashes the whole file (must equal the LFS oid), the header, every 64 MiB block of the language-model span and every
     source tensor;
-  * quantises each language_model tensor to 4-bit affine (group 64) with the numpy port of Vauta's CPU algorithm
-    (affine_quant.py), writing the output tensors at their final offsets of DIR/vauta.safetensors;
+  * quantises each language_model tensor to affine (group 64) with the numpy port of Vauta's CPU algorithm (affine_quant.py),
+    at 8 bits for the per-layer path and the attention projections and 4 bits elsewhere (`bits_for`, the same rule as
+    LanguageModelSpec.bits(forOutputStem:)), writing the output tensors at their final offsets of DIR/vauta.safetensors;
   * compares every quantised chunk with mx.quantize on the GPU and on the CPU (mlx 0.32.3) and counts the differences;
-  * hashes every output tensor and the assembled file, and compares them with an mlx-community reference conversion.
+  * hashes every output tensor and the assembled file, and compares them with an mlx-community reference conversion (all 4-bit, so
+    the 8-bit tensors differ from it by design).
 It writes DIR/manifest.json. Developer-side only: never run against user data, never shipped.
 """
 import argparse, concurrent.futures as cf, hashlib, http.client, json, os, struct, sys, threading, time, urllib.parse, urllib.request
@@ -31,6 +33,15 @@ CHUNK_BYTES = 16 << 20
 PREFIX_SRC = "model.language_model."
 PREFIX_OUT = "language_model.model."
 DTYPE_BYTES = {"BF16": 2, "F32": 4, "U32": 4, "F16": 2}
+
+
+def bits_for(stem):
+    """The bits of a quantised output stem (`language_model.model.layers.3.self_attn.q_proj`): LanguageModelSpec.bits(forOutputStem:)."""
+    if stem.endswith((".per_layer_input_gate", ".per_layer_projection", ".per_layer_model_projection")):
+        return 8
+    if ".self_attn." in stem and stem.endswith((".self_attn.q_proj", ".self_attn.k_proj", ".self_attn.v_proj", ".self_attn.o_proj")):
+        return 8
+    return 4
 
 
 def canonical_header(entries, fmt="mlx"):
@@ -154,15 +165,15 @@ class Quantizer:
         self.stats = {"chunks": 0, "gpu_word_diff": 0, "gpu_scale_diff": 0, "gpu_bias_diff": 0, "cpu_word_diff": 0, "cpu_scale_diff": 0,
                       "cpu_bias_diff": 0, "words": 0, "groups": 0}
 
-    def run(self, bits, cols):
-        ours = aq.quantize_rows(bits, cols)
+    def run(self, bits, cols, nbits=4):
+        ours = aq.quantize_rows(bits, cols, nbits)
         mx = self.mx
         with self.lock:
             a = mx.array(bits).view(mx.bfloat16)
             res = {}
             for dn, dev in (("gpu", mx.gpu), ("cpu", mx.cpu)):
                 with mx.stream(dev):
-                    w, s, b = mx.quantize(a, group_size=64, bits=4, mode="affine")
+                    w, s, b = mx.quantize(a, group_size=64, bits=nbits, mode="affine")
                     mx.eval(w, s, b)
                 res[dn] = (np.array(w), np.array(s.view(mx.uint16)), np.array(b.view(mx.uint16)))
             st = self.stats
@@ -254,8 +265,8 @@ def main():
             plan[n] = {"kind": "drop"}
         elif len(sh) == 2 and sh[1] % 64 == 0 and n.endswith(".weight"):
             stem = base[: -len(".weight")]
-            plan[n] = {"kind": "quantize", "stem": stem, "rows": sh[0], "cols": sh[1]}
-            out_entries[stem + ".weight"] = ("U32", [sh[0], sh[1] // 8])
+            plan[n] = {"kind": "quantize", "stem": stem, "rows": sh[0], "cols": sh[1], "bits": bits_for(stem)}
+            out_entries[stem + ".weight"] = ("U32", [sh[0], sh[1] * bits_for(stem) // 32])
             out_entries[stem + ".scales"] = ("BF16", [sh[0], sh[1] // 64])
             out_entries[stem + ".biases"] = ("BF16", [sh[0], sh[1] // 64])
         else:
@@ -326,7 +337,7 @@ def main():
         def job():
             if pl["kind"] == "quantize":
                 bits = np.frombuffer(raw, dtype=np.uint16).reshape(rows, pl["cols"])
-                w, s, b = quant.run(bits, pl["cols"])
+                w, s, b = quant.run(bits, pl["cols"], pl["bits"])
                 stem = pl["stem"]
                 for suf, arr in ((".weight", w), (".scales", s), (".biases", b)):
                     d, sh, o0, o1 = layout[stem + suf]
