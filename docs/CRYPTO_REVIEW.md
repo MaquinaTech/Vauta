@@ -5,10 +5,18 @@ nobody outside the project has reviewed it, and the author of the code wrote it.
 primitives are used, where, with what parameters, what was checked, and what is weak or unprotected. The formats are
 specified in [SECURITY.md](../SECURITY.md#encryption); this page judges them.
 
-Reviewed at commit `ca9b697`, for every code file in the Code column of the inventory below (`Storage/`, `Backup/`,
+Reviewed at commit `3b07f48`, for every code file in the Code column of the inventory below (`Storage/`, `Backup/`,
 `LLM/ServerTrust.swift`, `LLM/LLMClient.swift`, `LLM/LLMClient+Trust.swift`, `LLM/LLMClient+PeerCheck.swift`,
 `LLM/MeetingStore+Search.swift`, `Diarization/DiarizationModels.swift`,
-`Documents/DocumentIndex.swift`, `Documents/DocumentIndexer.swift`, `Documents/DocumentIndexer+IO.swift`, `Documents/MeetingStore+Documents.swift`). The previous review was at `919bb04` (between 0.9.0 and 0.9.1); the changes from it to `ca9b697` (0.9.3: the
+`Documents/DocumentIndex.swift`, `Documents/DocumentIndexer.swift`, `Documents/DocumentIndexer+IO.swift`, `Documents/MeetingStore+Documents.swift`). The previous review was at `ca9b697` (0.9.3); the changes from it to `3b07f48` (0.10.0) were reviewed as a whole: a declared
+image size beyond `Int` refused when a snapshot is unpacked; the full-text indexes of an untrusted backup image rebuilt from their
+text before anything reads them, with their FTS5 settings checked first (`rebuildFullTextIndexes`); a backup check that opens a
+backup exactly as a restore would and zeroes the decrypted database before it returns (`checkBackup`); the validity of a server's
+certificates recorded after the trust decision, which is unchanged and makes no fetch; the server key read from the Keychain once
+per launch and kept in memory (limit 7); the Time Machine exclusion of the model folders; and new store features (transcript edits
+and deleted lines, translations, introductions, echoes, pauses, scoped search) that only add tables and queries inside the
+encrypted store, with `secure-delete` on for the full-text indexes as before. No primitive, parameter or format changed. Before that,
+the review at `919bb04` (between 0.9.0 and 0.9.1); the changes from it to `ca9b697` (0.9.3: the
 staged restore key, the key item recreated on restore, the backup schema guard reading quoted names whole, the backup
 password rule, no network fetch during TLS evaluation, the peer check before a name-based server gets a request, and
 files split without changing code) were reviewed as a whole. Before that, `a670db8`, a commit of the history before the
@@ -19,7 +27,7 @@ redone for each later change to any of those paths, and before each release the 
 The command must print nothing (otherwise redo the review and change the commit above):
 
 ```
-git diff ca9b697..vX.Y.Z -- Sources/VautaCore/Storage Sources/VautaCore/Backup Sources/VautaCore/LLM/ServerTrust.swift Sources/VautaCore/LLM/LLMClient.swift Sources/VautaCore/LLM/LLMClient+Trust.swift Sources/VautaCore/LLM/LLMClient+PeerCheck.swift Sources/VautaCore/LLM/MeetingStore+Search.swift Sources/VautaCore/Diarization/DiarizationModels.swift Sources/VautaCore/Documents/DocumentIndex.swift Sources/VautaCore/Documents/DocumentIndexer.swift Sources/VautaCore/Documents/DocumentIndexer+IO.swift Sources/VautaCore/Documents/MeetingStore+Documents.swift
+git diff 3b07f48..vX.Y.Z -- Sources/VautaCore/Storage Sources/VautaCore/Backup Sources/VautaCore/LLM/ServerTrust.swift Sources/VautaCore/LLM/LLMClient.swift Sources/VautaCore/LLM/LLMClient+Trust.swift Sources/VautaCore/LLM/LLMClient+PeerCheck.swift Sources/VautaCore/LLM/MeetingStore+Search.swift Sources/VautaCore/Diarization/DiarizationModels.swift Sources/VautaCore/Documents/DocumentIndex.swift Sources/VautaCore/Documents/DocumentIndexer.swift Sources/VautaCore/Documents/DocumentIndexer+IO.swift Sources/VautaCore/Documents/MeetingStore+Documents.swift
 ```
 
 Findings are reported privately, as described in
@@ -130,7 +138,9 @@ These are stated plainly because the README and SECURITY.md promise only what th
 6. **Keychain backups.** An old Time Machine copy of the login keychain can contain a key that Erase Meetings and Context has since
    replaced (see SECURITY.md).
 7. **Model server key and configuration.** The server address, trust settings and bearer token are stored as plain
-   Keychain items, protected by the Keychain only. They are not wrapped with the store key. They are written by deleting
+   Keychain items, protected by the Keychain only. They are not wrapped with the store key. Since 0.10.0 the key is read once per
+   launch and kept in the process's memory until it quits or the key is saved again (`ServerCredentials.sessionBearer`), so it is
+   in memory as long as the decrypted store is (limit 5). They are written by deleting
    the item and adding a new one: if the process stops between the two, or the add is refused and the old value could not
    be read first, the old value is lost and has to be entered again.
 8. **A key item that is already there is used.** When no store file exists, Vauta uses a `database-key-v1` item already in
