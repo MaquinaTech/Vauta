@@ -8443,3 +8443,8 @@
 
 /* Panel tip under “The meeting is playing through speakers” */
 "The microphone hears the other participants too. Vauta leaves their echo out of the minutes, and headphones avoid it." = "麦克风也会听到其他参与者的声音。Vauta 会把这些回声排除在会议纪要之外，使用耳机可避免这种情况。";
+"A more accurate conversion of this model is available. Updating downloads only the parts that changed (%@), and the model stays in use until it is done." = "此模型有更精确的转换版本可用。更新只会下载有变化的部分（%@），完成前模型仍可使用。";
+"Update Model" = "更新模型";
+"Update progress" = "更新进度";
+"Updating (%lld%%)" = "正在更新（%lld%%）";
+"Updating · downloading only the parts that changed · %@ of %@" = "正在更新 · 仅下载有变化的部分 · %@ / %@";

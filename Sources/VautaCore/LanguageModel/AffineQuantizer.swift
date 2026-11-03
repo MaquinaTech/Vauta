@@ -8,25 +8,29 @@ public enum AffineQuantizerError: Error, Equatable, Sendable {
     case badShape
 }
 
-/// Deterministic CPU 4-bit affine quantizer, group size 64: the arithmetic of MLX's Metal `affine_quantize` kernel (what
+/// Deterministic CPU affine quantizer, 4 or 8 bits, group size 64: the arithmetic of MLX's Metal `affine_quantize` kernel (what
 /// `mlx_lm convert` runs on the GPU), so the result is byte-identical to that conversion.
 ///
 /// Per group: the minimum starts at the bf16 maximum and the maximum at 0 (a Metal quirk that is part of the format),
-/// `scale = max((max - min) / 15, 1e-7)`, the edge with the larger magnitude is mapped to an exact integer, values are
-/// rounded half away from zero and clamped at 15, and scales and biases are stored as bf16 (round to nearest even). Eight
-/// 4-bit values pack little-endian into a `UInt32`. All arithmetic is IEEE fp32 with no fused operations; the result does
+/// `scale = max((max - min) / top, 1e-7)` with `top` 15 or 255, the edge with the larger magnitude is mapped to an exact integer,
+/// values are rounded half away from zero and clamped at `top`, and scales and biases are stored as bf16 (round to nearest even).
+/// Eight 4-bit or four 8-bit values pack little-endian into a `UInt32`. All arithmetic is IEEE fp32 with no fused operations; the result does
 /// not depend on the number of threads or on how rows are chunked.
 public enum AffineQuantizer {
     public static let groupSize = 64
+    /// The bits of most tensors; `LanguageModelSpec.bits(forOutputStem:)` names the ones kept at 8.
     public static let bits = 4
-    static let maxBin: Float = 15
     static let bfloat16Max = Float(bitPattern: 0x7F7F_0000)
 
-    /// Quantizes `rows` rows of `cols` bf16 values (`cols` a multiple of 64). Output buffers hold `rows * cols / 8` words and
-    /// `rows * cols / 64` scales and biases (bf16 bit patterns).
-    public static func quantize(rows: Int, cols: Int, source: UnsafePointer<UInt16>, weights: UnsafeMutablePointer<UInt32>,
+    /// Words of packed values per group of 64.
+    public static func wordsPerGroup(bits: Int) -> Int { groupSize * bits / 32 }
+
+    /// Quantizes `rows` rows of `cols` bf16 values (`cols` a multiple of 64) to `bits` (4 or 8). Output buffers hold
+    /// `rows * cols * bits / 32` words and `rows * cols / 64` scales and biases (bf16 bit patterns).
+    public static func quantize(rows: Int, cols: Int, bits: Int = bits, source: UnsafePointer<UInt16>, weights: UnsafeMutablePointer<UInt32>,
                                 scales: UnsafeMutablePointer<UInt16>, biases: UnsafeMutablePointer<UInt16>) throws {
-        guard rows >= 0, cols > 0, cols % groupSize == 0 else { throw AffineQuantizerError.badShape }
+        guard rows >= 0, cols > 0, cols % groupSize == 0, bits == 4 || bits == 8 else { throw AffineQuantizerError.badShape }
+        let words = wordsPerGroup(bits: bits)
         if rows == 0 { return }
         let groupsPerRow = cols / groupSize
         let slices = min(rows, max(1, ProcessInfo.processInfo.activeProcessorCount * 4))
@@ -40,7 +44,9 @@ public enum AffineQuantizer {
             for r in r0..<r1 {
                 for g in 0..<groupsPerRow {
                     let gi = r * groupsPerRow + g
-                    if !quantizeGroup(buffers.source + gi * groupSize, buffers.weights + gi * 8, buffers.scales + gi, buffers.biases + gi) { buffers.bad[s] = true }
+                    if !quantizeGroup(buffers.source + gi * groupSize, buffers.weights + gi * words, buffers.scales + gi, buffers.biases + gi, bits: bits) {
+                        buffers.bad[s] = true
+                    }
                 }
             }
         }
@@ -48,12 +54,14 @@ public enum AffineQuantizer {
     }
 
     /// Array form of `quantize` (tests and small tensors).
-    public static func quantize(rows: Int, cols: Int, source: [UInt16], weights: inout [UInt32], scales: inout [UInt16], biases: inout [UInt16]) throws {
+    public static func quantize(rows: Int, cols: Int, bits: Int = bits, source: [UInt16], weights: inout [UInt32], scales: inout [UInt16],
+                                biases: inout [UInt16]) throws {
         try source.withUnsafeBufferPointer { src in
             try weights.withUnsafeMutableBufferPointer { w in
                 try scales.withUnsafeMutableBufferPointer { s in
                     try biases.withUnsafeMutableBufferPointer { b in
-                        try quantize(rows: rows, cols: cols, source: src.baseAddress!, weights: w.baseAddress!, scales: s.baseAddress!, biases: b.baseAddress!)
+                        try quantize(rows: rows, cols: cols, bits: bits, source: src.baseAddress!, weights: w.baseAddress!, scales: s.baseAddress!,
+                                     biases: b.baseAddress!)
                     }
                 }
             }
@@ -81,8 +89,9 @@ public enum AffineQuantizer {
     /// One group of 64 values. Returns false when a value is NaN or infinite.
     @inline(__always)
     static func quantizeGroup(_ src: UnsafePointer<UInt16>, _ words: UnsafeMutablePointer<UInt32>, _ scaleOut: UnsafeMutablePointer<UInt16>,
-                              _ biasOut: UnsafeMutablePointer<UInt16>) -> Bool {
+                              _ biasOut: UnsafeMutablePointer<UInt16>, bits: Int) -> Bool {
         var ok = true
+        let maxBin = Float((1 << bits) - 1), perWord = 32 / bits, wordCount = wordsPerGroup(bits: bits)
         withUnsafeTemporaryAllocation(of: Float.self, capacity: groupSize) { w in
             var lo = bfloat16Max, hi: Float = 0
             var finite = true
@@ -95,7 +104,7 @@ public enum AffineQuantizer {
             }
             if !finite {
                 scaleOut.pointee = 0; biasOut.pointee = 0
-                for k in 0..<8 { words[k] = 0 }
+                for k in 0..<wordCount { words[k] = 0 }
                 ok = false
                 return
             }
@@ -109,12 +118,12 @@ public enum AffineQuantizer {
             let bias: Float = atZero ? 0 : edge
             scaleOut.pointee = floatToBF16(scale)
             biasOut.pointee = floatToBF16(bias)
-            for k in 0..<8 {
+            for k in 0..<wordCount {
                 var word: UInt32 = 0
-                for j in 0..<8 {
-                    var q = ((w[k * 8 + j] - bias) / scale).rounded(.toNearestOrAwayFromZero)
+                for j in 0..<perWord {
+                    var q = ((w[k * perWord + j] - bias) / scale).rounded(.toNearestOrAwayFromZero)
                     q = min(max(q, 0), maxBin)
-                    word |= UInt32(q) << UInt32(4 * j)
+                    word |= UInt32(q) << UInt32(bits * j)
                 }
                 words[k] = word
             }

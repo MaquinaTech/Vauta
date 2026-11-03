@@ -179,6 +179,19 @@ public enum KernelSelfTest {
             cmp("llm tied head qmv (2048 rows)", L, tol: B, ref: { matmul(x1.asType(.float32), dequantized(tq, scales: ts, biases: tb, groupSize: 64, bits: 4).asType(.float32).T) }) { quantizedMM(x1, tq, scales: ts, biases: tb, transpose: true, groupSize: 64, bits: 4) }
         }
         do {
+            // The layers the file keeps at 8 bits: the per-layer projection (256 inputs) and the attention output (2048 inputs).
+            for cols in [256, 2048] {
+                let w = R([2560, cols], .bfloat16), x1 = R([1, cols], .bfloat16), x8 = R([32, cols], .bfloat16)
+                let (wq, sc, bi) = quantized(w, groupSize: 64, bits: 8)
+                eval([wq, sc] + (bi.map { [$0] } ?? []))
+                func ref(_ x: MLXArray) -> () -> MLXArray {
+                    { matmul(x.asType(.float32), dequantized(wq, scales: sc, biases: bi, groupSize: 64, bits: 8).asType(.float32).T) }
+                }
+                cmp("llm qmv 8-bit bf16 g64 (\(cols) in)", L, tol: B, ref: ref(x1)) { quantizedMM(x1, wq, scales: sc, biases: bi, transpose: true, groupSize: 64, bits: 8) }
+                cmp("llm qmm 8-bit bf16 g64 (\(cols) in, prefill chunk)", L, tol: B, ref: ref(x8)) { quantizedMM(x8, wq, scales: sc, biases: bi, transpose: true, groupSize: 64, bits: 8) }
+            }
+        }
+        do {
             // Proportional RoPE: 64 rotated pairs of a 512-dimension head, the rest left alone (frequency infinity).
             var f = [Float](repeating: .infinity, count: 256)
             for i in 0..<64 { f[i] = Float(pow(1_000_000.0, Double(2 * i) / 512.0)) }

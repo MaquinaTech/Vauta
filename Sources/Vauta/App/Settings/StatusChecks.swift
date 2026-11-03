@@ -234,6 +234,8 @@ struct StatusChecks {
             return row(.info, IntegratedModelText.statusPausedForRecording(percent), "paused for recording \(percent)%")
         case .repairing:
             return row(.info, IntegratedModelText.statusRepairing(percent), "repairing \(percent)%")
+        case .updating:
+            return row(.info, IntegratedModelText.statusUpdating(percent), "updating \(percent)%")
         case .importing(let fraction):
             let imported = Int((fraction * 100).rounded(.down))
             if status.importPaused { return row(.info, IntegratedModelText.statusImportPaused(imported), "import paused for recording \(imported)%") }

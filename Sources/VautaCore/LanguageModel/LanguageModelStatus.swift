@@ -29,6 +29,9 @@ public struct LanguageModelStatus: Sendable, Equatable {
         case damaged
         /// The damaged part is being fetched again and the file checked.
         case repairing(received: Int, total: Int)
+        /// The installed model is being brought to the current conversion: the original tensors that changed are fetched and
+        /// converted, the rest is copied from the installed file, and the result is checked.
+        case updating(received: Int, total: Int)
         case failed(IntegratedModelError)
         case deleting
     }
@@ -43,8 +46,10 @@ public struct LanguageModelStatus: Sendable, Equatable {
     public var secondsRemaining: Int?
     /// Bytes of the model on this Mac (installed files and staging).
     public var installedBytes = 0
-    /// "download", "import" or "repair".
+    /// "download", "import", "repair" or "update".
     public var source: String?
+    /// While ready: the installed weights are an earlier conversion, and updating them would download this many bytes.
+    public var updateBytes: Int?
     /// Why a stopped download stopped (the network went away, a redirect was refused) while its verified blocks wait for Resume.
     public var lastError: IntegratedModelError?
     /// The work in progress can be cancelled.
@@ -57,7 +62,8 @@ public struct LanguageModelStatus: Sendable, Equatable {
     /// Fraction of the download done, for a determinate progress bar.
     public var fraction: Double? {
         switch state {
-        case .downloading(let r, let t, _), .pausedForRecording(let r, let t), .repairing(let r, let t): t > 0 ? Double(r) / Double(t) : nil
+        case .downloading(let r, let t, _), .pausedForRecording(let r, let t), .repairing(let r, let t), .updating(let r, let t):
+            t > 0 ? Double(r) / Double(t) : nil
         case .partial(let v, let t): t > 0 ? Double(v) / Double(t) : nil
         case .importing(let f): f
         default: nil

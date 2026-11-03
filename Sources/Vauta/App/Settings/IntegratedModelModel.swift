@@ -71,7 +71,7 @@ final class IntegratedModelModel {
     /// A download, conversion or repair is in progress (including waiting for a recording to end).
     var isBusy: Bool {
         switch status.state {
-        case .downloading, .checkingPartial, .pausedForRecording, .importing, .verifying, .preparing, .repairing, .deleting: true
+        case .downloading, .checkingPartial, .pausedForRecording, .importing, .verifying, .preparing, .repairing, .updating, .deleting: true
         default: false
         }
     }
@@ -85,6 +85,7 @@ final class IntegratedModelModel {
     func discardPartial() { Task { await controller.discard() } }
     func delete() { Task { await controller.delete() } }
     func repair() { Task { await controller.repair() } }
+    func update() { Task { await controller.update() } }
     func retry() { Task { await controller.retry() } }
     func useForMinutes() { Task { await controller.useForMinutes() } }
     func importFiles(_ urls: [URL]) { Task { await controller.importFiles(urls) } }

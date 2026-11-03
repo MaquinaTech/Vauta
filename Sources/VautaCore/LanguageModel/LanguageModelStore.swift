@@ -106,6 +106,12 @@ public struct LanguageModelStore: Sendable {
         return FileManager.default.fileExists(atPath: stagingDirectory.path) ? .partial : .empty
     }
 
+    /// The earlier conversion the installed weights are, by their record: nil for the pinned one (or no install).
+    public var installedEarlierConversion: LanguageModelSpec.Conversion? {
+        guard case .installed(let record) = disk(), record.assembledSHA256 != spec.assembledSHA256 else { return nil }
+        return spec.earlier.first { $0.assembledSHA256 == record.assembledSHA256 }
+    }
+
     func install(_ record: LanguageModelInstallRecord) throws {
         let fm = FileManager.default
         let recordFile = stagingDirectory.appendingPathComponent("installed.json")

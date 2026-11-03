@@ -23,7 +23,7 @@ It handles **confidential conversations**. The rules below protect the user's da
      button and only when the user asks. Agents never fetch it themselves, never run `hf cache prune`, and never put model
      files in the repository;
    - the optional integrated language model (Google's `google/gemma-4-E4B-it` at its pinned revision, a 15 GB transfer that
-     Vauta quantises to about 4.2 GB on the Mac) from huggingface.co, under the same rules. The developer tools in
+     Vauta quantises to about 4.5 GB on the Mac) from huggingface.co, under the same rules. The developer tools in
      `tools/language-model` read it once to derive the manifest, and only when the user has asked for that run.
 4. **Never run the Vauta binary without a command.** With no arguments it starts a second menu-bar app with the user's
    permissions. Always pass a command (`doctor`, `status`, `languages`, `install-speech-assets`, `server-check`,
@@ -183,7 +183,7 @@ Vauta writes minutes, live notes and answers with one of four providers. The use
 | Provider | Setup | Notes |
 |---|---|---|
 | Apple Intelligence on this Mac (Quick start · Basic quality) | None | Requires Apple Intelligence to be turned on. Small context window (about 4K tokens on macOS 26). |
-| Integrated model (Gemma 4 E4B, Google) | Settings › Models › Download (a 15 GB transfer from Hugging Face that Vauta converts to 4.2 GB; the user clicks it, agents never start it) | Only on Macs with 16 GB of memory or more (`sysctl -n hw.memsize`); optional and never the default. Apple Intelligence and the model servers keep working. |
+| Integrated model (Gemma 4 E4B, Google) | Settings › Models › Download (a 15 GB transfer from Hugging Face that Vauta converts to 4.5 GB; the user clicks it, agents never start it) | Only on Macs with 16 GB of memory or more (`sysctl -n hw.memsize`); optional and never the default. Apple Intelligence and the model servers keep working. |
 | A model server on this Mac | Install LM Studio, Ollama or another OpenAI-compatible server; Settings › Models › Set Up… guides the user through LM Studio or Ollama and the model that fits the Mac's memory | Loopback only (`127.0.0.1`, `::1`, `localhost`). Vauta detects servers on their usual ports. |
 | A model server on your network | A server on another computer, over HTTPS | Private addresses only; see below. |
 

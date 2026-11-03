@@ -18,8 +18,11 @@ public enum LanguageModelInstaller {
         case .empty: lines.append("disk: not installed")
         case .partial: lines.append("disk: a download or import is waiting in staging/ (\(store.bytesOnDisk() >> 20) MiB)")
         case .installed(let r):
-            let quick = LanguageModelVerifier.quickCheck(file: store.weightsURL, spec: spec)
-            lines.append("disk: installed (\(r.source), \(r.installedAt.formatted(.iso8601))) · \(store.bytesOnDisk() >> 20) MiB · header \(quick ? "ok" : "MISMATCH")")
+            let quick = LanguageModelVerifier.quickCheckInstalled(store)
+            let update = LanguageModelUpdate.plan(store)
+            let conversion = store.installedEarlierConversion == nil ? ""
+                : " · earlier conversion" + (update.map { ", update downloads \($0.fetches.count) tensors, \($0.downloadBytes >> 20) MiB" } ?? ", no update possible")
+            lines.append("disk: installed (\(r.source), \(r.installedAt.formatted(.iso8601))) · \(store.bytesOnDisk() >> 20) MiB · header \(quick ? "ok" : "MISMATCH")\(conversion)")
         }
         return lines
     }

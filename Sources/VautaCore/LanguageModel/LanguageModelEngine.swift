@@ -281,12 +281,12 @@ public actor LanguageModelEngine {
             MLXRuntime.configure()
             if let refusal = LanguageModelGate.refusal(gpuSupported: MLXRuntime.isSupported) { throw IntegratedModelError.unsupported(refusal) }
             guard MLXRuntime.recommendedWorkingSetBytes >= 8 << 30 else { throw IntegratedModelError.unsupported("The GPU can use less than 8 GB of memory.") }
-            guard LanguageModelVerifier.quickCheck(file: store.weightsURL, spec: store.spec) else {
+            guard LanguageModelVerifier.quickCheckInstalled(store) else {
                 markDamaged()
                 throw IntegratedModelError.mismatch
             }
             if !verifiedThisLaunch {
-                do { try LanguageModelVerifier.fullVerify(file: store.weightsURL, spec: store.spec) } catch {
+                do { try LanguageModelVerifier.fullVerifyInstalled(store) } catch {
                     markDamaged()
                     throw IntegratedModelError.mismatch
                 }

@@ -296,6 +296,9 @@
 /* Server config error */
 "A model server on your network must be reached over HTTPS, so meetings never cross the network unencrypted." = "A model server on your network must be reached over HTTPS, so meetings never cross the network unencrypted.";
 
+/* Settings → Models; the integrated model is installed in an earlier, less accurate conversion; the argument is a size, e.g. 1.3 GB */
+"A more accurate conversion of this model is available. Updating downloads only the parts that changed (%@), and the model stays in use until it is done." = "A more accurate conversion of this model is available. Updating downloads only the parts that changed (%@), and the model stays in use until it is done.";
+
 /* Setup model choice title: the guided set-up of a new model server, as opposed to the card that looks for one already running */
 "A new model server on this Mac" = "A new model server on this Mac";
 
@@ -7483,6 +7486,9 @@
    Meetings: the view with the brief of the next meeting */
 "Upcoming" = "Upcoming";
 
+/* No comment provided by engineer. */
+"Update Model" = "Update Model";
+
 /* VoiceOver label of the button in the Live notes card that writes the live notes at once */
 "Update Now" = "Update Now";
 
@@ -7492,14 +7498,23 @@
 /* Recovery suggestion when the store comes from a newer app version */
 "Update Vauta to the latest version." = "Update Vauta to the latest version.";
 
+/* Accessibility label of the progress of updating the integrated model */
+"Update progress" = "Update progress";
+
 /* Help of the Update Now button in the Live notes card of the panel */
 "Update the live notes with what was said since the last ones" = "Update the live notes with what was said since the last ones";
 
 /* No comment provided by engineer. */
 "Updated" = "Updated";
 
+/* Settings → Status; the integrated model is being updated to its more accurate conversion; the argument is a percentage without the sign */
+"Updating (%lld%%)" = "Updating (%lld%%)";
+
 /* VoiceOver label of the spinner in the Live notes card while the model writes them */
 "Updating the live notes…" = "Updating the live notes…";
+
+/* Settings → Models; progress of the update of the integrated model to its more accurate conversion; the arguments are sizes, e.g. 0.4 GB and 1.3 GB */
+"Updating · downloading only the parts that changed · %@ of %@" = "Updating · downloading only the parts that changed · %@ of %@";
 
 /* No comment provided by engineer. */
 "Use" = "Use";

@@ -44,6 +44,7 @@ public actor LanguageModelController {
     private enum Stop { case keep, discard }
     private var stop = Stop.keep
     private var repairing = false
+    private var updating = false
     private var hooks = LanguageModelHooks()
     private var handler: (@Sendable (LanguageModelStatus) -> Void)?
     public private(set) var status = LanguageModelStatus()
@@ -97,9 +98,10 @@ public actor LanguageModelController {
         }
         switch store.disk() {
         case .installed:
-            if LanguageModelVerifier.quickCheck(file: store.weightsURL, spec: store.spec),
+            if LanguageModelVerifier.quickCheckInstalled(store),
                LanguageModelVerifier.quickCheckTokenizer(file: store.tokenizerURL, spec: store.spec) {
                 access.refresh(store: store, engine: engine)
+                status.updateBytes = LanguageModelUpdate.plan(store)?.downloadBytes
                 set(.ready)
             } else {
                 access.markDamaged()
@@ -217,8 +219,10 @@ public actor LanguageModelController {
         switch p.phase {
         case .checking: set(.checkingPartial)
         case .finishing: set(.verifying)
-        case .tokenizer, .downloading: set(repairing ? .repairing(received: p.received, total: p.total) : .downloading(received: p.received, total: p.total, phase: p.phase),
-                                           rate: rate, remaining: remaining)
+        case .tokenizer, .downloading:
+            let state: LanguageModelStatus.State = updating ? .updating(received: p.received, total: p.total)
+                : repairing ? .repairing(received: p.received, total: p.total) : .downloading(received: p.received, total: p.total, phase: p.phase)
+            set(state, rate: rate, remaining: remaining)
         }
     }
 
@@ -230,7 +234,7 @@ public actor LanguageModelController {
             try Task.checkCancellation()
             if resume == nil {
                 switch status.state {
-                case .downloading(let r, let t, _), .repairing(let r, let t):
+                case .downloading(let r, let t, _), .repairing(let r, let t), .updating(let r, let t):
                     resume = status.state
                     set(.pausedForRecording(received: r, total: t))
                 case .importing:
@@ -377,6 +381,63 @@ public actor LanguageModelController {
             runID += 1
             await adopt(source: status.source ?? "download", run: runID)
         }
+    }
+
+    // MARK: Update
+
+    /// Brings an install of an earlier conversion to the pinned one (`LanguageModelUpdate`): only the tensors that changed are
+    /// downloaded. The person asked for it. The installed model stays in use until the new file replaces it; stopping or a failure
+    /// leaves it as it was.
+    public func update() async {
+        guard task == nil, supported() == nil, status.state == .ready, let plan = LanguageModelUpdate.plan(store) else { return }
+        if session == nil { session = SearchModelDownloader.makeSession(protocolClasses: protocolClasses, log: log) }
+        let downloader = LanguageModelDownloader(session: session!, store: store, appBuild: appBuild)
+        updating = true
+        stop = .keep
+        meter.reset()
+        runID += 1
+        let run = runID
+        status.source = "update"
+        set(.updating(received: 0, total: plan.downloadBytes))
+        status.cancellable = true
+        let controller = self
+        let meter = meter
+        task = Task {
+            do {
+                try await downloader.update(plan, progress: { p in
+                    let tick = meter.record(bytes: p.received, total: p.total, at: ProcessInfo.processInfo.systemUptime)
+                    if tick == nil, p.phase != .finishing { return }
+                    Task { await controller.progressed(p, rate: tick?.rate, remaining: tick?.remaining, run: run) }
+                }, beforeBlock: { try await controller.waitWhileRecording() })
+                await controller.updated(run: run)
+            } catch is CancellationError {
+                await controller.updateEnded(nil, run: run)
+            } catch let error as IntegratedModelError {
+                await controller.updateEnded(error, run: run)
+            } catch {
+                await controller.updateEnded(.ioError, run: run)
+            }
+        }
+    }
+
+    private func updated(run: Int) async {
+        guard run == runID else { return }
+        endSession()
+        updating = false
+        status.updateBytes = nil
+        // The engine still holds the earlier file: it loads the new one.
+        await engine.unload()
+        await adopt(source: "update", run: run)
+    }
+
+    /// Stopped or failed: the installed model is still the earlier one and still in use.
+    private func updateEnded(_ error: IntegratedModelError?, run: Int) {
+        guard run == runID else { return }
+        endSession()
+        updating = false
+        status.source = nil
+        status.updateBytes = LanguageModelUpdate.plan(store)?.downloadBytes
+        set(.ready, error: error)
     }
 
     // MARK: Repair

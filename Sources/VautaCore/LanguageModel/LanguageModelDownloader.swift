@@ -22,10 +22,10 @@ public struct LanguageModelProgress: Sendable, Equatable {
 /// file (about 4.2 GB). A block that does not match is fetched once more; a second mismatch deletes everything. A resumed run
 /// restarts at the block that holds the first byte not yet consumed (`progress.json`).
 actor LanguageModelDownloader {
-    private let session: AuditedSession
-    private let store: LanguageModelStore
-    private let spec: LanguageModelSpec
-    private let appBuild: String
+    let session: AuditedSession
+    let store: LanguageModelStore
+    let spec: LanguageModelSpec
+    let appBuild: String
     private var cdn: [String: URL] = [:]
 
     init(session: AuditedSession, store: LanguageModelStore, appBuild: String = LanguageModelStore.currentBuild) {
@@ -63,10 +63,10 @@ actor LanguageModelDownloader {
 
     // MARK: Resolving
 
-    private enum File { case tokenizer, weights }
-    private func name(_ f: File) -> String { f == .tokenizer ? spec.tokenizerFile : spec.sourceFile }
+    enum File { case tokenizer, weights }
+    func name(_ f: File) -> String { f == .tokenizer ? spec.tokenizerFile : spec.sourceFile }
 
-    private func resolve(_ file: File, refresh: Bool = false) async throws -> URL {
+    func resolve(_ file: File, refresh: Bool = false) async throws -> URL {
         if !refresh, let url = cdn[name(file)] { return url }
         cdn[name(file)] = nil
         let resolveURL = URL(string: "https://\(SearchModelDestinations.host)\(spec.resolvePath(name(file)))")!
@@ -236,10 +236,18 @@ actor LanguageModelDownloader {
 
     static let parallelBlocks = 3
 
-    /// One Range block, in memory, with its hash checked: fetched again once after a mismatch (and after a 403 or 410, resolving the
-    /// address again); a second mismatch is an error.
+    /// One Range block, in memory, with its hash checked.
     private func downloadBlock(_ index: Int, progress: @escaping @Sendable (LanguageModelProgress) -> Void,
                                beforeBlock: @escaping @Sendable () async throws -> Void) async throws -> Data {
+        let data = try await fetchRange(from: spec.blockSourceOffset(index), count: spec.blockLength(index), sha256: spec.blocks[index],
+                                        beforeBlock: beforeBlock)
+        progress(.init(phase: .downloading, received: spec.tokenizerSize + min((index + 1) * spec.blockSize, spec.spanSize), total: spec.downloadSize))
+        return data
+    }
+
+    /// `count` bytes of the original file from `from`, in memory, with their SHA-256 checked: fetched again once after a mismatch
+    /// (and after a 403 or 410, resolving the address again); a second mismatch is an error.
+    func fetchRange(from: Int, count n: Int, sha256: String, beforeBlock: @escaping @Sendable () async throws -> Void) async throws -> Data {
         let spec = self.spec
         var retriedMismatch = false
         var renewedLink = false
@@ -247,8 +255,6 @@ actor LanguageModelDownloader {
         while true {
             try await beforeBlock()
             try Task.checkCancellation()
-            let n = spec.blockLength(index)
-            let from = spec.blockSourceOffset(index)
             let url = try await resolve(.weights, refresh: lookUpAgain)
             lookUpAgain = false
             let buffer = BlockBuffer(limit: n) { _ in }
@@ -267,10 +273,7 @@ actor LanguageModelDownloader {
                 throw r.statusCode == 403 || r.statusCode == 410 ? IntegratedModelError.offline : .unexpectedResponse
             }
             guard buffer.received == n else { throw IntegratedModelError.unexpectedResponse }
-            if buffer.hexDigest() == spec.blocks[index] {
-                progress(.init(phase: .downloading, received: spec.tokenizerSize + min((index + 1) * spec.blockSize, spec.spanSize), total: spec.downloadSize))
-                return buffer.data
-            }
+            if buffer.hexDigest() == sha256 { return buffer.data }
             if retriedMismatch { throw IntegratedModelError.mismatch }
             retriedMismatch = true
             lookUpAgain = true

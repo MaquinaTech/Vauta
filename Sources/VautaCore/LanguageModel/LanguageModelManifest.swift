@@ -6,7 +6,7 @@
 import Foundation
 
 /// Everything that identifies the one integrated language model: Google's `google/gemma-4-E4B-it` at a pinned revision, the
-/// language tower only, quantised on this Mac to 4-bit affine (group 64). Derived once from the verified original file by
+/// language tower only, quantised on this Mac to affine 4 and 8 bits (group 64). Derived once from the verified original file by
 /// tools/language-model/make-manifest.py (docs/LANGUAGE_MODEL.md) and pinned in source.
 public enum LanguageModelManifest {
     public static let repository = "google/gemma-4-E4B-it"
@@ -27,10 +27,10 @@ public enum LanguageModelManifest {
     public static let firstSharedLayer = 24
 
     public static let assembledFile = "model.safetensors"
-    public static let assembledHeaderSize = 176600
-    public static let assembledHeaderSHA256 = "f93f5167742498c27b6507ab9a09a50f5e802ef228f7ab5586ba0bb2282ecdaf"
-    public static let assembledSize = 4198926892
-    public static let assembledSHA256 = "caa8395988a8f687482ee9be5a9bd1e71f71509685a2590134e9a64f135871f3"
+    public static let assembledHeaderSize = 176608
+    public static let assembledHeaderSHA256 = "c3b15a9f2a99c3d56986c6f74ce305f9f5895898c8540ba0a446f834526ce9f3"
+    public static let assembledSize = 4533815860
+    public static let assembledSHA256 = "e34a76b113ca573f2c975c27c17825d7f20bf4a2e855f081aaaf62c01a416382"
 
     public static let tokenizerFile = "tokenizer.json"
     public static let tokenizerSize = 32169626

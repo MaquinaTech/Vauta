@@ -25,6 +25,27 @@ struct AffineQuantizerTests {
         #expect(b == g.biases.flatMap { $0 })
     }
 
+    @Test func eightBitsMatchMLXOnTheGPUByteForByte() throws {
+        let g = try JSONDecoder().decode(Golden.self, from: fixtureData("quantizer_goldens_8bit.json"))
+        #expect(g.rows == 69 && g.cols == 128)
+        var w = [UInt32](repeating: 0, count: g.rows * g.cols / 4), s = [UInt16](repeating: 0, count: g.rows * g.cols / 64), b = s
+        try AffineQuantizer.quantize(rows: g.rows, cols: g.cols, bits: 8, source: g.input.flatMap { $0 }, weights: &w, scales: &s, biases: &b)
+        #expect(w == g.weights.flatMap { $0 })
+        #expect(s == g.scales.flatMap { $0 })
+        #expect(b == g.biases.flatMap { $0 })
+    }
+
+    @Test func packsFourBytesLittleEndianAtEightBits() throws {
+        let values = (0..<64).map { SyntheticLanguageModel.bf16(Float($0 * 4)) }   // 0, 4, 8 … 252
+        var w = [UInt32](repeating: 0, count: 16), s = [UInt16](repeating: 0, count: 1), b = s
+        try AffineQuantizer.quantize(rows: 1, cols: 64, bits: 8, source: values, weights: &w, scales: &s, biases: &b)
+        // The maximum 252 is the edge (side false), so the scale is 252 / -255 and the bias 252: v is stored as the level of
+        // (v - 252) / scale, 255, 251, 247, 243 for 0, 4, 8, 12 in the first word, low byte first.
+        #expect(AffineQuantizer.bf16ToFloat(b[0]) == 252)
+        #expect(w[0] == 0xF3F7_FBFF)
+        #expect(throws: AffineQuantizerError.badShape) { try AffineQuantizer.quantize(rows: 1, cols: 64, bits: 6, source: values, weights: &w, scales: &s, biases: &b) }
+    }
+
     @Test func groupsOfTinyNonzeroValuesMatchMLXAndNeverProduceNegativeLevels() throws {
         // Values below about 5e-8: the level of the edge rounds to 0, so the bias is 0 and the scale stays at +-1e-7. The expected
         // words, scales and biases are what mx.quantize returns on the GPU (checked against the numpy reference in tools).
@@ -108,7 +129,13 @@ struct LanguageModelManifestTests {
         #expect(spec.blocks.count == 225 && spec.spanSize == 15_036_138_068 && spec.blockSize == 64 << 20)
         #expect(spec.blockLength(224) == 3_752_532)
         #expect(spec.sourceSize == 15_992_595_884 && spec.sourceSHA256 == "cfbd3d2f1cd71bd471c37fe2bf8546d5028d41e5736f64e1ca6c6b8893125503")
-        #expect(spec.outputDataSize == 4_198_750_292 && spec.assembledSize == 4_198_926_892)
+        #expect(spec.outputDataSize == 4_533_639_252 && spec.assembledSize == 4_533_815_860)
+        // 8 bits: the per-layer gate and projection of the 42 layers, the model's per-layer projection, q and o of every layer and k
+        // and v of the 24 that own them. The earlier all-4-bit conversion is what an install of before November 2026 holds.
+        let eight = spec.sources.filter { $0.action == .quantize && spec.outputs(forStem: $0.outputStem)?.bits == 8 }
+        #expect(eight.count == 42 * 2 + 1 + 42 * 2 + 24 * 2)
+        #expect(eight.allSatisfy { LanguageModelSpec.bits(forOutputStem: $0.outputStem) == 8 })
+        #expect(spec.earlier == [LanguageModelSpec.allFourBit] && LanguageModelSpec.allFourBit.assembledSize == 4_198_926_892)
         #expect(spec.tokenizerSize == 32_169_626 && spec.tokenizerSHA256 == "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f")
         #expect(spec.sources.filter { $0.action == .drop }.count == 54, "the k/v projections and k norms of layers 24 to 41")
         #expect(spec.sources.filter { $0.action == .quantize }.count == 345 + 54 / 3 * 2 * 0 + 0 || true)
