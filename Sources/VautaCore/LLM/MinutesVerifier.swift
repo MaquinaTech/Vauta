@@ -139,16 +139,8 @@ public enum MinutesVerifier {
         return [year, year % 100, month, day]
     }
 
-    /// `text` without the expressions that write `due` as a date: "2026-10-15", "15/10", "15th", "15 October",
-    /// "October 15, 2026", "10月15日". Only an expression whose numbers all belong to the date is removed, so "3.5" stays.
-    static func removingDate(_ due: Date, from text: String, timeZone: TimeZone) -> String {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = timeZone
-        let c = calendar.dateComponents([.year, .month, .day], from: due)
-        guard let year = c.year, let month = c.month, let day = c.day else { return text }
-        let allowed: Set<Int> = [year, year % 100, month, day]
-        var folded = text.precomposedStringWithCompatibilityMapping
-            .folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
+    /// The expressions `removingDate` looks for, compiled once: they do not depend on the date (its numbers are checked per match).
+    private static let dateExpressions: [NSRegularExpression] = {
         let names = DateWords.months.values.joined().sorted { $0.count > $1.count }.joined(separator: "|")
         let patterns = [
             #"\d{4}\s*[-/.]\s*\d{1,2}\s*[-/.]\s*\d{1,2}"#,
@@ -159,8 +151,20 @@ public enum MinutesVerifier {
             #"(?:\d{4}\s*[年년]\s*)?\d{1,2}\s*[月월]\s*(?:\d{1,2}\s*[日일号號]?)?"#,
             #"\d{1,2}\s*[日일号號]"#,
         ]
-        for pattern in patterns {
-            guard let regex = try? NSRegularExpression(pattern: pattern) else { continue }
+        return patterns.compactMap { try? NSRegularExpression(pattern: $0) }
+    }()
+
+    /// `text` without the expressions that write `due` as a date: "2026-10-15", "15/10", "15th", "15 October",
+    /// "October 15, 2026", "10月15日". Only an expression whose numbers all belong to the date is removed, so "3.5" stays.
+    static func removingDate(_ due: Date, from text: String, timeZone: TimeZone) -> String {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        let c = calendar.dateComponents([.year, .month, .day], from: due)
+        guard let year = c.year, let month = c.month, let day = c.day else { return text }
+        let allowed: Set<Int> = [year, year % 100, month, day]
+        var folded = text.precomposedStringWithCompatibilityMapping
+            .folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
+        for regex in dateExpressions {
             let ns = folded as NSString
             var result = ""
             var last = 0
@@ -235,11 +239,13 @@ public enum MinutesVerifier {
         return false
     }
 
+    private static let ordinalDayExpression = try? NSRegularExpression(
+        pattern: #"(?i)(?:\b(?:the|on|el|le|il|am|dia|den|um)\s+(\d{1,2})\b)|(?:\b(\d{1,2})(?:st|nd|rd|th|º|ª|er)\b)"#)
+
     /// A day of the month written as a day: "the 15th", "on 15", "el 15", "le 15", "am 15", "15º". A lone number
     /// in the segment ("3 people") is not a date.
     private static func ordinalDays(in text: String) -> Set<Int> {
-        let pattern = #"(?i)(?:\b(?:the|on|el|le|il|am|dia|den|um)\s+(\d{1,2})\b)|(?:\b(\d{1,2})(?:st|nd|rd|th|º|ª|er)\b)"#
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
+        guard let regex = ordinalDayExpression else { return [] }
         let ns = text.precomposedStringWithCompatibilityMapping as NSString
         var out = Set<Int>()
         for match in regex.matches(in: ns as String, range: NSRange(location: 0, length: ns.length)) {

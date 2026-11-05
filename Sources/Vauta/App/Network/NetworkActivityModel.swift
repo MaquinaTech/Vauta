@@ -12,9 +12,9 @@ import UniformTypeIdentifiers
 @Observable
 final class NetworkActivityModel {
     /// Oldest first, as the log keeps them.
-    private(set) var entries: [NetworkActivityEntry] = []
+    private(set) var entries: [NetworkActivityEntry] = [] { didSet { derive() } }
     /// Show only this purpose (nil = all).
-    var filter: NetworkPurpose?
+    var filter: NetworkPurpose? { didSet { if filter != oldValue { visible = entries.reversed().filtered(by: filter) } } }
     var exportFeedback: ModelsSettingsModel.Feedback?
     /// The file the last export wrote, for Show in Finder.
     private(set) var exportedFile: URL?
@@ -34,6 +34,7 @@ final class NetworkActivityModel {
         follows = false
         self.entries = entries
         self.filter = filter
+        derive()
     }
 
     /// Follows the log until the window closes (call from `.task`). Updates are
@@ -49,28 +50,34 @@ final class NetworkActivityModel {
         }
     }
 
-    /// Newest first, narrowed by the filter.
-    var visible: [NetworkActivityEntry] {
-        entries.reversed().filtered(by: filter)
-    }
+    // What the window shows is derived from the entries once per change of the log (up to ten a second while traffic flows) or
+    // of the filter, not on every read: the view reads each of these several times per render, over up to a thousand entries.
 
+    /// Newest first, narrowed by the filter.
+    private(set) var visible: [NetworkActivityEntry] = [] { didSet { visibleRequests = visible.requestCount } }
     /// Requests behind the listed rows (identical discovery probes are one row with a count).
-    var visibleRequests: Int { visible.requestCount }
+    private(set) var visibleRequests = 0
     /// Some rows stand for several requests, so the rows are fewer than the requests the counter says.
     var groupsRepeats: Bool { visible.count < visibleRequests }
-    var totalRequests: Int { entries.requestCount }
+    private(set) var totalRequests = 0
     /// A purpose filter is on, so the count reads "N of M requests".
     var isFiltering: Bool { filter != nil }
 
-    var destinations: [NetworkDestination] { NetworkDestination.summarize(entries) }
+    private(set) var destinations: [NetworkDestination] = []
 
     /// Requests refused before they were sent (the summary names where they were headed).
-    var blocked: [NetworkActivityEntry] { entries.reversed().filter { $0.blocked != nil } }
+    private(set) var blocked: [NetworkActivityEntry] = []
 
     /// The purposes that appear in the log, in a stable order, for the filter menu.
-    var purposes: [NetworkPurpose] {
+    private(set) var purposes: [NetworkPurpose] = []
+
+    private func derive() {
+        visible = entries.reversed().filtered(by: filter)
+        totalRequests = entries.requestCount
+        destinations = NetworkDestination.summarize(entries)
+        blocked = entries.reversed().filter { $0.blocked != nil }
         let present = Set(entries.map(\.purpose))
-        return NetworkPurpose.allCases.filter { present.contains($0) }
+        purposes = NetworkPurpose.allCases.filter { present.contains($0) }
     }
 
     func clear() async {

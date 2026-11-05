@@ -149,8 +149,10 @@ for dir in "${DIRS[@]}"; do
     report "$dir has localizations but no en.lproj"
     continue
   fi
+  # Each English file is converted once, then compared with every language.
   for name in "${FILES[@]}"; do
-    [[ -f "$BASE/$name" ]] && { to_json "$BASE/$name" "$WORK/en.json" || true; }
+    rm -f "$WORK/en-$name.json"
+    [[ -f "$BASE/$name" ]] && { to_json "$BASE/$name" "$WORK/en-$name.json" || true; }
   done
   for lproj in "${LPROJS[@]}"; do
     [[ "$lproj" == "$BASE" || "$(basename "$lproj")" == "Base.lproj" ]] && continue
@@ -160,7 +162,7 @@ for dir in "${DIRS[@]}"; do
         continue
       fi
       [[ -f "$lproj/$name" ]] || { report "missing $lproj/$name"; continue; }
-      to_json "$BASE/$name" "$WORK/en.json" || continue
+      [[ -f "$WORK/en-$name.json" ]] || continue
       to_json "$lproj/$name" "$WORK/tr.json" || continue
       CHECKED=$((CHECKED + 1))
       # Settings paths ("Settings → Models") keep a no-break space (U+00A0) on both sides of the arrow.
@@ -186,7 +188,7 @@ for dir in "${DIRS[@]}"; do
           [[ -n "$line" ]] && report "$lproj/$name: duplicate key: $line"
         done < <(perl -Mutf8 -CSD -ne 'if (/^"((?:[^"\\]|\\.)*)"\s*=\s*"/) { my $k = $1; if ($seen{$k}) { print "line $. repeats line $seen{$k}: ", substr($k, 0, 80), "\n" } else { $seen{$k} = $. } }' "$lproj/$name")
       fi
-      PROBLEMS="$(osascript -l JavaScript -e "$COMPARE" "$name" "$WORK/en.json" "$WORK/tr.json")" \
+      PROBLEMS="$(osascript -l JavaScript -e "$COMPARE" "$name" "$WORK/en-$name.json" "$WORK/tr.json")" \
         || { report "could not compare $lproj/$name"; continue; }
       while IFS= read -r line; do
         [[ -n "$line" ]] && report "$lproj/$name: $line"

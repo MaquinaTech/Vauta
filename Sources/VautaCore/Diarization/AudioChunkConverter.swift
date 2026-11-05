@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2026 Nicolás López de Lerma López
 
+import Accelerate
 import AVFoundation
 
 /// Turns audio chunks of any PCM format into 16 kHz mono Float samples for the diarizer. Memory only.
@@ -42,7 +43,13 @@ final class AudioChunkConverter {
                 return Array(UnsafeBufferPointer(start: data[0], count: frames))
             default:
                 guard let data = buffer.int16ChannelData else { return nil }
-                return UnsafeBufferPointer(start: data[0], count: frames).map { Float($0) / 32768 }
+                // Vectorized: 1/32768 is a power of two, so the samples are exactly those of `Float(x) / 32768`.
+                return [Float](unsafeUninitializedCapacity: frames) { out, count in
+                    vDSP_vflt16(data[0], 1, out.baseAddress!, 1, vDSP_Length(frames))
+                    var scale: Float = 1 / 32768
+                    vDSP_vsmul(out.baseAddress!, 1, &scale, out.baseAddress!, 1, vDSP_Length(frames))
+                    count = frames
+                }
             }
         }
         guard let converter else { return nil }

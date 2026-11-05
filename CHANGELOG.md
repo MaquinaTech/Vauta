@@ -4,6 +4,20 @@ All notable changes to Vauta are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and Vauta follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Faster deletes and edits on a large library.** Every column that points to another table now has an index (schema 39), so deleting a meeting or a transcript line, the daily retention, correcting a line and splitting a speaker no longer scan whole tables for each line. A test keeps every new reference indexed. Removing a meeting also checks the stored answers' citations against one list of what still exists, not one query per citation.
+- **Less work while recording.** The panel and the meeting companion no longer redraw on every provisional result, the live notes read the transcript only when one of your notes is waiting, the transcript builds the speakers' names once per redraw, and the diarizer converts 16-bit audio with Accelerate (the samples are bit for bit the same).
+- **Lighter Meetings, Tasks and Network Activity windows.** The task tables filter, sort and measure their tasks once per redraw instead of up to eight times, and look up whether each owner is you once; the People and Tasks sidebars match the search once; Network Activity works out its rows, totals and summary once per change of the log instead of on every read, with one byte formatter for every row.
+- **Search and checks.** Search within a scope (one meeting, some files) scores with Accelerate like the whole-library search; the search index status counts the library's coverage once instead of twice after each pass; and the minutes' date and day checks compile their patterns once instead of for every item.
+- **CI runs its checks in parallel.** The tests, the release build with the app bundle, the English strings and the quick checks are separate jobs, so a run takes about as long as its longest job instead of the sum of three builds, and a broken header or translation is reported in about a minute. `Build and test` still passes only when every check did.
+
+### Fixed
+
+- **Delete Line with a note's earlier version.** Deleting a transcript line failed with a store error whenever a note expansion in the library kept an earlier version (its undo level), and that earlier version could keep a quote from the deleted line. The earlier version now loses the line's citations and quotes like the current one, and keeps the rest.
+
 ## [0.10.0] - 2026-11-03
 
 ### Added

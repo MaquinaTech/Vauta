@@ -15,7 +15,8 @@ extension RecorderModel {
             liveSpeakers = (liveSpeakers + [ordinal]).sorted()
             syncCaptionSpeakers()
         }
-        latestLiveSpeaker = ordinal
+        // Written only when it changes: every write redraws the views that name speakers, and most lines keep the speaker.
+        if latestLiveSpeaker != ordinal { latestLiveSpeaker = ordinal }
     }
 
     /// The voice the name field is for: the one picked, else the one pinned while the user types or points at the

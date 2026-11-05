@@ -197,7 +197,8 @@ struct MeetingsSidebar: View {
         List(selection: taskFilter) {
             Label("All open tasks", systemImage: "checklist").tag(TaskFilter.all)
             // Only people with an open task (and the one being filtered, so the selection stays visible).
-            let withTasks = model.people.filter { p in model.ownerFilter == p.id || model.openTasks.contains { $0.ownerID == p.id } }
+            let owners = Set(model.openTasks.compactMap(\.ownerID))
+            let withTasks = model.people.filter { p in model.ownerFilter == p.id || owners.contains(p.id) }
             if !withTasks.isEmpty {
                 Section("By person") {
                     ForEach(withTasks) { p in
@@ -221,9 +222,12 @@ struct MeetingsSidebar: View {
     // MARK: People
 
     private var peopleList: some View {
-        List(selection: $model.selectedEntityID) {
+        // Matched against the search once per render, then split by kind (each kind used to run the match again).
+        let visible = model.visibleEntities
+        let byKind = Dictionary(grouping: visible, by: \.kind)
+        return List(selection: $model.selectedEntityID) {
             ForEach(EntityKind.allCases) { kind in
-                let items = MeetingsModel.selfFirst(model.visibleEntities.filter { $0.kind == kind })
+                let items = MeetingsModel.selfFirst(byKind[kind] ?? [])
                 if !items.isEmpty {
                     Section(kind.plural) {
                         ForEach(items) { e in
@@ -239,7 +243,7 @@ struct MeetingsSidebar: View {
         }
         .overlay {
             // With no people or projects the detail pane explains what to do, so the list stays empty.
-            if !model.entities.isEmpty, model.visibleEntities.isEmpty {
+            if !model.entities.isEmpty, visible.isEmpty {
                 SearchEmptyStateView(query: model.query) { model.query = "" }
             }
         }

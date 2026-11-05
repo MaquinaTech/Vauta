@@ -308,11 +308,15 @@ struct MeetingTasksTab: View {
                 // a task, so the two form one centred block.
                 empty
             } else {
-                table
+                // Sorted and measured once per render: every part of the table reads the same list.
+                let tasks = model.sortedTasks
+                let due = TaskDueFormat.width(for: tasks, icon: true)
+                let status = showsStatus(tasks)
+                table(tasks, due: due, showsStatus: status)
                     .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { tableWidth = $0 }
-                    .measuredTableHeight(token: TaskTableSizing.token(model.sortedTasks, width: tableWidth, extra: model.linkRowsToken)) { measuredHeight = $0 }
+                    .measuredTableHeight(token: TaskTableSizing.token(tasks, width: tableWidth, extra: model.linkRowsToken)) { measuredHeight = $0 }
                     // The table is as tall as its rows (up to a limit), so the editor is right under the last one.
-                    .frame(height: tableHeight)
+                    .frame(height: tableHeight(tasks, due: due, showsStatus: status))
             }
             // As in Open Tasks, the editor of the selected task comes directly after the table;
             // the field that adds a task closes the page.
@@ -329,7 +333,7 @@ struct MeetingTasksTab: View {
     }
 
     /// The column with the reminder's state appears only when a task of the list has one.
-    private var showsStatus: Bool { model.sortedTasks.contains { model.actions.state(of: $0).kind != .none } }
+    private func showsStatus(_ tasks: [TaskItem]) -> Bool { tasks.contains { model.actions.state(of: $0).kind != .none } }
 
     private var newTaskField: some View {
         NoCopyField(title: String(localized: "New task (press Return to add)", comment: "Placeholder"), text: $model.newTask,
@@ -338,15 +342,16 @@ struct MeetingTasksTab: View {
         }
     }
 
-    private var tableHeight: CGFloat {
-        let due = TaskDueFormat.width(for: model.sortedTasks, icon: true)
+    private func tableHeight(_ tasks: [TaskItem], due: CGFloat, showsStatus: Bool) -> CGFloat {
         if let measuredHeight { return min(measuredHeight, 420) }
-        return TaskTableSizing.height(model.sortedTasks, width: tableWidth, fixed: TaskLeadCell.width + TaskTableSizing.ownerWidth.max + due + (showsStatus ? ActionStatusCell.width : 0), baseRow: TaskTableSizing.singleLineRow,
+        return TaskTableSizing.height(tasks, width: tableWidth, fixed: TaskLeadCell.width + TaskTableSizing.ownerWidth.max + due + (showsStatus ? ActionStatusCell.width : 0), baseRow: TaskTableSizing.singleLineRow,
                                       extra: CGFloat(model.linkRows.values.filter { $0.link.kind == .task }.count) * LinkRowHost.estimatedHeight, cap: 420)
     }
 
-    private var table: some View {
-        Table(model.sortedTasks, selection: $model.taskSelection, sortOrder: $model.taskSort) {
+    private func table(_ tasks: [TaskItem], due: CGFloat, showsStatus: Bool) -> some View {
+        // Whether each owner is you, looked up once instead of rebuilding the people list for every row.
+        let selfIDs = Set(model.entities.lazy.filter { $0.kind == .person && $0.isSelf }.map(\.id))
+        return Table(tasks, selection: $model.taskSelection, sortOrder: $model.taskSort) {
             TableColumn(Text(verbatim: "")) { t in
                 TaskLeadCell(task: t) { status in Task { await model.setStatus(t.id, status) } }
                     .firstLineAligned()
@@ -361,10 +366,10 @@ struct MeetingTasksTab: View {
                 .firstLineAligned()
             }
             .width(min: 120, ideal: 200)
-            TableColumn("Owner", value: \.ownerSortKey) { TaskOwnerCell(task: $0, name: ownerName($0)).firstLineAligned(titleBaselineOffset: true) }
+            TableColumn("Owner", value: \.ownerSortKey) { TaskOwnerCell(task: $0, name: ownerName($0, selfIDs: selfIDs)).firstLineAligned(titleBaselineOffset: true) }
                 .width(min: TaskTableSizing.ownerWidth.min, ideal: TaskTableSizing.ownerWidth.ideal, max: TaskTableSizing.ownerWidth.max)
             TableColumn("Due", value: \.dueSortKey) { TaskDueCell(task: $0).firstLineAligned(titleBaselineOffset: true) }
-                .width(TaskDueFormat.width(for: model.sortedTasks, icon: true))
+                .width(due)
             if showsStatus {
                 TableColumn(Text(verbatim: ActionAppName.reminders)) { t in
                     let state = model.actions.state(of: t)
@@ -400,10 +405,9 @@ struct MeetingTasksTab: View {
         }
     }
 
-    private func ownerName(_ t: TaskItem) -> String {
+    private func ownerName(_ t: TaskItem, selfIDs: Set<Int64>) -> String {
         guard let name = t.ownerName else { return "—" }
-        let isSelf = model.people.first { $0.id == t.ownerID }?.isSelf ?? false
-        return MeetingStore.displayName(name, isSelf: isSelf)
+        return MeetingStore.displayName(name, isSelf: t.ownerID.map(selfIDs.contains) ?? false)
     }
 }
 

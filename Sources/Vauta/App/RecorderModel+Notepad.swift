@@ -149,7 +149,10 @@ extension RecorderModel {
 
     /// The live notes wait while a note of the user is ready: what the user typed comes first.
     var liveNotesWaitForNotes: Bool {
-        NoteExpansionPolicy.liveNotesShouldWait(pending: notePending, transcript: noteTranscript, now: currentOffset)
+        let pending = notePending
+        // No note waits (the usual case): nothing to read from the transcript.
+        guard !pending.isEmpty else { return false }
+        return NoteExpansionPolicy.liveNotesShouldWait(pending: pending, transcript: noteTranscript, now: currentOffset)
     }
 
     /// Called when a note is saved, when a segment arrives and every few seconds while a note waits.

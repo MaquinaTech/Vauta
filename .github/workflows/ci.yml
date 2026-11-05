@@ -15,9 +15,66 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# The checks run as parallel jobs, so the run takes as long as its longest job instead of the sum of three MLX builds, and
+# the quick checks report within a minute. "Build and test", the check `main` requires, passes only when every job did.
 jobs:
-  build-and-test:
-    name: Build and test
+  checks:
+    name: Quick checks
+    # Xcode 27 / Swift 6.4 on macOS 27, Apple silicon (public preview image).
+    # If that label is unavailable, use `runs-on: macos-26` and select Xcode 27 first:
+    #   - run: sudo xcode-select -s /Applications/Xcode_27.0.app
+    runs-on: xcode-27
+    timeout-minutes: 15
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Toolchain
+        run: |
+          sw_vers
+          xcode-select -p
+          swift --version
+
+      - name: Lint property lists
+        run: |
+          find Resources Sources \( -name '*.plist' -o -name '*.entitlements' -o -name '*.strings' -o -name '*.stringsdict' \) -print0 \
+            | xargs -0 plutil -lint
+
+      - name: Check translations against English
+        run: scripts/check-strings.sh
+
+      - name: Check license headers
+        run: scripts/check-headers.sh
+
+      - name: Test the statistics of the evaluation gates (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_stats.py'
+
+      - name: Test the human gold of the minutes and its scoring (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_ami_gold.py'
+
+      - name: Test the blind grading of minutes items against the transcript (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_item_support.py'
+
+      - name: Test the word confidence scoring of the evaluation (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_score_wer.py'
+
+      - name: Test the speaker-attributed scoring of the evaluation (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_score_cpwer.py'
+
+      - name: Test the prompt-injection sets and their scoring (standard library only)
+        run: python3 -I -m unittest discover -s eval/tests -p 'test_injection.py'
+
+      - name: Check shell scripts
+        run: |
+          for f in scripts/*.sh; do bash -n "$f"; done
+          scripts/check-shell-vars.sh
+          if command -v shellcheck >/dev/null; then shellcheck scripts/*.sh; else echo "shellcheck not installed; syntax check only"; fi
+
+
+  test:
+    name: Test
     # Xcode 27 / Swift 6.4 on macOS 27, Apple silicon (public preview image).
     # If that label is unavailable, use `runs-on: macos-26` and select Xcode 27 first:
     #   - run: sudo xcode-select -s /Applications/Xcode_27.0.app
@@ -34,9 +91,6 @@ jobs:
           sw_vers
           xcode-select -p
           swift --version
-
-      - name: Build (release)
-        run: swift build -c release --arch arm64
 
       - name: Test (with code coverage)
         run: swift test --enable-code-coverage
@@ -82,50 +136,27 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Lint property lists
+
+  app:
+    name: Release build and app bundle
+    # Xcode 27 / Swift 6.4 on macOS 27, Apple silicon (public preview image).
+    # If that label is unavailable, use `runs-on: macos-26` and select Xcode 27 first:
+    #   - run: sudo xcode-select -s /Applications/Xcode_27.0.app
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Toolchain
         run: |
-          find Resources Sources \( -name '*.plist' -o -name '*.entitlements' -o -name '*.strings' -o -name '*.stringsdict' \) -print0 \
-            | xargs -0 plutil -lint
+          sw_vers
+          xcode-select -p
+          swift --version
 
-      - name: Check translations against English
-        run: scripts/check-strings.sh
-
-      - name: Check that the English strings are in sync with the code
-        run: |
-          scripts/extract-strings.sh
-          git diff --exit-code -- Resources/en.lproj/Localizable.strings \
-            || { echo "::error::Resources/en.lproj/Localizable.strings is out of sync: run scripts/extract-strings.sh and commit"; exit 1; }
-
-      - name: Check license headers
-        run: scripts/check-headers.sh
-
-      - name: Check the dependencies (only the pinned mlx-swift fork and swift-numerics)
-        run: scripts/check-dependencies.sh
-
-      - name: Test the statistics of the evaluation gates (standard library only)
-        run: python3 -I -m unittest discover -s eval/tests -p 'test_stats.py'
-
-      - name: Test the human gold of the minutes and its scoring (standard library only)
-        run: python3 -I -m unittest discover -s eval/tests -p 'test_ami_gold.py'
-
-      - name: Test the blind grading of minutes items against the transcript (standard library only)
-        run: python3 -I -m unittest discover -s eval/tests -p 'test_item_support.py'
-
-      - name: Test the word confidence scoring of the evaluation (standard library only)
-        run: python3 -I -m unittest discover -s eval/tests -p 'test_score_wer.py'
-
-      - name: Test the speaker-attributed scoring of the evaluation (standard library only)
-        run: python3 -I -m unittest discover -s eval/tests -p 'test_score_cpwer.py'
-
-      - name: Test the prompt-injection sets and their scoring (standard library only)
-        run: python3 -I -m unittest discover -s eval/tests -p 'test_injection.py'
-
-      - name: Check shell scripts
-        run: |
-          for f in scripts/*.sh; do bash -n "$f"; done
-          scripts/check-shell-vars.sh
-          if command -v shellcheck >/dev/null; then shellcheck scripts/*.sh; else echo "shellcheck not installed; syntax check only"; fi
-
+      # build-app.sh builds the release binary (`swift build -c release --arch arm64`) before it assembles the bundle.
       - name: Assemble the app bundle (ad-hoc signature)
         env:
           VAUTA_ALLOW_ADHOC: "1"
@@ -134,3 +165,48 @@ jobs:
           test -f build/Vauta.app/Contents/Resources/AppIcon.icns
           plutil -lint build/Vauta.app/Contents/Info.plist
           codesign --verify --strict build/Vauta.app
+
+      # After the build: the gitlink checks need the checkouts the build resolved.
+      - name: Check the dependencies (only the pinned mlx-swift fork and swift-numerics)
+        run: scripts/check-dependencies.sh
+
+
+  strings:
+    name: English strings
+    # Xcode 27 / Swift 6.4 on macOS 27, Apple silicon (public preview image).
+    # If that label is unavailable, use `runs-on: macos-26` and select Xcode 27 first:
+    #   - run: sudo xcode-select -s /Applications/Xcode_27.0.app
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Toolchain
+        run: |
+          sw_vers
+          xcode-select -p
+          swift --version
+
+      - name: Check that the English strings are in sync with the code
+        run: |
+          scripts/extract-strings.sh
+          git diff --exit-code -- Resources/en.lproj/Localizable.strings \
+            || { echo "::error::Resources/en.lproj/Localizable.strings is out of sync: run scripts/extract-strings.sh and commit"; exit 1; }
+
+
+  build-and-test:
+    name: Build and test
+    needs: [checks, test, app, strings]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every job passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          for r in $RESULTS; do [[ "$r" == "success" ]] || { echo "::error::a CI job did not pass ($r)"; exit 1; }; done

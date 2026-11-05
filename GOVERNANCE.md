@@ -51,7 +51,8 @@ maintainers are held to.
 - **Two-factor authentication** is required for every maintainer and for anyone with write access. Prefer a passkey or a
   hardware security key to SMS.
 - **A ruleset on `main`**: pull requests only (no direct pushes; a repository administrator can bypass the rules only when
-  merging a pull request), the CI build and tests (`Build and test`, which also runs the string and header checks) and CodeQL
+  merging a pull request), the CI build and tests (`Build and test`, which passes only when every CI job did: the tests, the release build and app bundle,
+  the English strings and the quick checks) and CodeQL
   (`Analyze (Swift)`) must pass, conversations must be resolved, commits must be signed, and force pushes and branch deletion
   are blocked. At least one approving review from someone other than the author will be required once there is a second
   maintainer. Until then the project lead reviews their own pull requests and CI is the independent check; this is stated

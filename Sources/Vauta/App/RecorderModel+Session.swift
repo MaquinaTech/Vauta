@@ -329,9 +329,11 @@ extension RecorderModel {
 
     /// Live notes from the fast model. They wait until the segment is saved (they cite its ID).
     private func considerLiveNotes() {
-        guard phase == .recording, !liveNotesWaitForNotes, let llm, let id = meetingID, llmStatus.configured,
+        // The cheap conditions first: whether a note waits reads the whole transcript, and this runs on every final line.
+        guard phase == .recording, let llm, let id = meetingID, llmStatus.configured,
               LiveNotesSchedule.starts(newCharacters: charsSinceLiveNotes, sinceLast: lastLiveNotes.map { ContinuousClock.now - $0 },
-                                       busy: liveNotesTask != nil || noteExpansionTask != nil, asked: liveNotesAsked)
+                                       busy: liveNotesTask != nil || noteExpansionTask != nil, asked: liveNotesAsked),
+              !liveNotesWaitForNotes
         else { return }
         charsSinceLiveNotes = 0
         liveNotesHaveNewText = false

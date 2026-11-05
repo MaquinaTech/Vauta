@@ -586,11 +586,16 @@ enum NetworkFormat {
                       comment: "Network Activity tooltip; arguments are a count and two times")
     }
 
-    static func bytes(_ count: Int) -> String {
+    /// One formatter for every row (the tables show up to a thousand, redrawn while traffic flows).
+    @MainActor private static let byteFormatter: ByteCountFormatter = {
         let formatter = ByteCountFormatter()
         formatter.countStyle = .file
         formatter.allowsNonnumericFormatting = false
-        return ByteSize.glued(formatter.string(fromByteCount: Int64(count)))
+        return formatter
+    }()
+
+    @MainActor static func bytes(_ count: Int) -> String {
+        ByteSize.glued(byteFormatter.string(fromByteCount: Int64(count)))
     }
 
     /// "30 ms", "4.1 sec", "48 sec": milliseconds under a second, then seconds, with the language's own
@@ -606,10 +611,10 @@ enum NetworkFormat {
     }
 
     /// The Time column: seconds in 24 hours, or with AM/PM (English, Korean…), whichever the language uses.
-    static var timeColumnWidth: CGFloat {
+    static let timeColumnWidth: CGFloat = {
         let template = DateFormatter.dateFormat(fromTemplate: "jms", options: 0, locale: .current) ?? ""
         return template.contains("a") ? 104 : 72
-    }
+    }()
 }
 
 /// The Network Activity window with its way to Settings → Models.

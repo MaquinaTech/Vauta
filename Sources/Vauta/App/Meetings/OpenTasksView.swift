@@ -14,32 +14,35 @@ struct OpenTasksView: View {
         model.taskSelection.map { id in model.openTasks.contains { $0.id == id } } ?? false
     }
 
-    private func tableHeight(cap: CGFloat) -> CGFloat {
+    private func tableHeight(_ tasks: [TaskItem], due: CGFloat, showsStatus: Bool, cap: CGFloat) -> CGFloat {
         if let measuredHeight { return min(measuredHeight, cap) }
-        let due = TaskDueFormat.width(for: model.sortedOpenTasks, icon: true)
         let owner: CGFloat = model.ownerFilter == nil ? TaskTableSizing.ownerWidth.max : 0
-        return TaskTableSizing.height(model.sortedOpenTasks, marksOwner: model.ownerFilter != nil, width: tableWidth, fixed: TaskLeadCell.width + owner + due + (showsStatus ? ActionStatusCell.width : 0), baseRow: 43, extraLine: 16.5, slack: 52, bottom: 18,
-                                      extra: CGFloat(model.sortedOpenTasks.filter { model.openChains[$0.id] != nil }.count) * 20, cap: cap)
+        return TaskTableSizing.height(tasks, marksOwner: model.ownerFilter != nil, width: tableWidth, fixed: TaskLeadCell.width + owner + due + (showsStatus ? ActionStatusCell.width : 0), baseRow: 43, extraLine: 16.5, slack: 52, bottom: 18,
+                                      extra: CGFloat(tasks.filter { model.openChains[$0.id] != nil }.count) * 20, cap: cap)
     }
 
     var body: some View {
+        // Filtered, sorted and measured once per render: every part of the table reads the same list.
+        let tasks = model.sortedOpenTasks
+        let due = TaskDueFormat.width(for: tasks, icon: true)
+        let status = showsStatus(tasks)
         VStack(alignment: .leading, spacing: PaneLayout.item) {
             Text(heading).font(.title2.bold()).accessibilityAddTraits(.isHeader)
-            if model.sortedOpenTasks.isEmpty {
+            if tasks.isEmpty {
                 empty
             } else if editorShown {
                 // With the editor open the table is as tall as its rows, so the editor sits right under it.
-                table
+                table(tasks, due: due, showsStatus: status)
                     .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { tableWidth = $0 }
-                    .measuredTableHeight(token: TaskTableSizing.token(model.sortedOpenTasks, width: tableWidth, extra: chainToken)) { measuredHeight = $0 }
-                    .frame(height: tableHeight(cap: 400))
+                    .measuredTableHeight(token: TaskTableSizing.token(tasks, width: tableWidth, extra: chainToken)) { measuredHeight = $0 }
+                    .frame(height: tableHeight(tasks, due: due, showsStatus: status, cap: 400))
             } else {
                 // As tall as its rows, and no taller than the pane: a short list ends under its last row and a long
                 // one fills the pane and scrolls inside, so no row is ever cut off.
-                table
+                table(tasks, due: due, showsStatus: status)
                     .onGeometryChange(for: CGFloat.self, of: { $0.size.width }) { tableWidth = $0 }
-                    .measuredTableHeight(token: TaskTableSizing.token(model.sortedOpenTasks, width: tableWidth, extra: chainToken)) { measuredHeight = $0 }
-                    .frame(maxHeight: tableHeight(cap: .greatestFiniteMagnitude))
+                    .measuredTableHeight(token: TaskTableSizing.token(tasks, width: tableWidth, extra: chainToken)) { measuredHeight = $0 }
+                    .frame(maxHeight: tableHeight(tasks, due: due, showsStatus: status, cap: .greatestFiniteMagnitude))
             }
             if editorShown { TaskEditor(model: model, width: tableWidth) }
         }
@@ -57,10 +60,12 @@ struct OpenTasksView: View {
         return hasher.finalize()
     }
 
-    private var showsStatus: Bool { model.sortedOpenTasks.contains { model.actions.state(of: $0).kind != .none } }
+    private func showsStatus(_ tasks: [TaskItem]) -> Bool { tasks.contains { model.actions.state(of: $0).kind != .none } }
 
-    private var table: some View {
-        Table(model.sortedOpenTasks, selection: $model.taskSelection, sortOrder: $model.taskSort) {
+    private func table(_ tasks: [TaskItem], due: CGFloat, showsStatus: Bool) -> some View {
+        // Whether each owner is you, looked up once instead of rebuilding the people list for every row.
+        let selfIDs = Set(model.entities.lazy.filter { $0.kind == .person && $0.isSelf }.map(\.id))
+        return Table(tasks, selection: $model.taskSelection, sortOrder: $model.taskSort) {
             TableColumn(Text(verbatim: "")) { t in
                 TaskLeadCell(task: t) { status in Task { await model.setStatus(chainOf: t.id, status) } }
                     .firstLineAligned()
@@ -80,13 +85,13 @@ struct OpenTasksView: View {
             // Filtered by one person, the heading already says whose tasks these are.
             if model.ownerFilter == nil {
                 TableColumn("Owner", value: \.ownerSortKey) { t in
-                    TaskOwnerCell(task: t, name: t.ownerName.map { name in MeetingStore.displayName(name, isSelf: model.people.first { $0.id == t.ownerID }?.isSelf ?? false) } ?? "—")
+                    TaskOwnerCell(task: t, name: t.ownerName.map { name in MeetingStore.displayName(name, isSelf: t.ownerID.map(selfIDs.contains) ?? false) } ?? "—")
                         .firstLineAligned(titleBaselineOffset: true)
                 }
                 .width(min: TaskTableSizing.ownerWidth.min, ideal: TaskTableSizing.ownerWidth.ideal, max: TaskTableSizing.ownerWidth.max)
             }
             TableColumn("Due", value: \.dueSortKey) { TaskDueCell(task: $0).firstLineAligned(titleBaselineOffset: true) }
-                .width(TaskDueFormat.width(for: model.sortedOpenTasks, icon: true))
+                .width(due)
             if showsStatus {
                 TableColumn(Text(verbatim: ActionAppName.reminders)) { t in
                     let state = model.actions.state(of: t)
@@ -97,7 +102,7 @@ struct OpenTasksView: View {
         }
         .tableStyle(.bordered(alternatesRowBackgrounds: true))
         .contextMenu(forSelectionType: Int64.self) { ids in
-            if let id = ids.first, let task = model.sortedOpenTasks.first(where: { $0.id == id }) { TaskActionMenu(actions: model.actions, task: task) }
+            if let id = ids.first, let task = tasks.first(where: { $0.id == id }) { TaskActionMenu(actions: model.actions, task: task) }
         }
     }
 

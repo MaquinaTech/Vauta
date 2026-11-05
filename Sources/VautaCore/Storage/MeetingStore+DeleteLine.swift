@@ -88,13 +88,13 @@ extension MeetingStore {
                 SELECT 1 FROM json_each(note_expansions.sentences) s, json_each(s.value, '$.cites') c
                  WHERE json_extract(c.value, '$.seg') IN (SELECT value FROM json_each(?1)))
                OR EXISTS (
-                SELECT 1 FROM json_each(note_expansions.previous) s, json_each(s.value, '$.cites') c
+                SELECT 1 FROM json_each(note_expansions.previous, '$.sentences') s, json_each(s.value, '$.cites') c
                  WHERE json_extract(c.value, '$.seg') IN (SELECT value FROM json_each(?1)))
             """, [list])
-        var marked = 0
-        func forget(_ json: String?, counting: Bool) -> String? {
-            guard let json else { return nil }
-            return Self.encode(Self.decodeSentences(json).map { sentence in
+        /// The sentences without the lines, and how many of them were confirmed before.
+        func forget(_ sentences: [NoteExpansion.Sentence]) -> (sentences: [NoteExpansion.Sentence], marked: Int) {
+            var marked = 0
+            let out = sentences.map { sentence in
                 guard sentence.cites.contains(where: { words[$0.seg] != nil }) else { return sentence }
                 let cited = sentence.cites.compactMap { words[$0.seg] }.flatMap { $0 }
                 var s = sentence
@@ -102,14 +102,25 @@ extension MeetingStore {
                 if !s.quote.isEmpty, cited.contains(where: { $0.contains(s.quote) }) { s.quote = "" }
                 if !s.unconfirmed {
                     s.unconfirmed = true
-                    if counting { marked += 1 }
+                    marked += 1
                 }
                 return s
-            })
+            }
+            return (out, marked)
         }
+        var marked = 0
         for row in rows {
+            var sentences: String?
+            if let json = row.optionalString(1) {
+                let current = forget(Self.decodeSentences(json))
+                sentences = Self.encode(current.sentences)
+                marked += current.marked
+            }
+            // `previous` is the one level of undo (`NoteExpansion.Previous`): its sentences lose the lines too, and the rest of it stays.
+            var previous = row.optionalString(2).flatMap { try? JSONDecoder().decode(NoteExpansion.Previous.self, from: Data($0.utf8)) }
+            if let before = previous?.sentences { previous?.sentences = forget(before).sentences }
             try run("UPDATE note_expansions SET sentences = ?, previous = ? WHERE note_id = ?",
-                    [forget(row.optionalString(1), counting: true).map { .text($0) }, forget(row.optionalString(2), counting: false).map { .text($0) },
+                    [sentences.map { .text($0) }, previous.map { .text(Self.encode($0)) } ?? row.optionalString(2).map { .text($0) },
                      .integer(row.int(0))])
         }
         return marked

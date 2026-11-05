@@ -59,7 +59,11 @@ struct VectorIndex: @unchecked Sendable {
     func score(_ query: [Float], ids wanted: [Int64]) -> [Int64: Float] {
         guard query.count == dims, let q = Self.normalized(query), count > 0 else { return [:] }
         let base = buffer.base.assumingMemoryBound(to: Int8.self)
+        // One dequantized row in owned memory that is zeroed when released, scored with Accelerate like `search`.
+        let work = SecretBuffer(capacity: dims * MemoryLayout<Float>.stride)
+        let floats = work.base.assumingMemoryBound(to: Float.self)
         var out: [Int64: Float] = [:]
+        out.reserveCapacity(wanted.count)
         for id in wanted where out[id] == nil {
             var lo = 0, hi = count - 1, row = -1
             while lo <= hi {
@@ -69,8 +73,8 @@ struct VectorIndex: @unchecked Sendable {
             }
             guard row >= 0 else { continue }
             var dot: Float = 0
-            let r = base + row * dims
-            for d in 0..<dims { dot += Float(r[d]) * q[d] }
+            vDSP_vflt8(base + row * dims, 1, floats, 1, vDSP_Length(dims))
+            vDSP_dotpr(floats, 1, q, 1, &dot, vDSP_Length(dims))
             out[id] = dot * scales[row]
         }
         return out
@@ -106,7 +110,7 @@ struct VectorIndex: @unchecked Sendable {
             }
             row += n
         }
-        for i in 0..<count { scores[i] *= scales[i] }
+        vDSP.multiply(scores, scales, result: &scores)
         // Top k without sorting everything.
         var top: [(Int64, Float)] = []
         top.reserveCapacity(k + 1)
