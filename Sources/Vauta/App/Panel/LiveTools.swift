@@ -204,8 +204,6 @@ struct OthersCard: View {
 extension RecorderModel {
     /// The Live notes card has something to show: notes, or why they couldn't be written (the panel and the companion).
     var showsLiveNotes: Bool { !livePoints.isEmpty || !liveDecisions.isEmpty || !liveTasks.isEmpty || liveNotesError != nil }
-    /// The recording has passages to show, finished or still being said.
-    var hasLiveTranscript: Bool { !segments.isEmpty || !volatileSegments.isEmpty }
 }
 
 /// Notes the model takes while recording.

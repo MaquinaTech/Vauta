@@ -542,6 +542,7 @@ enum Schema {
         // while the line reads that way (a corrected line is translated again). NULL = stored before version 38: a translation of
         // what the transcriber wrote, shown while the line is not corrected, as before. Content: it lives and dies with the segment.
         Migration(38, .sql("ALTER TABLE segment_translations ADD COLUMN source TEXT;")),
+        Migration(39, .sql(foreignKeyIndexes)),
     ]
 
     /// The schema version this build writes.

@@ -74,9 +74,16 @@ final class RecorderModel {
     @ObservationIgnored var pausedSince: ContinuousClock.Instant?
     @ObservationIgnored var pauseReminded = false
     /// Final segments, in time order.
-    var segments: [LiveSegment] = []
+    var segments: [LiveSegment] = [] { didSet { syncHasLiveTranscript() } }
     /// The latest provisional result of each channel, in time order.
-    var volatileSegments: [Segment] = []
+    var volatileSegments: [Segment] = [] { didSet { syncHasLiveTranscript() } }
+    /// Something was transcribed (final or provisional). Stored, and written only when it changes: views that only need to know
+    /// whether there is a transcript (the panel, the companion) would otherwise redraw on every provisional result.
+    private(set) var hasLiveTranscript = false
+    private func syncHasLiveTranscript() {
+        let has = !segments.isEmpty || !volatileSegments.isEmpty
+        if has != hasLiveTranscript { hasLiveTranscript = has }
+    }
     /// Level per channel from 0 to 1 (for the meters).
     var levels: [Channel: Double] = [:]
     /// The consent helper's reminder for the recording in progress (see `+Consent`).

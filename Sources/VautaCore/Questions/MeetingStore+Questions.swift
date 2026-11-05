@@ -124,14 +124,17 @@ extension MeetingStore {
     /// claims that rested on it and the prose are dropped (the text of a deleted meeting must not stay in another meeting's answer),
     /// and the search index of the kept ones is refreshed. Runs inside the deletion's transaction.
     func purgeDanglingQuestionCites() throws {
+        // What still exists, read once: one lookup per cite of every stored answer was a query each.
+        let meetings = Set(try db.query("SELECT id FROM meetings").map { $0.int(0) })
+        let sources = Set(try db.query("SELECT id FROM doc_sources").map { $0.int(0) })
         try rewriteQuestionAnswers { cite in
             switch cite.kind {
             case .pastMeeting:
                 guard let id = cite.meetingID else { return false }
-                return try self.db.query("SELECT 1 FROM meetings WHERE id = ?", [.integer(id)]).isEmpty
+                return !meetings.contains(id)
             case .document:
                 guard let id = cite.sourceID else { return false }
-                return try self.db.query("SELECT 1 FROM doc_sources WHERE id = ?", [.integer(id)]).isEmpty
+                return !sources.contains(id)
             case .thisMeeting:
                 return false
             }
@@ -150,8 +153,9 @@ extension MeetingStore {
     func rewriteQuestionAnswers(dropping gone: (AutoAnswerContent.Cite) throws -> Bool) throws -> Int {
         let rows = try db.query("SELECT id, answer, kept FROM detected_questions WHERE answer IS NOT NULL")
         var changed = 0
+        let decoder = JSONDecoder()
         for row in rows {
-            guard let content = row.optionalString(1).flatMap({ try? JSONDecoder().decode(AutoAnswerContent.self, from: Data($0.utf8)) }) else { continue }
+            guard let content = row.optionalString(1).flatMap({ try? decoder.decode(AutoAnswerContent.self, from: Data($0.utf8)) }) else { continue }
             var failure: Error?
             let rewritten = content.removing { cite in
                 do { return try gone(cite) } catch { failure = error; return false }

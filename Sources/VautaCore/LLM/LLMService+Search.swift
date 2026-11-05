@@ -59,6 +59,11 @@ extension LLMService {
             return SemanticRanker.mode(space: space, coverage: coverage, reachedBefore: searchDefaults.bool(forKey: key))
         }
         let coverage = (try? await store.vectorCoverage(space: space)) ?? .init(covered: 0, total: 0)
+        return libraryMode(space: space, coverage: coverage, key: key)
+    }
+
+    /// The ranking over the whole library (meetings or documents) for a coverage already counted. Remembers when it was complete.
+    private func libraryMode(space: EmbeddingSpace, coverage: SemanticRanker.Coverage, key: String) -> SemanticRanker.Mode {
         if coverage.isComplete, coverage.total > 0 { searchDefaults.set(true, forKey: key) }
         return SemanticRanker.mode(space: space, coverage: coverage, reachedBefore: searchDefaults.bool(forKey: key))
     }
@@ -71,9 +76,7 @@ extension LLMService {
         if let filter { return SemanticRanker.mode(space: space, coverage: .init(covered: 0, total: 0), reachedBefore: false,
                                                     scopeCovered: (try? await documents.isCovered(filter, space: space)) ?? false) }
         let coverage = (try? await documents.vectorCoverage(space: space)) ?? .init(covered: 0, total: 0)
-        let key = Self.reachedKey(space, "documents")
-        if coverage.isComplete, coverage.total > 0 { searchDefaults.set(true, forKey: key) }
-        return SemanticRanker.mode(space: space, coverage: coverage, reachedBefore: searchDefaults.bool(forKey: key))
+        return libraryMode(space: space, coverage: coverage, key: Self.reachedKey(space, "documents"))
     }
 
     /// Sets how the service sees the Mac (recording, power, heat), for the pause rules of bulk embedding and the thermal fallback
@@ -116,8 +119,11 @@ extension LLMService {
         let env = environmentProvider()
         index.pause = IndexerPolicy.decide(env).pause
         index.onBattery = env.onBattery
-        let meetingMode = await meetingRankingMode(space: space, within: nil)
-        let documentMode = await documentRankingMode(space: space, filter: nil)
+        // The modes from the coverage just counted: asking `meetingRankingMode` would count the whole library again.
+        let meetingMode = SemanticRanker.isSearchModelSpace(space.model)
+            ? libraryMode(space: space, coverage: index.meetings, key: Self.reachedKey(space, "meetings")) : .rrf
+        let documentMode: SemanticRanker.Mode = !SemanticRanker.isSearchModelSpace(space.model) ? .rrf
+            : documents == nil ? .keyword : libraryMode(space: space, coverage: index.documents, key: Self.reachedKey(space, "documents"))
         index.meetingsRanking = index.meetings.total == 0 || meetingMode == .semantic
         index.documentsRanking = index.documents.total == 0 || documentMode == .semantic
         index.ranking = index.meetingsRanking && index.documentsRanking

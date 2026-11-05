@@ -89,6 +89,36 @@ struct DeleteLineTests {
         }
     }
 
+    /// The one level of undo a note expansion keeps (`previous`) is an object with its own sentences: a quote there from the
+    /// deleted line goes too, and the undo level itself stays.
+    @Test func theUndoLevelOfANoteExpansionLosesTheLineToo() async throws {
+        let fx = StoreFixture()
+        let store = try fx.open()
+        let m = try await meeting(store, ["The zzvaultxq code opens at nine", "We agreed on the budget"])
+        let (gone, kept) = (m.lines[0], m.lines[1])
+        try await store.execForTests("INSERT INTO notes(meeting_id, t, text) VALUES (?, 1, 'vault')", [.integer(m.id)])
+        let note = try #require(try await store.intsForTests("SELECT max(id) FROM notes").first)
+        let current = [NoteExpansion.Sentence(text: "The budget is agreed", cites: [.init(seg: kept, t: 10)])]
+        let previous = NoteExpansion.Previous(state: "done", sentences: [
+            NoteExpansion.Sentence(text: "The vault opens at nine", cites: [.init(seg: gone, t: 0), .init(seg: kept, t: 10)], quote: "zzvaultxq code opens"),
+        ], userEdited: true, sourceKey: "vault")
+        try await store.execForTests("""
+            INSERT INTO note_expansions(note_id, meeting_id, state, pass, sentences, plain, source_key, previous, updated_at)
+            VALUES (?, ?, 'done', 'final', ?, 'x', 'vault', ?, 0)
+            """, [.integer(note), .integer(m.id), .text(MeetingStore.encode(current)), .text(MeetingStore.encode(previous))])
+
+        let deletion = try await store.deleteSegment(gone)
+        #expect(deletion.marked == 0, "only the current sentences count")
+        for word in ["zzvaultxq"] {
+            #expect(try await !store.imageContains(word), "\(word): no trace in the undo level either")
+        }
+        let expansion = try #require(try await store.expansion(of: note))
+        #expect(expansion.sentences == current)
+        let undo = try #require(expansion.previous, "the undo level stays")
+        #expect(undo.state == "done" && undo.userEdited && undo.sourceKey == "vault")
+        #expect(undo.sentences.map { $0.cites.map(\.seg) } == [[kept]] && undo.sentences[0].quote.isEmpty && undo.sentences[0].unconfirmed)
+    }
+
     @Test func storedAnswersDropWhatTheLineSaid() async throws {
         let fx = StoreFixture()
         let store = try fx.open()

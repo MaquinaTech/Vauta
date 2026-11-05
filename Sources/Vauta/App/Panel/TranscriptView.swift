@@ -130,6 +130,8 @@ struct TranscriptView: View {
     /// (a whole number of passages), then scrolls, with the newest passage in view as text arrives.
     var body: some View {
         let rows = rows
+        // The speakers' names, built once per render rather than once per row.
+        let names = model.liveSpeakerNames
         let snapped = snappedHeight(rows)
         let boxHeight = snapped ?? (contentHeight > 0 ? min(contentHeight, maxHeight) : nil)
         ScrollViewReader { proxy in
@@ -137,7 +139,7 @@ struct TranscriptView: View {
                 // A plain stack (the list is capped at 100 passages): the height of the content is exact, so the end is too.
                 VStack(alignment: .leading, spacing: Self.spacing) {
                     ForEach(rows) { row in
-                        SegmentRow(segment: row.segment, label: model.liveLabel(for: row.segment), isProvisional: row.isProvisional)
+                        SegmentRow(segment: row.segment, label: LiveSpeakers.label(channel: row.segment.channel, speaker: row.segment.speaker, names: names), isProvisional: row.isProvisional)
                             .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { rowHeights[row.id] = $0 }
                     }
                 }

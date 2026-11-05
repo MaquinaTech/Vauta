@@ -732,9 +732,10 @@ swift test
 - **UI logic** lives in `VautaCore` as value types (`UnlockWindow`, `AppNotification`, `RetentionChange`,
   `ServerDraft`, `HotKeyRules`, `OnboardingFlow`) so it can be tested without AppKit.
 
-CI (`.github/workflows/ci.yml`) builds in release mode, runs the tests, lints property lists, checks translations
-against English (`scripts/check-strings.sh`), checks license headers, checks the shell scripts, and assembles an
-ad-hoc signed app bundle.
+CI (`.github/workflows/ci.yml`) runs four jobs in parallel: the tests with coverage; the release build, an ad-hoc signed app
+bundle and the dependency check; the English strings against the code; and the quick checks (property lists, translations
+against English with `scripts/check-strings.sh`, license headers, the evaluation's Python tests and the shell scripts).
+`Build and test`, the check `main` requires, passes only when all four did.
 
 Never run the app binary without a command while developing: it would start a second menu-bar instance with your
 permissions. Use `swift test`, or the read-only commands (`Vauta doctor`, `Vauta languages`).
