@@ -8448,3 +8448,93 @@
 "Update progress" = "アップデートの進行状況";
 "Updating (%lld%%)" = "アップデート中（%lld%%）";
 "Updating · downloading only the parts that changed · %@ of %@" = "アップデート中 · 変更された部分のみをダウンロード中 · %@ / %@";
+
+/* Settings → General → Updates: asks GitHub for the latest release now */
+"Check Now" = "今すぐ確認";
+
+/* No comment provided by engineer. */
+"Check for Updates…" = "アップデートを確認…";
+
+/* Settings → General → Updates: switch */
+"Check for updates automatically" = "アップデートを自動的に確認";
+
+/* Settings → General → Updates */
+"Checking for updates…" = "アップデートを確認中…";
+
+/* Settings → General → Updates */
+"Couldn’t check for updates." = "アップデートを確認できませんでした。";
+
+/* Settings → General → Updates: why the check failed; the argument is an HTTP status code */
+"GitHub answered with an error (%lld)." = "GitHubがエラーを返しました（%lld）。";
+
+/* Settings → General → Updates: why the check failed (rate limit) */
+"GitHub asked to wait before checking again. Vauta tries again later." = "GitHubから、次の確認まで待つよう求められました。Vautaは後でもう一度試します。";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub can’t be reached. Vauta tries again later." = "GitHubに接続できません。Vautaは後でもう一度試します。";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub’s answer wasn’t a Vauta release, so it was ignored." = "GitHubの応答はVautaのリリースではなかったため、無視しました。";
+
+/* Settings → General → Updates; the argument is a date and time */
+"Last checked %@." = "最終確認：%@。";
+
+/* Settings → General → Updates, under the automatic check switch */
+"Once a day Vauta asks GitHub for the number of the latest release. Nothing about you, this Mac or your meetings is sent, and Network Activity lists the request." = "Vautaは1日に1回、最新リリースの番号をGitHubに問い合わせます。自分やこのMac、ミーティングに関する情報は何も送信されず、このリクエストは「ネットワークアクティビティ」に表示されます。";
+
+/* Network Activity summary when the only destination is GitHub's API, asked whether a newer release of Vauta exists; the argument is api.github.com */
+"Only the update check at %@." = "アップデートの確認（%@）のみです。";
+
+/* Notification body when a newer release of Vauta exists */
+"Open Settings to update. The update checks the release’s signature before installing it." = "アップデートするには設定を開いてください。アップデートでは、インストールする前にリリースの署名が確認されます。";
+
+/* Network Activity summary, after the count of destinations; the argument is GitHub's API host, api.github.com, asked whether a newer release of Vauta exists */
+"Plus the update check at %@." = "このほか、アップデートの確認（%@）があります。";
+
+/* Settings → General → Updates: link to the release page on GitHub */
+"Release Notes" = "リリースノート";
+
+/* Settings → General → Updates, after Update… during a recording */
+"Stop the recording before updating: the update quits Vauta at the end." = "アップデートする前に録音を停止してください。アップデートの最後にVautaが終了します。";
+
+/* Settings → General → Updates, after Update… failed; the command stays as it is */
+"Terminal couldn’t be opened. Run ./scripts/update.sh in Terminal, in the folder you built Vauta from." = "「ターミナル」を開けませんでした。Vautaをビルドしたフォルダで、「ターミナル」で./scripts/update.shを実行してください。";
+
+/* Network Activity: where a destination is; GitHub's API, asked whether a newer release of Vauta exists */
+"The update check" = "アップデートの確認";
+
+/* Settings → General → Updates, after Update… when the launcher failed its checks; the paths and commands stay as they are */
+"The update files in ~/Library/Application Scripts aren’t the ones scripts/install.sh writes for this app, so Vauta didn’t run them. Run ./scripts/install.sh again, or ./scripts/update.sh in Terminal." = "~/Library/Application Scripts内のアップデート用ファイルが、scripts/install.shがこのAppのために書き込むものと異なるため、Vautaは実行しませんでした。./scripts/install.shをもう一度実行するか、「ターミナル」で./scripts/update.shを実行してください。";
+
+/* Settings → General → Updates, after Update… */
+"The update is running in Terminal." = "「ターミナル」でアップデートを実行中です。";
+
+/* Settings → General → Updates, in a development build */
+"This build has no version number, so it can’t be compared with the releases." = "このビルドにはバージョン番号がないため、リリースと比較できません。";
+
+/* Settings → General → Updates, after Update… in an install from before the launcher; the argument is the command ./scripts/update.sh */
+"This install can’t open the update by itself yet. The command %@ is copied: paste it in Terminal, in the folder you built Vauta from. The next install adds what Update… needs." = "このインストールでは、まだアップデートを自動で開けません。コマンド%@をコピーしました。Vautaをビルドしたフォルダで、「ターミナル」に貼り付けてください。次回のインストールで「アップデート…」に必要なものが追加されます。";
+
+/* Network Activity purpose: asking GitHub whether a newer release of Vauta exists */
+"Update check" = "アップデートの確認";
+
+/* Settings → General: section with the update check */
+"Updates" = "アップデート";
+
+/* Settings → General → Updates: opens Terminal, where scripts/update.sh verifies and installs the new release */
+"Update…" = "アップデート…";
+
+/* Settings → General → Updates, under Update…; scripts/update.sh is a file name and stays as it is */
+"Update… opens Terminal. There, scripts/update.sh checks that the release is signed with the maintainer’s key, shows its notes and asks before it builds, tests and installs it, which takes about 15 minutes. Vauta then quits and opens again: don’t start a recording until it has." = "「アップデート…」を押すと「ターミナル」が開きます。そこでscripts/update.shが、リリースがメンテナの鍵で署名されていることを確認し、リリースノートを表示して、ビルド、テスト、インストールの前に確認を求めます。所要時間は約15分です。その後Vautaが終了して再び開きます。それまで録音を開始しないでください。";
+
+/* Notification title when a newer release exists; the argument is a version number such as 0.11.0 */
+"Vauta %@ is available" = "Vauta %@が利用可能です";
+
+/* Settings → General → Updates; the arguments are the new version number and the installed one */
+"Vauta %@ is available. You have %@." = "Vauta %@が利用可能です。現在のバージョンは%@です。";
+
+/* Settings → General → Updates, before any check; the argument is a version number */
+"Vauta %@ is installed." = "Vauta %@がインストールされています。";
+
+/* Settings → General → Updates; the argument is a version number */
+"Vauta %@ is up to date." = "Vauta %@は最新です。";

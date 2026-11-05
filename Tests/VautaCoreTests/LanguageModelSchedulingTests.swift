@@ -27,9 +27,10 @@ struct LanguageModelSchedulingTests {
         func accept(_ token: Int32) {}
     }
 
-    /// Polls `condition` until it holds (at most 120 s: the full suite runs on a Mac that may be busy).
+    /// Polls `condition` until it holds, at most 300 s of wall-clock time: on a loaded CI runner (coverage, every suite in parallel) a
+    /// step that takes milliseconds alone can wait two minutes for a thread. Only a real failure waits this long.
     static func eventually(_ condition: () async -> Bool) async -> Bool {
-        let deadline = Date().addingTimeInterval(120)
+        let deadline = Date().addingTimeInterval(300)
         while Date() < deadline {
             if await condition() { return true }
             try? await Task.sleep(for: .milliseconds(10))

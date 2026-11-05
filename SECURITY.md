@@ -356,6 +356,45 @@ repository, `MaquinaTech/mlx` at commit `d1dfda2` (branch `vauta-clt`), which ca
 repositories are ours and both commits are tagged (`vauta-0.9.0`, signed with the release key) and rulesets on both repositories block deleting or
 moving those tags and deleting or force-pushing `vauta-clt`, so the pin cannot become unfetchable.
 
+### The update check and Update…
+
+`UpdateChecker` (`Sources/VautaCore/Updates/`) asks GitHub whether a newer release exists; it goes through `AuditedSession` with
+the purpose `updateCheck`. It only tells; installing stays `scripts/update.sh`, whose signature check is the security boundary.
+
+| Rule | Detail |
+|---|---|
+| When | Once a day while Settings → General → **Check for updates automatically** is on (the default), the first one a minute after launch, and when the person clicks **Check Now** or **Check for Updates…**. A failed automatic check also waits a day, so GitHub is never asked in a loop |
+| Exact destination | `https`, port 443, no user information, query or fragment, host `api.github.com`, path exactly `/repos/MaquinaTech/Vauta/releases/latest` (`UpdateDestination`), checked for the request and for the response's URL |
+| Anonymous | Ephemeral session: no cache, cookies or credential storage, TLS 1.2 or later with the system's trust, system proxies honoured. `User-Agent: Vauta`, `Accept-Language: en` and GitHub's `Accept` and API version headers, the same for every install: no version, identifier or token |
+| Strict answer | Only a `200` with a JSON media type from that exact URL is read; a redirect is never followed, and an answer over 512 KB is cancelled while it streams. Only `tag_name` is read, and only a release number `vX.Y.Z` (at most four ASCII digits each) that is neither a draft nor a pre-release counts. Notes, names, links and assets are ignored, and the release page Vauta links to is built from the parsed version |
+| No downgrade | A release is offered only if it is newer than the running version; `update.sh` refuses an older one too |
+| A forged answer | Someone who can forge GitHub's answer (a proxy with a certificate the Mac trusts) can at most offer a release that is not there or not signed, which `update.sh` then refuses (it installs only a tag signed with the maintainer's key and on `main`), or hide a real one until a genuine answer gets through |
+
+**Update… and the App Sandbox.** The sandboxed app cannot build or install anything, and it keeps no exception for it. It uses
+the mechanism macOS provides for this: a script in `~/Library/Application Scripts/<bundle ID>/` can be run by the app
+(`NSUserUnixTask`) but only created or changed by the person. `scripts/install.sh` (via `scripts/install-update-launcher.sh`)
+writes two files there: `update-vauta`, fixed text that opens `Update Vauta.command` with `/usr/bin/open -a
+/System/Applications/Utilities/Terminal.app`, and `Update Vauta.command`, which goes to the checkout and runs
+`scripts/update.sh` with the install's bundle ID and signing method. Before running anything, `UpdateLauncher.inspect` checks
+both files again (and once more right before running): regular files, not links, owned by the user, not writable by the group or
+others by their permission bits (the folder too; ACLs are not checked), at most 4 KB; `update-vauta` byte for byte the app's own
+copy; and the command byte for byte the one the script writes for the values it holds, rebuilt and compared as bytes (never as
+Swift text, where a quote followed by a combining mark is one character), with only the allowed variables (`VAUTA_BUNDLE_ID`,
+which must be this app's, `VAUTA_ALLOW_ADHOC=1`, `VAUTA_SIGN_IDENTITY`, `VAUTA_SIGN_KEYCHAIN`) and each value single-quoted with
+no quote byte and no control byte (below 0x20, or 0x7F); the script refuses to write such a value with the same byte rule. Vauta
+passes no arguments and no input, so it can start this one update and choose nothing else. A recording in progress blocks
+Update…, and `update.sh` asks again before it quits Vauta to install, since a recording may have started during the build.
+`update.sh` takes a lock in the checkout's `.git` folder, so a second click can't start a second update there. What the update
+does on the network (`git fetch`, the build) runs in Terminal, outside the app, and is shown there rather than in Network
+Activity.
+
+What these checks protect against: a broken or half-written install, files of another app or another copy of Vauta, and a
+compromised Vauta, which can neither write that folder nor pass input to what it runs. What they do not protect against:
+software already running as the user. It could write a valid command naming another folder, change the checkout's own
+`scripts/update.sh` (outside the sandbox, so Vauta can't check it), or change the command between the check and the moment
+Terminal reads it. That is outside what Vauta can protect against (see the threat model); the signature check is in
+`update.sh` itself, in the checkout you control.
+
 ### Network audit
 
 Settings → Privacy & Security → **Network Activity…** lists every connection Vauta makes, so the rules above can be
@@ -364,7 +403,7 @@ checked on a running app and not only read in the source.
 | Property | Detail |
 |---|---|
 | One choke point | `Sources/VautaCore/Network/AuditedSession.swift` is the only file that creates a `URLSession`, starts a URL task or opens a socket. It wraps each request (`bytes(for:purpose:)`, `data(for:purpose:)`) and records it in `NetworkActivityLog` |
-| A test keeps it that way | `NetworkAuditSourceScanTests` scans every Swift file under `Sources/` and fails if any other file uses `URLSession(…)`, `URLSession.shared`, URL tasks, `NWConnection` and the other Network framework types, legacy URL loading, web views, raw sockets, an XPC connection to a Mach service, child processes (which could run `curl`: `Process` and `Process.run`, `popen`, `posix_spawn`, `fork`, the `exec` family), or one of the initializers and functions it lists that load whatever URL they are given (`Data(contentsOf:)`, `String(contentsOf:)`, `NSImage(contentsOf:)`, `PDFDocument(url:)`, `AVURLAsset(url:)`, `AVPlayer(url:)`, `NSAttributedString(contentsOf:)`/`(url:)`, `XMLParser(contentsOf:)`, `NSDictionary`/`NSArray(contentsOf:)`, `CGImageSourceCreateWithURL` and the other Core Graphics readers of a URL, also written `.init(…)`). The calls of those that only read a file on the Mac are listed one by one in the test, with the reason each URL is local and how many each file has. Not covered: another API that loads a URL it is given and is not in the test's list. New code that needs the network must go through `AuditedSession` |
+| A test keeps it that way | `NetworkAuditSourceScanTests` scans every Swift file under `Sources/` and fails if any other file uses `URLSession(…)`, `URLSession.shared`, URL tasks, `NWConnection` and the other Network framework types, legacy URL loading, web views, raw sockets, an XPC connection to a Mach service, child processes (which could run `curl`: `Process` and `Process.run`, `popen`, `posix_spawn`, `fork`, the `exec` family), scripts run outside the sandbox (`NSUserUnixTask` and its siblings; allowed only in `Sources/Vauta/App/Updates/UpdateRunner.swift`, for Update…), or one of the initializers and functions it lists that load whatever URL they are given (`Data(contentsOf:)`, `String(contentsOf:)`, `NSImage(contentsOf:)`, `PDFDocument(url:)`, `AVURLAsset(url:)`, `AVPlayer(url:)`, `NSAttributedString(contentsOf:)`/`(url:)`, `XMLParser(contentsOf:)`, `NSDictionary`/`NSArray(contentsOf:)`, `CGImageSourceCreateWithURL` and the other Core Graphics readers of a URL, also written `.init(…)`). The calls of those that only read a file on the Mac are listed one by one in the test, with the reason each URL is local and how many each file has. Not covered: another API that loads a URL it is given and is not in the test's list. New code that needs the network must go through `AuditedSession` |
 | Metadata only | Time, purpose, scheme, host, port, method, path (no query), approximate body bytes sent and received (headers and overhead are not counted), duration, status or error kind, and, for coalesced probes, a count and the time of the last one. Never content, prompts, headers, keys, query strings or user information in URLs. Tests send secrets through the choke point and check that none is stored or exported |
 | Coalescing | Identical read-only discovery probes of this Mac (same destination, path and result, less than 60 s apart) merge into one row with a count, so the guided setup's polling cannot push other entries out of the 1,000-entry buffer. Requests of every other purpose are never merged |
 | Blocked requests | A request refused by the destination rules before anything is sent (a URL that is not the configured server, a name that resolved outside the allowed network, a path the server type does not use) is listed as **Blocked** with a reason category, with no bytes sent. It is not counted as a connection in the destination summary |
@@ -372,6 +411,7 @@ checked on a running app and not only read in the source.
 | In memory | An actor with a ring buffer of the last 1,000 entries for this run of the app. Nothing is persisted; the only file is the JSON the user chooses to export |
 | Classification | Destinations are labelled *on this Mac*, *on your local network* or *outside your local network*, using the same address rules as `ServerAddress`. The last one should never appear: the destination checks refuse such requests before anything is sent, and the label exists so a violation could not hide |
 | Model downloads | Listed with the purpose "Search model download" or "Integrated model download": one `huggingface.co` row per file lookup (302), and from the download host one row for the tokenizer (200) and one row per range of the weights (206). A redirect to a host outside the list is a Blocked row. These destinations are labelled "A download you started" and the summary does not warn about them; the "outside your local network" warning stays for anything else, which should never appear |
+| Update check | Listed with the purpose "Update check", one `api.github.com` row per check, labelled "The update check" and named in the summary. Only that purpose to that exact host gets the label; any other request to GitHub would be "outside your local network" |
 | Limits | It records Vauta's own requests. Downloads that macOS makes (speech and translation languages, Apple Intelligence model files) are outside the app and are not listed. An independent network monitor such as Little Snitch or LuLu covers those. The log is evidence for the user, not a security boundary: code that bypassed `AuditedSession` would not be listed, which is why the source scan test exists |
 
 ## App Sandbox, hardened runtime and entitlements
@@ -385,7 +425,7 @@ unsigned executable memory, no disabled library validation). The entitlements, f
 | `com.apple.security.app-sandbox` | Confines Vauta to its container; nothing else on disk is reachable without you |
 | `com.apple.security.device.audio-input` | The microphone, transcribed on device as "Me". Meeting-app audio is captured with a Core Audio process tap, which needs no entitlement; macOS asks for your permission |
 | `com.apple.security.personal-information.calendars` | Optional, off by default: reads the calendars you choose to name the meeting and its attendees. The same access lets Vauta, only when you press Add for one item, add that reminder or event and read the titles of the one list (or day) it adds to, so it does not add it twice, and remove only what it created. One source file does the writing and a test enforces it; Vauta never edits, completes or deletes anything it did not create |
-| `com.apple.security.network.client` | Outgoing connections to your model server and, only when you click Download, to Hugging Face for the search model or the integrated model, as enforced above. There is no `network.server` |
+| `com.apple.security.network.client` | Outgoing connections to your model server, to GitHub's API for the update check (one exact address) and, only when you click Download, to Hugging Face for the search model or the integrated model, as enforced above. There is no `network.server` |
 | `com.apple.security.files.user-selected.read-write` | Only files you pick: a recording to import (read), your server's CA certificate (read), an export (write) |
 | `com.apple.security.files.bookmarks.app-scope` | Remembers, read-only, the folders and files you added as document sources, so they work after a restart. Revocable: removing a source deletes its bookmark |
 

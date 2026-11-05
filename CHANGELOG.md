@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- **Update from Vauta.** Vauta checks GitHub once a day for a new release and says so in **Settings → General → Updates**, with a notification once per version; **Check Now** and **Vauta → Check for Updates…** check right away, and **Check for updates automatically** turns it off. The request is the same for every install and carries nothing about you, this Mac or your meetings, not even your version; Network Activity lists it as "Update check". **Update…** opens Terminal and runs `scripts/update.sh` for you, which checks the release's signature, shows its notes and asks before it builds, tests and installs it; it does nothing while a recording runs, `update.sh` asks before it quits Vauta to install, and only one update runs at a time in a folder. It needs the two small files that `scripts/install.sh` now writes to `~/Library/Application Scripts/<bundle ID>/`, which Vauta can run but never change, and it checks them strictly before running anything; until the next install, Update… copies the command to paste instead.
+
 ### Changed
 
 - **Faster deletes and edits on a large library.** Every column that points to another table now has an index (schema 39), so deleting a meeting or a transcript line, the daily retention, correcting a line and splitting a speaker no longer scan whole tables for each line. A test keeps every new reference indexed. Removing a meeting also checks the stored answers' citations against one list of what still exists, not one query per citation.

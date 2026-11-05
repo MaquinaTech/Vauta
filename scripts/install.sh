@@ -88,6 +88,9 @@ if legacy_same_id; then
     echo "WARNING: could not move $LEGACY_APP to the Trash. It shares Vauta's data: move it to the Trash yourself." >&2
   fi
 fi
+# Update… in Settings › General: the launcher in the app's Application Scripts folder (see the script). Not being able to write it
+# leaves the app installed, with the command to paste instead.
+scripts/install-update-launcher.sh || echo "WARNING: Update… in Vauta will show the command to run instead (scripts/install-update-launcher.sh failed)." >&2
 echo 'When this version opens, macOS may ask for the Keychain password for "Vauta": choose "Always Allow". It asks again after every update of an ad-hoc build and after a new signing identity. If it appears when you have not just installed or updated Vauta, click Deny.'
 open ~/Applications/Vauta.app
 echo "Vauta is installed in ~/Applications and running: look for the waveform in the menu bar (use the shortcut shown in its menu to record)."

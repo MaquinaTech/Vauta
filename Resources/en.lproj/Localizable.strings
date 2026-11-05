@@ -1090,8 +1090,17 @@
 /* No comment provided by engineer. */
 "Check Again" = "Check Again";
 
+/* Settings → General → Updates: asks GitHub for the latest release now */
+"Check Now" = "Check Now";
+
 /* Button of the panel notice after a recording: opens the saved meeting’s transcript to check the speaker names */
 "Check Speakers" = "Check Speakers";
+
+/* No comment provided by engineer. */
+"Check for Updates…" = "Check for Updates…";
+
+/* Settings → General → Updates: switch */
+"Check for updates automatically" = "Check for updates automatically";
 
 /* Panel warning: what to check when no system audio arrives, with the meeting app’s name (%@); under the title “Vauta can’t hear the meeting” */
 "Check that %@ isn’t muted and that its sound plays through this Mac." = "Check that %@ isn’t muted and that its sound plays through this Mac.";
@@ -1137,6 +1146,9 @@
 
 /* Model guide progress */
 "Checking and saving…" = "Checking and saving…";
+
+/* Settings → General → Updates */
+"Checking for updates…" = "Checking for updates…";
 
 /* Status while the integrated model checks an answer to a question */
 "Checking the answer" = "Checking the answer";
@@ -1591,6 +1603,9 @@
 
 /* Alert title */
 "Couldn’t change the topics" = "Couldn’t change the topics";
+
+/* Settings → General → Updates */
+"Couldn’t check for updates." = "Couldn’t check for updates.";
 
 /* Alert title when Touch ID or the password could not be checked before a protected action */
 "Couldn’t confirm it’s you" = "Couldn’t confirm it’s you";
@@ -2757,6 +2772,18 @@
 /* No comment provided by engineer. */
 "Getting ready…" = "Getting ready…";
 
+/* Settings → General → Updates: why the check failed; the argument is an HTTP status code */
+"GitHub answered with an error (%lld)." = "GitHub answered with an error (%lld).";
+
+/* Settings → General → Updates: why the check failed (rate limit) */
+"GitHub asked to wait before checking again. Vauta tries again later." = "GitHub asked to wait before checking again. Vauta tries again later.";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub can’t be reached. Vauta tries again later." = "GitHub can’t be reached. Vauta tries again later.";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub’s answer wasn’t a Vauta release, so it was ignored." = "GitHub’s answer wasn’t a Vauta release, so it was ignored.";
+
 /* Context editor section: acronyms and internal terms
    Detail of a name search hit that is a glossary term */
 "Glossary" = "Glossary";
@@ -3270,6 +3297,9 @@
 
 /* Settings → Models; badge of the integrated model option: it needs a download of about 15 GB */
 "Large download" = "Large download";
+
+/* Settings → General → Updates; the argument is a date and time */
+"Last checked %@." = "Last checked %@.";
 
 /* Settings → Translation: how the latest sentence was translated */
 "Last finished sentence" = "Last finished sentence";
@@ -4428,6 +4458,9 @@
 /* Capture error */
 "On-device speech recognition isn’t available on this Mac." = "On-device speech recognition isn’t available on this Mac.";
 
+/* Settings → General → Updates, under the automatic check switch */
+"Once a day Vauta asks GitHub for the number of the latest release. Nothing about you, this Mac or your meetings is sent, and Network Activity lists the request." = "Once a day Vauta asks GitHub for the number of the latest release. Nothing about you, this Mac or your meetings is sent, and Network Activity lists the request.";
+
 /* No comment provided by engineer. */
 "One email" = "One email";
 
@@ -4485,6 +4518,9 @@
 /* Ask scope when no meeting is selected */
 "Only the selected meeting" = "Only the selected meeting";
 
+/* Network Activity summary when the only destination is GitHub's API, asked whether a newer release of Vauta exists; the argument is api.github.com */
+"Only the update check at %@." = "Only the update check at %@.";
+
 /* Ask scope: only this meeting */
 "Only “%@”" = "Only “%@”";
 
@@ -4539,6 +4575,9 @@
 
 /* Settings → Calendar & Reminders empty state: opens the Reminders app */
 "Open Reminders" = "Open Reminders";
+
+/* Notification body when a newer release of Vauta exists */
+"Open Settings to update. The update checks the release’s signature before installing it." = "Open Settings to update. The update checks the release’s signature before installing it.";
 
 /* No comment provided by engineer. */
 "Open Sound Settings" = "Open Sound Settings";
@@ -4859,6 +4898,9 @@
 
 /* Network Activity summary, after the count of destinations; the argument is the list of hosts of the downloads the person started, e.g. huggingface.co and us.aws.cdn.hf.co */
 "Plus downloads you started from %@." = "Plus downloads you started from %@.";
+
+/* Network Activity summary, after the count of destinations; the argument is GitHub's API host, api.github.com, asked whether a newer release of Vauta exists */
+"Plus the update check at %@." = "Plus the update check at %@.";
 
 /* VoiceOver label of a live note that is a point; the argument is its text */
 "Point: %@" = "Point: %@";
@@ -5204,6 +5246,9 @@
 
 /* No comment provided by engineer. */
 "Relations are saved as soon as you add or remove them." = "Relations are saved as soon as you add or remove them.";
+
+/* Settings → General → Updates: link to the release page on GitHub */
+"Release Notes" = "Release Notes";
 
 /* Consent sheet title for saving a person’s voice; the argument is the person’s name */
 "Remember %@’s voice?" = "Remember %@’s voice?";
@@ -6162,6 +6207,9 @@
 /* Alert message */
 "Stop the recording before erasing all meetings." = "Stop the recording before erasing all meetings.";
 
+/* Settings → General → Updates, after Update… during a recording */
+"Stop the recording before updating: the update quits Vauta at the end." = "Stop the recording before updating: the update quits Vauta at the end.";
+
 /* Erase sheet: a recording is running */
 "Stop the recording to erase." = "Stop the recording to erase.";
 
@@ -6305,6 +6353,9 @@
 
 /* No comment provided by engineer. */
 "Term" = "Term";
+
+/* Settings → General → Updates, after Update… failed; the command stays as it is */
+"Terminal couldn’t be opened. Run ./scripts/update.sh in Terminal, in the folder you built Vauta from." = "Terminal couldn’t be opened. Run ./scripts/update.sh in Terminal, in the folder you built Vauta from.";
 
 /* No comment provided by engineer. */
 "Test" = "Test";
@@ -6914,6 +6965,15 @@
 /* Transcript tab: nothing is translated while a meeting is being recorded; the argument is a language name in running text */
 "The translation into %@ goes on when the recording ends." = "The translation into %@ goes on when the recording ends.";
 
+/* Network Activity: where a destination is; GitHub's API, asked whether a newer release of Vauta exists */
+"The update check" = "The update check";
+
+/* Settings → General → Updates, after Update… when the launcher failed its checks; the paths and commands stay as they are */
+"The update files in ~/Library/Application Scripts aren’t the ones scripts/install.sh writes for this app, so Vauta didn’t run them. Run ./scripts/install.sh again, or ./scripts/update.sh in Terminal." = "The update files in ~/Library/Application Scripts aren’t the ones scripts/install.sh writes for this app, so Vauta didn’t run them. Run ./scripts/install.sh again, or ./scripts/update.sh in Terminal.";
+
+/* Settings → General → Updates, after Update… */
+"The update is running in Terminal." = "The update is running in Terminal.";
+
 /* Confirmation message when deleting one person’s saved voice, from Settings or from the person’s card */
 "The voice of this person is removed from the encrypted store, with the voice summaries kept in meetings, and Vauta will no longer suggest them. Meetings and the names already in them stay as they are." = "The voice of this person is removed from the encrypted store, with the voice summaries kept in meetings, and Vauta will no longer suggest them. Meetings and the names already in them stay as they are.";
 
@@ -7017,6 +7077,9 @@
 /* Backup error: unknown backup format version */
 "This backup was made by a newer version of Vauta and can’t be read by this one." = "This backup was made by a newer version of Vauta and can’t be read by this one.";
 
+/* Settings → General → Updates, in a development build */
+"This build has no version number, so it can’t be compared with the releases." = "This build has no version number, so it can’t be compared with the releases.";
+
 /* Backup and restore sheets: shown while working on a large store */
 "This can take a minute with many meetings." = "This can take a minute with many meetings.";
 
@@ -7052,6 +7115,9 @@
 
 /* Event editor: the follow-up has an event from Vauta */
 "This follow-up was already added." = "This follow-up was already added.";
+
+/* Settings → General → Updates, after Update… in an install from before the launcher; the argument is the command ./scripts/update.sh */
+"This install can’t open the update by itself yet. The command %@ is copied: paste it in Terminal, in the folder you built Vauta from. The next install adds what Update… needs." = "This install can’t open the update by itself yet. The command %@ is copied: paste it in Terminal, in the folder you built Vauta from. The next install adds what Update… needs.";
 
 /* Speaker popover: title of the page that confirms saving the user’s own voice */
 "This is my voice" = "This is my voice";
@@ -7498,6 +7564,9 @@
 /* Recovery suggestion when the store comes from a newer app version */
 "Update Vauta to the latest version." = "Update Vauta to the latest version.";
 
+/* Network Activity purpose: asking GitHub whether a newer release of Vauta exists */
+"Update check" = "Update check";
+
 /* Accessibility label of the progress of updating the integrated model */
 "Update progress" = "Update progress";
 
@@ -7506,6 +7575,15 @@
 
 /* No comment provided by engineer. */
 "Updated" = "Updated";
+
+/* Settings → General: section with the update check */
+"Updates" = "Updates";
+
+/* Settings → General → Updates: opens Terminal, where scripts/update.sh verifies and installs the new release */
+"Update…" = "Update…";
+
+/* Settings → General → Updates, under Update…; scripts/update.sh is a file name and stays as it is */
+"Update… opens Terminal. There, scripts/update.sh checks that the release is signed with the maintainer’s key, shows its notes and asks before it builds, tests and installs it, which takes about 15 minutes. Vauta then quits and opens again: don’t start a recording until it has." = "Update… opens Terminal. There, scripts/update.sh checks that the release is signed with the maintainer’s key, shows its notes and asks before it builds, tests and installs it, which takes about 15 minutes. Vauta then quits and opens again: don’t start a recording until it has.";
 
 /* Settings → Status; the integrated model is being updated to its more accurate conversion; the argument is a percentage without the sign */
 "Updating (%lld%%)" = "Updating (%lld%%)";
@@ -7600,6 +7678,18 @@
 
 /* No comment provided by engineer. */
 "Usual people and projects" = "Usual people and projects";
+
+/* Notification title when a newer release exists; the argument is a version number such as 0.11.0 */
+"Vauta %@ is available" = "Vauta %@ is available";
+
+/* Settings → General → Updates; the arguments are the new version number and the installed one */
+"Vauta %@ is available. You have %@." = "Vauta %@ is available. You have %@.";
+
+/* Settings → General → Updates, before any check; the argument is a version number */
+"Vauta %@ is installed." = "Vauta %@ is installed.";
+
+/* Settings → General → Updates; the argument is a version number */
+"Vauta %@ is up to date." = "Vauta %@ is up to date.";
 
 /* Default file name of a backup; the argument is the date as yyyy-MM-dd */
 "Vauta Backup %@" = "Vauta Backup %@";

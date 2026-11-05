@@ -155,6 +155,8 @@ struct GeneralPane: View {
             } header: {
                 Text("Notifications")
             }
+
+            UpdatesSection(model: model.updates)
         }
         .formStyle(.grouped)
         .task {

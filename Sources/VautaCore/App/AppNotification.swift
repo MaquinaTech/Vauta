@@ -48,6 +48,8 @@ public struct AppNotification: Equatable, Sendable {
         case pauseReminder = "vauta.paused"
         /// Shortly before a meeting: "Brief ready". Never carries brief content, and the event's title only when titles may be shown.
         case brief = "vauta.brief"
+        /// A newer release of Vauta is on GitHub (once per version). Carries only the version number.
+        case updateAvailable = "vauta.update"
 
         /// The buttons of the notification, in order.
         public var actions: [Action] {
@@ -65,6 +67,7 @@ public struct AppNotification: Equatable, Sendable {
             case .startNeedsModel: [.installModel]
             case .voicesUnused: [.showSpeakers]
             case .brief: [.openBrief, .recordAtStart]
+            case .updateAvailable: [.showUpdate]
             }
         }
 
@@ -80,6 +83,7 @@ public struct AppNotification: Equatable, Sendable {
             case .startNeedsModel: .installModel
             case .voicesUnused: .showSpeakers
             case .brief: .openBrief
+            case .updateAvailable: .showUpdate
             }
         }
 
@@ -87,6 +91,8 @@ public struct AppNotification: Equatable, Sendable {
         public var gate: Gate {
             switch self {
             case .brief: .brief
+            // Its own switch (Settings › General › Check for updates automatically) decides whether checks run at all.
+            case .updateAvailable: .always
             case .autoStopWarning, .hangup, .suggestion, .pauseReminder: .always
             case .minutesReady, .recordingImported: .minutesReady
             case .recordingStopped, .serverUnreachable, .minutesFailed, .startFailed, .startBlocked, .startNeedsModel, .voicesUnused: .problems
@@ -114,6 +120,8 @@ public struct AppNotification: Equatable, Sendable {
         case openBrief = "brief"
         /// Asks Vauta to suggest recording when the event starts (it does not record by itself).
         case recordAtStart = "recordAtStart"
+        /// Settings → General, where Update… is.
+        case showUpdate = "update"
     }
 
     public enum Gate: Sendable {
@@ -157,6 +165,15 @@ public struct AppNotification: Equatable, Sendable {
     }
 
     // MARK: Builders
+
+    /// A newer release of Vauta exists. The version number is the only thing in it, parsed from the release tag.
+    public static func updateAvailable(_ version: ReleaseVersion) -> AppNotification {
+        AppNotification(
+            kind: .updateAvailable,
+            title: String(localized: "Vauta \(version.description) is available", comment: "Notification title when a newer release exists; the argument is a version number such as 0.11.0"),
+            body: String(localized: "Open Settings to update. The update checks the release’s signature before installing it.",
+                         comment: "Notification body when a newer release of Vauta exists"))
+    }
 
     public static func autoStopWarning(secondsLeft: Int) -> AppNotification {
         AppNotification(

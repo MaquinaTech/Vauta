@@ -135,6 +135,7 @@ extension NetworkPurpose {
         case .translation: String(localized: "Translation", comment: "Network Activity purpose: improving live translation with the model server")
         case .modelDownload: String(localized: "Search model download", comment: "Network Activity purpose: the user chose to download the search model (EmbeddingGemma 2) from Hugging Face")
         case .languageModelDownload: String(localized: "Integrated model download", comment: "Network Activity purpose: the user chose to download the integrated language model (Gemma 4 E4B) from Hugging Face")
+        case .updateCheck: String(localized: "Update check", comment: "Network Activity purpose: asking GitHub whether a newer release of Vauta exists")
         case .discovery: String(localized: "Server discovery", comment: "Network Activity purpose: looking for model servers on this Mac")
         case .connectionTest: String(localized: "Connection test", comment: "Network Activity purpose: the user tested a model server")
         case .statusCheck: String(localized: "Status check", comment: "Network Activity purpose: checking that the model server answers")
@@ -173,6 +174,7 @@ extension NetworkDestination.Scope {
         case .localNetwork: String(localized: "On your local network", comment: "Network Activity: where a destination is")
         case .outside: String(localized: "Outside your local network", comment: "Network Activity: where a destination is; should never happen")
         case .download: String(localized: "A download you started", comment: "Network Activity: where a destination is; the person clicked Download for the search model")
+        case .updateCheck: String(localized: "The update check", comment: "Network Activity: where a destination is; GitHub's API, asked whether a newer release of Vauta exists")
         }
     }
 }

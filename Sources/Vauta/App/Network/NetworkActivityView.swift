@@ -117,23 +117,41 @@ struct NetworkSummaryView: View {
 
     private var anyOutside: Bool { destinations.contains { $0.scope == .outside } }
 
-    /// The summary counts the destinations Vauta's rules expect; a download the person started is listed below with its own name.
+    /// The summary counts the destinations Vauta's rules expect; a download the person started and the update check are listed below
+    /// with their own names.
     private var headline: Text {
-        let base = countedHeadline
         // The recognisable host first (huggingface.co), then the download servers it names.
         let names: [String] = destinations.filter { $0.scope == .download }.map { $0.label.split(separator: ":").first.map(String.init) ?? $0.label }
         let hosts = names.filter { $0 == "huggingface.co" } + names.filter { $0 != "huggingface.co" }.sorted()
-        guard !hosts.isEmpty, destinations.contains(where: { $0.scope != .download }) else { return base }
+        let checked = destinations.contains { $0.scope == .updateCheck }
+        // The sentences after the count, as one string joined with the language's space between sentences.
+        var extra: [String] = []
+        if !hosts.isEmpty {
+            extra.append(String(localized: "Plus downloads you started from \(hosts.formatted(.list(type: .and))).",
+                                comment: "Network Activity summary, after the count of destinations; the argument is the list of hosts of the downloads the person started, e.g. huggingface.co and us.aws.cdn.hf.co"))
+        }
+        let update = String(localized: "Plus the update check at \(UpdateDestination.host).",
+                            comment: "Network Activity summary, after the count of destinations; the argument is GitHub's API host, api.github.com, asked whether a newer release of Vauta exists")
+        if checked { extra.append(update) }
+        let space = String(localized: "Space between two summary sentences", comment: "A space in English; ja and zh-Hans use an invisible word joiner (U+2060), because they put no space after a full-width full stop")
+        guard destinations.contains(where: { !$0.scope.isAllowedInternet }) else {
+            // Nothing but the allowed internet destinations.
+            if hosts.isEmpty, checked {
+                return Text("Only the update check at \(UpdateDestination.host).", comment: "Network Activity summary when the only destination is GitHub's API, asked whether a newer release of Vauta exists; the argument is api.github.com")
+            }
+            // Only downloads (the count says so) and the update check after it.
+            return checked ? countedHeadline + Text(verbatim: space + update) : countedHeadline
+        }
+        guard !extra.isEmpty else { return countedHeadline }
         // Never "Only 2 … all on this Mac" over a list of four rows: with downloads below, the count says what it counts and the
         // downloads follow in the same breath.
-        return countedHeadline(withDownloads: true) + Text("Space between two summary sentences", comment: "A space in English; ja and zh-Hans use an invisible word joiner (U+2060), because they put no space after a full-width full stop") + Text("Plus downloads you started from \(hosts.formatted(.list(type: .and))).",
-                                                comment: "Network Activity summary, after the count of destinations; the argument is the list of hosts of the downloads the person started, e.g. huggingface.co and us.aws.cdn.hf.co")
+        return countedHeadline(withDownloads: true) + Text(verbatim: space + extra.joined(separator: space))
     }
 
     private var countedHeadline: Text { countedHeadline(withDownloads: false) }
 
     private func countedHeadline(withDownloads: Bool) -> Text {
-        let counted = destinations.filter { $0.scope != .download }
+        let counted = destinations.filter { !$0.scope.isAllowedInternet }
         let outside = counted.filter { $0.scope == .outside }.count
         if counted.isEmpty, !destinations.isEmpty { return Text(NetworkDestination.Scope.download.displayName) }
         if outside > 0 {
@@ -291,6 +309,7 @@ private struct ScopeIcon: View {
         case .localNetwork: Image(systemName: "wifi.router").foregroundStyle(.secondary).frame(width: 20).accessibilityHidden(true)
         case .outside: Image(systemName: StatusSymbol.warning.name).foregroundStyle(.orange).frame(width: 20).accessibilityHidden(true)
         case .download: Image(systemName: "arrow.down.circle").foregroundStyle(.secondary).frame(width: 20).accessibilityHidden(true)
+        case .updateCheck: Image(systemName: "arrow.triangle.2.circlepath").foregroundStyle(.secondary).frame(width: 20).accessibilityHidden(true)
         }
     }
 }

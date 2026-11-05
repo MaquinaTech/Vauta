@@ -90,6 +90,8 @@ final class SettingsModel {
     let backup = BackupModel()
     let savedVoices = SavedVoicesModel()
     let minutesTemplates = MinutesTemplatesModel()
+    /// Settings → General → Updates.
+    let updates = UpdateModel()
 
     private(set) var statusItems: [StatusItem] = []
     private(set) var checking = false

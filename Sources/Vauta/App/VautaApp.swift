@@ -87,6 +87,13 @@ struct AppCommands: Commands {
             Button("Settings…") { model.showWindow("settings") }
                 .keyboardShortcut(",")
         }
+        CommandGroup(after: .appInfo) {
+            // Asks GitHub for the latest release now (Network Activity lists it) and shows the answer in Settings → General.
+            Button("Check for Updates…") {
+                model.settingsModel?.updates.checkNow()
+                model.showSettings(.general)
+            }
+        }
         // ⌘Q asks first while a recording runs, like the panel's Quit button. System terminations skip the menu.
         CommandGroup(replacing: .appTermination) {
             Button("Quit Vauta") { model.quit() }
@@ -168,6 +175,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         settings = SettingsModel(speech: model.speechDownloads)
         super.init()
         model.settingsModel = settings
+        settings.updates.recorder = model
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -184,6 +192,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
         // Event files handed to Calendar in an earlier session are removed (they are also cleared 10 minutes after a hand-off).
         if let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first { ICSHandoff.purge(in: caches, everything: true) }
+        // The daily update check (Settings → General → Updates), when it is on; the first one waits a minute after launch.
+        settings.updates.start()
     }
 
     /// Opening Vauta again (Finder, Spotlight, Apps) while it runs: with no window open, bring one

@@ -26,6 +26,9 @@ public enum NetworkPurpose: String, Codable, Sendable, CaseIterable {
     /// Downloading the optional integrated language model (Gemma 4 E4B) from huggingface.co, only when the person clicked Download.
     /// New raw value in 11b: an exported log written by an older build never contains it.
     case languageModelDownload
+    /// Asking GitHub (api.github.com) whether a newer release of Vauta exists: once a day while "Check for updates automatically"
+    /// is on, and when the person clicks Check Now. New raw value in 0.11: an exported log written by an older build never contains it.
+    case updateCheck
     case discovery
     case connectionTest
     case statusCheck
@@ -151,7 +154,10 @@ public struct NetworkActivityEntry: Codable, Sendable, Equatable, Identifiable {
     /// Where the destination is: this Mac, the local network, a download the person started or outside.
     public var scope: NetworkDestination.Scope {
         let base = NetworkDestination.Scope(host: host)
-        return purpose.isModelDownload && base == .outside ? .download : base
+        guard base == .outside else { return base }
+        if purpose.isModelDownload { return .download }
+        if purpose == .updateCheck, host == UpdateDestination.host { return .updateCheck }
+        return base
     }
 }
 
@@ -177,6 +183,12 @@ public struct NetworkDestination: Codable, Sendable, Equatable, Identifiable {
         /// A server on the internet that the person reached on purpose by clicking Download (the search model): the exact hosts
         /// are on an allowlist, and every request to them is of the purpose `modelDownload`.
         case download
+        /// GitHub's API, asked whether a newer release exists (`NetworkPurpose.updateCheck`, exactly `UpdateDestination.host`). New
+        /// raw value in 0.11.
+        case updateCheck
+
+        /// A server on the internet that Vauta's rules allow for this purpose (a download the person started, the update check).
+        public var isAllowedInternet: Bool { self == .download || self == .updateCheck }
 
         init(host: String) {
             self = ServerAddress.isLoopback(host) ? .thisMac : ServerAddress.isPrivateNetworkHost(host) ? .localNetwork : .outside
