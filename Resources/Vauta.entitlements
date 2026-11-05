@@ -27,7 +27,10 @@
        model server the user chose in Settings (LLMServerConfig and LLMClient):
        loopback on this Mac, or HTTPS (TLS 1.3) to a private address on the
        local network, with the private CA as the only trust anchor and optional
-       SPKI pins, no proxy and no redirects. And the optional models, only when
+       SPKI pins, no proxy and no redirects. GitHub's API for the update check,
+       once a day while it is on: one exact URL, api.github.com/repos/MaquinaTech/
+       Vauta/releases/latest (UpdateDestination), nothing about the install sent.
+       And the optional models, only when
        the user presses Download: HTTPS to huggingface.co and its CDN host
        us.aws.cdn.hf.co (SearchModelDestinations), each file checked against a
        pinned SHA-256. Speech models are downloaded by the system, not by

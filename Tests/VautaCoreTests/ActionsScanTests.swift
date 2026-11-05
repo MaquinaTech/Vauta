@@ -64,9 +64,10 @@ struct ActionsScanTests {
         #expect(checked >= 14)
     }
 
+    /// The actions added none; the one added since is the update check (`UpdateChecker`).
     @Test func noNetworkPurposeWasAddedForPartA() {
         #expect(NetworkPurpose.allCases.map(\.rawValue) == ["minutes", "liveNotes", "notes", "ask", "liveAnswers", "brief", "embeddings", "documents", "translation", "modelDownload",
-                                                           "languageModelDownload", "discovery", "connectionTest", "statusCheck", "other"])
+                                                           "languageModelDownload", "updateCheck", "discovery", "connectionTest", "statusCheck", "other"])
     }
 
     // MARK: The mail draft is never logged

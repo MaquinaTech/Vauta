@@ -8448,3 +8448,93 @@
 "Update progress" = "업데이트 진행률";
 "Updating (%lld%%)" = "업데이트 중(%lld%%)";
 "Updating · downloading only the parts that changed · %@ of %@" = "업데이트 중 · 변경된 부분만 다운로드하는 중 · %@ / %@";
+
+/* Settings → General → Updates: asks GitHub for the latest release now */
+"Check Now" = "지금 확인";
+
+/* No comment provided by engineer. */
+"Check for Updates…" = "업데이트 확인…";
+
+/* Settings → General → Updates: switch */
+"Check for updates automatically" = "자동으로 업데이트 확인";
+
+/* Settings → General → Updates */
+"Checking for updates…" = "업데이트 확인 중…";
+
+/* Settings → General → Updates */
+"Couldn’t check for updates." = "업데이트를 확인할 수 없습니다.";
+
+/* Settings → General → Updates: why the check failed; the argument is an HTTP status code */
+"GitHub answered with an error (%lld)." = "GitHub가 오류로 응답했습니다(%lld).";
+
+/* Settings → General → Updates: why the check failed (rate limit) */
+"GitHub asked to wait before checking again. Vauta tries again later." = "GitHub가 다시 확인하기 전에 기다려 달라고 요청했습니다. Vauta가 나중에 다시 시도합니다.";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub can’t be reached. Vauta tries again later." = "GitHub에 연결할 수 없습니다. Vauta가 나중에 다시 시도합니다.";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub’s answer wasn’t a Vauta release, so it was ignored." = "GitHub의 응답이 Vauta 릴리스가 아니어서 무시했습니다.";
+
+/* Settings → General → Updates; the argument is a date and time */
+"Last checked %@." = "마지막 확인: %@.";
+
+/* Settings → General → Updates, under the automatic check switch */
+"Once a day Vauta asks GitHub for the number of the latest release. Nothing about you, this Mac or your meetings is sent, and Network Activity lists the request." = "Vauta는 하루에 한 번 GitHub에 최신 릴리스 번호를 묻습니다. 사용자, 이 Mac 또는 회의에 관한 정보는 전송되지 않으며, 네트워크 활동에 이 요청이 표시됩니다.";
+
+/* Network Activity summary when the only destination is GitHub's API, asked whether a newer release of Vauta exists; the argument is api.github.com */
+"Only the update check at %@." = "%@의 업데이트 확인만 있습니다.";
+
+/* Notification body when a newer release of Vauta exists */
+"Open Settings to update. The update checks the release’s signature before installing it." = "업데이트하려면 설정을 여세요. 업데이트는 설치하기 전에 릴리스의 서명을 확인합니다.";
+
+/* Network Activity summary, after the count of destinations; the argument is GitHub's API host, api.github.com, asked whether a newer release of Vauta exists */
+"Plus the update check at %@." = "그 밖에 %@의 업데이트 확인이 있습니다.";
+
+/* Settings → General → Updates: link to the release page on GitHub */
+"Release Notes" = "릴리스 노트";
+
+/* Settings → General → Updates, after Update… during a recording */
+"Stop the recording before updating: the update quits Vauta at the end." = "업데이트하기 전에 녹음을 중지하세요. 업데이트가 끝날 때 Vauta가 종료됩니다.";
+
+/* Settings → General → Updates, after Update… failed; the command stays as it is */
+"Terminal couldn’t be opened. Run ./scripts/update.sh in Terminal, in the folder you built Vauta from." = "터미널을 열 수 없습니다. Vauta를 빌드한 폴더에서 터미널로 ./scripts/update.sh를 실행하세요.";
+
+/* Network Activity: where a destination is; GitHub's API, asked whether a newer release of Vauta exists */
+"The update check" = "업데이트 확인";
+
+/* Settings → General → Updates, after Update… when the launcher failed its checks; the paths and commands stay as they are */
+"The update files in ~/Library/Application Scripts aren’t the ones scripts/install.sh writes for this app, so Vauta didn’t run them. Run ./scripts/install.sh again, or ./scripts/update.sh in Terminal." = "~/Library/Application Scripts에 있는 업데이트 파일이 scripts/install.sh가 이 앱을 위해 쓰는 파일과 달라서 Vauta가 실행하지 않았습니다. ./scripts/install.sh를 다시 실행하거나 터미널에서 ./scripts/update.sh를 실행하세요.";
+
+/* Settings → General → Updates, after Update… */
+"The update is running in Terminal." = "터미널에서 업데이트가 실행 중입니다.";
+
+/* Settings → General → Updates, in a development build */
+"This build has no version number, so it can’t be compared with the releases." = "이 빌드에는 버전 번호가 없어 릴리스와 비교할 수 없습니다.";
+
+/* Settings → General → Updates, after Update… in an install from before the launcher; the argument is the command ./scripts/update.sh */
+"This install can’t open the update by itself yet. The command %@ is copied: paste it in Terminal, in the folder you built Vauta from. The next install adds what Update… needs." = "이 설치에서는 아직 업데이트를 직접 열 수 없습니다. %@ 명령을 복사했습니다. Vauta를 빌드한 폴더에서 터미널에 붙여넣으세요. 다음 설치에서 ‘업데이트…’에 필요한 항목이 추가됩니다.";
+
+/* Network Activity purpose: asking GitHub whether a newer release of Vauta exists */
+"Update check" = "업데이트 확인";
+
+/* Settings → General: section with the update check */
+"Updates" = "업데이트";
+
+/* Settings → General → Updates: opens Terminal, where scripts/update.sh verifies and installs the new release */
+"Update…" = "업데이트…";
+
+/* Settings → General → Updates, under Update…; scripts/update.sh is a file name and stays as it is */
+"Update… opens Terminal. There, scripts/update.sh checks that the release is signed with the maintainer’s key, shows its notes and asks before it builds, tests and installs it, which takes about 15 minutes. Vauta then quits and opens again: don’t start a recording until it has." = "‘업데이트…’를 누르면 터미널이 열립니다. 그곳에서 scripts/update.sh가 릴리스가 관리자의 키로 서명되었는지 확인하고, 릴리스 노트를 보여 준 다음, 빌드, 테스트, 설치 전에 확인을 요청합니다. 약 15분이 걸립니다. 그 후 Vauta가 종료되었다가 다시 열립니다. 그때까지 녹음을 시작하지 마세요.";
+
+/* Notification title when a newer release exists; the argument is a version number such as 0.11.0 */
+"Vauta %@ is available" = "Vauta %@ 사용 가능";
+
+/* Settings → General → Updates; the arguments are the new version number and the installed one */
+"Vauta %@ is available. You have %@." = "Vauta %@을(를) 사용할 수 있습니다. 현재 버전은 %@입니다.";
+
+/* Settings → General → Updates, before any check; the argument is a version number */
+"Vauta %@ is installed." = "Vauta %@이(가) 설치되어 있습니다.";
+
+/* Settings → General → Updates; the argument is a version number */
+"Vauta %@ is up to date." = "Vauta %@은(는) 최신 버전입니다.";

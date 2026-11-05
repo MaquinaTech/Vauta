@@ -247,6 +247,7 @@ extension RecorderModel {
         case .installModel: installMissingModel()
         case .openBrief: brief.openBrief()
         case .recordAtStart: brief.armRecordAtStart(occurrence: occurrence)
+        case .showUpdate: showSettings(.general)
         }
     }
 

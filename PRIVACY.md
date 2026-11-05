@@ -10,11 +10,12 @@ a difference, please [report it](SECURITY.md#reporting-a-vulnerability).
 - **Transcripts, minutes, notes and context are encrypted** (AES-256-GCM) in a single file, with the key in your
   login Keychain.
 - **Nothing leaves your Mac**, except the text you send to the model server *you* choose: one on this Mac, or one on
-  your local network over HTTPS. With "Apple Intelligence on this Mac" or the integrated model, nothing leaves at all. The
-  one other connection is the two optional models: if you click Download, Vauta fetches the search model or the integrated
-  language model from Hugging Face and sends nothing but the request (see [The search model](#the-search-model) and
-  [The integrated model](#the-integrated-model)).
-- **No telemetry, no analytics, no crash reporting, no update checks, no accounts.**
+  your local network over HTTPS. With "Apple Intelligence on this Mac" or the integrated model, no meeting text leaves at
+  all. Two other connections send nothing but the request: once a day Vauta asks GitHub for the number of the latest release
+  (you can turn it off; see [Updates](#updates)), and if you click Download, Vauta fetches the search model or the integrated
+  language model from Hugging Face (see [The search model](#the-search-model) and [The integrated model](#the-integrated-model)).
+- **No telemetry, no analytics, no crash reporting, no accounts.** The update check sends nothing about you, this Mac, this
+  install or your meetings, not even the version you have.
 
 ## What Vauta stores, and where
 
@@ -77,6 +78,7 @@ meeting content. The only meeting-related value is a numeric ID (`recordingMeeti
 | `stopRecordingOnScreenLock` | Stop recording when the screen locks |
 | `copyProtection` | Copy protection on or off |
 | `notifyMinutesReady`, `notifyProblems` | Which notifications you allow |
+| `updates.checkAutomatically`, `updates.lastChecked`, `updates.latestKnown`, `updates.notifiedVersion` | Whether Vauta checks for updates by itself, when it last checked, the newer release it found (a version number) and the one it last notified you about |
 | `recordHotKey`, `markHotKey`, `translationHotKey` | Global keyboard shortcuts |
 | `showsCompanion`, `companionShowsDetails` | Whether the meeting companion opens with each recording (on by default), and whether it shows its details: the answers, the live notes and the newest lines of the transcript (off by default) |
 | `actionsReminderListID`, `actionsReminderListName`, `actionsLastReminderListID`, `actionsEventCalendarID`, `actionsEventCalendarName`, `actionsLastEventCalendarID` | The list and calendar a new reminder or event starts in (opaque identifiers and the names, only to say one is gone); not in a backup |
@@ -170,7 +172,8 @@ Command-line and developer builds run unsandboxed and keep it in `~/Library/Cach
   checklist, no meeting content, names or addresses) and opens a new bug report on GitHub in your default browser, with
   only your Vauta and macOS versions in the address. Vauta sends nothing itself: you paste the diagnostics and decide
   whether to submit.
-- **No accounts, no cloud sync, no update checks.** Vauta has no servers of its own.
+- **No accounts, no cloud sync.** Vauta has no servers of its own. The update check asks GitHub's public API, not a Vauta
+  server, and sends nothing but the request (see [Updates](#updates)).
 - **No third-party code except MLX.** Vauta uses Apple frameworks, the system SQLite library and one package, MLX (MIT),
   which runs the optional search model on this Mac's GPU; MLX makes no connections. It does bundle two third-party
   neural-network models (weights, not code) for speaker separation; see [Speaker separation](#speaker-separation).
@@ -186,6 +189,7 @@ These are all the connections Vauta makes. Nothing else is contacted.
 | **Loopback discovery** | Only when you click **Find Servers** (in Settings or setup) | Read-only requests to `http://127.0.0.1` on ports 1234, 11434, 8080, 8000 and 1337 (`GET`, plus Ollama's `POST /api/show` to read a model's details), to list the models of servers running on this Mac. Never any other address |
 | **Guided model setup** | Only while the **Set Up a Model Server** guide is open | The same read-only requests as loopback discovery, only to `http://127.0.0.1` ports 1234 (LM Studio) and 11434 (Ollama), about every 3 seconds; they stop when the guide closes, its window is hidden or Meetings relocks. The guide's **Get** button opens the app's official website (`lmstudio.ai` or `ollama.com`) in your default browser; Vauta itself downloads nothing and sends nothing to those sites |
 | **Hugging Face** (`huggingface.co`, and the one download server it names, currently `us.aws.cdn.hf.co`) | Only when you click **Download** in Settings → Models → Search by meaning or → Integrated model (or **Try Again** / **Resume** / **Repair**), never at launch and never in the background | Plain `GET` requests whose User-Agent is just `Vauta` (no build, and no version of macOS or of its network stack) for two fixed files of one pinned revision of `google/embeddinggemma-2` (the tokenizer, and the text part of the weights in 32 MiB ranges), or of `google/gemma-4-E4B-it` (the tokenizer, and the language tower of the weights in 64 MiB ranges). No token, no cookie, no account, no identifier, nothing about you, your meetings or your documents. The purpose is "Search model download" or "Integrated model download"; the signed download address Hugging Face returns is kept in memory only and its query string is never logged. A redirect to any other host is refused (a Blocked row) and nothing is sent to it |
+| **GitHub** (`api.github.com`, exactly `/repos/MaquinaTech/Vauta/releases/latest`) | Once a day while **Settings → General → Check for updates automatically** is on (it is by default; the first check waits a minute after launch), and when you click **Check Now** or **Vauta → Check for Updates…** | One `GET` with `User-Agent: Vauta`, `Accept-Language: en` and GitHub's API headers, the same for every install: no version, build, identifier, cookie, token or account, nothing about you, this Mac or your meetings. GitHub sees your IP address, as any website does. Only the release's tag is read from the answer, and only a release number (`v1.2.3`) that is neither a draft nor a pre-release counts; its notes and links are never shown or opened. A redirect is never followed, and an answer over 512 KB is refused. The purpose is "Update check" |
 | **Apple** (by macOS, not by Vauta) | When a speech model, a translation language or an on-device language asset is installed | Standard system asset downloads |
 
 ### Seeing every connection
@@ -595,6 +599,29 @@ meeting's language.
 - **Network.** None of this uses the network or adds a destination to Network Activity: Reminders, Calendar and your mail app do their
   own syncing and sending.
 - **Evaluation.** The hidden `llm-eval --tasks actions` command writes to a fake store of reminders and events, never to yours.
+
+## Updates
+
+Vauta is installed from source, so an update is built on your Mac like the first install. Vauta tells you when there is one
+and starts it for you; it never downloads, builds or installs anything by itself.
+
+- **The check.** Once a day (and when you click **Check Now** in Settings → General → Updates, or **Vauta → Check for
+  Updates…**), Vauta asks GitHub's API for the latest release of Vauta's repository. The request is identical for every
+  install; it is listed in Network Activity with the purpose "Update check". Turn **Check for updates automatically** off and
+  Vauta never asks on its own. When a newer release exists, Settings shows it and a notification says so once per version,
+  with only the version number. An older or equal release is never offered, whatever the answer says.
+- **Update….** Opens Terminal and runs `scripts/update.sh` in the folder you built Vauta from. The script checks that the
+  release tag is signed with the maintainer's key (the one already in your copy of the code, and the fingerprint in
+  [SECURITY.md](SECURITY.md#verifying-what-you-run)) and is on the main branch, shows the release notes and asks before it
+  builds, tests and installs it, about 15 minutes. Vauta then quits cleanly (a recording in progress is saved) and opens
+  again. Update… does nothing while a recording runs, and if Vauta is running when the build is done, `update.sh` asks again
+  before it quits it.
+- **The two files it uses.** `scripts/install.sh` writes `update-vauta` and `Update Vauta.command` to
+  `~/Library/Application Scripts/<bundle ID>/`: the first only opens the second in Terminal, and the second holds the path of
+  your copy of the code, the bundle ID and how the app was signed (no key or password). macOS lets Vauta run the scripts in
+  that folder but not create or change them. Before running them Vauta checks that both are exactly what `install.sh`
+  writes for this app, owned by you and writable by no one else, and refuses to run anything else. Uninstalling Vauta: delete
+  that folder too.
 
 ## Notifications
 

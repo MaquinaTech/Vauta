@@ -28,6 +28,8 @@ struct NetworkAuditSourceScanTests {
         ("child process", #"\bProcess\s*(\.\s*init\s*)?\(|\bProcess\s*\.\s*(run|launchedProcess)\s*\(|\bNSTask\b"#
             + #"|\bposix_spawnp?\s*\(|\bpopen\s*\(|\bv?fork\s*\(\s*\)|(?<![.\w])(?<!func )system\s*\("#),
         ("exec", #"\bf?exec(l|le|lp|v|ve|vp|vP|vpe)\s*\("#),
+        // A script run outside the App Sandbox (`NSUserUnixTask` and its siblings): its network access would not be audited.
+        ("user script task", #"\bNSUser(Unix|AppleScript|Automator|Script)Task\b"#),
         ("XPC service", #"\bNSXPCConnection\s*\(\s*machServiceName\s*:"#),
         // Initializers and functions that load the URL they are given, a remote one too (also written `Type.init(...)`). Only these:
         // another API that loads a URL is not caught.
@@ -107,6 +109,9 @@ struct NetworkAuditSourceScanTests {
         ("Sources/Vauta/Snapshots/SnapshotScenesNotepad.swift", "PDFDocument(url:)", 1),
         // UI snapshots: the snapshot app relaunches itself (`execv` of its own binary) to change the interface language.
         ("Sources/Vauta/Snapshots/RenderUICommand.swift", "exec", 1),
+        // Update…: the launcher `scripts/install.sh` wrote to the app's Application Scripts folder, run only after `UpdateLauncher`
+        // accepted it. It sends nothing itself: it opens Terminal, where `scripts/update.sh` fetches and verifies the release.
+        ("Sources/Vauta/App/Updates/UpdateRunner.swift", "user script task", 1),
     ]
 
     static func packageRoot(from file: String = #filePath) -> URL {
@@ -238,6 +243,7 @@ struct NetworkAuditSourceScanTests {
             "raw sockets": "let fd = socket(AF_INET, SOCK_STREAM, 0)",
             "remote contents": "let d = try Data(contentsOf: URL(string: \"https://x.test\")!)",
             "exec": "execv(path, argv)",
+            "user script task": "let t = try NSUserUnixTask(url: script)",
             "XPC service": "let c = NSXPCConnection(machServiceName: \"com.example.helper\")",
             "Data(contentsOf:)": "let d = try Data(contentsOf: url)",
             "String(contentsOf:)": "let s = try String(contentsOf: url, encoding: .utf8)",

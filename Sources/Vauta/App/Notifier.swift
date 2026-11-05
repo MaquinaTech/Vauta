@@ -47,10 +47,11 @@ final class Notifier: NSObject, UNUserNotificationCenterDelegate {
         case .installModel: String(localized: "Download", comment: "Notification button: download the missing speech model")
         case .openBrief: String(localized: "Open Brief", comment: "Notification button: show the brief of the meeting about to start")
         case .recordAtStart: String(localized: "Record at Start", comment: "Notification button: suggest recording when the meeting starts; it does not start a recording by itself")
+        case .showUpdate: SettingsModel.Pane.general.openTitle
         }
         // Actions that show a window bring Vauta to the front.
         let options: UNNotificationActionOptions = switch action {
-        case .transcribe, .openMeeting, .showModels, .showStatus, .showSpeakers, .openSystemSettings, .openBrief: [.foreground]
+        case .transcribe, .openMeeting, .showModels, .showStatus, .showSpeakers, .openSystemSettings, .openBrief, .showUpdate: [.foreground]
         default: []
         }
         return UNNotificationAction(identifier: action.rawValue, title: title, options: options)

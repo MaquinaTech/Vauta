@@ -77,7 +77,9 @@ Conventions, in short (details in [CONTRIBUTING.md](CONTRIBUTING.md)):
 - Tests never use the network, the user's store or audio devices. Never create, change or remove reminders or events on a real store: tests and the evaluation use `FakeActionWriter`, and only `Sources/Vauta/App/Actions/EventKitActionWriter.swift` may save or remove anything in Reminders or Calendar (a source-scan test enforces it).
 - Network access goes through `AuditedSession` (`Sources/VautaCore/Network/`) only, with a `NetworkPurpose`, so it shows up
   in Network Activity. Never create a `URLSession`, a URL task, an `NWConnection` or a child process (such as `curl`)
-  elsewhere: `NetworkAuditSourceScanTests` fails if you do. Never put content, headers, keys or query strings in the log.
+  elsewhere: `NetworkAuditSourceScanTests` fails if you do. The one script Vauta runs outside the sandbox is Update…'s
+  launcher (`NSUserUnixTask`, only in `Sources/Vauta/App/Updates/UpdateRunner.swift`, after `UpdateLauncher.inspect`); never
+  add another, and never loosen those checks. Never put content, headers, keys or query strings in the log.
 - Don't commit, push or change Git configuration unless the user asks. Commits are signed off (`git commit -s`).
 
 ## Installing Vauta for a user
@@ -355,6 +357,10 @@ copies them too and opens a GitHub bug report with only the Vauta and macOS vers
 
 ## Updating Vauta for a user
 
+Vauta checks GitHub once a day for a new release (Settings › General › Updates) and **Update…** there opens the update in
+the user's own Terminal, through the launcher `install.sh` writes to `~/Library/Application Scripts/<bundle-id>/`. From the
+command line:
+
 ```sh
 ./scripts/update.sh                       # local signing identity: the user runs it in their own Terminal
 VAUTA_ALLOW_ADHOC=1 ./scripts/update.sh   # ad-hoc: you may run it
@@ -394,7 +400,8 @@ Builds from source default to the bundle ID `local.vauta.app`. A different bundl
 ## Uninstalling
 
 1. If **Settings → General → Open Vauta at login** is on, the user turns it off; then quit Vauta.
-2. Delete `~/Applications/Vauta.app` and `~/Library/Containers/<bundle-id>/` (this deletes all meetings). The optional
+2. Delete `~/Applications/Vauta.app`, `~/Library/Containers/<bundle-id>/` (this deletes all meetings) and
+   `~/Library/Application Scripts/<bundle-id>/` (the update launcher). The optional
    search model and the integrated language model (the `gemma-4-e4b-it` folder) live inside that container, in
    `Data/Library/Application Support/Vauta Models`; they hold no meeting content, so the user can also remove it first with Settings → Models → Delete. You still must not open the container:
    tell the user the path.

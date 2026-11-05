@@ -8448,3 +8448,93 @@
 "Update progress" = "更新进度";
 "Updating (%lld%%)" = "正在更新（%lld%%）";
 "Updating · downloading only the parts that changed · %@ of %@" = "正在更新 · 仅下载有变化的部分 · %@ / %@";
+
+/* Settings → General → Updates: asks GitHub for the latest release now */
+"Check Now" = "立即检查";
+
+/* No comment provided by engineer. */
+"Check for Updates…" = "检查更新…";
+
+/* Settings → General → Updates: switch */
+"Check for updates automatically" = "自动检查更新";
+
+/* Settings → General → Updates */
+"Checking for updates…" = "正在检查更新…";
+
+/* Settings → General → Updates */
+"Couldn’t check for updates." = "无法检查更新。";
+
+/* Settings → General → Updates: why the check failed; the argument is an HTTP status code */
+"GitHub answered with an error (%lld)." = "GitHub 返回了错误（%lld）。";
+
+/* Settings → General → Updates: why the check failed (rate limit) */
+"GitHub asked to wait before checking again. Vauta tries again later." = "GitHub 要求稍后再检查。Vauta 会稍后重试。";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub can’t be reached. Vauta tries again later." = "无法连接 GitHub。Vauta 会稍后重试。";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub’s answer wasn’t a Vauta release, so it was ignored." = "GitHub 的回应不是 Vauta 的版本，已忽略。";
+
+/* Settings → General → Updates; the argument is a date and time */
+"Last checked %@." = "上次检查：%@。";
+
+/* Settings → General → Updates, under the automatic check switch */
+"Once a day Vauta asks GitHub for the number of the latest release. Nothing about you, this Mac or your meetings is sent, and Network Activity lists the request." = "Vauta 每天向 GitHub 询问一次最新版本的编号。不会发送任何关于你、这台 Mac 或你的会议的信息，“网络活动”会列出这个请求。";
+
+/* Network Activity summary when the only destination is GitHub's API, asked whether a newer release of Vauta exists; the argument is api.github.com */
+"Only the update check at %@." = "只有在 %@ 的更新检查。";
+
+/* Notification body when a newer release of Vauta exists */
+"Open Settings to update. The update checks the release’s signature before installing it." = "打开设置以更新。更新会在安装前检查该版本的签名。";
+
+/* Network Activity summary, after the count of destinations; the argument is GitHub's API host, api.github.com, asked whether a newer release of Vauta exists */
+"Plus the update check at %@." = "另有在 %@ 的更新检查。";
+
+/* Settings → General → Updates: link to the release page on GitHub */
+"Release Notes" = "版本说明";
+
+/* Settings → General → Updates, after Update… during a recording */
+"Stop the recording before updating: the update quits Vauta at the end." = "请先停止录音再更新：更新结束时会退出 Vauta。";
+
+/* Settings → General → Updates, after Update… failed; the command stays as it is */
+"Terminal couldn’t be opened. Run ./scripts/update.sh in Terminal, in the folder you built Vauta from." = "无法打开“终端”。请在构建 Vauta 的文件夹中，在“终端”里运行 ./scripts/update.sh。";
+
+/* Network Activity: where a destination is; GitHub's API, asked whether a newer release of Vauta exists */
+"The update check" = "更新检查";
+
+/* Settings → General → Updates, after Update… when the launcher failed its checks; the paths and commands stay as they are */
+"The update files in ~/Library/Application Scripts aren’t the ones scripts/install.sh writes for this app, so Vauta didn’t run them. Run ./scripts/install.sh again, or ./scripts/update.sh in Terminal." = "~/Library/Application Scripts 中的更新文件与 scripts/install.sh 为此 App 写入的文件不同，因此 Vauta 没有运行它们。请再次运行 ./scripts/install.sh，或在“终端”中运行 ./scripts/update.sh。";
+
+/* Settings → General → Updates, after Update… */
+"The update is running in Terminal." = "更新正在“终端”中运行。";
+
+/* Settings → General → Updates, in a development build */
+"This build has no version number, so it can’t be compared with the releases." = "此构建没有版本号，因此无法与发布的版本比较。";
+
+/* Settings → General → Updates, after Update… in an install from before the launcher; the argument is the command ./scripts/update.sh */
+"This install can’t open the update by itself yet. The command %@ is copied: paste it in Terminal, in the folder you built Vauta from. The next install adds what Update… needs." = "此安装还不能自行打开更新。已拷贝命令 %@：请在构建 Vauta 的文件夹中，将它粘贴到“终端”。下次安装会添加“更新…”所需的内容。";
+
+/* Network Activity purpose: asking GitHub whether a newer release of Vauta exists */
+"Update check" = "更新检查";
+
+/* Settings → General: section with the update check */
+"Updates" = "更新";
+
+/* Settings → General → Updates: opens Terminal, where scripts/update.sh verifies and installs the new release */
+"Update…" = "更新…";
+
+/* Settings → General → Updates, under Update…; scripts/update.sh is a file name and stays as it is */
+"Update… opens Terminal. There, scripts/update.sh checks that the release is signed with the maintainer’s key, shows its notes and asks before it builds, tests and installs it, which takes about 15 minutes. Vauta then quits and opens again: don’t start a recording until it has." = "“更新…”会打开“终端”。在那里，scripts/update.sh 会检查该版本是否由维护者的密钥签名，显示版本说明，并在构建、测试和安装前征求确认，大约需要 15 分钟。之后 Vauta 会退出并重新打开：在此之前请不要开始录音。";
+
+/* Notification title when a newer release exists; the argument is a version number such as 0.11.0 */
+"Vauta %@ is available" = "Vauta %@ 现已推出";
+
+/* Settings → General → Updates; the arguments are the new version number and the installed one */
+"Vauta %@ is available. You have %@." = "Vauta %@ 现已推出。你当前使用的是 %@。";
+
+/* Settings → General → Updates, before any check; the argument is a version number */
+"Vauta %@ is installed." = "已安装 Vauta %@。";
+
+/* Settings → General → Updates; the argument is a version number */
+"Vauta %@ is up to date." = "Vauta %@ 已是最新版本。";

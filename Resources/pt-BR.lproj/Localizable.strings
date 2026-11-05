@@ -8448,3 +8448,93 @@
 "Update progress" = "Progresso da atualização";
 "Updating (%lld%%)" = "Atualizando (%lld%%)";
 "Updating · downloading only the parts that changed · %@ of %@" = "Atualizando · baixando só as partes que mudaram · %@ de %@";
+
+/* Settings → General → Updates: asks GitHub for the latest release now */
+"Check Now" = "Verificar agora";
+
+/* No comment provided by engineer. */
+"Check for Updates…" = "Buscar atualizações…";
+
+/* Settings → General → Updates: switch */
+"Check for updates automatically" = "Buscar atualizações automaticamente";
+
+/* Settings → General → Updates */
+"Checking for updates…" = "Buscando atualizações…";
+
+/* Settings → General → Updates */
+"Couldn’t check for updates." = "Não foi possível buscar atualizações.";
+
+/* Settings → General → Updates: why the check failed; the argument is an HTTP status code */
+"GitHub answered with an error (%lld)." = "O GitHub respondeu com um erro (%lld).";
+
+/* Settings → General → Updates: why the check failed (rate limit) */
+"GitHub asked to wait before checking again. Vauta tries again later." = "O GitHub pediu para esperar antes de verificar de novo. Vauta tentará mais tarde.";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub can’t be reached. Vauta tries again later." = "Não é possível acessar o GitHub. Vauta tentará mais tarde.";
+
+/* Settings → General → Updates: why the check failed */
+"GitHub’s answer wasn’t a Vauta release, so it was ignored." = "A resposta do GitHub não era uma versão de Vauta, então foi ignorada.";
+
+/* Settings → General → Updates; the argument is a date and time */
+"Last checked %@." = "Última verificação: %@.";
+
+/* Settings → General → Updates, under the automatic check switch */
+"Once a day Vauta asks GitHub for the number of the latest release. Nothing about you, this Mac or your meetings is sent, and Network Activity lists the request." = "Uma vez por dia, Vauta pergunta ao GitHub o número da versão mais recente. Nada sobre você, este Mac ou suas reuniões é enviado, e a Atividade de rede mostra a solicitação.";
+
+/* Network Activity summary when the only destination is GitHub's API, asked whether a newer release of Vauta exists; the argument is api.github.com */
+"Only the update check at %@." = "Apenas a verificação de atualizações em %@.";
+
+/* Notification body when a newer release of Vauta exists */
+"Open Settings to update. The update checks the release’s signature before installing it." = "Abra os Ajustes para atualizar. A atualização verifica a assinatura da versão antes de instalá-la.";
+
+/* Network Activity summary, after the count of destinations; the argument is GitHub's API host, api.github.com, asked whether a newer release of Vauta exists */
+"Plus the update check at %@." = "Além disso, a verificação de atualizações em %@.";
+
+/* Settings → General → Updates: link to the release page on GitHub */
+"Release Notes" = "Notas da versão";
+
+/* Settings → General → Updates, after Update… during a recording */
+"Stop the recording before updating: the update quits Vauta at the end." = "Pare a gravação antes de atualizar: a atualização encerra Vauta no final.";
+
+/* Settings → General → Updates, after Update… failed; the command stays as it is */
+"Terminal couldn’t be opened. Run ./scripts/update.sh in Terminal, in the folder you built Vauta from." = "Não foi possível abrir o Terminal. Execute ./scripts/update.sh no Terminal, na pasta em que você compilou Vauta.";
+
+/* Network Activity: where a destination is; GitHub's API, asked whether a newer release of Vauta exists */
+"The update check" = "A verificação de atualizações";
+
+/* Settings → General → Updates, after Update… when the launcher failed its checks; the paths and commands stay as they are */
+"The update files in ~/Library/Application Scripts aren’t the ones scripts/install.sh writes for this app, so Vauta didn’t run them. Run ./scripts/install.sh again, or ./scripts/update.sh in Terminal." = "Os arquivos de atualização em ~/Library/Application Scripts não são os que o scripts/install.sh grava para este app, então Vauta não os executou. Execute ./scripts/install.sh de novo, ou ./scripts/update.sh no Terminal.";
+
+/* Settings → General → Updates, after Update… */
+"The update is running in Terminal." = "A atualização está em execução no Terminal.";
+
+/* Settings → General → Updates, in a development build */
+"This build has no version number, so it can’t be compared with the releases." = "Esta compilação não tem número de versão, então não pode ser comparada com as versões publicadas.";
+
+/* Settings → General → Updates, after Update… in an install from before the launcher; the argument is the command ./scripts/update.sh */
+"This install can’t open the update by itself yet. The command %@ is copied: paste it in Terminal, in the folder you built Vauta from. The next install adds what Update… needs." = "Esta instalação ainda não consegue abrir a atualização sozinha. O comando %@ foi copiado: cole-o no Terminal, na pasta em que você compilou Vauta. A próxima instalação adiciona o que Atualizar… precisa.";
+
+/* Network Activity purpose: asking GitHub whether a newer release of Vauta exists */
+"Update check" = "Verificação de atualizações";
+
+/* Settings → General: section with the update check */
+"Updates" = "Atualizações";
+
+/* Settings → General → Updates: opens Terminal, where scripts/update.sh verifies and installs the new release */
+"Update…" = "Atualizar…";
+
+/* Settings → General → Updates, under Update…; scripts/update.sh is a file name and stays as it is */
+"Update… opens Terminal. There, scripts/update.sh checks that the release is signed with the maintainer’s key, shows its notes and asks before it builds, tests and installs it, which takes about 15 minutes. Vauta then quits and opens again: don’t start a recording until it has." = "Atualizar… abre o Terminal. Lá, o scripts/update.sh verifica se a versão está assinada com a chave do mantenedor, mostra as notas e pergunta antes de compilar, testar e instalar, o que leva cerca de 15 minutos. Depois Vauta encerra e abre de novo: não comece uma gravação até lá.";
+
+/* Notification title when a newer release exists; the argument is a version number such as 0.11.0 */
+"Vauta %@ is available" = "Vauta %@ está disponível";
+
+/* Settings → General → Updates; the arguments are the new version number and the installed one */
+"Vauta %@ is available. You have %@." = "Vauta %@ está disponível. Você tem a %@.";
+
+/* Settings → General → Updates, before any check; the argument is a version number */
+"Vauta %@ is installed." = "Vauta %@ está instalado.";
+
+/* Settings → General → Updates; the argument is a version number */
+"Vauta %@ is up to date." = "Vauta %@ está atualizado.";

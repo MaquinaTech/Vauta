@@ -44,9 +44,14 @@ main() {
   source scripts/preflight.sh
   vauta_preflight || exit 1
 
+  # One update at a time in this folder (Update… in Vauta can be clicked twice): a second run stops here. The lock is an empty
+  # folder in .git, taken atomically by mkdir and removed (rmdir) when this run ends.
+  lock="$(git rev-parse --absolute-git-dir)/vauta-update.lock"
+  mkdir "$lock" 2>/dev/null || fail "another update is running in this folder (if none is, remove the empty folder $lock)"
+
   # The trusted key, from what is already on this Mac. Not local: the EXIT trap runs after main has returned.
   dir="$(mktemp -d)"
-  trap 'rm -rf "$dir"' EXIT
+  trap 'rm -rf "$dir"; rmdir "$lock" 2>/dev/null || true' EXIT
   cp .github/allowed_signers "$dir/allowed_signers"
   local found
   found="$(awk -v p="$PRINCIPAL" '$1 == p { print $(NF-1), $NF }' "$dir/allowed_signers" | ssh-keygen -lf - 2>/dev/null | awk '{ print $2 }')"
@@ -113,6 +118,13 @@ main() {
     else
       swift test ${VAUTA_JOBS:+-j "$VAUTA_JOBS"}
     fi
+  fi
+  # The build took minutes: a recording may have started since the update was asked for. install.sh quits Vauta, which stops and
+  # saves a recording, so it asks first (unless --yes).
+  if [[ $yes -eq 0 ]] && pgrep -f "$HOME/Applications/Vauta.app/Contents/MacOS/Vauta" >/dev/null; then
+    local quit
+    read -r -p "Vauta quits now to be replaced (a recording in progress is stopped and saved). Continue? [y/N] " quit
+    [[ "$quit" == [yY]* ]] || { echo "Nothing installed. Run ./scripts/install.sh when you are ready (this folder is at $latest)."; return 0; }
   fi
   ./scripts/install.sh
 }
